@@ -1,0 +1,50 @@
+name: Automatisk bygg og push av Docker Image for rule-dsl
+on:
+  push:
+    branches:
+      - master
+
+env:
+  IMAGE_BASE: ghcr.io/${{ github.repository }}
+
+jobs:
+  automatisk-bygg:
+    name: Automatisk bygg og push av Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kanseller tidligere kjøringer
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Sjekk ut kode
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: 11
+      - name: set timezone
+        run: sudo timedatectl set-timezone "Europe/Oslo"
+      - name: Cache Maven pakker
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Deploy rule-dsl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TZ: "Europe/Oslo"
+        run: mvn clean deploy
+      - name: Push Docker Image
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: "${{ env.IMAGE_BASE }}/rule-dsl:${{ env.VERSION }}"
+          LATEST: "${{ env.IMAGE_BASE}}/rule-dsl:latest"
+        run: |
+          echo ${GITHUB_TOKEN} | docker login ghcr.io --username ${GITHUB_REPOSITORY} --password-stdin
+          docker build -t ${LATEST} -t ${IMAGE} .
+          docker push ${LATEST}
+          docker push ${IMAGE}
