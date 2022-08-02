@@ -1,4 +1,4 @@
-name: Automatisk bygg og push av Docker Image for rule-dsl
+name: Automatisk bygg og deploy rule-dsl
 on:
   push:
     branches:
@@ -9,7 +9,7 @@ env:
 
 jobs:
   automatisk-bygg:
-    name: Automatisk bygg og push av Docker Image
+    name: Automatisk bygg og deploy av rule-dsl
     runs-on: ubuntu-latest
     steps:
       - name: Kanseller tidligere kjøringer
@@ -24,8 +24,6 @@ jobs:
         with:
           distribution: adopt
           java-version: 11
-      - name: set timezone
-        run: sudo timedatectl set-timezone "Europe/Oslo"
       - name: Cache Maven pakker
         uses: actions/cache@v3
         with:
@@ -37,14 +35,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TZ: "Europe/Oslo"
         run: mvn clean deploy
-      - name: Push Docker Image
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE: "${{ env.IMAGE_BASE }}/rule-dsl:${{ env.VERSION }}"
-          LATEST: "${{ env.IMAGE_BASE}}/rule-dsl:latest"
-        run: |
-          echo ${GITHUB_TOKEN} | docker login ghcr.io --username ${GITHUB_REPOSITORY} --password-stdin
-          docker build -t ${LATEST} -t ${IMAGE} .
-          docker push ${LATEST}
-          docker push ${IMAGE}
