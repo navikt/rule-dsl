@@ -2,7 +2,7 @@ name: Automatisk bygg og push av Docker Image for rule-dsl
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   IMAGE_BASE: ghcr.io/${{ github.repository }}
