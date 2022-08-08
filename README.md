@@ -7,10 +7,10 @@ The goal is to isolate functional rules from the technical code and thus make th
 ## Documentation
 ### Components
 A set of classes inheriting **[AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt)** make up the core of the framework:
-* **[AbstractRuleService]()** Entrypoint for the service.
+* **[AbstractRuleService](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleset.kt)** Entrypoint for the service.
 * **[AbstractRuleflow](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleflow.kt)** Organizes the flowlogic.
-    * **[Branch](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleflow.kt#Decision.Branch)** DSL syntax conditions and flowlogic.
-    * **[Decision](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleflow.kt#)** DSL syntax for a group of branches. 
+    * **[Branch](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleflow.kt)** DSL syntax conditions and flowlogic.
+    * **[Decision](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleflow.kt)** DSL syntax for a group of branches. 
 * **[AbstractRuleset](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleset.kt)** Wraps a set of rules that relate to a single topic.
 * **[Rule](src/main/kotlin/no/nav/system/rule/dsl/Rule.kt)** A single functional decision.
 * **[Predicate](src/main/kotlin/no/nav/system/rule/dsl/Predicate.kt)** Wraps the boolean expression and subject text.
@@ -26,7 +26,7 @@ ruleservice: BeregnAlderspensjonService
         predicate: Virkningsdato i saken, 1990-05-01, er før 1991-01-01. fired: false
         predicate: Faktisk trygdetid, 224, er lavere enn fire-femtedelskravet (480). fired: true
 ```
-See [VisitorTest](src/test/kotlin/no/nav/pensjon/regler/demo/teknisk/visitor/VisitorTest.kt) for complete example.
+See [VisitorTest](src/test/kotlin/no/nav/system/rule/dsl/demo/visitor/VisitorTest.kt) for complete example.
 
 ### Resource
 [AbstractRuleComponents](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt) have a resourceMap containing [AbstractResource](src/main/kotlin/no/nav/system/rule/dsl/AbstractResource.kt) instantiated per service call. These objects typically contain resources like rates ("satser"), loggers and other global assets. See [AbstractDemoRuleService](src/test/kotlin/no/nav/system/rule/dsl/demo/ruleservice/AbstractDemoRuleService.kt) for demonstration.
@@ -94,7 +94,6 @@ Repo: [pensjon-regler-editor](https://github.com/navikt/pensjon-regler-editor)
 
 ### Usage
 Maven:
-TODO
 ```xml
 <dependency>
   <groupId>no.nav.system</groupId>
