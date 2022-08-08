@@ -97,9 +97,9 @@ Maven:
 TODO
 ```xml
 <dependency>
-  <groupId>no.nav.system.rule.dsl</groupId>
-  <artifactId>no.nav.system.rule.dsl</artifactId>
-  <version>1.0</version>
+  <groupId>no.nav.system</groupId>
+  <artifactId>rule.dsl</artifactId>
+  <version>1.2</version>
 </dependency>
 ```
 
