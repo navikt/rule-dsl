@@ -1,5 +1,8 @@
 package no.nav.system.rule.dsl
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 /**
  * A single boolean statement used in evaluation of a rule.
  */
@@ -22,18 +25,47 @@ class Predicate(
     /**
      * Example of Domain Text to be evaluated:
      * - "Faktisk trygdetid,er [lavere|høyere] enn fire-femtedelskravet."
-     *  TODO: Support multiple bracket groups! :o
      */
     internal fun evaluatedDomainText(): String {
-        val indexStart = domainText!!.indexOf("[")
-        val indexStop = domainText!!.indexOf("]")
+        val openingBrackets = countOccurrences(domainText!!, '[')
+        val closingBrackets = countOccurrences(domainText!!, ']')
 
-        val choices = domainText!!.substring(indexStart + 1, indexStop).split("|")
+        if (openingBrackets != closingBrackets) {
+            throw IllegalArgumentException("Antall start- og slutt brackets må stemme overens.")
+        }
 
-        val result: String = if (fired) choices[0] else choices[1]
+        val findChoices = findChoices(domainText!!)
 
-        return domainText!!.replaceRange(indexStart..indexStop, result)
+        for (i in 0 until openingBrackets) {
+            val indexStart = domainText!!.indexOf("[")
+            val indexStop = domainText!!.indexOf("]")
+            val result = findChoices[i]
+            domainText = domainText!!.replaceRange(indexStart..indexStop, result)
+        }
+        return domainText!!
     }
+
+    private fun findChoices(domainText: String): MutableList<String> {
+        val p = Pattern.compile("\\[(.*?)]")
+        val m: Matcher = p.matcher(domainText)
+
+        val choiceList = mutableListOf<String>()
+
+        while (m.find()) {
+            val choices = m.group(1).split("|")
+            if (fired) {
+                choiceList.add(choices[0])
+            } else {
+                choiceList.add(choices[1])
+            }
+        }
+        return choiceList
+    }
+
+    private fun countOccurrences(s: String, ch: Char): Int {
+        return s.count { it == ch }
+    }
+
 
     internal fun isDomainPredicate(): Boolean = !domainText.isNullOrBlank()
 
