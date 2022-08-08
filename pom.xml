@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>no.nav.system.rule.dsl</artifactId>
-    <groupId>no.nav.system.rule.dsl</groupId>
-    <version>1.1</version>
+    <groupId>no.nav.system</groupId>
+    <artifactId>rule.dsl</artifactId>
+    <version>1.2</version>
     <packaging>jar</packaging>
     <name>rule-dsl</name>
 
