@@ -1,6 +1,5 @@
 package no.nav.system.rule.dsl
 
-import no.nav.system.rule.dsl.rettsregel.Subsumsjon
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -11,11 +10,6 @@ class Predicate(
     private var domainText: String? = null,
     private val function: () -> Boolean
 ) : AbstractRuleComponent() {
-
-    constructor(subsumsjon: () -> Subsumsjon): this(
-        subsumsjon.invoke().tekst,
-        {subsumsjon.invoke().svar}
-    )
 
     private var fired: Boolean = false
 

@@ -1,20 +1,26 @@
 package no.nav.system.rule.dsl.rettsregel
 
 import no.nav.system.rule.dsl.rettsregel.KOMPARATOR.*
-import no.nav.system.rule.dsl.treevisitor.svarord
 import java.time.LocalDate
 
-class Subsumsjon(val komparator: KOMPARATOR, val pair: Pair<Faktum<*>, Faktum<*>>, val svar: Boolean, val tekst: String) {
+class Subsumsjon(
+    val komparator: KOMPARATOR,
+    val pair: Pair<Faktum<*>, Faktum<*>>,
+    val svar: () -> Boolean,
+    val tekst: String
+) {
+
     //    val pair = Pair<Faktum<*>, Faktum<*>>()
     override fun toString(): String {
-        return "Subsumsjon:${svar.svarord()}: $tekst"
+        return tekst
     }
 }
 
 
-data class Kilde( val paragraf: String, val bokstav: String)
+data class Kilde(val paragraf: String, val bokstav: String)
 
-class Faktum<T>(val navn: String, val verdi: T) {
+class Faktum<T>(val navn: String, var verdi: T) {
+
     override fun toString(): String {
         return "'$navn' ($verdi)"
     }
@@ -33,24 +39,60 @@ enum class KOMPARATOR(val text: String) {
 /**
  * Datoer
  */
-infix fun Faktum<LocalDate>.erFørEllerLik(other: Faktum<LocalDate>) = Subsumsjon(LESS_OR_EQUAL, Pair(this, other), verdi <= other.verdi, "$this, er før eller lik ${other}" )
-infix fun Faktum<LocalDate>.erFør(other: Faktum<LocalDate>) = Subsumsjon(LESS, Pair(this, other))
-infix fun Faktum<LocalDate>.erEtterEllerLik(other: Faktum<LocalDate>) = Subsumsjon(GREATER_OR_EQUAL, Pair(this, other))
-infix fun Faktum<LocalDate>.erEtter(other: Faktum<LocalDate>) = Subsumsjon(GREATER, Pair(this, other))
+infix fun Faktum<LocalDate>.erFørEllerLik(other: Faktum<LocalDate>) =
+    Subsumsjon(LESS_OR_EQUAL, Pair(this, other), { verdi <= other.verdi }, "$this, er før eller lik $other")
+
+infix fun Faktum<LocalDate>.erFør(other: Faktum<LocalDate>) =
+    Subsumsjon(LESS, Pair(this, other), { verdi < other.verdi }, "$this, er før $other")
+
+infix fun Faktum<LocalDate>.erEtterEllerLik(other: Faktum<LocalDate>) =
+    Subsumsjon(GREATER_OR_EQUAL, Pair(this, other), { verdi >= other.verdi }, "$this, er etter eller lik $other")
+
+infix fun Faktum<LocalDate>.erEtter(other: Faktum<LocalDate>) =
+    Subsumsjon(GREATER, Pair(this, other), { verdi > other.verdi }, "$this, er etter $other")
 
 /**
  * Tall
  */
-infix fun Faktum<out Number>.erMindreEllerLik(other: Faktum<out Number>) = Subsumsjon(LESS_OR_EQUAL, Pair(this, other))
-infix fun Faktum<out Number>.erMindreEnn(other: Faktum<out Number>) = Subsumsjon(LESS, Pair(this, other))
-infix fun Faktum<out Number>.erStørreEllerLik(other: Faktum<out Number>) = Subsumsjon(GREATER_OR_EQUAL, Pair(this, other), false, "")
-infix fun Faktum<out Number>.erStørre(other: Faktum<out Number>) = Subsumsjon(GREATER, Pair(this, other))
+infix fun Faktum<out Number>.erMindreEllerLik(other: Faktum<out Number>) =
+    Subsumsjon(
+        LESS_OR_EQUAL,
+        Pair(this, other),
+        { verdi.toDouble() <= other.verdi.toDouble() },
+        "$this, er mindre eller lik $other"
+    )
+
+infix fun Faktum<out Number>.erMindreEnn(other: Faktum<out Number>) =
+    Subsumsjon(
+        LESS,
+        Pair(this, other),
+        { verdi.toDouble() < other.verdi.toDouble() },
+        "$this, er mindre enn $other"
+    )
+
+infix fun Faktum<out Number>.erStørreEllerLik(other: Faktum<out Number>) =
+    Subsumsjon(
+        GREATER_OR_EQUAL,
+        Pair(this, other),
+        { verdi.toDouble() >= other.verdi.toDouble() },
+        "$this, er større eller lik $other"
+    )
+
+infix fun Faktum<out Number>.erStørre(other: Faktum<out Number>) = Subsumsjon(
+    GREATER,
+    Pair(this, other),
+    { verdi.toDouble() > other.verdi.toDouble() },
+    "$this, er større enn $other"
+)
 
 /**
  * Boolean
  */
-fun Faktum<Boolean>.erSann() = Subsumsjon(EQUAL, Pair(this, Faktum("SANN", true)))
-fun Faktum<Boolean>.erUsann() = Subsumsjon(NOT_EQUAL, Pair(this,Faktum("USANN", false)))
+fun Faktum<Boolean>.erSann() =
+    Subsumsjon(EQUAL, Pair(this, Faktum("SANN", true)), { verdi }, "$this, er SANN.")
+
+fun Faktum<Boolean>.erUsann() =
+    Subsumsjon(NOT_EQUAL, Pair(this, Faktum("USANN", false)), { verdi }, "$this, er USANN")
 
 fun main() {
     val f1i = Faktum("G", 2)

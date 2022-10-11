@@ -114,7 +114,8 @@ open class Rule<T : Any>(
     @DslDomainPredicate
     fun SUBSUMOG(subsumsjonFunction: () -> Subsumsjon) {
         containsDomainPredicate = true
-        Predicate( subsumsjonFunction).also {
+        val subsumsjon = subsumsjonFunction.invoke()
+        Predicate(subsumsjon.toString(), subsumsjon.svar).also {
             children.add(it)
             predicateList.add(it)
         }

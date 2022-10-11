@@ -3,7 +3,6 @@ package no.nav.system.rule.dsl.demo.rettsregel
 import no.nav.system.rule.dsl.AbstractRuleset
 import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.domain.Boperiode
-import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.TrygdetidSubSum
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
@@ -22,7 +21,7 @@ class BeregnFaktiskTrygdetidSubSumRS(
     val fødselsdato: LocalDate,
     val virkningstidspunkt: Faktum<LocalDate>,
     val boperiodeListe: List<Boperiode>
-) : AbstractRuleset<Trygdetid>() {
+) : AbstractRuleset<TrygdetidSubSum>() {
 
     /**
      * Nytt Pattern [norskeBoperioder] opprettes på bakgrunn av liste [boperiodeListe] med et filter på land.
@@ -41,7 +40,7 @@ class BeregnFaktiskTrygdetidSubSumRS(
         regel("BoPeriodeStartFør16år", norskeBoperioder) { boperiode ->
             HVIS { boperiode.fom < dato16år }
             SÅ {
-                svar.faktiskTrygdetidIMåneder += ChronoUnit.MONTHS.between(dato16år, boperiode.tom)
+                svar.faktiskTrygdetidIMåneder.verdi += ChronoUnit.MONTHS.between(dato16år, boperiode.tom)
             }
         }
 
@@ -51,7 +50,7 @@ class BeregnFaktiskTrygdetidSubSumRS(
         regel("BoPeriodeStartFom16år", norskeBoperioder) { boperiode ->
             HVIS { boperiode.fom >= dato16år }
             SÅ {
-                svar.faktiskTrygdetidIMåneder += ChronoUnit.MONTHS.between(boperiode.fom, boperiode.tom)
+                svar.faktiskTrygdetidIMåneder.verdi += ChronoUnit.MONTHS.between(boperiode.fom, boperiode.tom)
             }
         }
 
@@ -81,7 +80,7 @@ class BeregnFaktiskTrygdetidSubSumRS(
         regel("FastsettTrygdetid") {
             HVIS { true }
             SÅ {
-                svar.år = (svar.faktiskTrygdetidIMåneder / 12.0).roundToInt()
+                svar.år = (svar.faktiskTrygdetidIMåneder.verdi / 12.0).roundToInt()
             }
         }
 
