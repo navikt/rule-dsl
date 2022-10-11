@@ -1,6 +1,7 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.Subsumsjon
 import no.nav.system.rule.dsl.treevisitor.Conclusion
 import no.nav.system.rule.dsl.treevisitor.svarord
 import java.util.*
@@ -105,6 +106,15 @@ open class Rule<T : Any>(
     fun OG(domainText: String, predicateFunction: () -> Boolean) {
         containsDomainPredicate = true
         Predicate(domainText, predicateFunction).also {
+            children.add(it)
+            predicateList.add(it)
+        }
+    }
+
+    @DslDomainPredicate
+    fun SUBSUMOG(subsumsjonFunction: () -> Subsumsjon) {
+        containsDomainPredicate = true
+        Predicate( subsumsjonFunction).also {
             children.add(it)
             predicateList.add(it)
         }
