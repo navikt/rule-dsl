@@ -7,5 +7,9 @@ data class Person(
     val rolle: String = "UKJENT",
     val fødselsdato: LocalDate,
     val erGift: Boolean = false,
-    val boperioder: List<Boperiode> = mutableListOf()
+    val boperioder: List<Boperiode> = mutableListOf(),
+    val flyktning: Boolean = false,
+    var trygdetidK19: Trygdetid? = null,
+    var trygdetidK20: Trygdetid? = null,
+    var inngangOgEksportgrunnlag: InngangOgEksportgrunnlag? = null
 )

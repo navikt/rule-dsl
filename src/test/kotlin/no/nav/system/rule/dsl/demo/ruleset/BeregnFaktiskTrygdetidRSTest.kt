@@ -7,6 +7,7 @@ import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.treevisitor.visitor.DebugVisitor
 import no.nav.system.rule.dsl.treevisitor.visitor.RettsregelVisitor
 import no.nav.system.rule.dsl.treevisitor.visitor.RuleVisitor
+import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -22,8 +23,6 @@ class BeregnFaktiskTrygdetidRSTest {
             regel.name() == "BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid"
         }
 
-        val dbgVisitor = DebugVisitor()
-
         BeregnFaktiskTrygdetidRS(
             fødselsdato = localDate(1990, 1, 1),
             virkningstidspunkt = Faktum(navn = "virkningstidspunkt", localDate(2000, 1, 1)),
@@ -33,10 +32,8 @@ class BeregnFaktiskTrygdetidRSTest {
         ).run {
             test()
             accept(redFttVisitor)
-            accept(dbgVisitor)
+            println(debug())
         }
-
-        println(dbgVisitor.debugString)
 
         val redFttRegel = redFttVisitor.rettsregel
         Assertions.assertTrue(redFttRegel.evaluated)

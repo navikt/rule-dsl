@@ -62,8 +62,7 @@ class BeregnFaktiskTrygdetidRS(
         }
 
         /**
-         * Fagregel med sporing på predikatnivå (prototype).
-         * Hvert predikat opprettes med en faglig tekst som ved evaluering tilpasses utfallet av predikatet.
+         * Rettsregel med sporing på predikatnivå (subsumsjoner).
          */
         rettsregel("Skal ha redusert fremtidig trygdetid") {
             HVIS { virkningstidspunkt erEtterEllerLik dato1991 }

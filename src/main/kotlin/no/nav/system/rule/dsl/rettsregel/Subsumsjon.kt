@@ -9,7 +9,6 @@ class Subsumsjon(
     val komparator: KOMPARATOR,
     val pair: Pair<Faktum<*>, Faktum<*>>,
     val utfallFunksjon: () -> Boolean
-//    val utfallTekst: String
 ) : Predicate(function = utfallFunksjon) {
 
     /**
@@ -22,7 +21,6 @@ class Subsumsjon(
         return false
     }
 
-    //    val pair = Pair<Faktum<*>, Faktum<*>>()
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
         return "${fired.svarord()}: ${pair.first}$komparatorText${pair.second}"
@@ -47,16 +45,6 @@ class Faktum<T>(val navn: String, var verdi: T) {
         }
     }
 }
-
-//enum class KOMPARATOR(val text: String) {
-//    LESS_OR_EQUAL(" <= "),
-//    LESS(" < "),
-//    GREATER_OR_EQUAL(" >= "),
-//    GREATER(" > "),
-//    EQUAL(" = "),
-//    NOT_EQUAL(" != ")
-//}
-
 
 enum class KOMPARATOR(val text: String) {
     FØR_ELLER_LIK(" er tom "),
@@ -85,20 +73,6 @@ enum class KOMPARATOR(val text: String) {
         }
     }
 }
-
-val negatedKOMPARATOR = mapOf(
-    FØR_ELLER_LIK to ETTER,
-    FØR to ETTER_ELLER_LIK,
-    ETTER_ELLER_LIK to FØR,
-    ETTER to FØR_ELLER_LIK,
-    MINDRE_ELLER_LIK to STØRRE,
-    MINDRE to STØRRE_ELLER_LIK,
-    STØRRE_ELLER_LIK to MINDRE,
-    STØRRE to MINDRE_ELLER_LIK,
-    LIK to ULIK,
-    ULIK to LIK,
-)
-
 
 /**
  * Datoer
@@ -165,26 +139,5 @@ fun main() {
 
     val f2b = Faktum("Flagg", true)
     val subsumb: Subsumsjon = f2b.erUsann()
-
-
 }
-
-//  RETTSREGEL            regel("Skal ha redusert fremtidig trygdetid") {
-//    SUBSUM                  HVIS("Virkningsdato i saken, $virkningstidspunkt, er [fom|før] $dato1991.") {
-//       FAKTUM1 >= FAKTUM2       virkningstidspunkt >= dato1991
-//                            }
-//    SUBSUM                  OG("Faktisk trygdetid, ${svar.faktiskTrygdetidIMåneder}, er [lavere|høyere] enn fire-femtedelskravet (${svar.firefemtedelskrav}).") {
-//       FAKTUM1 < FAKTUM2       svar.faktiskTrygdetidIMåneder < svar.firefemtedelskrav
-//                            }
-//    RETTSVIRKNING           SÅ {
-//       FAKTUM<Boolean>         svar.redusertFremtidigTrygdetid = true
-//                            }
-//                            kommentar(
-//                                """Dersom faktisk trygdetid i Norge er mindre enn 4/5 av
-//                                             opptjeningstiden skal den framtidige trygdetiden være redusert."""
-//                            )
-//                        }
-
-//svar.redusertFremtidigTrygdetid : Boolean
-//svar.redusertFremtidigTrygdetid : Rule??
 
