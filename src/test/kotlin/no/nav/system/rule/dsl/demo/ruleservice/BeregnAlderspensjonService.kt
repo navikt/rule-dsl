@@ -6,6 +6,7 @@ import no.nav.system.rule.dsl.demo.domain.param.AlderspensjonInput
 import no.nav.system.rule.dsl.demo.domain.param.AlderspensjonOutput
 import no.nav.system.rule.dsl.demo.domain.param.AlderspensjonParameter
 import no.nav.system.rule.dsl.demo.ruleflow.BeregnAlderspensjonFlyt
+import no.nav.system.rule.dsl.rettsregel.Faktum
 
 class BeregnAlderspensjonService(
     private val request: Request
@@ -15,7 +16,7 @@ class BeregnAlderspensjonService(
         val parameter = AlderspensjonParameter(
             input = AlderspensjonInput(
                 person = request.person,
-                virkningstidspunkt = request.virkningstidspunkt,
+                virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt),
                 grunnbeløpVedVirk = grunnbeløpByDate(request.virkningstidspunkt)
             ),
             output = AlderspensjonOutput()

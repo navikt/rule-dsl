@@ -13,12 +13,8 @@ internal class BeregnAlderspensjonServiceTest {
     @Test
     fun `redusert fremtidig trygdetid og høy sats`() {
         val params = Request(
-            virkningstidspunkt = localDate(2020, 1, 1),
-            person = Person(
-                id = 1,
-                fødselsdato = localDate(1980, 3, 3),
-                erGift = false,
-                boperioder = listOf(
+            virkningstidspunkt = localDate(2020, 1, 1), person = Person(
+                id = 1, fødselsdato = localDate(1980, 3, 3), erGift = false, boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(1998, 12, 31), LandEnum.NOR)
                 )
             )
@@ -27,8 +23,8 @@ internal class BeregnAlderspensjonServiceTest {
         val response = BeregnAlderspensjonService(params).run()
 
         assertEquals(3, response.anvendtTrygdetid?.år)
-        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav)
-        assertTrue(response.anvendtTrygdetid?.redusertFremtidigTrygdetid!!)
+        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
+        assertTrue(response.anvendtTrygdetid.redusertFremtidigTrygdetid.fired())
 
         assertEquals(9000, response.grunnpensjon?.netto)
         assertEquals(1.0, response.grunnpensjon?.prosentsats)
@@ -38,12 +34,8 @@ internal class BeregnAlderspensjonServiceTest {
     @Test
     fun `ikke redusert fremtidig trygdetid og lav sats`() {
         val params = Request(
-            virkningstidspunkt = localDate(1990, 5, 1),
-            person = Person(
-                id = 1,
-                fødselsdato = localDate(1974, 3, 3),
-                erGift = true,
-                boperioder = listOf(
+            virkningstidspunkt = localDate(1990, 5, 1), person = Person(
+                id = 1, fødselsdato = localDate(1974, 3, 3), erGift = true, boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
                     Boperiode(fom = localDate(2004, 1, 1), tom = localDate(2010, 12, 31), LandEnum.SWE),
                     Boperiode(fom = localDate(2011, 1, 1), tom = localDate(2015, 12, 31), LandEnum.NOR),
@@ -55,8 +47,8 @@ internal class BeregnAlderspensjonServiceTest {
         val response = BeregnAlderspensjonService(params).run()
 
         assertEquals(19, response.anvendtTrygdetid?.år)
-        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav)
-        assertFalse(response.anvendtTrygdetid?.redusertFremtidigTrygdetid!!)
+        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
+        assertFalse(response.anvendtTrygdetid.redusertFremtidigTrygdetid.fired())
 
         assertEquals(42750, response.grunnpensjon?.netto)
         assertEquals(0.9, response.grunnpensjon?.prosentsats)

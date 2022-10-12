@@ -27,7 +27,7 @@ class RuleChainingRS : AbstractRuleset<Int>() {
 
         regel("sisteChain") {
             HVIS { "førsteRegel".harTruffet() }
-            OG { "førsteChain".harTruffet() }
+            this.OG { "førsteChain".harTruffet() }
             SÅ {
                 tak++
             }
@@ -44,7 +44,7 @@ class RuleChainingRS : AbstractRuleset<Int>() {
 
         regel("negativChain") {
             HVIS { "negativRegel".harTruffet() }
-            OG { "førsteChain".harTruffet() }
+            this.OG { "førsteChain".harTruffet() }
             SÅ {
                 tak++
             }

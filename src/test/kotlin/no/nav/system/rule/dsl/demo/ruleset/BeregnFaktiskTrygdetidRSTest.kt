@@ -1,10 +1,13 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
-import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
+import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.treevisitor.visitor.DebugVisitor
+import no.nav.system.rule.dsl.treevisitor.visitor.RettsregelVisitor
 import no.nav.system.rule.dsl.treevisitor.visitor.RuleVisitor
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 /**
@@ -15,44 +18,49 @@ class BeregnFaktiskTrygdetidRSTest {
     @Test
     fun `test fagregel 'Redusert fremtidig trygdetid' har truffet`() {
 
-        val redFttVisitor = RuleVisitor { regel ->
+        val redFttVisitor = RettsregelVisitor { regel ->
             regel.name() == "BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid"
         }
 
+        val dbgVisitor = DebugVisitor()
+
         BeregnFaktiskTrygdetidRS(
             fødselsdato = localDate(1990, 1, 1),
-            virkningstidspunkt = localDate(2000, 1, 1),
+            virkningstidspunkt = Faktum(navn = "virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2018, 12, 31), LandEnum.NOR)
             )
         ).run {
             test()
             accept(redFttVisitor)
+            accept(dbgVisitor)
         }
 
-        val redFttKonklusjon = redFttVisitor.conclusion
-        assertTrue(redFttKonklusjon.evaluated)
-        assertTrue(redFttKonklusjon.fired)
-        assertEquals(
-            "JA: Virkningsdato i saken, 2000-01-01, er fom 1991-01-01.",
-            redFttKonklusjon.reasons[0]
+        println(dbgVisitor.debugString)
+
+        val redFttRegel = redFttVisitor.rettsregel
+        Assertions.assertTrue(redFttRegel.evaluated)
+        Assertions.assertTrue(redFttRegel.fired())
+        Assertions.assertEquals(
+            "JA: 'virkningstidspunkt' (2000-01-01) er fom '1991-01-01'",
+            redFttRegel.predicateList[0].toString()
         )
-        assertEquals(
-            "JA: Faktisk trygdetid, 155, er lavere enn fire-femtedelskravet (480).",
-            redFttKonklusjon.reasons[1]
+        Assertions.assertEquals(
+            "JA: 'faktisk trygdetid i måneder' (155) er mindre enn 'firefemtedelskrav' (480)",
+            redFttRegel.predicateList[1].toString()
         )
     }
 
     @Test
     fun `test fagregel 'Redusert fremtidig trygdetid' har ikke truffet`() {
 
-        val redFttVisitor = RuleVisitor { regel ->
+        val redFttVisitor = RettsregelVisitor { regel ->
             regel.name() == "BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid"
         }
 
         BeregnFaktiskTrygdetidRS(
             fødselsdato = localDate(1990, 1, 1),
-            virkningstidspunkt = localDate(2000, 1, 1),
+            virkningstidspunkt = Faktum("virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2048, 12, 31), LandEnum.NOR)
             )
@@ -61,16 +69,16 @@ class BeregnFaktiskTrygdetidRSTest {
             accept(redFttVisitor)
         }
 
-        val redFttKonklusjon = redFttVisitor.conclusion
-        assertTrue(redFttKonklusjon.evaluated)
-        assertFalse(redFttKonklusjon.fired)
-        assertEquals(
-            "JA: Virkningsdato i saken, 2000-01-01, er fom 1991-01-01.",
-            redFttKonklusjon.reasons[0]
+        val redFttKonklusjon = redFttVisitor.rettsregel
+        Assertions.assertTrue(redFttKonklusjon.evaluated)
+        Assertions.assertFalse(redFttKonklusjon.fired())
+        Assertions.assertEquals(
+            "JA: 'virkningstidspunkt' (2000-01-01) er fom '1991-01-01'",
+            redFttKonklusjon.predicateList[0].toString()
         )
-        assertEquals(
-            "NEI: Faktisk trygdetid, 515, er høyere enn fire-femtedelskravet (480).",
-            redFttKonklusjon.reasons[1]
+        Assertions.assertEquals(
+            "NEI: 'faktisk trygdetid i måneder' (515) må være mindre enn 'firefemtedelskrav' (480)",
+            redFttKonklusjon.predicateList[1].toString()
         )
     }
 }

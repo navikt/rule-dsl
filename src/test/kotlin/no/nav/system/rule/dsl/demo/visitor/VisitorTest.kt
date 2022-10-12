@@ -34,25 +34,25 @@ class VisitorTest {
         val txt = service.debug()
 
         assertEquals("""
-            ruleservice: BeregnAlderspensjonService
-              ruleflow: BeregnAlderspensjonFlyt
-                ruleset: BeregnFaktiskTrygdetidRS
-                  rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.1 fired: true
-                  rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.2 fired: false
-                  rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.1 fired: false
-                  rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.2 fired: true
-                  rule: BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav fired: true
-                  rule: BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid fired: false
-                    predicate: Virkningsdato i saken, 1990-05-01, er før 1991-01-01. fired: false
-                    predicate: Faktisk trygdetid, 224, er lavere enn fire-femtedelskravet (480). fired: true
-                  rule: BeregnFaktiskTrygdetidRS.FastsettTrygdetid fired: true
-                  rule: BeregnFaktiskTrygdetidRS.ReturnRegel fired: true
-                decision: BeregnAlderspensjonFlyt.Sivilstand gift?
-                  branch: BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0 fired: true
-                  branch: BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1 fired: false
-                ruleset: BeregnGrunnpensjonRS
-                  rule: BeregnGrunnpensjonRS.FullTrygdetid fired: false
-                  rule: BeregnGrunnpensjonRS.RedusertTrygdetid fired: true""".trimIndent(), txt)
+                ruleservice: BeregnAlderspensjonService
+                  ruleflow: BeregnAlderspensjonFlyt
+                    ruleset: BeregnFaktiskTrygdetidRS
+                      rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.1 fired: true
+                      rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.2 fired: false
+                      rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.1 fired: false
+                      rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.2 fired: true
+                      rule: BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav fired: true
+                      rule: BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid fired: false
+                        subsumsjon: NEI: 'virkningstidspunkt' (1990-05-01) må være fom '1991-01-01' fired: false
+                        subsumsjon: JA: 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480) fired: true
+                      rule: BeregnFaktiskTrygdetidRS.FastsettTrygdetid fired: true
+                      rule: BeregnFaktiskTrygdetidRS.ReturnRegel fired: true
+                    decision: BeregnAlderspensjonFlyt.Sivilstand gift?
+                      branch: BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0 fired: true
+                      branch: BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1 fired: false
+                    ruleset: BeregnGrunnpensjonRS
+                      rule: BeregnGrunnpensjonRS.FullTrygdetid fired: false
+                      rule: BeregnGrunnpensjonRS.RedusertTrygdetid fired: true""".trimIndent(), txt)
     }
     @Test
     fun `XML debug visitor test`() {
@@ -83,9 +83,9 @@ class VisitorTest {
                   </BoPeriodeStartFom16år.1 fired=false>
                   </BoPeriodeStartFom16år.2 fired=true>
                   </SettFireFemtedelskrav fired=true>
-                  </Skal ha redusert fremtidig trygdetid fired=false comment="Dersom faktisk trygdetid i Norge er mindre enn 4/5 av opptjeningstiden skal den framtidige trygdetiden være redusert.">
-                    <predicate fired=false>Virkningsdato i saken, 1990-05-01, er før 1991-01-01.</predicate>
-                    <predicate fired=true>Faktisk trygdetid, 224, er lavere enn fire-femtedelskravet (480).</predicate>
+                  </Skal_ha_redusert_fremtidig_trygdetid fired=false comment="Dersom faktisk trygdetid i Norge er mindre enn 4/5 av opptjeningstiden skal den framtidige trygdetiden være redusert.">
+                    <subsumsjon fired=false>NEI: 'virkningstidspunkt' (1990-05-01) må være fom '1991-01-01'</predicate>
+                    <subsumsjon fired=true>JA: 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)</predicate>
                   </FastsettTrygdetid fired=true>
                   </ReturnRegel fired=true>
                 </BeregnFaktiskTrygdetidRS>

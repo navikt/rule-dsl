@@ -13,7 +13,7 @@ class SinglePattern<P>(
     private val filter: (P) -> Boolean = { true }
 ) : MutableList<P> by innListe, Pattern<P> {
 
-    override val ruleResultMap: HashMap<Rule<*>, P> = HashMap()
+    override val ruleResultMap: HashMap<Rule, P> = HashMap()
 
     /**
      * Combining a secondary [SinglePattern] creates a [DoublePattern] where patternElements are paired using [pairItemFunction]

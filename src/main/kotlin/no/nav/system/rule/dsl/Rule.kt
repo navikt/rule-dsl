@@ -2,9 +2,9 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
-import no.nav.system.rule.dsl.treevisitor.Conclusion
-import no.nav.system.rule.dsl.treevisitor.svarord
+import no.nav.system.rule.dsl.treevisitor.Rettsregel
 import java.util.*
+import kotlin.reflect.KMutableProperty
 
 /**
  * A rule that evaluates a set of predicates and, if all predicates are true, executes an action statement.
@@ -17,10 +17,10 @@ import java.util.*
  * @param name the rule name
  * @param sequence the rule sequence
  */
-open class Rule<T : Any>(
+open class Rule(
     private val name: String,
-    internal val sequence: Int
-) : Comparable<Rule<T>>, AbstractRuleComponent() {
+    internal open val sequence: Int
+) : Comparable<Rule>, AbstractRuleComponent() {
 
     /**
      * Functional description of the rule
@@ -30,12 +30,7 @@ open class Rule<T : Any>(
     /**
      * Each predicate function in the rule.
      */
-    private val predicateList: ArrayList<Predicate> = ArrayList()
-
-    /**
-     * True if at least one predicate is a Domain predicate.
-     */
-    private var containsDomainPredicate: Boolean = false
+    val predicateList: ArrayList<Predicate> = ArrayList()
 
     /**
      * Reference to optional pattern.
@@ -55,27 +50,28 @@ open class Rule<T : Any>(
     /**
      * Set to true if the rule has been evaluated.
      */
-    private var evaluated = false
+    internal var evaluated = false
 
     /**
      * Set to true if every predicate is true.
      */
-    private var fired = false
+    protected var fired = false
 
     /**
      * The code that executes if the rule is [fired]
      */
-    private var actionStatement: () -> Unit = {}
+    protected var actionStatement: () -> Unit = {}
 
     /**
      * The value this rule will return.
      */
-    var returnValue: Optional<T> = Optional.empty()
+    var returnValue: Optional<Any> = Optional.empty()
 
     /**
      * Set to true if rule has a return value. When set to true this rule will stop ruleset evaluation if fired.
      */
     var returnRule = false
+
 
     /**
      * DSL: Predicate entry.
@@ -85,41 +81,13 @@ open class Rule<T : Any>(
     }
 
     /**
-     * DSL: Domain Predicate entry.
-     */
-    @DslDomainPredicate
-    fun HVIS(fag: String, predicate: () -> Boolean) {
-        OG(fag, predicate)
-    }
-
-    /**
      * DSL: Technical Predicate entry.
      */
     fun OG(predicateFunction: () -> Boolean) {
         predicateList.add(Predicate(function = predicateFunction))
     }
 
-    /**
-     * DSL: Domain Predicate entry.
-     */
-    @DslDomainPredicate
-    fun OG(domainText: String, predicateFunction: () -> Boolean) {
-        containsDomainPredicate = true
-        Predicate(domainText, predicateFunction).also {
-            children.add(it)
-            predicateList.add(it)
-        }
-    }
 
-    @DslDomainPredicate
-    fun SUBSUMOG(subsumsjonFunction: () -> Subsumsjon) {
-        containsDomainPredicate = true
-        val subsumsjon = subsumsjonFunction.invoke()
-        Predicate(subsumsjon.toString(), subsumsjon.svar).also {
-            children.add(it)
-            predicateList.add(it)
-        }
-    }
 
     /**
      * DSL: Action statement entry.
@@ -131,7 +99,7 @@ open class Rule<T : Any>(
     /**
      * DSL: Return value entry.
      */
-    fun RETURNER(returnValue: T? = null) {
+    fun RETURNER(returnValue: Any? = null) {
         if (returnValue == null) {
             this.returnValue = Optional.empty()
         } else {
@@ -151,7 +119,7 @@ open class Rule<T : Any>(
      * Evaluates the [predicateList]. A rule is considered [fired] once all predicates are evaluated to true.
      * Rules that fire invoke their [actionStatement].
      */
-    fun evaluate() {
+    open fun evaluate() {
         fired = predicateList.isNotEmpty()
         evaluated = true
 
@@ -173,20 +141,18 @@ open class Rule<T : Any>(
      * Creates a conclusion based on this rule object.
      * Includes domaintext if available.
      */
-    fun conclusion() = Conclusion(
-        evaluated = evaluated,
-        fired = fired,
-        ruleName = name(),
-        documentation = prettyDoc(),
-        reasons = predicateList
-            .filter { it.isDomainPredicate() }
-            .map { p -> "${p.fired().svarord()}: ${p.evaluatedDomainText()}" }
-    )
+//    fun rettsregel() = Rettsregel(
+//        evaluated = evaluated,
+//        fired = fired,
+//        ruleName = name(),
+//        documentation = prettyDoc(),
+//        subsumsjonList = predicateList.filterIsInstance<Subsumsjon>()
+//    )
 
     /**
      * Ruleset ordering by rule sequence
      */
-    override fun compareTo(other: Rule<T>): Int {
+    override fun compareTo(other: Rule): Int {
         return compareValues(this.sequence, other.sequence)
     }
 

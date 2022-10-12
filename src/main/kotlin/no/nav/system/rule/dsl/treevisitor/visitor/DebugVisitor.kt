@@ -1,6 +1,7 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.*
+import no.nav.system.rule.dsl.rettsregel.Subsumsjon
 
 /**
  * Lists the complete tree of [AbstractRuleComponent]
@@ -13,10 +14,13 @@ class DebugVisitor : TreeVisitor {
         debugString.append(" ".repeat(level * 2))
 
         when (ruleComponent) {
-            is Predicate -> {
-                debugString.append("predicate: ${ruleComponent.evaluatedDomainText()} fired: ${ruleComponent.fired()}\n")
+            is Subsumsjon -> {
+                debugString.append("subsumsjon: $ruleComponent fired: ${ruleComponent.fired()}\n")
             }
-            is Rule<*> -> {
+            is Predicate -> {
+                debugString.append("predicate: fired: ${ruleComponent.fired()}\n")
+            }
+            is Rule -> {
                 debugString.append("rule: ${ruleComponent.name()} fired: ${ruleComponent.fired()}\n")
             }
             is AbstractRuleset<*> -> {

@@ -1,6 +1,7 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.*
+import no.nav.system.rule.dsl.rettsregel.Subsumsjon
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -29,20 +30,27 @@ class XmlDebugVisitor : TreeVisitor {
             is AbstractRuleset<*> -> {
                 debugString.append(ruleComponent.name()).append(">").append("\n")
             }
-            is Rule<*> -> {
+            is Rule -> {
                 debugString.append("/")
-                    .append(ruleComponent.name().replace("${ruleComponent.parent!!.name()}.", ""))
+                    .append(ruleComponent.name().replace("${ruleComponent.parent!!.name()}.", "").replace(" ", "_"))
                     .append(" fired=${ruleComponent.fired()}")
                 if (ruleComponent.prettyDoc().isNotBlank()) {
                     debugString.append(" comment=\"${ruleComponent.prettyDoc()}\"")
                 }
                 debugString.append(">").append("\n")
             }
+            is Subsumsjon -> {
+                debugString
+                    .append("subsumsjon")
+                    .append(" fired=${ruleComponent.fired()}").append(">")
+                    .append(ruleComponent)
+                    .append("</predicate>")
+                    .append("\n")
+            }
             is Predicate -> {
                 debugString
                     .append("predicate")
                     .append(" fired=${ruleComponent.fired()}").append(">")
-                    .append(ruleComponent.evaluatedDomainText())
                     .append("</predicate>")
                     .append("\n")
             }
@@ -52,7 +60,7 @@ class XmlDebugVisitor : TreeVisitor {
         ruleComponent.children.forEach { it.accept(this) }
         level--
 
-        if (ruleComponent !is Rule<*> && ruleComponent !is Predicate) {
+        if (ruleComponent !is Rule && ruleComponent !is Predicate) {
             debugString.append(" ".repeat(level * 2))
             debugString.append("</${ruleComponent.name()}>\n")
         }

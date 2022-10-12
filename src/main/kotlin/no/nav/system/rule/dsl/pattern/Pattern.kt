@@ -10,7 +10,7 @@ interface Pattern<P> {
     /**
      * Map of [Rule] and their corresponding patternElement ([P]) that was used in the evaluation.
      */
-    val ruleResultMap: HashMap<Rule<*>, P>
+    val ruleResultMap: HashMap<Rule, P>
 
     /**
      * Internal use only.
@@ -25,7 +25,7 @@ interface Pattern<P> {
      * @param rule the rule to register
      * @param patternElement the element the [rule] is evaluating
      */
-     fun registerRule(rule: Rule<*>, patternElement: P) {
+     fun registerRule(rule: Rule, patternElement: P) {
         rule.pattern = this
         ruleResultMap[rule] = patternElement
     }

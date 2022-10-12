@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.error.InvalidRulesetException
+import no.nav.system.rule.dsl.treevisitor.Rettsregel
 import java.util.*
 
 /**
@@ -15,7 +16,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     /**
      * List of rules that have been evaluated regardless of the rule has fired or not.
      */
-    internal var evaluatedRuleList: MutableList<Rule<T>> = mutableListOf()
+    internal var evaluatedRuleList: MutableList<Rule> = mutableListOf()
 
     /**
      * Ruleset name
@@ -30,7 +31,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      * Functions either create a single Rule object, or, if the function is created using the pattern, a rule object for each element in the pattern.
      */
     @PublishedApi
-    internal val ruleFunctionMap = mutableMapOf<Int, () -> List<Rule<T>>>()
+    internal val ruleFunctionMap = mutableMapOf<Int, () -> List<Rule>>()
 
     /**
      * Creates a standard rule using the rule mini-DSL.
@@ -38,10 +39,27 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      * @param navn the rule name
      * @param createRuleContent the Rule function that populates the Rule object.
      */
-    inline fun regel(navn: String, crossinline createRuleContent: Rule<T>.() -> Unit) {
+    inline fun regel(navn: String, crossinline createRuleContent: Rule.() -> Unit) {
         val sequence = nextSequence()
         ruleFunctionMap[sequence] = {
-            val rule = Rule<T>("$rulesetName.$navn", sequence)
+            val rule = Rule("$rulesetName.$navn", sequence)
+            rule.parent = this
+            children.add(rule)
+            rule.createRuleContent()
+            listOf(rule)
+        }
+    }
+
+    /**
+     * Creates a standard rule using the rule mini-DSL.
+     *
+     * @param navn the rule name
+     * @param createRuleContent the Rule function that populates the Rule object.
+     */
+    inline fun rettsregel(navn: String, crossinline createRuleContent: Rettsregel.() -> Unit) {
+        val sequence = nextSequence()
+        ruleFunctionMap[sequence] = {
+            val rule = Rettsregel("$rulesetName.$navn", sequence)
             rule.parent = this
             children.add(rule)
             rule.createRuleContent()
@@ -59,14 +77,14 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     inline fun <P> regel(
         navn: String,
         pattern: Pattern<P>,
-        crossinline createRuleContent: Rule<T>.(P) -> Unit
+        crossinline createRuleContent: Rule.(P) -> Unit
     ) {
         val sequence = nextSequence() // starting sequence for all the rules that will be created using this pattern
         ruleFunctionMap[sequence] = {
-            val rulesInPattern = mutableListOf<Rule<T>>()
+            val rulesInPattern = mutableListOf<Rule>()
             var offset = 1
             for (patternElement in pattern.get()) {
-                val rule = Rule<T>("$rulesetName.$navn.$offset", sequence + offset).apply {
+                val rule = Rule("$rulesetName.$navn.$offset", sequence + offset).apply {
                     nameWithoutPatternOffset = "$rulesetName.$navn"
                 }
                 pattern.registerRule(rule, patternElement)
@@ -108,7 +126,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
                 it.evaluate()
                 evaluatedRuleList.add(it)
                 if (it.returnRule) {
-                    return it.returnValue
+                    return it.returnValue as Optional<T>
                 }
             }
         }

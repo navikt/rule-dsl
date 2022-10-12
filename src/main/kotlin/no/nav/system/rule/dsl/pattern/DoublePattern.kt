@@ -14,7 +14,7 @@ class DoublePattern<K, V>(
     private var pairItemFunction: (K, V) -> Boolean
 ) : Pattern<Pair<K, V>> {
 
-    override val ruleResultMap: HashMap<Rule<*>, Pair<K, V>> = HashMap()
+    override val ruleResultMap: HashMap<Rule, Pair<K, V>> = HashMap()
 
     override fun get(): List<Pair<K, V>> {
         return pairItemsByFunction(firstPattern.get(), secondPattern.get(), pairItemFunction).toList()
