@@ -5,6 +5,7 @@ import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Request
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -14,7 +15,7 @@ internal class BeregnAlderspensjonServiceTest {
     fun `redusert fremtidig trygdetid og høy sats`() {
         val params = Request(
             virkningstidspunkt = localDate(2020, 1, 1), person = Person(
-                id = 1, fødselsdato = localDate(1980, 3, 3), erGift = false, boperioder = listOf(
+                id = 1, fødselsdato = Faktum("Fødselsdato", localDate(1980, 3, 3)), erGift = false, boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(1998, 12, 31), LandEnum.NOR)
                 )
             )
@@ -35,7 +36,7 @@ internal class BeregnAlderspensjonServiceTest {
     fun `ikke redusert fremtidig trygdetid og lav sats`() {
         val params = Request(
             virkningstidspunkt = localDate(1990, 5, 1), person = Person(
-                id = 1, fødselsdato = localDate(1974, 3, 3), erGift = true, boperioder = listOf(
+                id = 1, fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)), erGift = true, boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
                     Boperiode(fom = localDate(2004, 1, 1), tom = localDate(2010, 12, 31), LandEnum.SWE),
                     Boperiode(fom = localDate(2011, 1, 1), tom = localDate(2015, 12, 31), LandEnum.NOR),

@@ -24,7 +24,7 @@ class BeregnFaktiskTrygdetidRSTest {
         }
 
         BeregnFaktiskTrygdetidRS(
-            fødselsdato = localDate(1990, 1, 1),
+            fødselsdato = Faktum("Fødselsdato", localDate(1990, 1, 1)),
             virkningstidspunkt = Faktum(navn = "virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2018, 12, 31), LandEnum.NOR)
@@ -56,7 +56,7 @@ class BeregnFaktiskTrygdetidRSTest {
         }
 
         BeregnFaktiskTrygdetidRS(
-            fødselsdato = localDate(1990, 1, 1),
+            fødselsdato = Faktum("Fødselsdato", localDate(1990, 1, 1)),
             virkningstidspunkt = Faktum("virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2048, 12, 31), LandEnum.NOR)

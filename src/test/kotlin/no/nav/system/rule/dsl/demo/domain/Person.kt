@@ -4,13 +4,14 @@ import no.nav.system.rule.dsl.rettsregel.Faktum
 import java.time.LocalDate
 
 data class Person(
-    val id: Int,
+    val id: Int = 1,
     val rolle: String = "UKJENT",
-    val fødselsdato: LocalDate,
+    val fødselsdato: Faktum<LocalDate>,
     val erGift: Boolean = false,
     val boperioder: List<Boperiode> = mutableListOf(),
     val flyktning: Faktum<Boolean> = Faktum("Angitt flyktning", false),
     var trygdetidK19: Trygdetid? = null,
     var trygdetidK20: Trygdetid? = null,
-    var inngangOgEksportgrunnlag: InngangOgEksportgrunnlag? = null
+    var inngangOgEksportgrunnlag: InngangOgEksportgrunnlag? = null,
+    var forsteVirkningsdatoGrunnlagListe: List<ForsteVirkningsdatoGrunnlag> = mutableListOf()
 )

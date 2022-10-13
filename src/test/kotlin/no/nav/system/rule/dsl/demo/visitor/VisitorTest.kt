@@ -6,6 +6,7 @@ import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Request
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.ruleservice.BeregnAlderspensjonService
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import no.nav.system.rule.dsl.treevisitor.visitor.xmlDebug
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,7 +20,7 @@ class VisitorTest {
             virkningstidspunkt = localDate(1990, 5, 1),
             person = Person(
                 id = 1,
-                fødselsdato = localDate(1974, 3, 3),
+                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
                 erGift = true,
                 boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
@@ -60,7 +61,7 @@ class VisitorTest {
             virkningstidspunkt = localDate(1990, 5, 1),
             person = Person(
                 id = 1,
-                fødselsdato = localDate(1974, 3, 3),
+                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
                 erGift = true,
                 boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),

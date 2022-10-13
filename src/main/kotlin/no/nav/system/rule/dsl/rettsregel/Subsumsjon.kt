@@ -148,6 +148,29 @@ infix fun Faktum<out Number>.erStørre(other: Faktum<out Number>) = Subsumsjon(
     Pair(this, other)
 ) { verdi.toDouble() > other.verdi.toDouble() }
 
+infix fun Faktum<out Number>.erMindreEllerLik(other: Number) =
+    Subsumsjon(
+        MINDRE_ELLER_LIK,
+        Pair(this, Faktum(other))
+    ) { verdi.toDouble() <= other.toDouble() }
+
+infix fun Faktum<out Number>.erMindreEnn(other: Number) =
+    Subsumsjon(
+        MINDRE,
+        Pair(this, Faktum(other))
+    ) { verdi.toDouble() < other.toDouble() }
+
+infix fun Faktum<out Number>.erStørreEllerLik(other: Number) =
+    Subsumsjon(
+        STØRRE_ELLER_LIK,
+        Pair(this, Faktum(other))
+    ) { verdi.toDouble() >= other.toDouble() }
+
+infix fun Faktum<out Number>.erStørre(other: Number) = Subsumsjon(
+    STØRRE,
+    Pair(this, Faktum(other))
+) { verdi.toDouble() > other.toDouble() }
+
 /**
  * Boolean
  */
@@ -156,6 +179,33 @@ fun Faktum<Boolean>.erSann() =
 
 fun Faktum<Boolean>.erUsann() =
     Subsumsjon(ULIK, Pair(this, Faktum("USANN", false))) { verdi }
+
+/**
+ * Dato > Tall
+ */
+infix fun Faktum<out LocalDate>.erMindreEllerLik(other: Int) =
+    Subsumsjon(
+        MINDRE_ELLER_LIK,
+        Pair(this, Faktum(other))
+    ) { verdi.year <= other }
+
+infix fun Faktum<out LocalDate>.erMindreEnn(other: Int) =
+    Subsumsjon(
+        MINDRE,
+        Pair(this, Faktum(other))
+    ) { verdi.year < other }
+
+infix fun Faktum<out LocalDate>.erStørreEllerLik(other: Int) =
+    Subsumsjon(
+        STØRRE_ELLER_LIK,
+        Pair(this, Faktum(other))
+    ) { verdi.year >= other }
+
+infix fun Faktum<out LocalDate>.erStørreEnn(other: Int) =
+    Subsumsjon(
+        STØRRE,
+        Pair(this, Faktum(other))
+    ) { verdi.year > other }
 
 /**
  * Generisk
