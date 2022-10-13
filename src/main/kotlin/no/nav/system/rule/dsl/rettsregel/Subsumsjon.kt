@@ -5,6 +5,9 @@ import no.nav.system.rule.dsl.rettsregel.KOMPARATOR.*
 import no.nav.system.rule.dsl.treevisitor.svarord
 import java.time.LocalDate
 
+/**
+ * TODO Vurder om en subsumsjon (og Predicate) burde ha en evaluate variabel slik sonm Rule. Hensikten er å oppdage bruk av Sumsumsjoner som ikke har blitt evaluert enda (feilsituasjon)
+ */
 class Subsumsjon(
     val komparator: KOMPARATOR,
     val pair: Pair<Faktum<*>, Faktum<*>>,
@@ -44,7 +47,33 @@ class Faktum<T>(val navn: String, var verdi: T) {
             "'$navn' ($verdi)"
         }
     }
+
+//    fun Faktum<out SuperEnum>.erBlandt(others: List<SuperEnum>) = Subsumsjon(
+//        ER_BLANDT,
+//        Pair(this, Faktum(others.map { it.navn() }.joinToString(", ")))
+//    ) { others.any { this.verdi.navn() == it.navn() } }
+
+
+//    fun erBlandtX(others: List<SuperEnum>) = Subsumsjon(
+//        ER_BLANDT,
+//        Pair(this, Faktum(others.map { it.navn() }.joinToString(", ")))
+//    ) { others.any { this.verdi == it.navn() } }
+
+//    fun erBlandt(vararg others: SuperEnum) = Subsumsjon(
+//        ER_BLANDT,
+//        Pair(this, Faktum(others.map { it.navn() }.joinToString(", ")))
+//    ) { others.any { this.verdi == it.navn() } }
+
+    infix fun String.erStringen(s: String): String {
+        return ""
+    }
 }
+
+interface SuperEnum {
+    fun faktum(): Faktum<*>
+    fun navn(): String
+}
+
 
 enum class KOMPARATOR(val text: String) {
     FØR_ELLER_LIK(" er tom "),
@@ -56,10 +85,12 @@ enum class KOMPARATOR(val text: String) {
     STØRRE_ELLER_LIK(" er større eller lik "),
     STØRRE(" er større enn "),
     LIK(" er lik "),
-    ULIK(" er ulik ");
+    ULIK(" er ulik "),
+    ER_BLANDT(" er blandt "),
+    ER_IKKE_BLANDT(" er ikke blandt ");
 
     fun negated(): String {
-       return when (this) {
+        return when (this) {
             FØR_ELLER_LIK -> " må være tom "
             FØR -> " må være før "
             ETTER_ELLER_LIK -> " må være fom "
@@ -70,6 +101,8 @@ enum class KOMPARATOR(val text: String) {
             STØRRE -> " må være større enn "
             LIK -> " må være lik "
             ULIK -> " må være ulik "
+            ER_BLANDT -> " må være blandt "
+            ER_IKKE_BLANDT -> " må ikke være blandt "
         }
     }
 }
@@ -124,7 +157,43 @@ fun Faktum<Boolean>.erSann() =
 fun Faktum<Boolean>.erUsann() =
     Subsumsjon(ULIK, Pair(this, Faktum("USANN", false))) { verdi }
 
+/**
+ * Generisk
+ */
+infix fun <T> Faktum<T>.erLik(ap: T) = Subsumsjon(
+    LIK,
+    Pair(this, Faktum(ap))
+) { this.verdi == ap }
+
+
+infix fun <T> Faktum<T>.erBlant(others: List<T>) = Subsumsjon(
+    ER_BLANDT,
+    Pair(this, Faktum(others.joinToString(", ")))
+) { this.verdi in others }
+
+enum class MinEnum : SuperEnum {
+    A, B;
+
+    override fun navn(): String = this.name
+
+    override fun faktum(): Faktum<MinEnum> {
+        return when (this) {
+            A -> Faktum("a", this)
+            B -> Faktum("b", this)
+        }
+    }
+}
+
+
+fun Faktum<SuperEnum>.hallo() = "hallo"
+
+
 fun main() {
+    val kode = Faktum(MinEnum.A)
+    val listOfSuperEnum = listOf(MinEnum.A, MinEnum.B)
+//    val x = kode erBlandtString "asd"
+
+
     val f1i = Faktum("G", 2)
     val f2i = Faktum("SATS", 3)
     val subsumi: Subsumsjon = f1i erMindreEnn f2i
@@ -140,4 +209,6 @@ fun main() {
     val f2b = Faktum("Flagg", true)
     val subsumb: Subsumsjon = f2b.erUsann()
 }
+
+
 

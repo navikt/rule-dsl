@@ -1,10 +1,14 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
 import no.nav.system.rule.dsl.AbstractRuleset
+import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.domain.*
 import no.nav.system.rule.dsl.demo.domain.koder.*
-import no.nav.system.rule.dsl.demo.helper.localDate
-import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
+import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum.*
+import no.nav.system.rule.dsl.demo.helper.måneder
+import no.nav.system.rule.dsl.demo.helper.år
+import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
 import java.util.*
 
@@ -12,27 +16,26 @@ import java.util.*
  * Hvis unntak fra forutgående medlemsskap er angitt i inngang og eksportgrunnlag og unntaktype er
  * flyktning så har personen status som flyktning.
  */
+@OptIn(DslDomainPredicate::class)
 class PersonenErFlyktningRS(
-    //    private val inninngangOgEksportgrunnlag: inngangOgEksportgrunnlag,
-//    private val innTrygdetidK19: Trygdetid,
-//    private val innTrygdetidK20: Trygdetid,
-//    private val innAngittFlyktning: Faktum<Boolean>,
-//    private val innFødselsdato: Faktum<LocalDate>,
-    private val inninngangOgEksportgrunnlag: InngangOgEksportgrunnlag,
-    private val innTrygdetidK19: Trygdetid,
-    private val innTrygdetidK20: Trygdetid,
     private val innPersongrunnlag: Person,
-    private val innHarKravfremsattdatoFom2021: Faktum<Boolean>,
     private val innYtelseType: Faktum<YtelseEnum>,
     private val innKapittel20: Faktum<Boolean>,
-    private val innVirk: Faktum<Date>,
-    private val innYtelsestype: String
+    private val innVirk: Faktum<Date>
 ) : AbstractRuleset<Boolean>() {
 
     private var erFlyktning: Boolean = false
     private var overgangsregel: Boolean = false
-    private var dato67m: LocalDate = innPersongrunnlag.fødselsdato
-
+    private var dato67m: LocalDate = innPersongrunnlag.fødselsdato.withDayOfMonth(1) + 67.år + 1.måneder
+    private val unntakFraForutgaendeMedlemskap =
+        innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap
+    private val unntakFraForutgaendeTT = innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT
+    val aktuelleUnntakstyper = listOf(
+        FLYKT_ALDER,
+        FLYKT_BARNEP,
+        FLYKT_GJENLEV,
+        FLYKT_UFOREP
+    )
 //    var datoClone = innFødselsdato.clone() as Date
 //    datoClone += 67.år
 //    datoClone += 1.måneder
@@ -40,17 +43,12 @@ class PersonenErFlyktningRS(
 
     override fun create() {
 
-        regel("HarUnntakFraForutgaendeMedlemskapTypeFlyktning") {
-            HVIS { innPersongrunnlag.inngangOgEksportgrunnlag != null }
-            OG { innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap != null }
-            OG { innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap?.unntak == true }
-            OG { innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap?.unntakType != null }
-            OG {
-                innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap?.unntakType!! == UnntakEnum.FLYKT_ALDER
-                        || innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap?.unntakType!! == UnntakEnum.FLYKT_BARNEP
-                        || innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap?.unntakType!! == UnntakEnum.FLYKT_GJENLEV
-                        || innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap?.unntakType!! == UnntakEnum.FLYKT_UFOREP
-            }
+
+        rettsregel("HarUnntakFraForutgaendeMedlemskapTypeFlyktning") {
+            HVIS { unntakFraForutgaendeMedlemskap != null }
+            OG { unntakFraForutgaendeMedlemskap!!.unntak.erSann() }
+            OG { unntakFraForutgaendeMedlemskap?.unntakType != null }
+            OG { unntakFraForutgaendeMedlemskap!!.unntakType erBlant aktuelleUnntakstyper }
             SÅ {
                 erFlyktning = true
             }
@@ -59,17 +57,11 @@ class PersonenErFlyktningRS(
             og unntaktype er flyktning så har personen status som flyktning."""
             )
         }
-        regel("HarUnntakFraForutgaendeTTTypeFlyktning") {
-            HVIS { innPersongrunnlag.inngangOgEksportgrunnlag != null }
-            OG { innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT != null }
-            OG { innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT?.unntak == true }
-            OG { innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT?.unntakType != null }
-            OG {
-                innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT?.unntakType!! == UnntakEnum.FLYKT_ALDER
-                        || innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT?.unntakType!! == UnntakEnum.FLYKT_BARNEP
-                        || innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT?.unntakType!! == UnntakEnum.FLYKT_GJENLEV
-                        || innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT?.unntakType!! == UnntakEnum.FLYKT_UFOREP
-            }
+        rettsregel("HarUnntakFraForutgaendeTTTypeFlyktning") {
+            HVIS { unntakFraForutgaendeTT != null }
+            OG { unntakFraForutgaendeTT!!.unntak.erSann() }
+            OG { unntakFraForutgaendeTT?.unntakType != null }
+            OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
             SÅ {
                 erFlyktning = true
             }
@@ -78,187 +70,195 @@ class PersonenErFlyktningRS(
             unntaktype er flyktning så har personen status som flyktning."""
             )
         }
-        regel("HarFlyktningFlaggetSatt") {
-            HVIS { innPersongrunnlag.flyktning }
+        rettsregel("HarFlyktningFlaggetSatt") {
+            HVIS { innPersongrunnlag.flyktning.erSann() }
             SÅ {
                 erFlyktning = true
             }
             kommentar("")
         }
 
-        regel("Overgangsregel_APk19") {
-            HVIS { innYtelsestype == YtelseEnum.AP.toString() }
-            OG { innPersongrunnlag.fødselsdato.år!! <= 1959 }
-            OG { !innKapittel20 }
-            OG { innPersongrunnlag.trygdetid?.tt_fa_F2021 != null }
-            OG { innPersongrunnlag.trygdetid?.tt_fa_F2021?.antallAr!! >= 20 }
+        rettsregel("Overgangsregel_APk19") {
+            HVIS { innYtelseType erLik AP }
+            OG { innPersongrunnlag.fødselsdato erMindreEnn 1959 }
+            OG { innKapittel20.erUsann() }
+            OG { innPersongrunnlag.trygdetidK19?.tt_fa_F2021 erStørreEllerLik 20 }
             SÅ {
                 overgangsregel = true
             }
             kommentar("")
         }
-        regel("Overgangsregel_APk20") {
-            HVIS { innYtelsestype == YtelseEnum.AP.toString() }
-            OG { innPersongrunnlag.fødselsdato.year <= 1959 }
-            OG { innKapittel20 }
-            OG { innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021 != null }
-            OG { innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021?.verdi!! >= 20 }
-            SÅ {
-                overgangsregel = true
-            }
-            kommentar("")
-        }
-        regel("Overgangsregel_APk19_tidligereUT") {
-            HVIS { innYtelsestype == YtelseEnum.AP.toString() }
-            OG { innPersongrunnlag.fødselsdato.year <= 1959 }
-            OG { innVirk!! >= dato67m }
-            OG { !innKapittel20 }
-            OG { innPersongrunnlag.trygdetid?.tt_fa_F2021 != null }
-            OG { innPersongrunnlag.trygdetid?.tt_fa?.antallAr!! >= 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
-                    it.kravlinjeTypeUnntakEnum == YtelseEnum.UT
-                            && it.virkningsdato?!! < localDate(2021, 1, 1)
-                }
-            }
-            SÅ {
-                overgangsregel = true
-            }
-            kommentar("")
-        }
-        regel("Overgangsregel_APk20_tidligereUT") {
-            HVIS { innYtelsestype == YtelseEnum.AP.toString() }
-            OG { innPersongrunnlag.fødselsdato.year <= 1959 }
-            OG { innVirk >= dato67m }
-            OG { innKapittel20 }
-            OG { innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021 != null && innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021?.antallAr!! >= 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
-                    it.kravlinjeTypeUnntakEnum == YtelseEnum.UT
-                            && it.virkningsdato!! < localDate(2021, 1, 1)
-                }
-            }
-            SÅ {
-                overgangsregel = true
-            }
-            kommentar("")
-        }
-        regel("Overgangsregel_GJRk19_tidligereUT_GJT") {
-            HVIS { innYtelsestype == YtelseEnum.GJR.toString() }
-            OG { innPersongrunnlag.fødselsdato.year <= 1959 }
-            OG { innVirk != null }
-            OG { innVirk >= dato67m }
-            OG { !innKapittel20 }
-            OG { innPersongrunnlag.trygdetid?.tt_fa_F2021?.antallAr != null && innPersongrunnlag.trygdetid?.tt_fa_F2021?.antallAr!! >= 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
-                    it.kravlinjeTypeUnntakEnum == YtelseEnum.UT_GJR
-                            && it.virkningsdato!! < localDate(2021, 1, 1)
-                }
-            }
-            SÅ {
-                overgangsregel = true
-            }
-            kommentar("")
-        }
-        regel("Overgangsregel_GJRk20_tidligereUT_GJT") {
-            HVIS { innYtelsestype == YtelseEnum.GJR.toString() }
-            OG { innPersongrunnlag.fødselsdato.year <= 1959 }
-            OG { innVirk >= dato67m }
-            OG { innKapittel20 }
-            OG { innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021?.antallAr != null && innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021?.antallAr!! >= 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
-                    it.kravlinjeTypeUnntakEnum == YtelseEnum.UT_GJR
-                            && it.virkningsdato!! < localDate(2021, 1, 1)
-                }
-            }
-            SÅ {
-                log_debug("[HIT] PersonenErFlyktningRS.Overgangsregel_GJRk20_tidligereUT_GJT")
-                overgangsregel = true
-            }
-            kommentar("")
-        }
-        regel("Overgangsregel_APk19_tidligereGJP") {
-            HVIS { innYtelsestype == YtelseEnum.AP.toString() }
-            OG { innPersongrunnlag.fødselsdato.year <= 1959 }
-            OG { innVirk >= dato67m }
-            OG { !innKapittel20 }
-            OG { innPersongrunnlag.trygdetid?.tt_fa_F2021?.antallAr != null && innPersongrunnlag.trygdetid?.tt_fa_F2021?.antallAr!! >= 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
-                    it.kravlinjeTypeUnntakEnum == YtelseEnum.GJP
-                            && it.virkningsdato!! < localDate(2021, 1, 1)
-                }
-            }
-            SÅ {
-                overgangsregel = true
-            }
-            kommentar("")
-        }
-        regel("Overgangsregel_APk20_tidligereGJP") {
-            HVIS { innYtelsestype == YtelseEnum.AP.toString() }
-            OG { innPersongrunnlag.fødselsdato.year <= 1959 }
-            OG { innVirk >= dato67m }
-            OG { innKapittel20 }
-            OG { innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021?.antallAr != null && innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021?.antallAr!! >= 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
-                    it.kravlinjeTypeUnntakEnum == YtelseEnum.GJP
-                            && it.virkningsdato!! < localDate(2021, 1, 1)
-                }
-            }
-            SÅ {
-                overgangsregel = true
-            }
-            kommentar("")
-        }
-        regel("Overgangsregel_GJRk19_tidligereGJR") {
-            HVIS { innYtelsestype == YtelseEnum.GJR.toString() }
-            OG { innPersongrunnlag.fødselsdato.year!! <= 1959 }
-            OG { innVirk >= dato67m }
-            OG { !innKapittel20 }
-            OG { innPersongrunnlag.trygdetid?.tt_fa_F2021?.antallAr != null && innPersongrunnlag.trygdetid?.tt_fa_F2021?.antallAr!! >= 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
-                    it.kravlinjeTypeUnntakEnum == YtelseEnum.GJR
-                            && it.virkningsdato!! < localDate(2021, 1, 1)
-                }
-            }
-            SÅ {
-                overgangsregel = true
-            }
-            kommentar("")
-        }
-        regel("Overgangsregel_GJRk20_tidligereGJR") {
-            HVIS { innYtelsestype == YtelseEnum.GJR.toString() }
-            OG { innPersongrunnlag.fødselsdato.year!! <= 1959 }
-            OG { innVirk >= dato67m }
-            OG { innKapittel20 }
-            OG { innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021?.antallAr != null && innPersongrunnlag.trygdetidKapittel20?.tt_fa_F2021?.antallAr!! >= 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
-                    it.kravlinjeTypeUnntakEnum == YtelseEnum.GJR
-                            && it.virkningsdato!! < localDate(2021, 1, 1)
-                }
-            }
-            SÅ {
-                overgangsregel = true
-            }
-        }
-        regel("Unntak_kravlinjeFremsattDatoForSent") {
-            HVIS { harKravlinjeFremsattDatoFom2021 }
-            OG { !overgangsregel }
-            SÅ {
-                erFlyktning = false
-            }
-        }
-        regel("ReturRegel") {
-            HVIS { true }
-            SÅ {
-                RETURNER(erFlyktning)
-            }
-        }
+//        rettsregel("Overgangsregel_APk20") {
+//            HVIS { innYtelseType erLik YtelseEnum.AP }
+//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+//            OG { innKapittel20.erSann() }
+//            OG { innPersongrunnlag.trygdetidK20?.tt_fa_F2021 erStørreEllerLik 20 }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//            kommentar("")
+//        }
+//        rettsregel("Overgangsregel_APk19_tidligereUT") {
+//            HVIS { innYtelseType erLik YtelseEnum.AP }
+//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+//            OG { innVirk erEtterEllerLik dato67m }
+//            OG { innKapittel20.erUsann() }
+//            OG { innPersongrunnlag.trygdetidK19?.tt_fa_F2021 erStørreEllerLik 20 }
+//            OG {
+//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
+//                    it.kravlinjeTypeUnntakEnum == YtelseEnum.UT
+//                            && it.virkningsdato?!! < localDate(2021, 1, 1)
+//                }
+//            }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//            kommentar("")
+//        }
+//        rettsregel("Overgangsregel_APk20_tidligereUT") {
+//            HVIS { innYtelseType erLik YtelseEnum.AP }
+//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+//            OG { innVirk erEtterEllerLik dato67m }
+//            OG { innKapittel20 }
+//            OG { innPersongrunnlag.trygdetidK20?.tt_fa_F2021? erStørreEllerLik 20 }
+//            OG {
+//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
+//                    it.kravlinjeTypeUnntakEnum == YtelseEnum.UT
+//                            && it.virkningsdato!! < localDate(2021, 1, 1)
+//                }
+//            }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//            kommentar("")
+//        }
+//        rettsregel("Overgangsregel_GJRk19_tidligereUT_GJT") {
+//            HVIS { innYtelseType erLik YtelseEnum.GJR }
+//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+//            OG { innVirk størreEllerLik dato67m }
+//            OG { innKapittel20.erUsann() }
+//            OG { innPersongrunnlag.trygdetidK19?.tt_fa_F2021 erStørreEllerLik 20 }
+//            OG {
+//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
+//                    it.kravlinjeTypeUnntakEnum == YtelseEnum.UT_GJR
+//                            && it.virkningsdato!! < localDate(2021, 1, 1)
+//                }
+//            }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//            kommentar("")
+//        }
+//        rettsregel("Overgangsregel_GJRk20_tidligereUT_GJT") {
+//            HVIS { innYtelseType erLik YtelseEnum.GJR }
+//            OG { innPersongrunnlag.fødselsdato.year erMindreEllerLik 1959 }
+//            OG { innVirk erEtterEllerLik dato67m }
+//            OG { innKapittel20.erSann() }
+//            OG { innPersongrunnlag.trygdetidK20?.tt_fa_F2021 erStørreEllerLik 20 }
+//            OG {
+//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
+//                    it.kravlinjeTypeUnntakEnum == YtelseEnum.UT_GJR
+//                            && it.virkningsdato!! < localDate(2021, 1, 1)
+//                }
+//            }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//            kommentar("")
+//        }
+//        rettsregel("Overgangsregel_APk19_tidligereGJP") {
+//            HVIS { innYtelseType erLik YtelseEnum.AP }
+//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+//            OG { innVirk erEtterEllerLik dato67m }
+//            OG { innKapittel20.erUsann() }
+//            OG { innPersongrunnlag.trygdetidK19?.tt_fa_F2021 erStørreEllerLik 20 }
+//            OG {
+//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
+//                    it.kravlinjeTypeUnntakEnum == YtelseEnum.GJP
+//                            && it.virkningsdato!! < localDate(2021, 1, 1)
+//                }
+//            }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//            kommentar("")
+//        }
+//        rettsregel("Overgangsregel_APk20_tidligereGJP") {
+//            HVIS { innYtelseType erLik YtelseEnum.AP }
+//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+//            OG { innVirk erEtterEllerLik dato67m }
+//            OG { innKapittel20.erSann() }
+//            OG { innPersongrunnlag.trygdetidK20?.tt_fa_F2021 erStørreEllerLik 20 }
+//            OG {
+//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
+//                    it.kravlinjeTypeUnntakEnum == YtelseEnum.GJP
+//                            && it.virkningsdato!! < localDate(2021, 1, 1)
+//                }
+//            }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//            kommentar("")
+//        }
+//        rettsregel("Overgangsregel_GJRk19_tidligereGJR") {
+//            HVIS { innYtelseType erLik YtelseEnum.GJR }
+//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+//            OG { innVirk erEtterEllerLik dato67m }
+//            OG { innKapittel20.erUsann() }
+//            OG { innPersongrunnlag.trygdetidK19?.tt_fa_F2021 erStørreEllerLik 20 }
+//            OG {
+//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
+//                    it.kravlinjeTypeUnntakEnum == YtelseEnum.GJR
+//                            && it.virkningsdato!! < localDate(2021, 1, 1)
+//                }
+//            }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//            kommentar("")
+//        }
+//        rettsregel("Overgangsregel_GJRk20_tidligereGJR") {
+//            HVIS { innYtelseType erLik YtelseEnum.GJR }
+//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+//            OG { innVirk størreEllerLik dato67m }
+//            OG { innKapittel20.erSann() }
+//            OG { innPersongrunnlag.trygdetidK20?.tt_fa_F2021 erStørreEllerLik 20 }
+//            OG {
+//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe!!.minst(1) {
+//                    it.kravlinjeTypeUnntakEnum == YtelseEnum.GJR
+//                            && it.virkningsdato!! < localDate(2021, 1, 1)
+//                }
+//            }
+//            SÅ {
+//                overgangsregel = true
+//            }
+//        }
+//        rettsregel("Unntak_kravlinjeFremsattDatoForSent") {
+//            HVIS { harKravlinjeFremsattDatoFom2021.erSann() }
+//            OG { overgangsregel.erUsann() }
+//            SÅ {
+//                erFlyktning = false
+//            }
+//        }
+//        regel("ReturRegel") {
+//            HVIS { true }
+//            SÅ {
+//                RETURNER(erFlyktning)
+//            }
+//        }
 
     }
+}
+
+
+fun main() {
+    val ytelseFakta = Faktum("Ytelsetypen", AP)
+
+    val x2: Subsumsjon = ytelseFakta erLik AP
+    x2.evaluate()
+    println(x2)
+
+    val bb2: Subsumsjon = ytelseFakta erBlant listOf(AFP, UT_GJR, AP)
+    bb2.evaluate()
+    println(bb2)
 }

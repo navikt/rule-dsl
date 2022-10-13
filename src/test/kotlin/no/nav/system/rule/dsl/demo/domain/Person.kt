@@ -1,5 +1,6 @@
 package no.nav.system.rule.dsl.demo.domain
 
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import java.time.LocalDate
 
 data class Person(
@@ -8,7 +9,7 @@ data class Person(
     val fødselsdato: LocalDate,
     val erGift: Boolean = false,
     val boperioder: List<Boperiode> = mutableListOf(),
-    val flyktning: Boolean = false,
+    val flyktning: Faktum<Boolean> = Faktum("Angitt flyktning", false),
     var trygdetidK19: Trygdetid? = null,
     var trygdetidK20: Trygdetid? = null,
     var inngangOgEksportgrunnlag: InngangOgEksportgrunnlag? = null
