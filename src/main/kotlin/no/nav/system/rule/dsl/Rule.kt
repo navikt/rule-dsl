@@ -2,9 +2,7 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
-import no.nav.system.rule.dsl.treevisitor.Rettsregel
 import java.util.*
-import kotlin.experimental.ExperimentalTypeInference
 
 /**
  * A rule that evaluates a set of predicates and, if all predicates are true, executes an action statement.

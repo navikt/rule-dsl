@@ -14,14 +14,14 @@ open class Rettsregel(
 ) : Rule(name = name, sequence = sequence) {
 
     private lateinit var rettsregelTargetProperty: KMutableProperty<Rettsregel>
-    private lateinit var rettsregel: Rettsregel
+
     /**
      * DSL: Domain Predicate entry.
      */
     @DslDomainPredicate
     @OverloadResolutionByLambdaReturnType
     @JvmName("SubsumsjonHVIS")
-    fun HVIS(subsumsjonFunction: () -> Subsumsjon)  {
+    fun HVIS(subsumsjonFunction: () -> Subsumsjon) {
         OG(subsumsjonFunction)
     }
 
@@ -45,30 +45,8 @@ open class Rettsregel(
         predicateList.add { Predicate { subsumsjonFunction.invoke().fired } }
     }
 
-//    fun RESULTATx(rr: KMutableProperty<Rettsregel>) {
-//        rettsregelTargetProperty = rr
-//    }
-    fun RESULTAT(rr: Rettsregel) {
-        rettsregel = rr
-    }
-
-    override fun evaluate() {
-        rettsregel.become(this)
-        super.evaluate()
-    }
-
-    private fun become(rr: Rettsregel) {
-//        this.name = rr.name
-//        this.sequence = rr.sequence
-//        this.comment = rr.comment
-//        this.predicateList.clear(); this.predicateList.
-//        this.pattern
-//        this.patternOffset
-//        this.evaluated = false
-//        this.fired = false
-//        this.actionStatement
-//        this.returnValue
-//        this.returnRule
+    fun RESULTAT(rr: () -> Unit) {
+        rr.invoke()
     }
 
     override fun toString(): String {

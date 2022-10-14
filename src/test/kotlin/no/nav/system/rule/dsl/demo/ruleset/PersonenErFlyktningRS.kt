@@ -39,51 +39,45 @@ class PersonenErFlyktningRS(
         FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP
     )
 
-    val SANN = Faktum<Boolean>("SANN", true)
+    val SANN = Faktum("SANN", true)
 
     override fun create() {
-        erFlyktning = rettsregel("HarUnntakFraForutgaendeMedlemskapTypeFlyktning") {
+        rettsregel("HarUnntakFraForutgaendeMedlemskapTypeFlyktning") {
             HVIS { unntakFraForutgaendeMedlemskap != null }
             OG { unntakFraForutgaendeMedlemskap!!.unntak erLik SANN }
             OG { unntakFraForutgaendeMedlemskap?.unntakType != null }
             OG { unntakFraForutgaendeMedlemskap!!.unntakType erBlant aktuelleUnntakstyper }
-//            RESULTAT(erFlyktning)
-            kommentar(
-                """Hvis unntak fra forutgående medlemsskap er angitt i inngang og eksportgrunnlag
-            og unntaktype er flyktning så har personen status som flyktning."""
-            )
+           // GRUPPE { erFlyktningGruppe }
+            kommentar("")
         }
-        erFlyktning = rettsregel("HarUnntakFraForutgaendeTTTypeFlyktning") {
+        rettsregel("HarUnntakFraForutgaendeTTTypeFlyktning") {
             HVIS { unntakFraForutgaendeTT != null }
             OG { unntakFraForutgaendeTT!!.unntak.erSann() }
             OG { unntakFraForutgaendeTT?.unntakType != null }
             OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
-//            RESULTAT(erFlyktning)
-            kommentar(
-                """Hvis unntak fra forutgående trygdetid er angitt i inngang og eksportgrunnlag og
-            unntaktype er flyktning så har personen status som flyktning."""
-            )
+           // GRUPPE { erFlyktningGruppe }
+            kommentar("")
         }
-        erFlyktning = rettsregel("HarFlyktningFlaggetSatt") {
+        rettsregel("HarFlyktningFlaggetSatt") {
             HVIS { innPersongrunnlag.flyktning.erSann() }
-//            RESULTAT(erFlyktning)
+           // GRUPPE { erFlyktningGruppe }
             kommentar("")
         }
 
-        overgangsregel = rettsregel("Overgangsregel_APk19") {
+        rettsregel("Overgangsregel_APk19") {
             HVIS { innYtelseType erLik AP }
             OG { innPersongrunnlag.fødselsdato erMindreEnn 1959 }
             OG { innKapittel20.erUsann() }
             OG { innPersongrunnlag.trygdetidK19.tt_fa_F2021 erStørreEllerLik 20 }
-//            RESULTAT(overgangsregel)
+          //  GRUPPE { overgangsregelGruppe }
             kommentar("")
         }
-        overgangsregel = rettsregel("Overgangsregel_APk20") {
+        rettsregel("Overgangsregel_APk20") {
             HVIS { innYtelseType erLik AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innKapittel20.erSann() }
             OG { innPersongrunnlag.trygdetidK20?.tt_fa_F2021!! erStørreEllerLik 20 }
-//            RESULTAT(overgangsregel)
+          //  GRUPPE { overgangsregelGruppe }
             kommentar("")
         }
 
@@ -93,7 +87,7 @@ class PersonenErFlyktningRS(
                 STØRRE_ELLER_LIK, Pair(Faktum(this), Faktum(target))
             ) { this.count(quantifier) >= target }
         }
-        overgangsregel = rettsregel("Overgangsregel_APk19_tidligereUT") {
+        rettsregel("Overgangsregel_APk19_tidligereUT") {
             HVIS { innYtelseType erLik AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
@@ -104,10 +98,10 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-//            RESULTAT(overgangsregel)
+          //  GRUPPE { overgangsregelGruppe }
             kommentar("")
         }
-        overgangsregel = rettsregel("Overgangsregel_APk20_tidligereUT") {
+        rettsregel("Overgangsregel_APk20_tidligereUT") {
             HVIS { innYtelseType erLik AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
@@ -118,10 +112,9 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-//            RESULTAT(overgangsregel)
             kommentar("")
         }
-        overgangsregel = rettsregel("Overgangsregel_GJRk19_tidligereUT_GJT") {
+        rettsregel("Overgangsregel_GJRk19_tidligereUT_GJT") {
             HVIS { innYtelseType erLik GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
@@ -132,10 +125,9 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-//            RESULTAT(overgangsregel)
             kommentar("")
         }
-        overgangsregel = rettsregel("Overgangsregel_GJRk20_tidligereUT_GJT") {
+        rettsregel("Overgangsregel_GJRk20_tidligereUT_GJT") {
             HVIS { innYtelseType erLik GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
@@ -146,10 +138,9 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-//            RESULTAT(overgangsregel)
             kommentar("")
         }
-        overgangsregel = rettsregel("Overgangsregel_APk19_tidligereGJP") {
+        rettsregel("Overgangsregel_APk19_tidligereGJP") {
             HVIS { innYtelseType erLik AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
@@ -160,10 +151,9 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == GJP && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-//            RESULTAT(overgangsregel)
             kommentar("")
         }
-        overgangsregel = rettsregel("Overgangsregel_APk20_tidligereGJP") {
+        rettsregel("Overgangsregel_APk20_tidligereGJP") {
             HVIS { innYtelseType erLik AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
@@ -174,10 +164,9 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == GJP && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-//            RESULTAT(overgangsregel)
             kommentar("")
         }
-        overgangsregel = rettsregel("Overgangsregel_GJRk19_tidligereGJR") {
+        rettsregel("Overgangsregel_GJRk19_tidligereGJR") {
             HVIS { innYtelseType erLik GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
@@ -188,10 +177,9 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-//            RESULTAT(overgangsregel)
             kommentar("")
         }
-        overgangsregel =  rettsregel("Overgangsregel_GJRk20_tidligereGJR") {
+        rettsregel("Overgangsregel_GJRk20_tidligereGJR") {
             HVIS { innYtelseType erLik GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
@@ -202,12 +190,10 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-//            RESULTAT(overgangsregel)
         }
-        erFlyktning = rettsregel("Unntak_kravlinjeFremsattDatoForSent") {
+        rettsregel("Unntak_kravlinjeFremsattDatoForSent") {
             HVIS { harKravlinjeFremsattDatoFom2021.erSann() }
-            OG { overgangsregel }
-            RESULTAT(erFlyktning)
+            OG { "Overgangsregel_".gruppe() }
         }
         regel("ReturRegel") {
             HVIS { true }

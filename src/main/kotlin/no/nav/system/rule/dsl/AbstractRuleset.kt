@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl
 
-import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.error.InvalidRulesetException
+import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.treevisitor.Rettsregel
 import java.util.*
 
@@ -56,16 +56,15 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      * @param navn the rule name
      * @param createRuleContent the Rule function that populates the Rule object.
      */
-    inline fun rettsregel(navn: String, crossinline createRuleContent: Rettsregel.() -> Unit): Rettsregel {
+    inline fun rettsregel(navn: String, crossinline createRuleContent: Rettsregel.() -> Unit) {
         val sequence = nextSequence()
-        val rule = Rettsregel("$rulesetName.$navn", sequence)
         ruleFunctionMap[sequence] = {
+            val rule = Rettsregel("$rulesetName.$navn", sequence)
             rule.parent = this
             children.add(rule)
             rule.createRuleContent()
             listOf(rule)
         }
-        return rule
     }
 
     /**
@@ -161,6 +160,12 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
 
         return evaluatedRuleList.stream()
             .anyMatch { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
+    }
+
+    protected fun String.gruppe(): Rettsregel {
+        return evaluatedRuleList.filterIsInstance<Rettsregel>()
+            .find { rule -> rule.nameWithoutPatternOffset.startsWith("$rulesetName.$this") }
+            ?: throw InvalidRulesetException("No rule with name that starts with ['$this'] found during rule chaining.")
     }
 
     /**
