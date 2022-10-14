@@ -2,7 +2,10 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.KOMPARATOR
+import no.nav.system.rule.dsl.rettsregel.Subsumsjon
 import no.nav.system.rule.dsl.treevisitor.Rettsregel
+import org.jetbrains.kotlin.builtins.StandardNames.FqNames.list
 import java.util.*
 
 /**
@@ -161,13 +164,44 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         return evaluatedRuleList.stream()
             .anyMatch { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
     }
-
-    protected fun String.gruppe(): Rettsregel {
-        return evaluatedRuleList.filterIsInstance<Rettsregel>()
-            .find { rule -> rule.nameWithoutPatternOffset.startsWith("$rulesetName.$this") }
-            ?: throw InvalidRulesetException("No rule with name that starts with ['$this'] found during rule chaining.")
+    protected fun String.minstEnHarTruffet(): Subsumsjon {
+        val list = finnRettsreglerByName(this)
+        return Subsumsjon(
+            komparator = KOMPARATOR.STØRRE_ELLER_LIK,
+            pair = null,
+            utfallFunksjon = { list.any { it.fired() }}
+        ).apply {
+            this.children.addAll(list.filter { it.fired() }) // TODO Skal også alle andre regler være med i dokumentasjonen?
+        }
+    }
+    protected fun String.alleHarTruffet(): Subsumsjon {
+        val list = finnRettsreglerByName(this)
+        return Subsumsjon(
+            komparator = KOMPARATOR.ALLE,
+            pair = null,
+            utfallFunksjon = { list.all { it.fired() }}
+        ).apply {
+            this.children.addAll(list)
+        }
+    }
+    protected fun String.ingenHarTruffet(): Subsumsjon {
+        val list = finnRettsreglerByName(this)
+        return Subsumsjon(
+            komparator = KOMPARATOR.INGEN,
+            pair = null,
+            utfallFunksjon = { list.none { it.fired() }}
+        ).apply {
+            this.children.addAll(list)
+        }
     }
 
+    private fun finnRettsreglerByName(rettsregelNavn: String): List<Rettsregel> {
+        val list = evaluatedRuleList.filterIsInstance<Rettsregel>()
+            .filterNot { it.stopEval }
+            .filter { rule -> rule.nameWithoutPatternOffset.startsWith("$rulesetName.$rettsregelNavn")}
+        if (list.isEmpty()) throw InvalidRulesetException("No rule with name that starts with ['$rettsregelNavn'] found during rule chaining.")
+        return list
+    }
     /**
      * Checks if a rule with name equal to receiver has not fired.
      *

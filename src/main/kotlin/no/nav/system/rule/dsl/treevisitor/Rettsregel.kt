@@ -41,12 +41,25 @@ open class Rettsregel(
     @DslDomainPredicate
     @OverloadResolutionByLambdaReturnType
     @JvmName("RettsregelOG")
-    fun OG(subsumsjonFunction: () -> Rettsregel) {
-        predicateList.add { Predicate { subsumsjonFunction.invoke().fired } }
+    fun OG(rettsregelFunction: () -> Rettsregel) {
+        predicateList.add {
+            val rettsregel = rettsregelFunction.invoke()
+            this.children.add(rettsregel)
+            Predicate { rettsregel.fired }
+        }
     }
 
-    fun RESULTAT(rr: () -> Unit) {
-        rr.invoke()
+    /**
+     * DSL: Domain Predicate entry.
+     */
+    @DslDomainPredicate
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("RettsregelListeOG")
+    fun OG(rettsregelFunction: () -> List<Rettsregel>) {
+        rettsregelFunction.invoke().forEach { rettsregel ->
+            this.children.add(rettsregel)
+            predicateList.add { Predicate { rettsregel.fired } }
+        }
     }
 
     override fun toString(): String {

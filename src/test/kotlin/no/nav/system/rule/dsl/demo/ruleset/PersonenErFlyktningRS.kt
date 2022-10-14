@@ -12,7 +12,6 @@ import no.nav.system.rule.dsl.demo.helper.år
 import no.nav.system.rule.dsl.rettsregel.*
 import no.nav.system.rule.dsl.rettsregel.KOMPARATOR.STØRRE_ELLER_LIK
 import no.nav.system.rule.dsl.treevisitor.Rettsregel
-import no.nav.system.rule.dsl.treevisitor.TomRettsregel
 import java.time.LocalDate
 
 /**
@@ -24,12 +23,9 @@ class PersonenErFlyktningRS(
     private val innPersongrunnlag: Person,
     private val innYtelseType: Faktum<YtelseEnum>,
     private val innKapittel20: Faktum<Boolean>,
-    private val innVirk: Faktum<LocalDate>
+    private val innVirk: Faktum<LocalDate>,
+    private val innKravlinjeFremsattDatoFom2021: Faktum<Boolean>
 ) : AbstractRuleset<Rettsregel>() {
-
-    private var erFlyktning: Rettsregel = TomRettsregel()
-    private var overgangsregel: Rettsregel = TomRettsregel()
-    private var harKravlinjeFremsattDatoFom2021: Faktum<Boolean> = Faktum("HarKravlinjeFremsattDatoFom2021", true)
     private var dato67m: Faktum<LocalDate> =
         Faktum("Fødselsdato67m", innPersongrunnlag.fødselsdato.verdi.withDayOfMonth(1) + 67.år + 1.måneder)
     private val unntakFraForutgaendeMedlemskap =
@@ -42,34 +38,33 @@ class PersonenErFlyktningRS(
     val SANN = Faktum("SANN", true)
 
     override fun create() {
-        rettsregel("HarUnntakFraForutgaendeMedlemskapTypeFlyktning") {
+        rettsregel("AngittFlyktning_HarFlyktningFlaggetSatt") {
+            HVIS { innPersongrunnlag.flyktning.erSann() }
+            kommentar("Flyktningerflagget er angitt av saksbehandler.")
+        }
+        rettsregel("AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning") {
             HVIS { unntakFraForutgaendeMedlemskap != null }
             OG { unntakFraForutgaendeMedlemskap!!.unntak erLik SANN }
             OG { unntakFraForutgaendeMedlemskap?.unntakType != null }
             OG { unntakFraForutgaendeMedlemskap!!.unntakType erBlant aktuelleUnntakstyper }
-           // GRUPPE { erFlyktningGruppe }
             kommentar("")
         }
-        rettsregel("HarUnntakFraForutgaendeTTTypeFlyktning") {
+        rettsregel("AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning") {
             HVIS { unntakFraForutgaendeTT != null }
             OG { unntakFraForutgaendeTT!!.unntak.erSann() }
             OG { unntakFraForutgaendeTT?.unntakType != null }
             OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
-           // GRUPPE { erFlyktningGruppe }
             kommentar("")
         }
-        rettsregel("HarFlyktningFlaggetSatt") {
-            HVIS { innPersongrunnlag.flyktning.erSann() }
-           // GRUPPE { erFlyktningGruppe }
-            kommentar("")
+        rettsregel("Konklusjon: ikkeAngittFlyktning") {
+            OG { "AngittFlyktning_".ingenHarTruffet() }
+            RETURNER(this)
         }
-
         rettsregel("Overgangsregel_APk19") {
             HVIS { innYtelseType erLik AP }
             OG { innPersongrunnlag.fødselsdato erMindreEnn 1959 }
             OG { innKapittel20.erUsann() }
             OG { innPersongrunnlag.trygdetidK19.tt_fa_F2021 erStørreEllerLik 20 }
-          //  GRUPPE { overgangsregelGruppe }
             kommentar("")
         }
         rettsregel("Overgangsregel_APk20") {
@@ -77,7 +72,6 @@ class PersonenErFlyktningRS(
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innKapittel20.erSann() }
             OG { innPersongrunnlag.trygdetidK20?.tt_fa_F2021!! erStørreEllerLik 20 }
-          //  GRUPPE { overgangsregelGruppe }
             kommentar("")
         }
 
@@ -98,7 +92,6 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-          //  GRUPPE { overgangsregelGruppe }
             kommentar("")
         }
         rettsregel("Overgangsregel_APk20_tidligereUT") {
@@ -191,15 +184,17 @@ class PersonenErFlyktningRS(
                 }
             }
         }
-        rettsregel("Unntak_kravlinjeFremsattDatoForSent") {
-            HVIS { harKravlinjeFremsattDatoFom2021.erSann() }
-            OG { "Overgangsregel_".gruppe() }
+        rettsregel("AnvendtFlyktning_unntak") {
+            HVIS { innKravlinjeFremsattDatoFom2021.erSann() }
+            OG { "AngittFlyktning_".minstEnHarTruffet() }
+            OG { "Overgangsregel_".ingenHarTruffet() }
+            RETURNER(this)
         }
-        regel("ReturRegel") {
-            HVIS { true }
-            SÅ {
-                RETURNER(erFlyktning)
-            }
+
+        rettsregel("AnvendtFlyktning") {
+            HVIS { innKravlinjeFremsattDatoFom2021.erUsann() }
+            OG { "AngittFlyktning_".minstEnHarTruffet() }
+            RETURNER(this)
         }
     }
 }

@@ -10,7 +10,7 @@ import java.time.LocalDate
  */
 class Subsumsjon(
     val komparator: KOMPARATOR,
-    val pair: Pair<Faktum<*>, Faktum<*>>,
+    val pair: Pair<Faktum<*>, Faktum<*>>? = null,
     val utfallFunksjon: () -> Boolean
 ) : Predicate(function = utfallFunksjon) {
 
@@ -26,7 +26,7 @@ class Subsumsjon(
 
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
-        return "${fired.svarord()}: ${pair.first}$komparatorText${pair.second}"
+        return "${fired.svarord()}: ${pair?.first?:""}$komparatorText${pair?.second ?:""}"
     }
 }
 
@@ -87,7 +87,9 @@ enum class KOMPARATOR(val text: String) {
     LIK(" er lik "),
     ULIK(" er ulik "),
     ER_BLANDT(" er blandt "),
-    ER_IKKE_BLANDT(" er ikke blandt ");
+    ER_IKKE_BLANDT(" er ikke blandt "),
+    ALLE(" alle "),
+    INGEN(" ingen ");
 
     fun negated(): String {
         return when (this) {
@@ -103,6 +105,8 @@ enum class KOMPARATOR(val text: String) {
             ULIK -> " må være ulik "
             ER_BLANDT -> " må være blandt "
             ER_IKKE_BLANDT -> " må ikke være blandt "
+            ALLE -> " ingen "
+            INGEN -> " alle "
         }
     }
 }

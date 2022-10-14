@@ -112,6 +112,8 @@ open class Rule(
         comment = kommentar
     }
 
+    var stopEval = false
+
     /**
      * Evaluates the [predicateList]. A rule is considered [fired] once all predicates are evaluated to true.
      * Rules that fire invoke their [actionStatement].
@@ -125,7 +127,7 @@ open class Rule(
             if (instanciated is Subsumsjon) {
                 children.add(instanciated)
             }
-            val stopEval = instanciated.evaluate()
+            stopEval = instanciated.evaluate()
             fired = fired && instanciated.fired()
 
             if (stopEval) {
