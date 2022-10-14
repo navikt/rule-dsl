@@ -56,15 +56,16 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      * @param navn the rule name
      * @param createRuleContent the Rule function that populates the Rule object.
      */
-    inline fun rettsregel(navn: String, crossinline createRuleContent: Rettsregel.() -> Unit) {
+    inline fun rettsregel(navn: String, crossinline createRuleContent: Rettsregel.() -> Unit): Rettsregel {
         val sequence = nextSequence()
+        val rule = Rettsregel("$rulesetName.$navn", sequence)
         ruleFunctionMap[sequence] = {
-            val rule = Rettsregel("$rulesetName.$navn", sequence)
             rule.parent = this
             children.add(rule)
             rule.createRuleContent()
             listOf(rule)
         }
+        return rule
     }
 
     /**

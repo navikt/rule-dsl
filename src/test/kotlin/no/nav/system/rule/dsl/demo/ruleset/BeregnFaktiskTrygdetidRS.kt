@@ -65,14 +65,13 @@ class BeregnFaktiskTrygdetidRS(
         /**
          * Rettsregel med sporing på predikatnivå (subsumsjoner).
          */
-        rettsregel("Skal ha redusert fremtidig trygdetid") {
+        svar.redusertFremtidigTrygdetid = rettsregel("Skal ha redusert fremtidig trygdetid") {
             HVIS { virkningstidspunkt erEtterEllerLik dato1991 }
             OG { svar.faktiskTrygdetidIMåneder erMindreEnn svar.firefemtedelskrav }
             SÅ {
                 println("[HIT] Skal ha redusert fremtidig trygdetid")
             }
 //            KILDE ( paragraf ...)
-            RESULTAT( svar::redusertFremtidigTrygdetid )
             kommentar(
                 """Dersom faktisk trygdetid i Norge er mindre enn 4/5 av
                      opptjeningstiden skal den framtidige trygdetiden være redusert."""

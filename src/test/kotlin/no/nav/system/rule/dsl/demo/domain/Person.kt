@@ -10,8 +10,8 @@ data class Person(
     val erGift: Boolean = false,
     val boperioder: List<Boperiode> = mutableListOf(),
     val flyktning: Faktum<Boolean> = Faktum("Angitt flyktning", false),
-    var trygdetidK19: Trygdetid? = null,
-    var trygdetidK20: Trygdetid? = null,
+    var trygdetidK19: Trygdetid = Trygdetid(5),
+    var trygdetidK20: Trygdetid? = Trygdetid(4),
     var inngangOgEksportgrunnlag: InngangOgEksportgrunnlag? = null,
     var forsteVirkningsdatoGrunnlagListe: List<ForsteVirkningsdatoGrunnlag> = mutableListOf()
 )

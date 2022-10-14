@@ -215,6 +215,11 @@ infix fun <T> Faktum<T>.erLik(ap: T) = Subsumsjon(
     Pair(this, Faktum(ap))
 ) { this.verdi == ap }
 
+infix fun <T> Faktum<T>.erLik(ap: Faktum<T>) = Subsumsjon(
+    LIK,
+    Pair(this, ap)
+) { this.verdi == ap.verdi }
+
 
 infix fun <T> Faktum<T>.erBlant(others: List<T>) = Subsumsjon(
     ER_BLANDT,

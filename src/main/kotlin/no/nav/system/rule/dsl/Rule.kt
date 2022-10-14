@@ -1,6 +1,7 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.Subsumsjon
 import no.nav.system.rule.dsl.treevisitor.Rettsregel
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
@@ -29,7 +30,8 @@ open class Rule(
     /**
      * Each predicate function in the rule.
      */
-    val predicateList: ArrayList<Predicate> = ArrayList()
+    val predicateList: ArrayList<() -> Predicate> = ArrayList()
+    val predicateList2: ArrayList<Predicate> = ArrayList()
 
     /**
      * Reference to optional pattern.
@@ -83,7 +85,7 @@ open class Rule(
      * DSL: Technical Predicate entry.
      */
     fun OG(predicateFunction: () -> Boolean) {
-        predicateList.add(Predicate(function = predicateFunction))
+        predicateList.add { Predicate(function = predicateFunction) }
     }
 
     /**
@@ -121,8 +123,12 @@ open class Rule(
         evaluated = true
 
         predicateList.forEach { predicate ->
-            val stopEval = predicate.evaluate()
-            fired = fired && predicate.fired()
+            val instanciated = predicate.invoke()
+            if (instanciated is Subsumsjon) {
+                children.add(instanciated)
+            }
+            val stopEval = instanciated.evaluate()
+            fired = fired && instanciated.fired()
 
             if (stopEval) {
                 return

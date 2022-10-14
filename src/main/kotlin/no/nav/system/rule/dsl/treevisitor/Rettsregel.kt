@@ -7,18 +7,18 @@ import no.nav.system.rule.dsl.rettsregel.Subsumsjon
 import kotlin.experimental.ExperimentalTypeInference
 import kotlin.reflect.KMutableProperty
 
+@OptIn(ExperimentalTypeInference::class)
 open class Rettsregel(
     private val name: String,
     override val sequence: Int
 ) : Rule(name = name, sequence = sequence) {
 
     private lateinit var rettsregelTargetProperty: KMutableProperty<Rettsregel>
-
+    private lateinit var rettsregel: Rettsregel
     /**
      * DSL: Domain Predicate entry.
      */
     @DslDomainPredicate
-    @OptIn(ExperimentalTypeInference::class)
     @OverloadResolutionByLambdaReturnType
     @JvmName("SubsumsjonHVIS")
     fun HVIS(subsumsjonFunction: () -> Subsumsjon)  {
@@ -29,37 +29,46 @@ open class Rettsregel(
      * DSL: Domain Predicate entry.
      */
     @DslDomainPredicate
-    @OptIn(ExperimentalTypeInference::class)
     @OverloadResolutionByLambdaReturnType
     @JvmName("SubsumsjonOG")
     fun OG(subsumsjonFunction: () -> Subsumsjon) {
-        subsumsjonFunction.invoke().also {
-            children.add(it)
-            predicateList.add(it)
-        }
+        predicateList.add(subsumsjonFunction)
     }
 
     /**
      * DSL: Domain Predicate entry.
      */
     @DslDomainPredicate
-    @OptIn(ExperimentalTypeInference::class)
     @OverloadResolutionByLambdaReturnType
     @JvmName("RettsregelOG")
     fun OG(subsumsjonFunction: () -> Rettsregel) {
-        subsumsjonFunction.invoke().also {
-            children.add(it)
-            predicateList.add(Predicate { it.fired })
-        }
+        predicateList.add { Predicate { subsumsjonFunction.invoke().fired } }
     }
 
-    fun RESULTAT(rr: KMutableProperty<Rettsregel>) {
-        rettsregelTargetProperty = rr
+//    fun RESULTATx(rr: KMutableProperty<Rettsregel>) {
+//        rettsregelTargetProperty = rr
+//    }
+    fun RESULTAT(rr: Rettsregel) {
+        rettsregel = rr
     }
 
     override fun evaluate() {
-        rettsregelTargetProperty.setter.call(this)
+        rettsregel.become(this)
         super.evaluate()
+    }
+
+    private fun become(rr: Rettsregel) {
+//        this.name = rr.name
+//        this.sequence = rr.sequence
+//        this.comment = rr.comment
+//        this.predicateList.clear(); this.predicateList.
+//        this.pattern
+//        this.patternOffset
+//        this.evaluated = false
+//        this.fired = false
+//        this.actionStatement
+//        this.returnValue
+//        this.returnRule
     }
 
     override fun toString(): String {
