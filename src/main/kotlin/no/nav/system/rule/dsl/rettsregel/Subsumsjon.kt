@@ -200,7 +200,7 @@ fun Faktum<Boolean>.erSann() =
     Subsumsjon(LIK, Pair(this, Faktum("SANN", true))) { verdi }
 
 fun Faktum<Boolean>.erUsann() =
-    Subsumsjon(ULIK, Pair(this, Faktum("USANN", false))) { verdi }
+    Subsumsjon(LIK, Pair(this, Faktum("USANN", false))) { !verdi }
 
 operator fun Faktum<Boolean>.not(): Faktum<Boolean> = Faktum(this.navn, !this.verdi)
 

@@ -18,7 +18,7 @@ import kotlin.experimental.ExperimentalTypeInference
  * @param sequence the rule sequence
  */
 @OptIn(ExperimentalTypeInference::class)
-class Rule(
+open class Rule(
     private val name: String,
     private val sequence: Int,
 ) : Comparable<Rule>, AbstractRuleComponent() {
@@ -103,10 +103,10 @@ class Rule(
         predicateFunctionList.add(arcFunction)
     }
 
-    var utfall: Utfall? = null
+    internal var utfall: Utfall? = null
     private var utfallFunksjon: (() -> Utfall)? = null
 
-    fun SVAR(utfallType: UtfallType?, svarFunction: () -> Utfall) {
+    fun SVAR(utfallType: UtfallType? = null, svarFunction: () -> Utfall) {
         utfallFunksjon = {
             svarFunction.invoke().also {
                 it.regel = this
@@ -167,13 +167,14 @@ class Rule(
             }
         }
 
+        konstruerUtfall()
+
         if (fired) {
             actionStatement.invoke()
         }
-        konstruerUtfall()
     }
 
-    fun konstruerUtfall() {
+    private fun konstruerUtfall() {
         utfall = utfallFunksjon?.invoke()
 //        utfall.doc = prettyDoc()
 //        utfall.kilde = kilde. ..
