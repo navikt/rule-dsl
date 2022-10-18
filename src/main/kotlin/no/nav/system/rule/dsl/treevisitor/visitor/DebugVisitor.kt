@@ -21,7 +21,8 @@ class DebugVisitor : TreeVisitor {
                 debugString.append("predicate: fired: ${ruleComponent.fired()}\n")
             }
             is Rule -> {
-                debugString.append("rule: ${ruleComponent.name()} fired: ${ruleComponent.fired()}\n")
+                val utfallTekst = ruleComponent.utfall?.let { " utfallType: ${it.utfallType}" } ?: ""
+                debugString.append("rule: ${ruleComponent.name()} fired: ${ruleComponent.fired()}$utfallTekst\n")
             }
             is AbstractRuleset<*> -> {
                 debugString.append("ruleset: ${ruleComponent.rulesetName}\n")

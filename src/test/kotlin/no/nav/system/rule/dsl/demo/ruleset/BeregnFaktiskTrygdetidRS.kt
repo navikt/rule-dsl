@@ -8,6 +8,8 @@ import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.pattern.createPattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.UtfallType
+import no.nav.system.rule.dsl.rettsregel.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.erEtterEllerLik
 import no.nav.system.rule.dsl.rettsregel.erMindreEnn
 import java.time.LocalDate
@@ -20,16 +22,17 @@ import kotlin.math.roundToInt
 class BeregnFaktiskTrygdetidRS(
     val fødselsdato: Faktum<LocalDate>,
     val virkningstidspunkt: Faktum<LocalDate>,
-    val boperiodeListe: List<Boperiode>
+    val boperiodeListe: List<Boperiode>,
 ) : AbstractRuleset<Trygdetid>() {
 
     /**
      * Nytt Pattern [norskeBoperioder] opprettes på bakgrunn av liste [boperiodeListe] med et filter på land.
      */
     private val norskeBoperioder = boperiodeListe.createPattern { it.land == LandEnum.NOR }
+
     // TODO denne riktig?
     private val dato16år = fødselsdato.verdi.plusYears(16)
-    private val dato1991 = Faktum( localDate(1991, 1, 1))
+    private val dato1991 = Faktum(localDate(1991, 1, 1))
     private val svar = Trygdetid()
 
     @OptIn(DslDomainPredicate::class)
@@ -65,12 +68,10 @@ class BeregnFaktiskTrygdetidRS(
         /**
          * Rettsregel med sporing på predikatnivå (subsumsjoner).
          */
-        rettsregel("Skal ha redusert fremtidig trygdetid") {
+        regel("Skal ha redusert fremtidig trygdetid") {
             HVIS { virkningstidspunkt erEtterEllerLik dato1991 }
             OG { svar.faktiskTrygdetidIMåneder erMindreEnn svar.firefemtedelskrav }
-            SÅ {
-                println("[HIT] Skal ha redusert fremtidig trygdetid")
-            }
+            SVAR(OPPFYLT) { svar.redusertFremtidigTrygdetid }
 //            KILDE ( paragraf ...)
             kommentar(
                 """Dersom faktisk trygdetid i Norge er mindre enn 4/5 av

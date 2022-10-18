@@ -2,7 +2,9 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import no.nav.system.rule.dsl.rettsregel.UtfallType
 import java.util.*
+import kotlin.experimental.ExperimentalTypeInference
 
 /**
  * A rule that evaluates a set of predicates and, if all predicates are true, executes an action statement.
@@ -15,21 +17,16 @@ import java.util.*
  * @param name the rule name
  * @param sequence the rule sequence
  */
+@OptIn(ExperimentalTypeInference::class)
 open class Rule(
     private val name: String,
-    internal open val sequence: Int
+    internal open val sequence: Int,
 ) : Comparable<Rule>, AbstractRuleComponent() {
 
     /**
      * Functional description of the rule
      */
     private var comment: String = ""
-
-    /**
-     * Each predicate function in the rule.
-     */
-    val predicateList: ArrayList<() -> Predicate> = ArrayList()
-    val predicateList2: ArrayList<Predicate> = ArrayList()
 
     /**
      * Reference to optional pattern.
@@ -71,9 +68,10 @@ open class Rule(
      */
     var returnRule = false
 
+    val predicateFunctionList = mutableListOf<() -> Predicate>()
 
     /**
-     * DSL: Predicate entry.
+     * DSL: Technical Predicate entry.
      */
     fun HVIS(predicate: () -> Boolean) {
         OG(predicate)
@@ -83,8 +81,40 @@ open class Rule(
      * DSL: Technical Predicate entry.
      */
     fun OG(predicateFunction: () -> Boolean) {
-        predicateList.add { Predicate(function = predicateFunction) }
+        predicateFunctionList.add { Predicate(function = predicateFunction) }
     }
+
+    /**
+     * DSL: Functional Predicate entry.
+     */
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("FagHVIS")
+    fun HVIS(arcFunction: () -> Subsumsjon) {
+        OG(arcFunction)
+    }
+
+    /**
+     * DSL: Functional Predicate entry.
+     */
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("FagOG")
+    fun OG(arcFunction: () -> Subsumsjon) {
+        predicateFunctionList.add(arcFunction)
+    }
+
+    var utfall: Utfall? = null
+    private var utfallFunksjon: (() -> Utfall)? = null
+    fun SVAR(utfallType: UtfallType?, svarFunction: () -> Utfall) {
+        utfallFunksjon = {
+            svarFunction.invoke().also {
+                it.regel = this
+                val tempUtfallType = utfallType ?: defaultUtfallType()
+                it.utfallType = if (fired) tempUtfallType else tempUtfallType.motsatt()
+            }
+        }
+    }
+
+    private fun defaultUtfallType(): UtfallType = if (fired) UtfallType.OPPFYLT else UtfallType.IKKE_OPPFYLT
 
     /**
      * DSL: Action statement entry.
@@ -112,45 +142,40 @@ open class Rule(
         comment = kommentar
     }
 
-    var stopEval = false
-
     /**
-     * Evaluates the [predicateList]. A rule is considered [fired] once all predicates are evaluated to true.
+     * Evaluates the [children]. A rule is considered [fired] once all predicates are evaluated to true.
      * Rules that fire invoke their [actionStatement].
      */
     open fun evaluate() {
-        fired = predicateList.isNotEmpty()
+        fired = predicateFunctionList.isNotEmpty()
         evaluated = true
 
-        predicateList.forEach { predicate ->
-            val instanciated = predicate.invoke()
-            if (instanciated is Subsumsjon) {
-                children.add(instanciated)
-            }
-            stopEval = instanciated.evaluate()
-            fired = fired && instanciated.fired()
+        run predLoop@{
+            predicateFunctionList.forEach { predicateFunction ->
+                val predicate = predicateFunction.invoke().apply {
+                    parent = this@Rule
+                }
 
-            if (stopEval) {
-                return
+                val stopEval = predicate.evaluate()
+                fired = fired && predicate.fired()
+
+                if (stopEval) {
+                    return@predLoop
+                }
             }
         }
 
         if (fired) {
             actionStatement.invoke()
         }
+        konstruerUtfall()
     }
 
-    /**
-     * Creates a conclusion based on this rule object.
-     * Includes domaintext if available.
-     */
-//    fun rettsregel() = Rettsregel(
-//        evaluated = evaluated,
-//        fired = fired,
-//        ruleName = name(),
-//        documentation = prettyDoc(),
-//        subsumsjonList = predicateList.filterIsInstance<Subsumsjon>()
-//    )
+    fun konstruerUtfall() {
+        utfall = utfallFunksjon?.invoke()
+//        utfall.doc = prettyDoc()
+//        utfall.kilde = kilde. ..
+    }
 
     /**
      * Ruleset ordering by rule sequence
@@ -169,4 +194,6 @@ open class Rule(
     override fun name(): String = name
     override fun fired(): Boolean = fired
     override fun type(): String = "regel"
+
 }
+

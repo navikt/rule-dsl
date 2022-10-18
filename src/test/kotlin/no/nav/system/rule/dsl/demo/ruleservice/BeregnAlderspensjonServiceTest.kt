@@ -3,10 +3,14 @@ package no.nav.system.rule.dsl.demo.ruleservice
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Request
+import no.nav.system.rule.dsl.demo.domain.Response
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import org.junit.jupiter.api.Assertions.*
+import no.nav.system.rule.dsl.rettsregel.UtfallType.IKKE_OPPFYLT
+import no.nav.system.rule.dsl.rettsregel.UtfallType.OPPFYLT
+import no.nav.system.rule.dsl.treevisitor.visitor.debug
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BeregnAlderspensjonServiceTest {
@@ -21,11 +25,15 @@ internal class BeregnAlderspensjonServiceTest {
             )
         )
 
-        val response = BeregnAlderspensjonService(params).run()
+        val response: Response = BeregnAlderspensjonService(params).let {
+            val run = it.run()
+            println(it.debug())
+            run
+        }
 
         assertEquals(3, response.anvendtTrygdetid?.år)
         assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
-        assertTrue(response.anvendtTrygdetid.redusertFremtidigTrygdetid.fired())
+        assertEquals(OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.utfallType)
 
         assertEquals(9000, response.grunnpensjon?.netto)
         assertEquals(1.0, response.grunnpensjon?.prosentsats)
@@ -45,11 +53,15 @@ internal class BeregnAlderspensjonServiceTest {
             )
         )
 
-        val response = BeregnAlderspensjonService(params).run()
+        val response = BeregnAlderspensjonService(params).let {
+            val run = it.run()
+            println(it.debug())
+            run
+        }
 
         assertEquals(19, response.anvendtTrygdetid?.år)
         assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
-        assertFalse(response.anvendtTrygdetid.redusertFremtidigTrygdetid.fired())
+        assertEquals(IKKE_OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.utfallType)
 
         assertEquals(42750, response.grunnpensjon?.netto)
         assertEquals(0.9, response.grunnpensjon?.prosentsats)

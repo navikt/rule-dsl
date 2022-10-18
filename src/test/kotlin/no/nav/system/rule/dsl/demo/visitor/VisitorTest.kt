@@ -43,7 +43,7 @@ class VisitorTest {
                       rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.1 fired: false
                       rule: BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.2 fired: true
                       rule: BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav fired: true
-                      rule: BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid fired: false
+                      rule: BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid fired: false utfallType: IKKE_OPPFYLT
                         subsumsjon: NEI: 'virkningstidspunkt' (1990-05-01) må være fom '1991-01-01' fired: false
                         subsumsjon: JA: 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480) fired: true
                       rule: BeregnFaktiskTrygdetidRS.FastsettTrygdetid fired: true

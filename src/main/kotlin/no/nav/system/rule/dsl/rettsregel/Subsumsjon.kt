@@ -2,7 +2,7 @@ package no.nav.system.rule.dsl.rettsregel
 
 import no.nav.system.rule.dsl.Predicate
 import no.nav.system.rule.dsl.rettsregel.KOMPARATOR.*
-import no.nav.system.rule.dsl.treevisitor.svarord
+import svarord
 import java.time.LocalDate
 
 /**
@@ -20,13 +20,16 @@ class Subsumsjon(
      * @return returns true if further evaluation of remaining predicates in the rule should be prevented.
      */
     override fun evaluate(): Boolean {
+        parent!!.children.add(this)
         fired = utfallFunksjon.invoke()
         return false
     }
 
+    override fun type(): String = "Subsumsjon"
+
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
-        return "${fired.svarord()}: ${pair?.first?:""}$komparatorText${pair?.second ?:""}"
+        return "${fired.svarord()}: ${pair?.first ?: ""}$komparatorText${pair?.second ?: ""}"
     }
 }
 
@@ -74,6 +77,19 @@ interface SuperEnum {
     fun navn(): String
 }
 
+enum class UtfallType {
+    OPPFYLT,
+    IKKE_OPPFYLT,
+    IKKE_RELEVANT;
+
+    fun motsatt(): UtfallType {
+        return when (this) {
+            OPPFYLT -> IKKE_OPPFYLT
+            IKKE_OPPFYLT -> OPPFYLT
+            IKKE_RELEVANT -> IKKE_RELEVANT
+        }
+    }
+}
 
 enum class KOMPARATOR(val text: String) {
     FØR_ELLER_LIK(" er tom "),
@@ -175,14 +191,18 @@ infix fun Faktum<out Number>.erStørre(other: Number) = Subsumsjon(
     Pair(this, Faktum(other))
 ) { verdi.toDouble() > other.toDouble() }
 
+
 /**
  * Boolean
+ * TODO Burde ikke trenge disse. Faktum/regler (generellt alle RuleComponents) bør kunne brukes fritt som regelbetingelser. Vurder å legge inn Faktum.not override.
  */
 fun Faktum<Boolean>.erSann() =
     Subsumsjon(LIK, Pair(this, Faktum("SANN", true))) { verdi }
 
 fun Faktum<Boolean>.erUsann() =
     Subsumsjon(ULIK, Pair(this, Faktum("USANN", false))) { verdi }
+
+operator fun Faktum<Boolean>.not(): Faktum<Boolean> = Faktum(this.navn, !this.verdi)
 
 /**
  * Dato > Tall

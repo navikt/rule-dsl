@@ -22,6 +22,7 @@ abstract class AbstractRuleComponent {
             this.resourceMap = parent!!.resourceMap
         }
 
+    // TODO resourceMap og tilhørende funksjoner bør flyttes ut i eget interface som implementeres kun der det er nødvendig (dvs ikke i Sumsumsjon / Predicate)
     private var resourceMap: MutableMap<KClass<*>, AbstractResource> = mutableMapOf()
 
     fun <T : AbstractResource> putResource(key: KClass<T>, service: T) {
@@ -34,6 +35,7 @@ abstract class AbstractRuleComponent {
     }
 
     abstract fun name(): String
+    // TODO En RuleComponentType enum er kanskje bedre enn String her.
     abstract fun type(): String
     abstract fun fired(): Boolean
 

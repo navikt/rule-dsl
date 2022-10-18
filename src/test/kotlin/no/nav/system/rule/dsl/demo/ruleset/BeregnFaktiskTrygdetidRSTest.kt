@@ -4,11 +4,10 @@ import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.treevisitor.visitor.DebugVisitor
-import no.nav.system.rule.dsl.treevisitor.visitor.RettsregelVisitor
 import no.nav.system.rule.dsl.treevisitor.visitor.RuleVisitor
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 /**
@@ -19,7 +18,7 @@ class BeregnFaktiskTrygdetidRSTest {
     @Test
     fun `test fagregel 'Redusert fremtidig trygdetid' har truffet`() {
 
-        val redFttVisitor = RettsregelVisitor { regel ->
+        val redFttVisitor = RuleVisitor { regel ->
             regel.name() == "BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid"
         }
 
@@ -35,7 +34,8 @@ class BeregnFaktiskTrygdetidRSTest {
             println(debug())
         }
 
-        val redFttRegel = redFttVisitor.rettsregel
+        assertNotNull(redFttVisitor.rule)
+        val redFttRegel = redFttVisitor.rule!!
         Assertions.assertTrue(redFttRegel.evaluated)
         Assertions.assertTrue(redFttRegel.fired())
         Assertions.assertEquals(
@@ -51,7 +51,7 @@ class BeregnFaktiskTrygdetidRSTest {
     @Test
     fun `test fagregel 'Redusert fremtidig trygdetid' har ikke truffet`() {
 
-        val redFttVisitor = RettsregelVisitor { regel ->
+        val redFttVisitor = RuleVisitor { regel ->
             regel.name() == "BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid"
         }
 
@@ -66,7 +66,8 @@ class BeregnFaktiskTrygdetidRSTest {
             accept(redFttVisitor)
         }
 
-        val redFttKonklusjon = redFttVisitor.rettsregel
+        assertNotNull(redFttVisitor.rule)
+        val redFttKonklusjon = redFttVisitor.rule!!
         Assertions.assertTrue(redFttKonklusjon.evaluated)
         Assertions.assertFalse(redFttKonklusjon.fired())
         Assertions.assertEquals(

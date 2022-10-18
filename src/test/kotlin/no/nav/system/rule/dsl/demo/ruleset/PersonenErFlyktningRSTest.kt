@@ -4,7 +4,10 @@ import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.UtfallType
+import no.nav.system.rule.dsl.rettsregel.UtfallType.*
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
@@ -25,9 +28,9 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).test().get()
 
-        println(anvendtFlytkning.debug())
+        println(anvendtFlytkning)
 
-        assertFalse(anvendtFlytkning.fired())
+        assertEquals(IKKE_RELEVANT, anvendtFlytkning.utfallType)
 
     }
 }
