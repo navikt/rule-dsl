@@ -20,7 +20,7 @@ import kotlin.experimental.ExperimentalTypeInference
 @OptIn(ExperimentalTypeInference::class)
 class Rule(
     private val name: String,
-    internal val sequence: Int,
+    private val sequence: Int,
 ) : Comparable<Rule>, AbstractRuleComponent() {
 
     /**

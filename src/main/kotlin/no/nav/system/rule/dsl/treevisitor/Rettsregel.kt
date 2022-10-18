@@ -92,6 +92,5 @@ import no.nav.system.rule.dsl.Rule
 //    }
 //}
 //
-class EmptyRule : Rule(name = "Tom rettsregel.", sequence = 0)
 //
 fun Boolean.svarord() = if (this) "JA" else "NEI"
