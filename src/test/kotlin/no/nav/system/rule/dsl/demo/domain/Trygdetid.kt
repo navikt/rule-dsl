@@ -1,7 +1,5 @@
 package no.nav.system.rule.dsl.demo.domain
 
-import EmptyRule
-import no.nav.system.rule.dsl.Rule
 import no.nav.system.rule.dsl.TomtUtfall
 import no.nav.system.rule.dsl.Utfall
 import no.nav.system.rule.dsl.rettsregel.Faktum

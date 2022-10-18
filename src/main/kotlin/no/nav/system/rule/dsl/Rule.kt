@@ -18,9 +18,9 @@ import kotlin.experimental.ExperimentalTypeInference
  * @param sequence the rule sequence
  */
 @OptIn(ExperimentalTypeInference::class)
-open class Rule(
+class Rule(
     private val name: String,
-    internal open val sequence: Int,
+    internal val sequence: Int,
 ) : Comparable<Rule>, AbstractRuleComponent() {
 
     /**
@@ -56,19 +56,19 @@ open class Rule(
     /**
      * The code that executes if the rule is [fired]
      */
-    protected var actionStatement: () -> Unit = {}
+    private var actionStatement: () -> Unit = {}
 
     /**
      * The value this rule will return.
      */
-    var returnValue: Optional<Any> = Optional.empty()
+    internal var returnValue: Optional<Any> = Optional.empty()
 
     /**
      * Set to true if rule has a return value. When set to true this rule will stop ruleset evaluation if fired.
      */
-    var returnRule = false
+    internal var returnRule = false
 
-    val predicateFunctionList = mutableListOf<() -> Predicate>()
+    private val predicateFunctionList = mutableListOf<() -> Predicate>()
 
     /**
      * DSL: Technical Predicate entry.
@@ -89,6 +89,7 @@ open class Rule(
      */
     @OverloadResolutionByLambdaReturnType
     @JvmName("FagHVIS")
+    @DslDomainPredicate
     fun HVIS(arcFunction: () -> Subsumsjon) {
         OG(arcFunction)
     }
@@ -104,6 +105,7 @@ open class Rule(
 
     var utfall: Utfall? = null
     private var utfallFunksjon: (() -> Utfall)? = null
+
     fun SVAR(utfallType: UtfallType?, svarFunction: () -> Utfall) {
         utfallFunksjon = {
             svarFunction.invoke().also {
@@ -146,7 +148,7 @@ open class Rule(
      * Evaluates the [children]. A rule is considered [fired] once all predicates are evaluated to true.
      * Rules that fire invoke their [actionStatement].
      */
-    open fun evaluate() {
+    fun evaluate() {
         fired = predicateFunctionList.isNotEmpty()
         evaluated = true
 

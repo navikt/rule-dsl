@@ -8,7 +8,6 @@ import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.pattern.createPattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.UtfallType
 import no.nav.system.rule.dsl.rettsregel.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.erEtterEllerLik
 import no.nav.system.rule.dsl.rettsregel.erMindreEnn
