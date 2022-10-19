@@ -103,6 +103,7 @@ open class Rule(
         predicateFunctionList.add(arcFunction)
     }
 
+    // TODO Slett 'utfall' og bytt ut alle kall mot denne med 'konstruerUtfall'. Fjern også kall til 'konstruerUtfall' fra 'evaluate'.
     internal var utfall: Utfall? = null
     private var utfallFunksjon: (() -> Utfall)? = null
 
@@ -110,13 +111,11 @@ open class Rule(
         utfallFunksjon = {
             svarFunction.invoke().also {
                 it.regel = this
-                val tempUtfallType = utfallType ?: defaultUtfallType()
+                val tempUtfallType = utfallType ?: UtfallType.OPPFYLT
                 it.utfallType = if (fired) tempUtfallType else tempUtfallType.motsatt()
             }
         }
     }
-
-    private fun defaultUtfallType(): UtfallType = if (fired) UtfallType.OPPFYLT else UtfallType.IKKE_OPPFYLT
 
     /**
      * DSL: Action statement entry.

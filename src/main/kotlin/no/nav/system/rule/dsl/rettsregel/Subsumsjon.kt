@@ -7,6 +7,7 @@ import java.time.LocalDate
 
 /**
  * TODO Vurder om en subsumsjon (og Predicate) burde ha en evaluate variabel slik sonm Rule. Hensikten er å oppdage bruk av Sumsumsjoner som ikke har blitt evaluert enda (feilsituasjon)
+ * Kanskje bør vi ha TreSubsumsjon (komparator anvendes på children) eller ParSubsumsjon (komparator anvendes på Pair)
  */
 class Subsumsjon(
     val komparator: KOMPARATOR,
@@ -105,7 +106,8 @@ enum class KOMPARATOR(val text: String) {
     ER_BLANDT(" er blandt "),
     ER_IKKE_BLANDT(" er ikke blandt "),
     ALLE(" alle "),
-    INGEN(" ingen ");
+    INGEN(" ingen "),
+    MINST_EN_AV(" minst én er JA ");
 
     fun negated(): String {
         return when (this) {
@@ -122,7 +124,8 @@ enum class KOMPARATOR(val text: String) {
             ER_BLANDT -> " må være blandt "
             ER_IKKE_BLANDT -> " må ikke være blandt "
             ALLE -> " ingen "
-            INGEN -> " alle "
+            INGEN -> " minst én er JA "
+            MINST_EN_AV -> " ingen er JA "
         }
     }
 }

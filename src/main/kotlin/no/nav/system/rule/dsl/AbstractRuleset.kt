@@ -4,6 +4,7 @@ import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.KOMPARATOR
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import java.util.*
 
 /**
@@ -99,6 +100,13 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         return internalRun()
     }
 
+    // TODO Slett før release?
+    open fun testAndDebug(): Optional<T> {
+        val ret = internalRun()
+        println(this.debug())
+        return ret
+    }
+
     /**
      * Runs the ruleset
      *
@@ -160,11 +168,11 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     protected fun String.minstEnHarTruffet(): Subsumsjon {
         val list = finnReglerByName(this)
         return Subsumsjon(
-            komparator = KOMPARATOR.STØRRE_ELLER_LIK,
+            komparator = KOMPARATOR.MINST_EN_AV,
             pair = null,
             utfallFunksjon = { list.any { it.fired() } }
         ).apply {
-            this.children.addAll(list.filter { it.fired() }) // TODO Skal også alle andre regler være med i dokumentasjonen?
+            this.children.addAll(list)
         }
     }
 

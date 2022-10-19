@@ -6,17 +6,14 @@ import no.nav.system.rule.dsl.TomtUtfall
 import no.nav.system.rule.dsl.Utfall
 import no.nav.system.rule.dsl.pattern.createPattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.UtfallType.IKKE_OPPFYLT
-import no.nav.system.rule.dsl.rettsregel.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.rettsregel.erSann
-import no.nav.system.rule.dsl.rettsregel.erUsann
 
 class DomainPatternRS(
-    inputFakta: MutableList<Faktum<Boolean>>
-) : AbstractRuleset<Utfall>() {
+    inputFakta: List<Faktum<Boolean>>,
+) : AbstractRuleset<List<Utfall>>() {
 
     private val faktumListe = inputFakta.createPattern()
-    private val utfallDemo = TomtUtfall()
+    private val utfallListe = listOf(TomtUtfall(), TomtUtfall(), TomtUtfall())
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
@@ -25,14 +22,28 @@ class DomainPatternRS(
             HVIS { bool.erSann() }
         }
 
-        regel("usann", faktumListe) { bool ->
-            HVIS { bool.erUsann() }
+//        regel("usann", faktumListe) { bool ->
+//            HVIS { bool.erUsann() }
+//        }
+
+        regel("ingenHarTruffet") {
+            HVIS { "sann".ingenHarTruffet() }
+            SVAR { utfallListe[0] }
+        }
+
+        regel("minstEnHarTruffet") {
+            HVIS { "sann".minstEnHarTruffet() }
+            SVAR { utfallListe[1] }
         }
 
         regel("alleHarTruffet") {
             HVIS { "sann".alleHarTruffet() }
-            SVAR { utfallDemo }
-            RETURNER(utfallDemo)
+            SVAR { utfallListe[2] }
+        }
+
+        regel("returner utfall") {
+            HVIS { true }
+            RETURNER(utfallListe)
         }
     }
 }
