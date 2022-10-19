@@ -169,7 +169,6 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         val list = finnReglerByName(this)
         return Subsumsjon(
             komparator = MINST_EN_AV,
-            pair = null,
             utfallFunksjon = { list.any { it.fired() } }
         ).apply {
             this.children.addAll(list.filter { it.children.isNotEmpty() })

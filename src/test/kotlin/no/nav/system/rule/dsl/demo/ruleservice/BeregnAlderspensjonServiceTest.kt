@@ -13,7 +13,7 @@ import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class BeregnAlderspensjonServiceTest {
+class BeregnAlderspensjonServiceTest {
 
     @Test
     fun `redusert fremtidig trygdetid og høy sats`() {

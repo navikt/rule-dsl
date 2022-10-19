@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 class DomainPatternRSTest {
 
     @Test
-    internal fun `skal returnere OPPFYLT når ingen regler treffer`() {
+    fun `test skal returnere OPPFYLT når ingen regler treffer`() {
 
         val faktumListe = listOf(
             Faktum("bool1", false),
@@ -31,7 +31,7 @@ class DomainPatternRSTest {
     }
 
     @Test
-    internal fun `skal returnere OPPFYLT når minst èn regel treffer`() {
+    fun `test skal returnere OPPFYLT når minst èn regel treffer`() {
 
         val faktumListe = listOf(
             Faktum("bool1", false),
@@ -50,7 +50,7 @@ class DomainPatternRSTest {
     }
 
     @Test
-    internal fun `skal returnere OPPFYLT når alle regler treffer`() {
+    fun `test skal returnere OPPFYLT når alle regler treffer`() {
 
         val faktumListe = listOf(
             Faktum("bool1", true),
@@ -70,7 +70,7 @@ class DomainPatternRSTest {
 
 
     @Test
-    internal fun `skal returnere IKKE_OPPFYLT når en eller flere regler treffer`() {
+    fun `test skal returnere IKKE_OPPFYLT når en eller flere regler treffer`() {
 
         val faktumListe = listOf(
             Faktum("bool1", false),
@@ -90,7 +90,7 @@ class DomainPatternRSTest {
     }
 
     @Test
-    internal fun `skal returnere IKKE_OPPFYLT når ingen regel treffer`() {
+    fun `test skal returnere IKKE_OPPFYLT når ingen regel treffer`() {
 
         val faktumListe = listOf(
             Faktum("bool1", false),
@@ -109,7 +109,7 @@ class DomainPatternRSTest {
     }
 
     @Test
-    internal fun `skal returnere IKKE_OPPFYLT når en eller fler regler ikke treffer`() {
+    fun `test skal returnere IKKE_OPPFYLT når en eller fler regler ikke treffer`() {
 
         val faktumListe = listOf(
             Faktum("bool1", true),

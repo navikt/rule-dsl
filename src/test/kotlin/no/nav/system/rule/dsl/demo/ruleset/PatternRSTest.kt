@@ -3,7 +3,7 @@ package no.nav.system.rule.dsl.demo.ruleset
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-internal class PatternRSTest {
+class PatternRSTest {
     @Test
     fun `skal returnere korrekt sum`() {
         val list1 = mutableListOf(2, 4, 6, 8, 10)
