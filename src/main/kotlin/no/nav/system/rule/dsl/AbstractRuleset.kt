@@ -1,8 +1,8 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.enums.Komparator.*
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.KOMPARATOR
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import java.util.*
@@ -74,7 +74,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     inline fun <P> regel(
         navn: String,
         pattern: Pattern<P>,
-        crossinline createRuleContent: Rule.(P) -> Unit
+        crossinline createRuleContent: Rule.(P) -> Unit,
     ) {
         val sequence = nextSequence() // starting sequence for all the rules that will be created using this pattern
         ruleFunctionMap[sequence] = {
@@ -168,7 +168,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     protected fun String.minstEnHarTruffet(): Subsumsjon {
         val list = finnReglerByName(this)
         return Subsumsjon(
-            komparator = KOMPARATOR.MINST_EN_AV,
+            komparator = MINST_EN_AV,
             pair = null,
             utfallFunksjon = { list.any { it.fired() } }
         ).apply {
@@ -179,7 +179,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     protected fun String.alleHarTruffet(): Subsumsjon {
         val list = finnReglerByName(this)
         return Subsumsjon(
-            komparator = KOMPARATOR.ALLE,
+            komparator = ALLE,
             pair = null,
             utfallFunksjon = { list.all { it.fired() } }
         ).apply {
@@ -190,7 +190,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     protected fun String.ingenHarTruffet(): Subsumsjon {
         val list = finnReglerByName(this)
         return Subsumsjon(
-            komparator = KOMPARATOR.INGEN,
+            komparator = INGEN,
             pair = null,
             utfallFunksjon = { list.none { it.fired() } }
         ).apply {

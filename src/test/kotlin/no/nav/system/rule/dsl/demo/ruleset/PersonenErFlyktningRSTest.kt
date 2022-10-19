@@ -3,8 +3,8 @@ package no.nav.system.rule.dsl.demo.ruleset
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.enums.UtfallType.IKKE_RELEVANT
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.UtfallType.IKKE_RELEVANT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

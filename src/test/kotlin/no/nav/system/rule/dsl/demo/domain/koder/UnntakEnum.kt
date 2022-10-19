@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.demo.domain.koder
 
+import no.nav.system.rule.dsl.enums.SuperEnum
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.SuperEnum
 
 enum class UnntakEnum : SuperEnum {
     FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP;

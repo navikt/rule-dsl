@@ -1,8 +1,9 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.enums.UtfallType
+import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
-import no.nav.system.rule.dsl.rettsregel.UtfallType
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
 
@@ -111,7 +112,7 @@ open class Rule(
         utfallFunksjon = {
             svarFunction.invoke().also {
                 it.regel = this
-                val tempUtfallType = utfallType ?: UtfallType.OPPFYLT
+                val tempUtfallType = utfallType ?: OPPFYLT
                 it.utfallType = if (fired) tempUtfallType else tempUtfallType.motsatt()
             }
         }

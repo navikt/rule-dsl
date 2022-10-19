@@ -1,6 +1,6 @@
 package no.nav.system.rule.dsl
 
-import no.nav.system.rule.dsl.rettsregel.UtfallType
+import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 
 open class Utfall(var utfallType: UtfallType) {

@@ -1,9 +1,7 @@
 package no.nav.system.rule.dsl.demo.domain.koder
 
+import no.nav.system.rule.dsl.enums.SuperEnum
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.KOMPARATOR
-import no.nav.system.rule.dsl.rettsregel.Subsumsjon
-import no.nav.system.rule.dsl.rettsregel.SuperEnum
 
 enum class YtelseEnum : SuperEnum {
     AP, UT, AFP, GJR, GJP, UT_GJR;

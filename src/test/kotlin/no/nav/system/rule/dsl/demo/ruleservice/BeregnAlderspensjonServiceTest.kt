@@ -6,9 +6,9 @@ import no.nav.system.rule.dsl.demo.domain.Request
 import no.nav.system.rule.dsl.demo.domain.Response
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.enums.UtfallType.IKKE_OPPFYLT
+import no.nav.system.rule.dsl.enums.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.UtfallType.IKKE_OPPFYLT
-import no.nav.system.rule.dsl.rettsregel.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
