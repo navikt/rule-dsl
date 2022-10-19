@@ -3,7 +3,9 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import no.nav.system.rule.dsl.rettsregel.erLik
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
 
@@ -83,6 +85,20 @@ open class Rule(
      */
     fun OG(predicateFunction: () -> Boolean) {
         predicateFunctionList.add { Predicate(function = predicateFunction) }
+    }
+
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("FaktumHVIS")
+    @DslDomainPredicate
+    fun HVIS(predicateFunction: () -> Faktum<Boolean>) {
+        OG(predicateFunction)
+    }
+
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("FaktumOG")
+    @DslDomainPredicate
+    fun OG(predicateFunction: () -> Faktum<Boolean>) {
+        predicateFunctionList.add { predicateFunction.invoke() erLik Faktum(true) }
     }
 
     /**

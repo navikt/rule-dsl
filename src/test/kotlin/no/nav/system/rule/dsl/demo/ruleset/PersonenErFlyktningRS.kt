@@ -2,11 +2,14 @@ package no.nav.system.rule.dsl.demo.ruleset
 
 import no.nav.system.rule.dsl.*
 import no.nav.system.rule.dsl.demo.domain.Person
+import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum.*
+import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.helper.måneder
 import no.nav.system.rule.dsl.demo.helper.år
+import no.nav.system.rule.dsl.enums.Komparator
 import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
@@ -32,10 +35,24 @@ class PersonenErFlyktningRS(
         FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP
     )
     private val svar = TomtUtfall()
+    private lateinit var trygdetid: Trygdetid
 
     val SANN = Faktum("SANN", true)
 
     override fun create() {
+        regel("SettRelevantTrygdetid_kap19") {
+            HVIS { !innKapittel20 }
+            SÅ {
+                trygdetid = innPersongrunnlag.trygdetidK19
+            }
+        }
+        regel("SettRelevantTrygdetid_kap20") {
+            HVIS { innKapittel20 }
+            SÅ {
+                trygdetid = innPersongrunnlag.trygdetidK20
+            }
+        }
+
         regel("AngittFlyktning_HarFlyktningFlaggetSatt") {
             OG { innPersongrunnlag.flyktning.erSann() }
             kommentar("Flyktningerflagget er angitt av saksbehandler.")
@@ -54,151 +71,102 @@ class PersonenErFlyktningRS(
             OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
             kommentar("")
         }
-        regel("Konklusjon: ikkeAngittFlyktning") {
-            OG { "AngittFlyktning_".ingenHarTruffet() }
-            SVAR(IKKE_RELEVANT) { svar }
-            RETURNER(svar)
-        }
-//        regel("Overgangsregel_APk19") {
-//            HVIS { innYtelseType erLik AP }
-//            OG { innPersongrunnlag.fødselsdato erMindreEnn 1959 }
-//            OG { innKapittel20.erUsann() }
-//            OG { innPersongrunnlag.trygdetidK19.tt_fa_F2021 erStørreEllerLik 20 }
-//            kommentar("")
-//        }
-//        regel("Overgangsregel_APk20") {
-//            HVIS { innYtelseType erLik AP }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innKapittel20.erSann() }
-//            OG { innPersongrunnlag.trygdetidK20?.tt_fa_F2021!! erStørreEllerLik 20 }
-//            kommentar("")
-//        }
-//
-//        // TODO Kom tibake til denne senere
-//        fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): Subsumsjon {
-//            return Subsumsjon(
-//                STØRRE_ELLER_LIK, Pair(Faktum(this), Faktum(target))
-//            ) { this.count(quantifier) >= target }
-//        }
-//        regel("Overgangsregel_APk19_tidligereUT") {
-//            HVIS { innYtelseType erLik AP }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innVirk erEtterEllerLik dato67m }
-//            OG { innKapittel20.erUsann() }
-//            OG { innPersongrunnlag.trygdetidK19.tt_fa_F2021 erStørreEllerLik 20 }
-//            OG {
-//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
-//                    it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
-//                }
-//            }
-//            kommentar("")
-//        }
-//        regel("Overgangsregel_APk20_tidligereUT") {
-//            HVIS { innYtelseType erLik AP }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innVirk erEtterEllerLik dato67m }
-//            OG { innKapittel20.erSann() }
-//            OG { innPersongrunnlag.trygdetidK20!!.tt_fa_F2021 erStørreEllerLik 20 }
-//            OG {
-//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
-//                    it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
-//                }
-//            }
-//            kommentar("")
-//        }
-//        regel("Overgangsregel_GJRk19_tidligereUT_GJT") {
-//            HVIS { innYtelseType erLik GJR }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innVirk erEtterEllerLik dato67m }
-//            OG { innKapittel20.erUsann() }
-//            OG { innPersongrunnlag.trygdetidK19.tt_fa_F2021 erStørreEllerLik 20 }
-//            OG {
-//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
-//                    it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1)
-//                }
-//            }
-//            kommentar("")
-//        }
-//        regel("Overgangsregel_GJRk20_tidligereUT_GJT") {
-//            HVIS { innYtelseType erLik GJR }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innVirk erEtterEllerLik dato67m }
-//            OG { innKapittel20.erSann() }
-//            OG { innPersongrunnlag.trygdetidK20!!.tt_fa_F2021 erStørreEllerLik 20 }
-//            OG {
-//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
-//                    it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1)
-//                }
-//            }
-//            kommentar("")
-//        }
-//        regel("Overgangsregel_APk19_tidligereGJP") {
-//            HVIS { innYtelseType erLik AP }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innVirk erEtterEllerLik dato67m }
-//            OG { innKapittel20.erUsann() }
-//            OG { innPersongrunnlag.trygdetidK19.tt_fa_F2021 erStørreEllerLik 20 }
-//            OG {
-//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
-//                    it.kravlinjeType == GJP && it.virkningsdato < localDate(2021, 1, 1)
-//                }
-//            }
-//            kommentar("")
-//        }
-//        regel("Overgangsregel_APk20_tidligereGJP") {
-//            HVIS { innYtelseType erLik AP }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innVirk erEtterEllerLik dato67m }
-//            OG { innKapittel20.erSann() }
-//            OG { innPersongrunnlag.trygdetidK20!!.tt_fa_F2021 erStørreEllerLik 20 }
-//            OG {
-//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
-//                    it.kravlinjeType == GJP && it.virkningsdato < localDate(2021, 1, 1)
-//                }
-//            }
-//            kommentar("")
-//        }
-//        regel("Overgangsregel_GJRk19_tidligereGJR") {
-//            HVIS { innYtelseType erLik GJR }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innVirk erEtterEllerLik dato67m }
-//            OG { innKapittel20.erUsann() }
-//            OG { innPersongrunnlag.trygdetidK19.tt_fa_F2021 erStørreEllerLik 20 }
-//            OG {
-//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
-//                    it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1)
-//                }
-//            }
-//            kommentar("")
-//        }
-//        regel("Overgangsregel_GJRk20_tidligereGJR") {
-//            HVIS { innYtelseType erLik GJR }
-//            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-//            OG { innVirk erEtterEllerLik dato67m }
-//            OG { innKapittel20.erSann() }
-//            OG { innPersongrunnlag.trygdetidK20!!.tt_fa_F2021 erStørreEllerLik 20 }
-//            OG {
-//                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
-//                    it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1)
-//                }
-//            }
-//        }
 
-//        regel("AnvendtFlyktning_unntak") {
-//            HVIS { "AngittFlyktning_".minstEnHarTruffet() }
-//            OG { innKravlinjeFremsattDatoFom2021.erSann() }
-//            OG { "Overgangsregel_".ingenHarTruffet() }
-//            SÅ {
-//                val fak = !innKapittel20
-//            }
-//            RETURNER(this)
-//        }
-//
-//        regel("AnvendtFlyktning") {
-//            HVIS { innKravlinjeFremsattDatoFom2021.erUsann() }
-//            OG { "AngittFlyktning_".minstEnHarTruffet() }
-//            RETURNER(this)
-//        }
+        regel("Overgangsregel_AP") {
+            HVIS { innYtelseType.verdi == AP }
+            OG { innPersongrunnlag.fødselsdato erMindreEnn 1959 }
+            OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
+            kommentar("")
+        }
+
+        // TODO Kom tibake til denne senere
+        fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): Subsumsjon {
+            return Subsumsjon(
+                Komparator.STØRRE_ELLER_LIK, Pair(Faktum(this), Faktum(target))
+            ) { this.count(quantifier) >= target }
+        }
+        regel("Overgangsregel_AP_tidligereUT") {
+            HVIS { innYtelseType.verdi == AP }
+            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+            OG { innVirk erEtterEllerLik dato67m }
+            OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
+            OG {
+                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
+                    it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
+                }
+            }
+            kommentar("")
+        }
+        regel("Overgangsregel_AP_tidligereGJP") {
+            HVIS { innYtelseType.verdi == AP }
+            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+            OG { innVirk erEtterEllerLik dato67m }
+            OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
+            OG {
+                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
+                    it.kravlinjeType == GJP && it.virkningsdato < localDate(2021, 1, 1)
+                }
+            }
+            kommentar("")
+        }
+        regel("Overgangsregel_GJR_tidligereUT_GJT") {
+            HVIS { innYtelseType.verdi == GJR }
+            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+            OG { innVirk erEtterEllerLik dato67m }
+            OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
+            OG {
+                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
+                    it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1)
+                }
+            }
+            kommentar("")
+        }
+        regel("Overgangsregel_GJR_tidligereGJR") {
+            HVIS { innYtelseType.verdi == GJR }
+            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+            OG { innVirk erEtterEllerLik dato67m }
+            OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
+            OG {
+                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
+                    it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1)
+                }
+            }
+            kommentar("")
+        }
+
+        regel("Konklusjon: ikkeRelevant") {
+            OG { "AngittFlyktning".ingenHarTruffet() }
+            SVAR(IKKE_RELEVANT) { svar }
+            SÅ {
+                RETURNER(svar)
+            }
+        }
+        regel("AnvendtFlyktning") {
+            HVIS { innKravlinjeFremsattDatoFom2021.erUsann() }
+            OG { "AngittFlyktning".minstEnHarTruffet() }
+            SVAR { svar }
+            SÅ {
+                RETURNER(svar)
+            }
+        }
+        regel("AnvendtFlyktning_ingenOvergang") {
+            HVIS { "AngittFlyktning".minstEnHarTruffet() }
+            OG { innKravlinjeFremsattDatoFom2021.erSann() }
+            OG { "Overgangsregel".ingenHarTruffet() }
+            SVAR(IKKE_OPPFYLT) { svar }
+            SÅ {
+                RETURNER(svar)
+            }
+        }
+        regel("AnvendtFlyktning_harOvergang") {
+            HVIS { "AngittFlyktning".minstEnHarTruffet() }
+            OG { innKravlinjeFremsattDatoFom2021.erSann() }
+            OG { "Overgangsregel".minstEnHarTruffet() }
+            SVAR { svar }
+            SÅ {
+                RETURNER(svar)
+            }
+        }
     }
 }
 

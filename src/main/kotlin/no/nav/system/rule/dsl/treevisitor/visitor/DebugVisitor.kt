@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.*
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import svarord
 
 /**
  * Lists the complete tree of [AbstractRuleComponent]
@@ -15,14 +16,14 @@ class DebugVisitor : TreeVisitor {
 
         when (ruleComponent) {
             is Subsumsjon -> {
-                debugString.append("subsumsjon: $ruleComponent fired: ${ruleComponent.fired()}\n")
+                debugString.append("subsumsjon: $ruleComponent\n")
             }
             is Predicate -> {
-                debugString.append("predicate: fired: ${ruleComponent.fired()}\n")
+                debugString.append("predicate: ${ruleComponent.fired().svarord()}\n")
             }
             is Rule -> {
                 val utfallTekst = ruleComponent.utfall?.let { " utfallType: ${it.utfallType}" } ?: ""
-                debugString.append("rule: ${ruleComponent.name()} fired: ${ruleComponent.fired()}$utfallTekst\n")
+                debugString.append("rule: ${ruleComponent.fired().svarord()} ${ruleComponent.name()} $utfallTekst\n")
             }
             is AbstractRuleset<*> -> {
                 debugString.append("ruleset: ${ruleComponent.rulesetName}\n")
@@ -34,7 +35,7 @@ class DebugVisitor : TreeVisitor {
                 debugString.append("decision: ${ruleComponent.name()}\n")
             }
             is AbstractRuleflow.Decision.Branch -> {
-                debugString.append("branch: ${ruleComponent.name()} fired: ${ruleComponent.fired()}\n")
+                debugString.append("branch: ${ruleComponent.fired().svarord()} ${ruleComponent.name()}\n")
             }
             is AbstractRuleService<*> -> {
                 debugString.append("ruleservice: ${ruleComponent.name()}\n")

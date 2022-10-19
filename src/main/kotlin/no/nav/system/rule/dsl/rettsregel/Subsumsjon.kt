@@ -29,6 +29,6 @@ class Subsumsjon(
 
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
-        return "${fired.svarord()}: ${pair?.first ?: ""}$komparatorText${pair?.second ?: ""}"
+        return "${fired.svarord()} ${pair?.first ?: ""}$komparatorText${pair?.second ?: ""}"
     }
 }

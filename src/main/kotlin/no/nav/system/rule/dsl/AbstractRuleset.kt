@@ -172,7 +172,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
             pair = null,
             utfallFunksjon = { list.any { it.fired() } }
         ).apply {
-            this.children.addAll(list)
+            this.children.addAll(list.filter { it.children.isNotEmpty() })
         }
     }
 
@@ -183,7 +183,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
             pair = null,
             utfallFunksjon = { list.all { it.fired() } }
         ).apply {
-            this.children.addAll(list)
+            this.children.addAll(list.filter { it.children.isNotEmpty() })
         }
     }
 
@@ -194,7 +194,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
             pair = null,
             utfallFunksjon = { list.none { it.fired() } }
         ).apply {
-            this.children.addAll(list)
+            this.children.addAll(list.filter { it.children.isNotEmpty() })
         }
     }
 

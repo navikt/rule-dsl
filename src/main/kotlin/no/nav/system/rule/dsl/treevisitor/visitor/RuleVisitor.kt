@@ -19,20 +19,3 @@ class RuleVisitor(
         }
     }
 }
-
-///**
-// * Searches the ruleComponent tree for a target rettsregel using [searchFunction].
-// */
-//class RettsregelVisitor(
-//    private val searchFunction: (Rettsregel) -> Boolean
-//) : TreeVisitor {
-//    var rettsregel: Rettsregel = TomRettsregel()
-//
-//    override fun visit(ruleComponent: AbstractRuleComponent) {
-//        if (ruleComponent is Rettsregel && searchFunction.invoke(ruleComponent)) {
-//            rettsregel = ruleComponent
-//        } else {
-//            ruleComponent.children.forEach { it.accept(this) }
-//        }
-//    }
-//}
