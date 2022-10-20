@@ -13,7 +13,7 @@ import java.util.*
  * @param T the return type of the ruleset
  *
  */
-abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
+abstract class AbstractRuleset<T : Any> : AbstractRuleComponent(), ResourceHolder {
 
     /**
      * Ruleset name

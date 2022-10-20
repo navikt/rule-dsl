@@ -2,17 +2,16 @@ package no.nav.system.rule.dsl
 
 import org.jetbrains.annotations.TestOnly
 import java.util.*
-import kotlin.reflect.KClass
 
 /**
  * Common ruleflow behaviour used by all ruleflow implementations.
  * Defines branching logic DSL (decision, branch, condition, flow).
  */
-abstract class AbstractRuleflow : AbstractRuleComponent() {
+abstract class AbstractRuleflow : AbstractRuleComponent(), ResourceHolder {
     /**
      * Tracks the full name of nested branches.
      */
-    protected val branchNameStack = Stack<String>()
+    private val branchNameStack = Stack<String>()
 
     /**
      * Tests the ruleflow without a parent ruleComponent.

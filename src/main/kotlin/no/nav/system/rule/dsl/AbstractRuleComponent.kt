@@ -2,7 +2,6 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.treevisitor.visitor.TreeVisitor
 import org.jetbrains.annotations.NotNull
-import kotlin.reflect.KClass
 
 /**
  * Common functionality across all components of the DSL.
@@ -19,22 +18,14 @@ abstract class AbstractRuleComponent {
     var parent: AbstractRuleComponent? = null
         set(@NotNull parent) {
             field = parent
-            this.resourceMap = parent!!.resourceMap
+            if (parent is ResourceHolder && this is ResourceHolder) {
+                this.resourceMap = parent.resourceMap
+            }
         }
 
-    // TODO resourceMap og tilhørende funksjoner bør flyttes ut i eget interface som implementeres kun der det er nødvendig (dvs ikke i Sumsumsjon / Predicate)
-    private var resourceMap: MutableMap<KClass<*>, AbstractResource> = mutableMapOf()
-
-    fun <T : AbstractResource> putResource(key: KClass<T>, service: T) {
-        resourceMap[key] = service
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : AbstractResource> getResource(key: KClass<T>): T {
-        return resourceMap[key] as T
-    }
 
     abstract fun name(): String
+
     // TODO En RuleComponentType enum er kanskje bedre enn String her.
     abstract fun type(): String
     abstract fun fired(): Boolean

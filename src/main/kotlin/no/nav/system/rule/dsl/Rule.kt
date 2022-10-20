@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.UtfallType
-import no.nav.system.rule.dsl.enums.UtfallType.*
+import no.nav.system.rule.dsl.enums.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.Subsumsjon
@@ -23,8 +23,8 @@ import kotlin.experimental.ExperimentalTypeInference
 @OptIn(ExperimentalTypeInference::class)
 open class Rule(
     private val name: String,
-    private val sequence: Int,
-) : Comparable<Rule>, AbstractRuleComponent() {
+    private val sequence: Int
+) : Comparable<Rule>, AbstractRuleComponent(), ResourceHolder {
 
     /**
      * Functional description of the rule
