@@ -16,9 +16,9 @@ class XmlDebugVisitor : TreeVisitor {
         debugString.append(" ".repeat(level * 2))
         debugString.append("<")
 
-        if (ruleComponent !is Faktum<*>) {
-            debugString.append("<")
-        }
+//        if (ruleComponent !is Faktum<*>) {
+//            debugString.append("<")
+//        }
 
         when (ruleComponent) {
             is AbstractRuleService<*> -> {
@@ -56,10 +56,10 @@ class XmlDebugVisitor : TreeVisitor {
         }
 
         level++
-        ruleComponent.children.forEach { it.accept(this) }
+        ruleComponent.children.forEach { if(it !is Faktum<*>) it.accept(this) }
         level--
 
-        if (ruleComponent !is Rule && ruleComponent !is Faktum<*>) {
+        if (ruleComponent !is Rule && ruleComponent !is AbstractSubsumsjon) {
             debugString.append(" ".repeat(level * 2))
             debugString.append("</${ruleComponent.name()}>\n")
         }
