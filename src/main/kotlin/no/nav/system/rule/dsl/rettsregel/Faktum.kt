@@ -23,9 +23,9 @@ class Faktum<T>(val navn: String, var verdi: T) : AbstractRuleComponent() {
 
     override fun toString(): String {
         return if (anonymous) {
-            "'$navn'"
+            "${type()}: '$navn'"
         } else {
-            "'$navn' ($verdi)"
+            "${type()}: '$navn' ($verdi)"
         }
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.system.rule.dsl.rettsregel
 
-import no.nav.system.rule.dsl.enums.Komparator.*
+import no.nav.system.rule.dsl.enums.MengdeKomparator
+import no.nav.system.rule.dsl.enums.ParKomparator.*
 import java.time.LocalDate
 
 /**
@@ -14,7 +15,8 @@ infix fun Faktum<LocalDate>.erFør(other: Faktum<LocalDate>) = ParSubsumsjon(FØ
 infix fun Faktum<LocalDate>.erEtterEllerLik(other: Faktum<LocalDate>) =
     ParSubsumsjon(ETTER_ELLER_LIK, this, other) { verdi >= other.verdi }
 
-infix fun Faktum<LocalDate>.erEtter(other: Faktum<LocalDate>) = ParSubsumsjon(ETTER, this, other) { verdi > other.verdi }
+infix fun Faktum<LocalDate>.erEtter(other: Faktum<LocalDate>) =
+    ParSubsumsjon(ETTER, this, other) { verdi > other.verdi }
 
 /**
  * Tall
@@ -92,7 +94,8 @@ infix fun <T> Faktum<T>.erLik(ap: Faktum<T>) = ParSubsumsjon(
     LIK, this, ap
 ) { this.verdi == ap.verdi }
 
-
-infix fun <T> Faktum<T>.erBlant(others: List<T>) = ParSubsumsjon(
-    ER_BLANDT, this, Faktum(others.joinToString(", "))
+infix fun <T> Faktum<T>.erBlant(others: List<T>) = MengdeSubsumsjon(
+    MengdeKomparator.ER_BLANDT,
+    Faktum(navn = this.navn, verdi = this.verdi.toString()),
+    others.map { Faktum(it) }
 ) { this.verdi in others }

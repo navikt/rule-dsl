@@ -1,9 +1,10 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
-import no.nav.system.rule.dsl.enums.Komparator.*
+import no.nav.system.rule.dsl.enums.MengdeKomparator.*
 import no.nav.system.rule.dsl.enums.UtfallType.IKKE_OPPFYLT
 import no.nav.system.rule.dsl.enums.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.MengdeSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -23,7 +24,7 @@ class DomainPatternRSTest {
         val utfallList = DomainPatternRS(faktumListe).testAndDebug().get()
 
         assertEquals(OPPFYLT, utfallList[0].utfallType)
-        val ingenSubsumsjon = utfallList[0].regel.children.first() as ParSubsumsjon
+        val ingenSubsumsjon = utfallList[0].regel.children.first() as MengdeSubsumsjon
         assertTrue(ingenSubsumsjon.fired())
         assertEquals(INGEN, ingenSubsumsjon.komparator)
         assertTrue(ingenSubsumsjon.children.all { !it.fired() })
@@ -43,7 +44,7 @@ class DomainPatternRSTest {
         val utfallList = DomainPatternRS(faktumListe).testAndDebug().get()
 
         assertEquals(OPPFYLT, utfallList[1].utfallType)
-        val minstEnSubsumsjon = utfallList[1].regel.children.first() as ParSubsumsjon
+        val minstEnSubsumsjon = utfallList[1].regel.children.first() as MengdeSubsumsjon
         assertTrue(minstEnSubsumsjon.fired())
         assertEquals(MINST_EN_AV, minstEnSubsumsjon.komparator)
         assertTrue(minstEnSubsumsjon.children.any { !it.fired() })
@@ -59,10 +60,11 @@ class DomainPatternRSTest {
             Faktum("bool4", true)
         )
 
-        val utfallList = DomainPatternRS(faktumListe).testAndDebug().get()
+        val utfallList = DomainPatternRS(faktumListe).test().get()
+        println(utfallList[2])
 
         assertEquals(OPPFYLT, utfallList[2].utfallType)
-        val alleSubsumsjon = utfallList[2].regel.children.first() as ParSubsumsjon
+        val alleSubsumsjon = utfallList[2].regel.children.first() as MengdeSubsumsjon
         assertTrue(alleSubsumsjon.fired())
         assertEquals(ALLE, alleSubsumsjon.komparator)
         assertTrue(alleSubsumsjon.children.all { it.fired() })
@@ -82,7 +84,7 @@ class DomainPatternRSTest {
         val utfallList = DomainPatternRS(faktumListe).testAndDebug().get()
 
         assertEquals(IKKE_OPPFYLT, utfallList[0].utfallType)
-        val ingenSubsumsjon = utfallList[0].regel.children.first() as ParSubsumsjon
+        val ingenSubsumsjon = utfallList[0].regel.children.first() as MengdeSubsumsjon
         assertFalse(ingenSubsumsjon.fired())
         assertEquals(INGEN, ingenSubsumsjon.komparator)
         assertTrue(ingenSubsumsjon.children.any { it.fired() })
@@ -102,7 +104,7 @@ class DomainPatternRSTest {
         val utfallList = DomainPatternRS(faktumListe).testAndDebug().get()
 
         assertEquals(IKKE_OPPFYLT, utfallList[1].utfallType)
-        val minstEnSubsumsjon = utfallList[1].regel.children.first() as ParSubsumsjon
+        val minstEnSubsumsjon = utfallList[1].regel.children.first() as MengdeSubsumsjon
         assertFalse(minstEnSubsumsjon.fired())
         assertEquals(MINST_EN_AV, minstEnSubsumsjon.komparator)
         assertTrue(minstEnSubsumsjon.children.all { !it.fired() })
@@ -121,7 +123,7 @@ class DomainPatternRSTest {
         val utfallList = DomainPatternRS(faktumListe).testAndDebug().get()
 
         assertEquals(IKKE_OPPFYLT, utfallList[2].utfallType)
-        val alleSubsumsjon = utfallList[2].regel.children.first() as ParSubsumsjon
+        val alleSubsumsjon = utfallList[2].regel.children.first() as MengdeSubsumsjon
         assertFalse(alleSubsumsjon.fired())
         assertEquals(ALLE, alleSubsumsjon.komparator)
         assertTrue(alleSubsumsjon.children.any { !it.fired() })

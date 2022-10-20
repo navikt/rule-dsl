@@ -9,7 +9,7 @@ import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum.*
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.helper.måneder
 import no.nav.system.rule.dsl.demo.helper.år
-import no.nav.system.rule.dsl.enums.Komparator
+import no.nav.system.rule.dsl.enums.ParKomparator
 import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
@@ -61,7 +61,7 @@ class PersonenErFlyktningRS(
             HVIS { unntakFraForutgaendeMedlemskap != null }
             OG { unntakFraForutgaendeMedlemskap!!.unntak erLik SANN }
             OG { unntakFraForutgaendeMedlemskap?.unntakType != null }
-            OG { unntakFraForutgaendeMedlemskap!!.unntakType erBlant aktuelleUnntakstyper }
+            OG { unntakFraForutgaendeMedlemskap!!.unntakType.erBlant( aktuelleUnntakstyper) }
             kommentar("")
         }
         regel("AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning") {
@@ -82,7 +82,7 @@ class PersonenErFlyktningRS(
         // TODO Kom tibake til denne senere
         fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): ParSubsumsjon {
             return ParSubsumsjon(
-                Komparator.STØRRE_ELLER_LIK, Faktum(this), Faktum(target)
+                ParKomparator.STØRRE_ELLER_LIK, Faktum(this), Faktum(target)
             ) { this.count(quantifier) >= target }
         }
         regel("Overgangsregel_AP_tidligereUT") {
@@ -177,7 +177,7 @@ fun main() {
     x2.evaluate()
     println(x2)
 
-    val bb2: ParSubsumsjon = ytelseFakta erBlant listOf(AFP, UT_GJR, AP)
+    val bb2: MengdeSubsumsjon = ytelseFakta erBlant listOf(AFP, UT_GJR, AP)
     bb2.evaluate()
     println(bb2)
 

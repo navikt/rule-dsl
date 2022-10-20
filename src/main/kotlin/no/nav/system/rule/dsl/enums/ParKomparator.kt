@@ -1,6 +1,12 @@
 package no.nav.system.rule.dsl.enums
 
-enum class Komparator(val text: String) {
+import no.nav.system.rule.dsl.enums.Komparator as Komparator
+
+interface Komparator {
+    fun negated(): String
+}
+
+enum class ParKomparator( val text: String): Komparator {
     FØR_ELLER_LIK(" er tom "),
     FØR(" er før "),
     ETTER_ELLER_LIK(" er fom "),
@@ -10,14 +16,9 @@ enum class Komparator(val text: String) {
     STØRRE_ELLER_LIK(" er større eller lik "),
     STØRRE(" er større enn "),
     LIK(" er lik "),
-    ULIK(" er ulik "),
-    ER_BLANDT(" er blandt "),
-    ER_IKKE_BLANDT(" er ikke blandt "),
-    ALLE(" alle "),
-    INGEN(" ingen "),
-    MINST_EN_AV(" minst én er JA ");
+    ULIK(" er ulik ");
 
-    fun negated(): String {
+    override fun negated(): String {
         return when (this) {
             FØR_ELLER_LIK -> " må være tom "
             FØR -> " må være før "
@@ -29,6 +30,19 @@ enum class Komparator(val text: String) {
             STØRRE -> " må være større enn "
             LIK -> " må være lik "
             ULIK -> " må være ulik "
+        }
+    }
+}
+
+enum class MengdeKomparator( val text: String): Komparator {
+    ER_BLANDT(" er blandt "),
+    ER_IKKE_BLANDT(" er ikke blandt "),
+    ALLE(" gjelder samtlige"),
+    INGEN(" ingen "),
+    MINST_EN_AV(" minst én er JA ");
+
+    override fun negated(): String {
+        return when (this) {
             ER_BLANDT -> " må være blandt "
             ER_IKKE_BLANDT -> " må ikke være blandt "
             ALLE -> " ingen "

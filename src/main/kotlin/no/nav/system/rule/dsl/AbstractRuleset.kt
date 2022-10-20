@@ -1,10 +1,11 @@
 package no.nav.system.rule.dsl
 
-import no.nav.system.rule.dsl.enums.Komparator.*
+import no.nav.system.rule.dsl.enums.MengdeKomparator
+import no.nav.system.rule.dsl.enums.ParKomparator.*
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.MengdeSubsumsjon
-import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import java.util.*
 
@@ -169,31 +170,39 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
     protected fun String.minstEnHarTruffet(): MengdeSubsumsjon {
         val list = finnReglerByName(this)
         return MengdeSubsumsjon(
-            komparator = MINST_EN_AV,
-            utfallFunksjon = { list.any { it.fired() } }
-        ).apply {
-            this.children.addAll(list.filter { it.children.isNotEmpty() })
-        }
+            komparator = MengdeKomparator.MINST_EN_AV,
+            faktum = Faktum("Regelreferanse",this),
+            utfallFunksjon = { list.any { it.fired() } },
+            faktumList = list.filter { it.children.isNotEmpty() }
+        )
     }
 
+    /**
+     * "AngittFlyktning".alleHarTruffet()
+     * MengdeSumsumsjon:
+     *      ALLE
+     *          "AngittFlyktning_r1"
+     *          "AngittFlyktning_r2"
+     *          "AngittFlyktning_r3"
+     */
     protected fun String.alleHarTruffet(): MengdeSubsumsjon {
         val list = finnReglerByName(this)
         return MengdeSubsumsjon(
-            komparator = ALLE,
-            utfallFunksjon = { list.all { it.fired() } }
-        ).apply {
-            this.children.addAll(list.filter { it.children.isNotEmpty() })
-        }
+            komparator = MengdeKomparator.ALLE,
+            faktum = Faktum("Regelreferanse",this),
+            utfallFunksjon = { list.all { it.fired() } },
+            faktumList = list.filter { it.children.isNotEmpty() }
+        )
     }
 
     protected fun String.ingenHarTruffet(): MengdeSubsumsjon {
         val list = finnReglerByName(this)
         return MengdeSubsumsjon(
-            komparator = INGEN,
-            utfallFunksjon = { list.none { it.fired() } }
-        ).apply {
-            this.children.addAll(list.filter { it.children.isNotEmpty() })
-        }
+            komparator = MengdeKomparator.INGEN,
+            faktum = Faktum("Regelreferanse",this),
+            utfallFunksjon = { list.none { it.fired() } },
+            faktumList = list.filter { it.children.isNotEmpty() }
+        )
     }
 
     private fun finnReglerByName(rettsregelNavn: String): List<Rule> {

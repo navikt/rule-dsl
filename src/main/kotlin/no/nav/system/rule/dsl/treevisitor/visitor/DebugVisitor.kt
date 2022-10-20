@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.MengdeSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import svarord
 
@@ -14,13 +15,16 @@ class DebugVisitor : TreeVisitor {
 
     override fun visit(ruleComponent: AbstractRuleComponent) {
         debugString.append(" ".repeat(level * 2))
-
+        debugString.append(ruleComponent.toString()).append("\n")
         when (ruleComponent) {
             is Faktum<*> -> {
                 debugString.append("faktum: $ruleComponent\n")
             }
             is ParSubsumsjon -> {
-                debugString.append("subsumsjon: $ruleComponent\n")
+                debugString.append("parsubsumsjon: $ruleComponent\n")
+            }
+            is MengdeSubsumsjon -> {
+                debugString.append("mengdesubsumsjon: $ruleComponent\n")
             }
             is Predicate -> {
                 debugString.append("predicate: ${ruleComponent.fired().svarord()}\n")

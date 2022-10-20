@@ -3,6 +3,7 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.enums.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.AbstractSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.erLik
@@ -107,7 +108,7 @@ open class Rule(
     @OverloadResolutionByLambdaReturnType
     @JvmName("FagHVIS")
     @DslDomainPredicate
-    fun HVIS(arcFunction: () -> ParSubsumsjon) {
+    fun HVIS(arcFunction: () -> AbstractSubsumsjon) {
         OG(arcFunction)
     }
 
@@ -116,7 +117,7 @@ open class Rule(
      */
     @OverloadResolutionByLambdaReturnType
     @JvmName("FagOG")
-    fun OG(arcFunction: () -> ParSubsumsjon) {
+    fun OG(arcFunction: () -> AbstractSubsumsjon) {
         predicateFunctionList.add(arcFunction)
     }
 
