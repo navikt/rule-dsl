@@ -4,7 +4,7 @@ import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.enums.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.erLik
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
@@ -24,7 +24,7 @@ import kotlin.experimental.ExperimentalTypeInference
 open class Rule(
     private val name: String,
     private val sequence: Int
-) : Comparable<Rule>, AbstractRuleComponent(), ResourceHolder {
+) : Comparable<Rule>, AbstractResourceHolder() {
 
     /**
      * Functional description of the rule
@@ -107,7 +107,7 @@ open class Rule(
     @OverloadResolutionByLambdaReturnType
     @JvmName("FagHVIS")
     @DslDomainPredicate
-    fun HVIS(arcFunction: () -> Subsumsjon) {
+    fun HVIS(arcFunction: () -> ParSubsumsjon) {
         OG(arcFunction)
     }
 
@@ -116,7 +116,7 @@ open class Rule(
      */
     @OverloadResolutionByLambdaReturnType
     @JvmName("FagOG")
-    fun OG(arcFunction: () -> Subsumsjon) {
+    fun OG(arcFunction: () -> ParSubsumsjon) {
         predicateFunctionList.add(arcFunction)
     }
 

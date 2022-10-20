@@ -3,7 +3,7 @@ package no.nav.system.rule.dsl
 /**
  * Top level ruleComponent encapusaltes a complete ruleservice.
  */
-abstract class AbstractRuleService<out T> : AbstractRuleComponent(), ResourceHolder {
+abstract class AbstractRuleService<out T> : AbstractResourceHolder() {
     protected abstract val ruleService: () -> T
 
     /**

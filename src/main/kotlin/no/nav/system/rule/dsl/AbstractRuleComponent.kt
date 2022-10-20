@@ -18,7 +18,7 @@ abstract class AbstractRuleComponent {
     var parent: AbstractRuleComponent? = null
         set(@NotNull parent) {
             field = parent
-            if (parent is ResourceHolder && this is ResourceHolder) {
+            if (parent is AbstractResourceHolder && this is AbstractResourceHolder) {
                 this.resourceMap = parent.resourceMap
             }
         }

@@ -10,11 +10,11 @@ class Faktum<T>(val navn: String, var verdi: T) : AbstractRuleComponent() {
     }
 
     override fun name(): String {
-        TODO("Not yet implemented")
+        return navn
     }
 
     override fun type(): String {
-        TODO("Not yet implemented")
+        return "Faktum"
     }
 
     override fun fired(): Boolean {

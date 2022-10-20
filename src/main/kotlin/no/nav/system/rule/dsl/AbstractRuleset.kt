@@ -3,7 +3,8 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.Komparator.*
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import no.nav.system.rule.dsl.rettsregel.MengdeSubsumsjon
+import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import java.util.*
 
@@ -13,7 +14,7 @@ import java.util.*
  * @param T the return type of the ruleset
  *
  */
-abstract class AbstractRuleset<T : Any> : AbstractRuleComponent(), ResourceHolder {
+abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     /**
      * Ruleset name
@@ -165,9 +166,9 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent(), ResourceHolde
             .any { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
     }
 
-    protected fun String.minstEnHarTruffet(): Subsumsjon {
+    protected fun String.minstEnHarTruffet(): MengdeSubsumsjon {
         val list = finnReglerByName(this)
-        return Subsumsjon(
+        return MengdeSubsumsjon(
             komparator = MINST_EN_AV,
             utfallFunksjon = { list.any { it.fired() } }
         ).apply {
@@ -175,22 +176,20 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent(), ResourceHolde
         }
     }
 
-    protected fun String.alleHarTruffet(): Subsumsjon {
+    protected fun String.alleHarTruffet(): MengdeSubsumsjon {
         val list = finnReglerByName(this)
-        return Subsumsjon(
+        return MengdeSubsumsjon(
             komparator = ALLE,
-            pair = null,
             utfallFunksjon = { list.all { it.fired() } }
         ).apply {
             this.children.addAll(list.filter { it.children.isNotEmpty() })
         }
     }
 
-    protected fun String.ingenHarTruffet(): Subsumsjon {
+    protected fun String.ingenHarTruffet(): MengdeSubsumsjon {
         val list = finnReglerByName(this)
-        return Subsumsjon(
+        return MengdeSubsumsjon(
             komparator = INGEN,
-            pair = null,
             utfallFunksjon = { list.none { it.fired() } }
         ).apply {
             this.children.addAll(list.filter { it.children.isNotEmpty() })

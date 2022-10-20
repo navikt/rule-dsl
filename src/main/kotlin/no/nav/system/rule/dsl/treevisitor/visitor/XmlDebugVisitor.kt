@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.*
-import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -39,7 +39,7 @@ class XmlDebugVisitor : TreeVisitor {
                 }
                 debugString.append(">").append("\n")
             }
-            is Subsumsjon -> {
+            is ParSubsumsjon -> {
                 debugString
                     .append("subsumsjon")
                     .append(" fired=${ruleComponent.fired()}").append(">")

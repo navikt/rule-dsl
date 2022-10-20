@@ -1,7 +1,8 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.*
-import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import svarord
 
 /**
@@ -15,7 +16,10 @@ class DebugVisitor : TreeVisitor {
         debugString.append(" ".repeat(level * 2))
 
         when (ruleComponent) {
-            is Subsumsjon -> {
+            is Faktum<*> -> {
+                debugString.append("faktum: $ruleComponent\n")
+            }
+            is ParSubsumsjon -> {
                 debugString.append("subsumsjon: $ruleComponent\n")
             }
             is Predicate -> {

@@ -8,7 +8,7 @@ import no.nav.system.rule.dsl.enums.Komparator
 import no.nav.system.rule.dsl.enums.Komparator.INGEN
 import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.Subsumsjon
+import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -33,7 +33,7 @@ class PersonenErFlyktningRSTest {
         assertTrue(flyktningUtfall.regel.fired())
 
 
-        val flyktningSubsum = flyktningUtfall.regel.children.first() as Subsumsjon
+        val flyktningSubsum = flyktningUtfall.regel.children.first() as ParSubsumsjon
         assertEquals(INGEN, flyktningSubsum.komparator)
         assertTrue(flyktningSubsum.children.all { !it.fired() })
     }
@@ -95,7 +95,7 @@ class PersonenErFlyktningRSTest {
 
         assertEquals(OPPFYLT, flyktningUtfall.utfallType)
         assertTrue(flyktningUtfall.regel.fired())
-        val overgangsregelTreSubsumsjon = flyktningUtfall.regel.children[2] as Subsumsjon
+        val overgangsregelTreSubsumsjon = flyktningUtfall.regel.children[2] as ParSubsumsjon
         assertEquals(Komparator.MINST_EN_AV, overgangsregelTreSubsumsjon.komparator)
         assertEquals(3, overgangsregelTreSubsumsjon.children.size)
         assertTrue(overgangsregelTreSubsumsjon.children[0].fired())

@@ -7,7 +7,7 @@ import java.util.*
  * Common ruleflow behaviour used by all ruleflow implementations.
  * Defines branching logic DSL (decision, branch, condition, flow).
  */
-abstract class AbstractRuleflow : AbstractRuleComponent(), ResourceHolder {
+abstract class AbstractRuleflow : AbstractResourceHolder() {
     /**
      * Tracks the full name of nested branches.
      */

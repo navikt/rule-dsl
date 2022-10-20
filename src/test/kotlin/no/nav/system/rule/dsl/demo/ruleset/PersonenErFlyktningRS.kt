@@ -80,9 +80,9 @@ class PersonenErFlyktningRS(
         }
 
         // TODO Kom tibake til denne senere
-        fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): Subsumsjon {
-            return Subsumsjon(
-                Komparator.STØRRE_ELLER_LIK, Pair(Faktum(this), Faktum(target))
+        fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): ParSubsumsjon {
+            return ParSubsumsjon(
+                Komparator.STØRRE_ELLER_LIK, Faktum(this), Faktum(target)
             ) { this.count(quantifier) >= target }
         }
         regel("Overgangsregel_AP_tidligereUT") {
@@ -173,11 +173,11 @@ class PersonenErFlyktningRS(
 fun main() {
     val ytelseFakta = Faktum("Ytelsetypen", AP)
 
-    val x2: Subsumsjon = ytelseFakta erLik AP
+    val x2: ParSubsumsjon = ytelseFakta erLik AP
     x2.evaluate()
     println(x2)
 
-    val bb2: Subsumsjon = ytelseFakta erBlant listOf(AFP, UT_GJR, AP)
+    val bb2: ParSubsumsjon = ytelseFakta erBlant listOf(AFP, UT_GJR, AP)
     bb2.evaluate()
     println(bb2)
 
