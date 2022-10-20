@@ -1,6 +1,8 @@
 package no.nav.system.rule.dsl.rettsregel
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.FAKTUM
 
 class Faktum<T>(val navn: String, var verdi: T) : AbstractRuleComponent() {
     var anonymous = false
@@ -14,7 +16,7 @@ class Faktum<T>(val navn: String, var verdi: T) : AbstractRuleComponent() {
     }
 
     override fun type(): String {
-        return "Faktum"
+        return FAKTUM.name
     }
 
     override fun fired(): Boolean {

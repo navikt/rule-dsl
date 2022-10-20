@@ -2,6 +2,8 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.MengdeKomparator
 import no.nav.system.rule.dsl.enums.ParKomparator.*
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
@@ -271,5 +273,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     override fun name(): String = rulesetName
     override fun fired(): Boolean = true
-    override fun type(): String = AbstractRuleset::class.java.name
+   // override fun type(): String = AbstractRuleset::class.java.name
+    override fun type(): String = REGELSETT.name
 }

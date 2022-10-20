@@ -1,5 +1,8 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.PREDIKAT
+
 /**
  * A single boolean statement used in evaluation of a rule.
  */
@@ -20,7 +23,7 @@ open class Predicate(
     }
 
     override fun name(): String = ""
-    override fun type(): String = "predikat"
+    override fun type(): String = PREDIKAT.name
     override fun fired(): Boolean = fired
     override fun toString(): String = "Predicate(fired=$fired)"
 }

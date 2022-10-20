@@ -5,6 +5,9 @@ import no.nav.system.rule.dsl.Predicate
 import no.nav.system.rule.dsl.enums.Komparator
 import no.nav.system.rule.dsl.enums.MengdeKomparator
 import no.nav.system.rule.dsl.enums.ParKomparator
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.MENGDE_SUBSUMSJON
+import no.nav.system.rule.dsl.enums.RuleComponentType.PAR_SUBSUMSJON
 import svarord
 
 /**
@@ -22,7 +25,7 @@ class ParSubsumsjon(
         this.children.add(faktum2)
     }
 
-    override fun type(): String = "ParSubsumsjon"
+    override fun type(): String = PAR_SUBSUMSJON.name
 
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
@@ -42,7 +45,7 @@ class MengdeSubsumsjon(
     }
 
     override fun type(): String {
-        return "MengdeSubsumsjon"
+        return MENGDE_SUBSUMSJON.name
     }
 
     override fun toString(): String {

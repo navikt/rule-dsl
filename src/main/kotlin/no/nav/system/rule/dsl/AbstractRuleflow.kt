@@ -1,5 +1,7 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.REGELFLYT
 import org.jetbrains.annotations.TestOnly
 import java.util.*
 
@@ -52,7 +54,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
     override fun name(): String = this.javaClass.simpleName
     override fun fired(): Boolean = true
-    override fun type(): String = "regelflyt"
+    override fun type(): String = REGELFLYT.name
 
     /**
      *

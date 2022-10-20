@@ -1,5 +1,7 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.*
 import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.enums.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.pattern.Pattern
@@ -213,7 +215,7 @@ open class Rule(
      */
     override fun name(): String = name
     override fun fired(): Boolean = fired
-    override fun type(): String = "regel"
+    override fun type(): String = REGEL.name
 
 }
 
