@@ -31,7 +31,7 @@ class BeregnFaktiskTrygdetidRSTest {
         ).run {
             test()
             accept(redFttVisitor)
-            println(debug())
+//            println(debug())
         }
 
         assertNotNull(redFttVisitor.rule)
