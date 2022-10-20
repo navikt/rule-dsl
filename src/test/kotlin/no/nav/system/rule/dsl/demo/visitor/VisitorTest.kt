@@ -1,10 +1,10 @@
 package no.nav.system.rule.dsl.demo.visitor
 
 import no.nav.system.rule.dsl.demo.domain.Boperiode
-import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Request
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
+import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.ruleservice.BeregnAlderspensjonService
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
@@ -34,27 +34,34 @@ class VisitorTest {
         val service = BeregnAlderspensjonService(params).also { it.run() }
         val txt = service.debug()
 
-        assertEquals("""
-            ruleservice: BeregnAlderspensjonService
-              ruleflow: BeregnAlderspensjonFlyt
-                ruleset: BeregnFaktiskTrygdetidRS
-                  rule: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.1 
-                  rule: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.2 
-                  rule: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.1 
-                  rule: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.2 
-                  rule: JA BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav 
-                  rule: NEI BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid  utfallType: IKKE_OPPFYLT
-                    subsumsjon: NEI 'virkningstidspunkt' (1990-05-01) må være fom '1991-01-01'
-                    subsumsjon: JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)
-                  rule: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid 
-                  rule: JA BeregnFaktiskTrygdetidRS.ReturnRegel 
-                decision: BeregnAlderspensjonFlyt.Sivilstand gift?
-                  branch: JA BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0
-                  branch: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1
-                ruleset: BeregnGrunnpensjonRS
-                  rule: NEI BeregnGrunnpensjonRS.FullTrygdetid 
-                  rule: JA BeregnGrunnpensjonRS.RedusertTrygdetid""".trimIndent(), txt)
+        assertEquals(
+            """
+                regeltjeneste: BeregnAlderspensjonService
+                  regelflyt: BeregnAlderspensjonFlyt
+                    regelsett: BeregnFaktiskTrygdetidRS
+                      regel: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.1 
+                      regel: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.2 
+                      regel: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.1 
+                      regel: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.2 
+                      regel: JA BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav 
+                      regel: NEI BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid  utfallType: IKKE_OPPFYLT
+                        par_subsumsjon: NEI faktum: 'virkningstidspunkt' (1990-05-01) må være fom faktum: '1991-01-01'
+                          faktum: 'virkningstidspunkt' (1990-05-01)
+                          faktum: '1991-01-01'
+                        par_subsumsjon: JA faktum: 'faktisk trygdetid i måneder' (224) er mindre enn faktum: 'firefemtedelskrav' (480)
+                          faktum: 'faktisk trygdetid i måneder' (224)
+                          faktum: 'firefemtedelskrav' (480)
+                      regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid 
+                      regel: JA BeregnFaktiskTrygdetidRS.ReturnRegel 
+                    decision: BeregnAlderspensjonFlyt.Sivilstand gift?
+                      branch: JA BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0
+                      branch: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1
+                    regelsett: BeregnGrunnpensjonRS
+                      regel: NEI BeregnGrunnpensjonRS.FullTrygdetid 
+                      regel: JA BeregnGrunnpensjonRS.RedusertTrygdetid""".trimIndent(), txt
+        )
     }
+
     @Test
     fun `XML debug visitor test`() {
         val params = Request(
@@ -72,10 +79,11 @@ class VisitorTest {
             )
         )
 
-        val service = BeregnAlderspensjonService(params).also { it.run() }
-        val xml = service.xmlDebug()
 
-        assertEquals("""
+        val xml = BeregnAlderspensjonService(params).also { it.run() }.xmlDebug()
+
+        assertEquals(
+            """
             <BeregnAlderspensjonService>
               <BeregnAlderspensjonFlyt>
                 <BeregnFaktiskTrygdetidRS>
@@ -85,8 +93,8 @@ class VisitorTest {
                   </BoPeriodeStartFom16år.2 fired=true>
                   </SettFireFemtedelskrav fired=true>
                   </Skal_ha_redusert_fremtidig_trygdetid fired=false comment="Dersom faktisk trygdetid i Norge er mindre enn 4/5 av opptjeningstiden skal den framtidige trygdetiden være redusert.">
-                    <subsumsjon fired=false>NEI 'virkningstidspunkt' (1990-05-01) må være fom '1991-01-01'</predicate>
-                    <subsumsjon fired=true>JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)</predicate>
+                    <subsumsjon fired=false>par_subsumsjon: NEI faktum: 'virkningstidspunkt' (1990-05-01) må være fom faktum: '1991-01-01'</subsumsjon>
+                    <subsumsjon fired=true>par_subsumsjon: JA faktum: 'faktisk trygdetid i måneder' (224) er mindre enn faktum: 'firefemtedelskrav' (480)</subsumsjon>
                   </FastsettTrygdetid fired=true>
                   </ReturnRegel fired=true>
                 </BeregnFaktiskTrygdetidRS>
@@ -101,7 +109,8 @@ class VisitorTest {
                   </RedusertTrygdetid fired=true>
                 </BeregnGrunnpensjonRS>
               </BeregnAlderspensjonFlyt>
-            </BeregnAlderspensjonService>""".trimIndent(), xml)
+            </BeregnAlderspensjonService>""".trimIndent(), xml
+        )
 
     }
 }

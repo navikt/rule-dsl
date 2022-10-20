@@ -39,11 +39,11 @@ class BeregnFaktiskTrygdetidRSTest {
         Assertions.assertTrue(redFttRegel.evaluated)
         Assertions.assertTrue(redFttRegel.fired())
         Assertions.assertEquals(
-            "JA 'virkningstidspunkt' (2000-01-01) er fom '1991-01-01'",
+            "par_subsumsjon: JA faktum: 'virkningstidspunkt' (2000-01-01) er fom faktum: '1991-01-01'",
             redFttRegel.children[0].toString()
         )
         Assertions.assertEquals(
-            "JA 'faktisk trygdetid i måneder' (155) er mindre enn 'firefemtedelskrav' (480)",
+            "par_subsumsjon: JA faktum: 'faktisk trygdetid i måneder' (155) er mindre enn faktum: 'firefemtedelskrav' (480)",
             redFttRegel.children[1].toString()
         )
     }
@@ -71,11 +71,11 @@ class BeregnFaktiskTrygdetidRSTest {
         Assertions.assertTrue(redFttKonklusjon.evaluated)
         Assertions.assertFalse(redFttKonklusjon.fired())
         Assertions.assertEquals(
-            "JA 'virkningstidspunkt' (2000-01-01) er fom '1991-01-01'",
+            "par_subsumsjon: JA faktum: 'virkningstidspunkt' (2000-01-01) er fom faktum: '1991-01-01'",
             redFttKonklusjon.children[0].toString()
         )
         Assertions.assertEquals(
-            "NEI 'faktisk trygdetid i måneder' (515) må være mindre enn 'firefemtedelskrav' (480)",
+            "par_subsumsjon: NEI faktum: 'faktisk trygdetid i måneder' (515) må være mindre enn faktum: 'firefemtedelskrav' (480)",
             redFttKonklusjon.children[1].toString()
         )
     }

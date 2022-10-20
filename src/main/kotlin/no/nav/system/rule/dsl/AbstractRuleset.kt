@@ -173,7 +173,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         val list = finnReglerByName(this)
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.MINST_EN_AV,
-            faktum = Faktum("Regelreferanse",this),
+            faktum = Faktum("Regelreferanse", this),
             utfallFunksjon = { list.any { it.fired() } },
             faktumList = list.filter { it.children.isNotEmpty() }
         )
@@ -191,7 +191,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         val list = finnReglerByName(this)
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.ALLE,
-            faktum = Faktum("Regelreferanse",this),
+            faktum = Faktum("Regelreferanse", this),
             utfallFunksjon = { list.all { it.fired() } },
             faktumList = list.filter { it.children.isNotEmpty() }
         )
@@ -201,7 +201,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         val list = finnReglerByName(this)
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.INGEN,
-            faktum = Faktum("Regelreferanse",this),
+            faktum = Faktum("Regelreferanse", this),
             utfallFunksjon = { list.none { it.fired() } },
             faktumList = list.filter { it.children.isNotEmpty() }
         )
@@ -273,6 +273,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     override fun name(): String = rulesetName
     override fun fired(): Boolean = true
-   // override fun type(): RuleComponentType = AbstractRuleset::class.java.name
     override fun type(): RuleComponentType = REGELSETT
+    override fun toString(): String = "${type()}: $rulesetName"
+
 }

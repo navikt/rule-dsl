@@ -3,6 +3,7 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
 import org.jetbrains.annotations.TestOnly
+import svarord
 import java.util.*
 
 /**
@@ -55,12 +56,13 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
     override fun name(): String = this.javaClass.simpleName
     override fun fired(): Boolean = true
     override fun type(): RuleComponentType = REGELFLYT
+    override fun toString(): String = "${type()}: ${name()}"
 
     /**
      *
      */
     class Decision(
-        private val name: String
+        private val name: String,
     ) : AbstractRuleComponent() {
 
         private var branchList = mutableListOf<Branch>()
@@ -94,9 +96,10 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
         override fun name(): String = name
         override fun fired(): Boolean = true
         override fun type(): RuleComponentType = DECISION
+        override fun toString(): String = "${type()}: ${name()}"
 
         class Branch(
-            private val name: String
+            private val name: String,
         ) : AbstractRuleComponent() {
             lateinit var condition: () -> Boolean
             lateinit var flowFunction: () -> Unit
@@ -121,6 +124,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
             override fun name(): String = name
             override fun fired(): Boolean = fired
             override fun type(): RuleComponentType = BRANCH
+            override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
         }
     }
 }

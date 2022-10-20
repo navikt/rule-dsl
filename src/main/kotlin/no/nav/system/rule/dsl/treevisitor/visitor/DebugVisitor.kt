@@ -16,39 +16,39 @@ class DebugVisitor : TreeVisitor {
     override fun visit(ruleComponent: AbstractRuleComponent) {
         debugString.append(" ".repeat(level * 2))
         debugString.append(ruleComponent.toString()).append("\n")
-        when (ruleComponent) {
-            is Faktum<*> -> {
-                debugString.append("faktum: $ruleComponent\n")
-            }
-            is ParSubsumsjon -> {
-                debugString.append("parsubsumsjon: $ruleComponent\n")
-            }
-            is MengdeSubsumsjon -> {
-                debugString.append("mengdesubsumsjon: $ruleComponent\n")
-            }
-            is Predicate -> {
-                debugString.append("predicate: ${ruleComponent.fired().svarord()}\n")
-            }
-            is Rule -> {
-                val utfallTekst = ruleComponent.utfall?.let { " utfallType: ${it.utfallType}" } ?: ""
-                debugString.append("rule: ${ruleComponent.fired().svarord()} ${ruleComponent.name()} $utfallTekst\n")
-            }
-            is AbstractRuleset<*> -> {
-                debugString.append("ruleset: ${ruleComponent.rulesetName}\n")
-            }
-            is AbstractRuleflow -> {
-                debugString.append("ruleflow: ${ruleComponent.javaClass.simpleName}\n")
-            }
-            is AbstractRuleflow.Decision -> {
-                debugString.append("decision: ${ruleComponent.name()}\n")
-            }
-            is AbstractRuleflow.Decision.Branch -> {
-                debugString.append("branch: ${ruleComponent.fired().svarord()} ${ruleComponent.name()}\n")
-            }
-            is AbstractRuleService<*> -> {
-                debugString.append("ruleservice: ${ruleComponent.name()}\n")
-            }
-        }
+//        when (ruleComponent) {
+//            is Faktum<*> -> {
+//                debugString.append("faktum: $ruleComponent\n")
+//            }
+//            is ParSubsumsjon -> {
+//                debugString.append("parsubsumsjon: $ruleComponent\n")
+//            }
+//            is MengdeSubsumsjon -> {
+//                debugString.append("mengdesubsumsjon: $ruleComponent\n")
+//            }
+//            is Predicate -> {
+//                debugString.append("predicate: ${ruleComponent.fired().svarord()}\n")
+//            }
+//            is Rule -> {
+//                val utfallTekst = ruleComponent.utfall?.let { " utfallType: ${it.utfallType}" } ?: ""
+//                debugString.append("rule: ${ruleComponent.fired().svarord()} ${ruleComponent.name()} $utfallTekst\n")
+//            }
+//            is AbstractRuleset<*> -> {
+//                debugString.append("ruleset: ${ruleComponent.rulesetName}\n")
+//            }
+//            is AbstractRuleflow -> {
+//                debugString.append("ruleflow: ${ruleComponent.javaClass.simpleName}\n")
+//            }
+//            is AbstractRuleflow.Decision -> {
+//                debugString.append("decision: ${ruleComponent.name()}\n")
+//            }
+//            is AbstractRuleflow.Decision.Branch -> {
+//                debugString.append("branch: ${ruleComponent.fired().svarord()} ${ruleComponent.name()}\n")
+//            }
+//            is AbstractRuleService<*> -> {
+//                debugString.append("ruleservice: ${ruleComponent.name()}\n")
+//            }
+//        }
 
         level++
         ruleComponent.children.forEach { it.accept(this) }

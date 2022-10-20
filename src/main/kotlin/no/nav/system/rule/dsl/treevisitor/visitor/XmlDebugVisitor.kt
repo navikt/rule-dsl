@@ -1,6 +1,8 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.*
+import no.nav.system.rule.dsl.rettsregel.AbstractSubsumsjon
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 
 /**
@@ -13,6 +15,10 @@ class XmlDebugVisitor : TreeVisitor {
     override fun visit(ruleComponent: AbstractRuleComponent) {
         debugString.append(" ".repeat(level * 2))
         debugString.append("<")
+
+        if (ruleComponent !is Faktum<*>) {
+            debugString.append("<")
+        }
 
         when (ruleComponent) {
             is AbstractRuleService<*> -> {
@@ -39,19 +45,12 @@ class XmlDebugVisitor : TreeVisitor {
                 }
                 debugString.append(">").append("\n")
             }
-            is ParSubsumsjon -> {
+            is AbstractSubsumsjon -> {
                 debugString
                     .append("subsumsjon")
                     .append(" fired=${ruleComponent.fired()}").append(">")
                     .append(ruleComponent)
-                    .append("</predicate>")
-                    .append("\n")
-            }
-            is Predicate -> {
-                debugString
-                    .append("predicate")
-                    .append(" fired=${ruleComponent.fired()}").append(">")
-                    .append("</predicate>")
+                    .append("</subsumsjon>")
                     .append("\n")
             }
         }
@@ -60,7 +59,7 @@ class XmlDebugVisitor : TreeVisitor {
         ruleComponent.children.forEach { it.accept(this) }
         level--
 
-        if (ruleComponent !is Rule && ruleComponent !is Predicate) {
+        if (ruleComponent !is Rule && ruleComponent !is Faktum<*>) {
             debugString.append(" ".repeat(level * 2))
             debugString.append("</${ruleComponent.name()}>\n")
         }

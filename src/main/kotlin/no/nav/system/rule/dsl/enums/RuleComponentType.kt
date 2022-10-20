@@ -11,4 +11,9 @@ enum class RuleComponentType {
     REGELFLYT,
     REGELSETT,
     REGELTJENESTE;
+
+    override fun toString(): String {
+        return name.lowercase()
+    }
+
 }

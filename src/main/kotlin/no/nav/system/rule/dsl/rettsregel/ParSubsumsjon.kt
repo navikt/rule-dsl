@@ -29,14 +29,14 @@ class ParSubsumsjon(
 
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
-        return "${fired.svarord()} ${faktum1}$komparatorText${faktum2}"
+        return "${type()}: ${fired.svarord()} ${faktum1}$komparatorText${faktum2}"
     }
 }
 
 class MengdeSubsumsjon(
     override val komparator: MengdeKomparator,
     private val faktum: Faktum<String>,
-    private val faktumList: List<AbstractRuleComponent>,
+    faktumList: List<AbstractRuleComponent>,
     override val utfallFunksjon: () -> Boolean,
 ) : AbstractSubsumsjon(komparator = komparator, utfallFunksjon = utfallFunksjon) {
 
@@ -49,7 +49,7 @@ class MengdeSubsumsjon(
     }
 
     override fun toString(): String {
-        return "${fired.svarord()} ${faktum.navn} (${faktum.verdi})${komparator.text}:"
+        return "${type()}: ${fired.svarord()} ${faktum.navn} (${faktum.verdi})${komparator.text}:"
     }
 }
 

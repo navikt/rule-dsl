@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.PREDIKAT
+import svarord
 
 /**
  * A single boolean statement used in evaluation of a rule.
@@ -25,5 +26,5 @@ open class Predicate(
     override fun name(): String = ""
     override fun type(): RuleComponentType = PREDIKAT
     override fun fired(): Boolean = fired
-    override fun toString(): String = "Predicate(fired=$fired)"
+    override fun toString(): String = "${type()}: ${fired.svarord()}"
 }

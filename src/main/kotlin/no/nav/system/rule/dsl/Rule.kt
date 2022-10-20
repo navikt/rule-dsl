@@ -9,6 +9,7 @@ import no.nav.system.rule.dsl.rettsregel.AbstractSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.erLik
+import svarord
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
 
@@ -127,12 +128,11 @@ open class Rule(
     internal var utfall: Utfall? = null
     private var utfallFunksjon: (() -> Utfall)? = null
 
-    fun SVAR(utfallType: UtfallType? = null, svarFunction: () -> Utfall) {
+    fun SVAR(utfallType: UtfallType = OPPFYLT, svarFunction: () -> Utfall) {
         utfallFunksjon = {
             svarFunction.invoke().also {
                 it.regel = this
-                val tempUtfallType = utfallType ?: OPPFYLT
-                it.utfallType = if (fired) tempUtfallType else tempUtfallType.motsatt()
+                it.utfallType = if (fired) utfallType else utfallType.motsatt()
             }
         }
     }
@@ -216,6 +216,9 @@ open class Rule(
     override fun name(): String = name
     override fun fired(): Boolean = fired
     override fun type(): RuleComponentType = REGEL
-
+    override fun toString(): String {
+        val utfallTekst = utfall?.let { " utfallType: ${it.utfallType}" } ?: ""
+        return "${type()}: ${fired().svarord()} ${name()} $utfallTekst"
+    }
 }
 
