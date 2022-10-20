@@ -5,6 +5,8 @@ enum class RuleComponentType {
     MENGDE_SUBSUMSJON,
     FAKTUM,
     PREDIKAT,
+    DECISION,
+    BRANCH,
     REGEL,
     REGELFLYT,
     REGELSETT,

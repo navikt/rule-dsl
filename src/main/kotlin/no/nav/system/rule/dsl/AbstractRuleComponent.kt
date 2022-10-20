@@ -1,5 +1,6 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.treevisitor.visitor.TreeVisitor
 import org.jetbrains.annotations.NotNull
 
@@ -26,8 +27,7 @@ abstract class AbstractRuleComponent {
 
     abstract fun name(): String
 
-    // TODO En RuleComponentType enum er kanskje bedre enn String her.
-    abstract fun type(): String
+    abstract fun type(): RuleComponentType
     abstract fun fired(): Boolean
 
     /**

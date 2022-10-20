@@ -23,7 +23,7 @@ open class Predicate(
     }
 
     override fun name(): String = ""
-    override fun type(): String = PREDIKAT.name
+    override fun type(): RuleComponentType = PREDIKAT
     override fun fired(): Boolean = fired
     override fun toString(): String = "Predicate(fired=$fired)"
 }

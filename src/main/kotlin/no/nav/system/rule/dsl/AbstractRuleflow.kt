@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
-import no.nav.system.rule.dsl.enums.RuleComponentType.REGELFLYT
+import no.nav.system.rule.dsl.enums.RuleComponentType.*
 import org.jetbrains.annotations.TestOnly
 import java.util.*
 
@@ -54,7 +54,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
     override fun name(): String = this.javaClass.simpleName
     override fun fired(): Boolean = true
-    override fun type(): String = REGELFLYT.name
+    override fun type(): RuleComponentType = REGELFLYT
 
     /**
      *
@@ -93,7 +93,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
         override fun name(): String = name
         override fun fired(): Boolean = true
-        override fun type(): String = Decision::class.java.name
+        override fun type(): RuleComponentType = DECISION
 
         class Branch(
             private val name: String
@@ -120,7 +120,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
             override fun name(): String = name
             override fun fired(): Boolean = fired
-            override fun type(): String = Branch::class.java.name
+            override fun type(): RuleComponentType = BRANCH
         }
     }
 }

@@ -273,6 +273,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     override fun name(): String = rulesetName
     override fun fired(): Boolean = true
-   // override fun type(): String = AbstractRuleset::class.java.name
-    override fun type(): String = REGELSETT.name
+   // override fun type(): RuleComponentType = AbstractRuleset::class.java.name
+    override fun type(): RuleComponentType = REGELSETT
 }

@@ -215,7 +215,7 @@ open class Rule(
      */
     override fun name(): String = name
     override fun fired(): Boolean = fired
-    override fun type(): String = REGEL.name
+    override fun type(): RuleComponentType = REGEL
 
 }
 

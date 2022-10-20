@@ -20,6 +20,6 @@ abstract class AbstractRuleService<out T> : AbstractResourceHolder() {
 
     override fun name(): String = this.javaClass.simpleName
     override fun fired(): Boolean = true
-    override fun type(): String = REGELTJENESTE.name
+    override fun type(): RuleComponentType = REGELTJENESTE
 
 }

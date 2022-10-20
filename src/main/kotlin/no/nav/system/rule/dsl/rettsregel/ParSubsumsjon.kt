@@ -25,7 +25,7 @@ class ParSubsumsjon(
         this.children.add(faktum2)
     }
 
-    override fun type(): String = PAR_SUBSUMSJON.name
+    override fun type(): RuleComponentType = PAR_SUBSUMSJON
 
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
@@ -44,8 +44,8 @@ class MengdeSubsumsjon(
         this.children.addAll(faktumList)
     }
 
-    override fun type(): String {
-        return MENGDE_SUBSUMSJON.name
+    override fun type(): RuleComponentType {
+        return MENGDE_SUBSUMSJON
     }
 
     override fun toString(): String {

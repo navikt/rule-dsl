@@ -15,8 +15,8 @@ class Faktum<T>(val navn: String, var verdi: T) : AbstractRuleComponent() {
         return navn
     }
 
-    override fun type(): String {
-        return FAKTUM.name
+    override fun type(): RuleComponentType {
+        return FAKTUM
     }
 
     override fun fired(): Boolean {
