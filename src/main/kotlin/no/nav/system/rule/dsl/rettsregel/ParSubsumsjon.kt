@@ -36,12 +36,12 @@ class ParSubsumsjon(
 class MengdeSubsumsjon(
     override val komparator: MengdeKomparator,
     private val faktum: Faktum<String>,
-    faktumList: List<AbstractRuleComponent>,
+    abstractRuleComponentList: List<AbstractRuleComponent>,
     override val utfallFunksjon: () -> Boolean,
 ) : AbstractSubsumsjon(komparator = komparator, utfallFunksjon = utfallFunksjon) {
 
     init {
-        this.children.addAll(faktumList)
+        this.children.addAll(abstractRuleComponentList)
     }
 
     override fun type(): RuleComponentType {

@@ -1,7 +1,6 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.MengdeKomparator
-import no.nav.system.rule.dsl.enums.ParKomparator.*
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
@@ -50,23 +49,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             listOf(rule)
         }
     }
-
-    /**
-     * Creates a standard rule using the rule mini-DSL.
-     *
-     * @param navn the rule name
-     * @param createRuleContent the Rule function that populates the Rule object.
-     */
-//    inline fun rettsregel(navn: String, crossinline createRuleContent: Rettsregel.() -> Unit) {
-//        val sequence = nextSequence()
-//        ruleFunctionMap[sequence] = {
-//            val rule = Rettsregel("$rulesetName.$navn", sequence)
-//            rule.parent = this
-//            children.add(rule)
-//            rule.createRuleContent()
-//            listOf(rule)
-//        }
-//    }
 
     /**
      * Creates a pattern rule for each applicable element in the provided [pattern] using the rule mini-DSL.
@@ -164,7 +146,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      */
     protected fun String.harTruffet(): Boolean {
         validateRuleExistance(this)
-
         return children.filterIsInstance<Rule>()
             .any { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
     }
@@ -175,7 +156,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             komparator = MengdeKomparator.MINST_EN_AV,
             faktum = Faktum("Regelreferanse", this),
             utfallFunksjon = { list.any { it.fired() } },
-            faktumList = list.filter { it.children.isNotEmpty() }
+            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }
 
@@ -193,7 +174,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             komparator = MengdeKomparator.ALLE,
             faktum = Faktum("Regelreferanse", this),
             utfallFunksjon = { list.all { it.fired() } },
-            faktumList = list.filter { it.children.isNotEmpty() }
+            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }
 
@@ -203,7 +184,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             komparator = MengdeKomparator.INGEN,
             faktum = Faktum("Regelreferanse", this),
             utfallFunksjon = { list.none { it.fired() } },
-            faktumList = list.filter { it.children.isNotEmpty() }
+            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }
 
@@ -213,22 +194,14 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         if (list.isEmpty()) throw InvalidRulesetException("No rule with name that starts with ['$rettsregelNavn'] found during rule chaining.")
         return list
     }
-//    private fun finnRettsreglerByName(rettsregelNavn: String): List<Rettsregel> {
-//        val list = evaluatedRuleList.filterIsInstance<Rettsregel>()
-//            .filterNot { it.stopEval }
-//            .filter { rule -> rule.nameWithoutPatternOffset.startsWith("$rulesetName.$rettsregelNavn")}
-//        if (list.isEmpty()) throw InvalidRulesetException("No rule with name that starts with ['$rettsregelNavn'] found during rule chaining.")
-//        return list
-//    }
+
     /**
      * Checks if a rule with name equal to receiver has not fired.
      *
      * @receiver the rule name
      * @return returns true if the rule is found and has not fired.
      */
-    protected fun String.harIkkeTruffet(): Boolean {
-        return !this.harTruffet()
-    }
+    protected fun String.harIkkeTruffet(): Boolean = !this.harTruffet()
 
     /**
      * Checks if a pattern rule with name equal to receiver has fired on the specified [patternElement].
@@ -239,7 +212,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      */
     protected fun <P> String.harTruffet(patternElement: P): Boolean {
         validateRuleExistance(this)
-
         return children.filterIsInstance<Rule>()
             .any { rule ->
                 rule.nameWithoutPatternOffset == "$rulesetName.$this"

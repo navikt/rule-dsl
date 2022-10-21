@@ -1,5 +1,6 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
+import no.nav.system.rule.dsl.TomtUtfall
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
@@ -27,7 +28,8 @@ class BeregnFaktiskTrygdetidRSTest {
             virkningstidspunkt = Faktum(navn = "virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2018, 12, 31), LandEnum.NOR)
-            )
+            ),
+            TomtUtfall()
         ).run {
             test()
             accept(redFttVisitor)
@@ -60,7 +62,8 @@ class BeregnFaktiskTrygdetidRSTest {
             virkningstidspunkt = Faktum("virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2048, 12, 31), LandEnum.NOR)
-            )
+            ),
+            TomtUtfall()
         ).run {
             test()
             accept(redFttVisitor)

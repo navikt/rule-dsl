@@ -10,6 +10,7 @@ import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.helper.måneder
 import no.nav.system.rule.dsl.demo.helper.år
 import no.nav.system.rule.dsl.enums.ParKomparator
+import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
@@ -25,7 +26,7 @@ class PersonenErFlyktningRS(
     private val innKapittel20: Faktum<Boolean>,
     private val innVirk: Faktum<LocalDate>,
     private val innKravlinjeFremsattDatoFom2021: Faktum<Boolean>,
-) : AbstractRuleset<Utfall>() {
+) : AbstractRuleset<Faktum<UtfallType>>() {
     private var dato67m: Faktum<LocalDate> =
         Faktum("Fødselsdato67m", innPersongrunnlag.fødselsdato.verdi.withDayOfMonth(1) + 67.år + 1.måneder)
     private val unntakFraForutgaendeMedlemskap =
@@ -34,10 +35,9 @@ class PersonenErFlyktningRS(
     private val aktuelleUnntakstyper = listOf(
         FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP
     )
-    private val svar = TomtUtfall()
     private lateinit var trygdetid: Trygdetid
 
-    val SANN = Faktum("SANN", true)
+    val SANN = Faktum("SANN", true) // TODO Hvordan kan vi gjøre dette på en annen måte
 
     override fun create() {
         regel("SettRelevantTrygdetid_kap19") {
@@ -61,7 +61,7 @@ class PersonenErFlyktningRS(
             HVIS { unntakFraForutgaendeMedlemskap != null }
             OG { unntakFraForutgaendeMedlemskap!!.unntak erLik SANN }
             OG { unntakFraForutgaendeMedlemskap?.unntakType != null }
-            OG { unntakFraForutgaendeMedlemskap!!.unntakType.erBlant( aktuelleUnntakstyper) }
+            OG { unntakFraForutgaendeMedlemskap!!.unntakType.erBlant(aktuelleUnntakstyper) }
             kommentar("")
         }
         regel("AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning") {
@@ -136,35 +136,35 @@ class PersonenErFlyktningRS(
 
         regel("Konklusjon: ikkeRelevant") {
             OG { "AngittFlyktning".ingenHarTruffet() }
-            SVAR(IKKE_RELEVANT) { svar }
+            SVAR { Faktum("Anvendt flyktning", IKKE_RELEVANT) }
             SÅ {
-                RETURNER(svar)
+                RETURNER()
             }
         }
         regel("AnvendtFlyktning") {
             HVIS { innKravlinjeFremsattDatoFom2021.erUsann() }
             OG { "AngittFlyktning".minstEnHarTruffet() }
-            SVAR { svar }
+            SVAR { Faktum("Anvendt flyktning", OPPFYLT) }
             SÅ {
-                RETURNER(svar)
+                RETURNER()
             }
         }
         regel("AnvendtFlyktning_ingenOvergang") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
             OG { innKravlinjeFremsattDatoFom2021.erSann() }
             OG { "Overgangsregel".ingenHarTruffet() }
-            SVAR(IKKE_OPPFYLT) { svar }
+            SVAR { Faktum("Anvendt flyktning", IKKE_OPPFYLT) }
             SÅ {
-                RETURNER(svar)
+                RETURNER()
             }
         }
         regel("AnvendtFlyktning_harOvergang") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
             OG { innKravlinjeFremsattDatoFom2021.erSann() }
             OG { "Overgangsregel".minstEnHarTruffet() }
-            SVAR { svar }
+            SVAR { Faktum("Anvendt flyktning", OPPFYLT) }
             SÅ {
-                RETURNER(svar)
+                RETURNER()
             }
         }
     }

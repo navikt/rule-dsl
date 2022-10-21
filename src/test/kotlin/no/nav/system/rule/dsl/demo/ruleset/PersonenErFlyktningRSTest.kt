@@ -29,11 +29,11 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).testAndDebug().get()
 
-        assertEquals(IKKE_RELEVANT, flyktningUtfall.utfallType)
-        assertTrue(flyktningUtfall.regel.fired())
+        assertEquals(IKKE_RELEVANT, flyktningUtfall.verdi)
+        assertTrue(flyktningUtfall.children[0].fired())
 
 
-        val flyktningSubsum = flyktningUtfall.regel.children.first() as MengdeSubsumsjon
+        val flyktningSubsum = flyktningUtfall.children[0].children.first() as MengdeSubsumsjon
         assertEquals(INGEN, flyktningSubsum.komparator)
         assertTrue(flyktningSubsum.children.all { !it.fired() })
     }
@@ -53,8 +53,8 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", false)
         ).testAndDebug().get()
 
-        assertEquals(OPPFYLT, flyktningUtfall.utfallType)
-        assertEquals(1, flyktningUtfall.regel.children[1].children.size)
+        assertEquals(OPPFYLT, flyktningUtfall.verdi)
+        assertEquals(1, flyktningUtfall.children[0].children[1].children.size)
     }
 
     @Test
@@ -72,9 +72,9 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).testAndDebug().get()
 
-        assertEquals(IKKE_OPPFYLT, flyktningUtfall.utfallType)
-        assertTrue(flyktningUtfall.regel.fired())
-        assertEquals(3, flyktningUtfall.regel.children.size)
+        assertEquals(IKKE_OPPFYLT, flyktningUtfall.verdi)
+        assertTrue(flyktningUtfall.children[0].fired())
+        assertEquals(3, flyktningUtfall.children[0].children.size)
     }
 
     @Test
@@ -93,9 +93,9 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).testAndDebug().get()
 
-        assertEquals(OPPFYLT, flyktningUtfall.utfallType)
-        assertTrue(flyktningUtfall.regel.fired())
-        val overgangsregelTreSubsumsjon = flyktningUtfall.regel.children[2] as MengdeSubsumsjon
+        assertEquals(OPPFYLT, flyktningUtfall.verdi)
+        assertTrue(flyktningUtfall.children[0].fired())
+        val overgangsregelTreSubsumsjon = flyktningUtfall.children[0].children[2] as MengdeSubsumsjon
         assertEquals(MINST_EN_AV, overgangsregelTreSubsumsjon.komparator)
         assertEquals(3, overgangsregelTreSubsumsjon.children.size)
         assertTrue(overgangsregelTreSubsumsjon.children[0].fired())

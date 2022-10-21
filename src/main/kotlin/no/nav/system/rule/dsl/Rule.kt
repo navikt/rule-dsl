@@ -3,11 +3,9 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
 import no.nav.system.rule.dsl.enums.UtfallType
-import no.nav.system.rule.dsl.enums.UtfallType.OPPFYLT
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.AbstractSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.erLik
 import svarord
 import java.util.*
@@ -27,7 +25,7 @@ import kotlin.experimental.ExperimentalTypeInference
 @OptIn(ExperimentalTypeInference::class)
 open class Rule(
     private val name: String,
-    private val sequence: Int
+    private val sequence: Int,
 ) : Comparable<Rule>, AbstractResourceHolder() {
 
     /**
@@ -74,6 +72,9 @@ open class Rule(
      * Set to true if rule has a return value. When set to true this rule will stop ruleset evaluation if fired.
      */
     internal var returnRule = false
+
+    // TODO Slett 'utfall' og bytt ut alle kall mot denne med 'konstruerUtfall'. Fjern også kall til 'konstruerUtfall' fra 'evaluate'.
+    private var utfallsFaktumFunksjon: (() -> Faktum<*>)? = null
 
     private val predicateFunctionList = mutableListOf<() -> Predicate>()
 
@@ -124,15 +125,32 @@ open class Rule(
         predicateFunctionList.add(arcFunction)
     }
 
-    // TODO Slett 'utfall' og bytt ut alle kall mot denne med 'konstruerUtfall'. Fjern også kall til 'konstruerUtfall' fra 'evaluate'.
-    internal var utfall: Utfall? = null
-    private var utfallFunksjon: (() -> Utfall)? = null
 
-    fun SVAR(utfallType: UtfallType = OPPFYLT, svarFunction: () -> Utfall) {
-        utfallFunksjon = {
+    //    fun SVAR(utfallType: UtfallType = UtfallType.OPPFYLT, svarFunction: () -> Faktum<UtfallType>) {
+//        utfallsFaktumFunksjon = {
+//            svarFunction.invoke().also {
+//                it.children.add(this)
+//                it.verdi = if (fired) utfallType else utfallType.motsatt()
+//            }
+//        }
+//    }
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("SvarUtfall")
+    fun SVAR(svarFunction: () -> Faktum<UtfallType>) {
+        utfallsFaktumFunksjon = {
             svarFunction.invoke().also {
-                it.regel = this
-                it.utfallType = if (fired) utfallType else utfallType.motsatt()
+                it.children.add(this)
+                if (!fired) it.verdi = it.verdi.motsatt()
+            }
+        }
+    }
+
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("Svar")
+    fun SVAR(svarFunction: () -> Faktum<*>) {
+        utfallsFaktumFunksjon = {
+            svarFunction.invoke().also {
+                it.children.add(this)
             }
         }
     }
@@ -143,6 +161,15 @@ open class Rule(
     fun SÅ(action: () -> Unit) {
         this.actionStatement = action
     }
+
+//    /**
+//     * DSL: Return value entry.
+//     */
+//    fun RETURNER(returnValue: Utfall<*>) {
+//        returnValue.regel = this
+//        this.returnValue = Optional.of(returnValue)
+//        returnRule = true
+//    }
 
     /**
      * DSL: Return value entry.
@@ -155,6 +182,14 @@ open class Rule(
         }
         returnRule = true
     }
+
+//    /**
+//     * DSL: Return value entry.
+//     */
+//    fun RETURNERSVAR() {
+//        this.returnValue = Optional.of(this.utfallsFaktum)
+//        returnRule = true
+//    }
 
     /**
      * Provides a function for rule documentation.
@@ -194,9 +229,10 @@ open class Rule(
     }
 
     private fun konstruerUtfall() {
-        utfall = utfallFunksjon?.invoke()
-//        utfall.doc = prettyDoc()
-//        utfall.kilde = kilde. ..
+        utfallsFaktumFunksjon?.let {
+            returnValue = Optional.of(it.invoke())
+        }
+        // TODO Legg på prettyDoc og Kilde etterhvert.
     }
 
     /**
@@ -217,8 +253,8 @@ open class Rule(
     override fun fired(): Boolean = fired
     override fun type(): RuleComponentType = REGEL
     override fun toString(): String {
-        val utfallTekst = utfall?.let { " utfallType: ${it.utfallType}" } ?: ""
-        return "${type()}: ${fired().svarord()} ${name()} $utfallTekst"
+//        val utfallTekst = utfall?.let { " utfallType: ${it.type}" } ?: ""
+        return "${type()}: ${fired().svarord()} ${name()}"
     }
 }
 

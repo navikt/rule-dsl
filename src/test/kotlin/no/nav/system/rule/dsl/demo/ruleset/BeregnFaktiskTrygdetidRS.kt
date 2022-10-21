@@ -6,6 +6,7 @@ import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.pattern.createPattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
@@ -22,6 +23,7 @@ class BeregnFaktiskTrygdetidRS(
     val fødselsdato: Faktum<LocalDate>,
     val virkningstidspunkt: Faktum<LocalDate>,
     val boperiodeListe: List<Boperiode>,
+    val flyktningUtfall: Faktum<UtfallType>,
 ) : AbstractRuleset<Trygdetid>() {
 
     /**
@@ -70,7 +72,7 @@ class BeregnFaktiskTrygdetidRS(
         regel("Skal ha redusert fremtidig trygdetid") {
             HVIS { virkningstidspunkt erEtterEllerLik dato1991 }
             OG { svar.faktiskTrygdetidIMåneder erMindreEnn svar.firefemtedelskrav }
-            SVAR(OPPFYLT) { svar.redusertFremtidigTrygdetid }
+//            SVAR(OPPFYLT) { svar.redusertFremtidigTrygdetid }
 //            KILDE ( paragraf ...)
             kommentar(
                 """Dersom faktisk trygdetid i Norge er mindre enn 4/5 av
@@ -78,10 +80,16 @@ class BeregnFaktiskTrygdetidRS(
             )
         }
 
-        regel("FastsettTrygdetid") {
-            HVIS { true }
+        regel("FastsettTrygdetid_ikkeFlyktning") {
+            HVIS { flyktningUtfall.verdi != OPPFYLT }
             SÅ {
                 svar.år = (svar.faktiskTrygdetidIMåneder.verdi / 12.0).roundToInt()
+            }
+        }
+        regel("FastsettTrygdetid_Flyktning") {
+            HVIS { flyktningUtfall.verdi == OPPFYLT }
+            SÅ {
+                svar.år = 40
             }
         }
 

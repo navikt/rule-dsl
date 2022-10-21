@@ -33,7 +33,7 @@ class BeregnAlderspensjonServiceTest {
 
         assertEquals(3, response.anvendtTrygdetid?.år)
         assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
-        assertEquals(OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.utfallType)
+        assertEquals(OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.verdi)
 
         assertEquals(9000, response.grunnpensjon?.netto)
         assertEquals(1.0, response.grunnpensjon?.prosentsats)
@@ -61,7 +61,7 @@ class BeregnAlderspensjonServiceTest {
 
         assertEquals(19, response.anvendtTrygdetid?.år)
         assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
-        assertEquals(IKKE_OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.utfallType)
+        assertEquals(IKKE_OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.verdi)
 
         assertEquals(42750, response.grunnpensjon?.netto)
         assertEquals(0.9, response.grunnpensjon?.prosentsats)

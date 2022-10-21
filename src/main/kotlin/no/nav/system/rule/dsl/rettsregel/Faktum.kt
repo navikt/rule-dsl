@@ -4,7 +4,7 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.FAKTUM
 
-class Faktum<T>(val navn: String, var verdi: T) : AbstractRuleComponent() {
+open class Faktum<T>(open val navn: String, open var verdi: T) : AbstractRuleComponent() {
     var anonymous = false
 
     constructor(verdi: T) : this(verdi.toString(), verdi) {
