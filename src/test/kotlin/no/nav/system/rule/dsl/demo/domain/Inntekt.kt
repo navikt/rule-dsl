@@ -4,5 +4,4 @@ import java.time.LocalDate
 
 class Inntekt {
     var beløp = 0
-    var fom: LocalDate? = null
 }

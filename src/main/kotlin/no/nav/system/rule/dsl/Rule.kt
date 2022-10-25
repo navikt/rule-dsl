@@ -6,7 +6,7 @@ import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.AbstractSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.erLik
-import svarord
+import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
 

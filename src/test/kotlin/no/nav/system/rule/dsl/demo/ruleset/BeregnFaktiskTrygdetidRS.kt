@@ -20,10 +20,10 @@ import kotlin.math.roundToInt
  * Demo regelsett viser bruk av Pattern og regelsporing.
  */
 class BeregnFaktiskTrygdetidRS(
-    val fødselsdato: Faktum<LocalDate>,
-    val virkningstidspunkt: Faktum<LocalDate>,
-    val boperiodeListe: List<Boperiode>,
-    val flyktningUtfall: Faktum<UtfallType>,
+    fødselsdato: Faktum<LocalDate>,
+    private val virkningstidspunkt: Faktum<LocalDate>,
+    private val boperiodeListe: List<Boperiode>,
+    private val flyktningUtfall: Faktum<UtfallType>,
 ) : AbstractRuleset<Trygdetid>() {
 
     /**

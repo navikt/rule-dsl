@@ -5,9 +5,9 @@ import no.nav.system.rule.dsl.demo.domain.Grunnpensjon
 import kotlin.math.roundToInt
 
 class BeregnGrunnpensjonRS(
-    val grunnbeløp: Int,
-    val trygdetid: Int,
-    val sats: Double
+    private val grunnbeløp: Int,
+    private val trygdetid: Int,
+    private val sats: Double
 ) : AbstractRuleset<Grunnpensjon>() {
     override fun create() {
 

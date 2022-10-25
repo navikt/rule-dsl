@@ -2,8 +2,8 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
+import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import org.jetbrains.annotations.TestOnly
-import svarord
 import java.util.*
 
 /**

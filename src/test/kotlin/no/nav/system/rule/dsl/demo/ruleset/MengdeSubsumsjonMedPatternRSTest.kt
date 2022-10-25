@@ -4,7 +4,8 @@ import no.nav.system.rule.dsl.enums.MengdeKomparator.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.MengdeSubsumsjon
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class MengdeSubsumsjonMedPatternRSTest {
@@ -19,10 +20,7 @@ class MengdeSubsumsjonMedPatternRSTest {
             Faktum("bool4", false)
         )
 
-        val rule = MengdeSubsumsjonMedPatternRS(
-            faktumListe
-        ).testAndDebug()
-            .get()
+        val rule = MengdeSubsumsjonMedPatternRS(faktumListe).testAndDebug().get()
 
         println(rule.debug())
 

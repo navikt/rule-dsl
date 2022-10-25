@@ -2,7 +2,7 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.PREDIKAT
-import svarord
+import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
 /**
  * A single boolean statement used in evaluation of a rule.

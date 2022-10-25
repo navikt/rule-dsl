@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull
  * All rulecomponents are organized in a tree of rulecomponents using [children] and [parent]. Navigate the
  * rulecomponenttree by providing a [TreeVisitor] in the [accept] method.
  *
- * A [resourceMap] keeps track of all instantiated resources for convinient access during rule processing.
+ * A [AbstractResourceHolder.resourceMap] keeps track of all instantiated resources for convinient access during rule processing.
  * Resources are all classes that needs to be instantiated once per ruleService call, typically resources
  * are Rates (norsk "Sats"), Console-capture or anything else non-static.
  */

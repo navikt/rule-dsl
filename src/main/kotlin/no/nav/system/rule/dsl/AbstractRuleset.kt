@@ -108,7 +108,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
     /**
      * Creates, sorts and evaluates the rules of the ruleset.
      */
-    fun internalRun(): Optional<T> {
+    private fun internalRun(): Optional<T> {
         create()
 
         ruleFunctionMap.values.forEach { ruleSpawn ->

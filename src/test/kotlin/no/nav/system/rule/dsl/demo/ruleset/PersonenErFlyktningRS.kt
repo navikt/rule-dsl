@@ -164,27 +164,3 @@ class PersonenErFlyktningRS(
         }
     }
 }
-
-fun main() {
-    val ytelseFakta = Faktum("Ytelsetypen", AP)
-
-    val x2: ParSubsumsjon = ytelseFakta erLik AP
-    x2.evaluate()
-    println(x2)
-
-    val bb2: MengdeSubsumsjon = ytelseFakta erBlant listOf(AFP, UT_GJR, AP)
-    bb2.evaluate()
-    println(bb2)
-
-    val tomregel = 20
-    calc(tomregel)
-    println(tomregel)
-
-
-}
-
-
-fun calc(x: Int) {
-    var xIntern = x
-    xIntern = 2000
-}

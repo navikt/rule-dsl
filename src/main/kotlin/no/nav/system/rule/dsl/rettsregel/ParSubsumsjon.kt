@@ -8,11 +8,11 @@ import no.nav.system.rule.dsl.enums.ParKomparator
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.MENGDE_SUBSUMSJON
 import no.nav.system.rule.dsl.enums.RuleComponentType.PAR_SUBSUMSJON
-import svarord
+import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
 /**
  * TODO Vurder om en subsumsjon (og Predicate) burde ha en evaluate variabel slik sonm Rule. Hensikten er å oppdage bruk av Sumsumsjoner som ikke har blitt evaluert enda (feilsituasjon)
-  */
+ */
 class ParSubsumsjon(
     override val komparator: ParKomparator,
     private val faktum1: Faktum<*>,
@@ -44,9 +44,7 @@ class MengdeSubsumsjon(
         this.children.addAll(abstractRuleComponentList)
     }
 
-    override fun type(): RuleComponentType {
-        return MENGDE_SUBSUMSJON
-    }
+    override fun type(): RuleComponentType = MENGDE_SUBSUMSJON
 
     override fun toString(): String {
         return "${type()}: ${fired.svarord()} ${faktum.navn} (${faktum.verdi})${komparator.text}:"
@@ -55,7 +53,7 @@ class MengdeSubsumsjon(
 
 abstract class AbstractSubsumsjon(
     open val komparator: Komparator,
-    open val utfallFunksjon: () -> Boolean
+    open val utfallFunksjon: () -> Boolean,
 ) : Predicate(function = utfallFunksjon) {
 
     /**
