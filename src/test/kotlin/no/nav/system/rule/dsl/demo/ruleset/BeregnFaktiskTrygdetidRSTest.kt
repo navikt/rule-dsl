@@ -1,12 +1,12 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
-import no.nav.system.rule.dsl.TomtUtfall
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.enums.UtfallType
+import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.treevisitor.visitor.RuleVisitor
-import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -29,7 +29,7 @@ class BeregnFaktiskTrygdetidRSTest {
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2018, 12, 31), LandEnum.NOR)
             ),
-            TomtUtfall()
+            Faktum("Anvendt flyktning", IKKE_OPPFYLT)
         ).run {
             test()
             accept(redFttVisitor)
@@ -63,7 +63,7 @@ class BeregnFaktiskTrygdetidRSTest {
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2048, 12, 31), LandEnum.NOR)
             ),
-            TomtUtfall()
+            Faktum("Anvendt flyktning", IKKE_OPPFYLT)
         ).run {
             test()
             accept(redFttVisitor)

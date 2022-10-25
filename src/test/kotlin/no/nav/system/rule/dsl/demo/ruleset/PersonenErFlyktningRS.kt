@@ -43,6 +43,7 @@ class PersonenErFlyktningRS(
         regel("SettRelevantTrygdetid_kap19") {
             HVIS { !innKapittel20 }
             SÅ {
+                RETURNER(true)
                 trygdetid = innPersongrunnlag.trygdetidK19
             }
         }
@@ -133,38 +134,33 @@ class PersonenErFlyktningRS(
             }
             kommentar("")
         }
-
-        regel("Konklusjon: ikkeRelevant") {
-            OG { "AngittFlyktning".ingenHarTruffet() }
-            SVAR { Faktum("Anvendt flyktning", IKKE_RELEVANT) }
+        regel("AnvendtFlyktning_ikkeRelevant") {
+            HVIS { "AngittFlyktning".ingenHarTruffet() }
             SÅ {
-                RETURNER()
+                RETURNER(Faktum("Anvendt flyktning", IKKE_RELEVANT))
             }
         }
-        regel("AnvendtFlyktning") {
-            HVIS { innKravlinjeFremsattDatoFom2021.erUsann() }
-            OG { "AngittFlyktning".minstEnHarTruffet() }
-            SVAR { Faktum("Anvendt flyktning", OPPFYLT) }
+        regel("AnvendtFlyktning_oppfylt") {
+            HVIS { "AngittFlyktning".minstEnHarTruffet() }
+            OG { innKravlinjeFremsattDatoFom2021.erUsann() }
             SÅ {
-                RETURNER()
+                RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_ingenOvergang") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
             OG { innKravlinjeFremsattDatoFom2021.erSann() }
             OG { "Overgangsregel".ingenHarTruffet() }
-            SVAR { Faktum("Anvendt flyktning", IKKE_OPPFYLT) }
             SÅ {
-                RETURNER()
+                RETURNER(Faktum("Anvendt flyktning", IKKE_OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_harOvergang") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
             OG { innKravlinjeFremsattDatoFom2021.erSann() }
             OG { "Overgangsregel".minstEnHarTruffet() }
-            SVAR { Faktum("Anvendt flyktning", OPPFYLT) }
             SÅ {
-                RETURNER()
+                RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
             }
         }
     }

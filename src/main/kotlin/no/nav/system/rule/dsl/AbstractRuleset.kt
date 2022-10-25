@@ -150,6 +150,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             .any { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
     }
 
+
     protected fun String.minstEnHarTruffet(): MengdeSubsumsjon {
         val list = finnReglerByName(this)
         return MengdeSubsumsjon(

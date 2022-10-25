@@ -2,7 +2,6 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
-import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.AbstractSubsumsjon
 import no.nav.system.rule.dsl.rettsregel.Faktum
@@ -64,6 +63,11 @@ open class Rule(
     private var actionStatement: () -> Unit = {}
 
     /**
+     * The code that executes if the rule is not [fired]
+     */
+    private var elseStatement: () -> Unit = {}
+
+    /**
      * The value this rule will return.
      */
     internal var returnValue: Optional<Any> = Optional.empty()
@@ -72,9 +76,6 @@ open class Rule(
      * Set to true if rule has a return value. When set to true this rule will stop ruleset evaluation if fired.
      */
     internal var returnRule = false
-
-    // TODO Slett 'utfall' og bytt ut alle kall mot denne med 'konstruerUtfall'. Fjern også kall til 'konstruerUtfall' fra 'evaluate'.
-    private var utfallsFaktumFunksjon: (() -> Faktum<*>)? = null
 
     private val predicateFunctionList = mutableListOf<() -> Predicate>()
 
@@ -91,6 +92,8 @@ open class Rule(
     fun OG(predicateFunction: () -> Boolean) {
         predicateFunctionList.add { Predicate(function = predicateFunction) }
     }
+
+    // TODO Vurder å lag HVIS(predicateFunction: () -> Faktum<UtfallType>)
 
     @OverloadResolutionByLambdaReturnType
     @JvmName("FaktumHVIS")
@@ -125,36 +128,6 @@ open class Rule(
         predicateFunctionList.add(arcFunction)
     }
 
-
-    //    fun SVAR(utfallType: UtfallType = UtfallType.OPPFYLT, svarFunction: () -> Faktum<UtfallType>) {
-//        utfallsFaktumFunksjon = {
-//            svarFunction.invoke().also {
-//                it.children.add(this)
-//                it.verdi = if (fired) utfallType else utfallType.motsatt()
-//            }
-//        }
-//    }
-    @OverloadResolutionByLambdaReturnType
-    @JvmName("SvarUtfall")
-    fun SVAR(svarFunction: () -> Faktum<UtfallType>) {
-        utfallsFaktumFunksjon = {
-            svarFunction.invoke().also {
-                it.children.add(this)
-                if (!fired) it.verdi = it.verdi.motsatt()
-            }
-        }
-    }
-
-    @OverloadResolutionByLambdaReturnType
-    @JvmName("Svar")
-    fun SVAR(svarFunction: () -> Faktum<*>) {
-        utfallsFaktumFunksjon = {
-            svarFunction.invoke().also {
-                it.children.add(this)
-            }
-        }
-    }
-
     /**
      * DSL: Action statement entry.
      */
@@ -162,14 +135,12 @@ open class Rule(
         this.actionStatement = action
     }
 
-//    /**
-//     * DSL: Return value entry.
-//     */
-//    fun RETURNER(returnValue: Utfall<*>) {
-//        returnValue.regel = this
-//        this.returnValue = Optional.of(returnValue)
-//        returnRule = true
-//    }
+    /**
+     * DSL: Else statement entry.
+     */
+    fun ELLERS(action: () -> Unit) {
+        this.elseStatement = action
+    }
 
     /**
      * DSL: Return value entry.
@@ -182,14 +153,6 @@ open class Rule(
         }
         returnRule = true
     }
-
-//    /**
-//     * DSL: Return value entry.
-//     */
-//    fun RETURNERSVAR() {
-//        this.returnValue = Optional.of(this.utfallsFaktum)
-//        returnRule = true
-//    }
 
     /**
      * Provides a function for rule documentation.
@@ -221,16 +184,17 @@ open class Rule(
             }
         }
 
-        konstruerUtfall()
-
         if (fired) {
             actionStatement.invoke()
+        } else {
+            elseStatement.invoke()
         }
+        konstruerUtfall()
     }
 
     private fun konstruerUtfall() {
-        utfallsFaktumFunksjon?.let {
-            returnValue = Optional.of(it.invoke())
+        if (returnRule && returnValue.get() is Faktum<*>) {
+            (returnValue.get() as Faktum<*>).children.add(this)
         }
         // TODO Legg på prettyDoc og Kilde etterhvert.
     }

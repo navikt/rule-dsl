@@ -86,15 +86,15 @@ infix fun Faktum<out LocalDate>.erStørreEnn(other: Int) = ParSubsumsjon(
 /**
  * Generisk
  */
-infix fun <T> Faktum<T>.erLik(ap: T) = ParSubsumsjon(
+infix fun <T : Any> Faktum<T>.erLik(ap: T) = ParSubsumsjon(
     LIK, this, Faktum(ap)
 ) { this.verdi == ap }
 
-infix fun <T> Faktum<T>.erLik(ap: Faktum<T>) = ParSubsumsjon(
+infix fun <T : Any> Faktum<T>.erLik(ap: Faktum<T>) = ParSubsumsjon(
     LIK, this, ap
 ) { this.verdi == ap.verdi }
 
-infix fun <T> Faktum<T>.erBlant(others: List<T>) = MengdeSubsumsjon(
+infix fun <T : Any> Faktum<T>.erBlant(others: List<T>) = MengdeSubsumsjon(
     MengdeKomparator.ER_BLANDT,
     Faktum(navn = this.navn, verdi = this.verdi.toString()),
     others.map { Faktum(it) }

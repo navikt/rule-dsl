@@ -9,6 +9,7 @@ import no.nav.system.rule.dsl.enums.MengdeKomparator.MINST_EN_AV
 import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.MengdeSubsumsjon
+import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -28,6 +29,8 @@ class PersonenErFlyktningRSTest {
             Faktum("Virkningstidspunkt", localDate(2020, 1, 1)),
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).testAndDebug().get()
+
+        println(flyktningUtfall.debug())
 
         assertEquals(IKKE_RELEVANT, flyktningUtfall.verdi)
         assertTrue(flyktningUtfall.children[0].fired())
@@ -54,7 +57,8 @@ class PersonenErFlyktningRSTest {
         ).testAndDebug().get()
 
         assertEquals(OPPFYLT, flyktningUtfall.verdi)
-        assertEquals(1, flyktningUtfall.children[0].children[1].children.size)
+        assertEquals(1, flyktningUtfall.children[0].children[0].children.size)
+        assertEquals(2, flyktningUtfall.children[0].children[1].children.size)
     }
 
     @Test

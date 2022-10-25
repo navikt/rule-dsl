@@ -3,9 +3,16 @@ package no.nav.system.rule.dsl.rettsregel
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.FAKTUM
+import no.nav.system.rule.dsl.treevisitor.visitor.debug
 
-open class Faktum<T>(open val navn: String, open var verdi: T) : AbstractRuleComponent() {
+open class Faktum<T:Any>(open val navn: String) : AbstractRuleComponent() {
+    lateinit var verdi: T
+
     var anonymous = false
+
+    constructor(navn: String, verdi: T) : this(navn) {
+        this.verdi = verdi
+    }
 
     constructor(verdi: T) : this(verdi.toString(), verdi) {
         anonymous = true

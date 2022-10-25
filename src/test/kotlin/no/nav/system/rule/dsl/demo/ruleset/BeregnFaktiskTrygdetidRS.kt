@@ -72,8 +72,12 @@ class BeregnFaktiskTrygdetidRS(
         regel("Skal ha redusert fremtidig trygdetid") {
             HVIS { virkningstidspunkt erEtterEllerLik dato1991 }
             OG { svar.faktiskTrygdetidIMåneder erMindreEnn svar.firefemtedelskrav }
-//            SVAR(OPPFYLT) { svar.redusertFremtidigTrygdetid }
-//            KILDE ( paragraf ...)
+            SÅ {
+                svar.redusertFremtidigTrygdetid.verdi = OPPFYLT
+            }
+            ELLERS {
+                svar.redusertFremtidigTrygdetid.verdi = IKKE_OPPFYLT
+            }
             kommentar(
                 """Dersom faktisk trygdetid i Norge er mindre enn 4/5 av
                      opptjeningstiden skal den framtidige trygdetiden være redusert."""
