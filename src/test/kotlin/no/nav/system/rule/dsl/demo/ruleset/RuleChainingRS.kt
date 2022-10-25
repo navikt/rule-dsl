@@ -5,12 +5,12 @@ import no.nav.system.rule.dsl.AbstractRuleset
 /**
  * Regelsett som demonstrerer rulechaining.
  */
-class RuleChainingRS : AbstractRuleset<Int>() {
+class RuleChainingRS(val kjørRegel: Boolean) : AbstractRuleset<Int>() {
     private var tak: Int = 1000
 
     override fun create() {
         regel("førsteRegel") {
-            HVIS { true }
+            HVIS { kjørRegel }
             SÅ {
                 tak++
             }
@@ -27,7 +27,7 @@ class RuleChainingRS : AbstractRuleset<Int>() {
 
         regel("sisteChain") {
             HVIS { "førsteRegel".harTruffet() }
-            this.OG { "førsteChain".harTruffet() }
+            OG { "førsteChain".harTruffet() }
             SÅ {
                 tak++
             }
@@ -37,16 +37,16 @@ class RuleChainingRS : AbstractRuleset<Int>() {
         regel("negativRegel") {
             HVIS { "førsteRegel".harIkkeTruffet() }
             SÅ {
-                tak++
+                tak--
             }
             kommentar("Skal treffe hvis 'førsteRegel' ikke har truffet.")
         }
 
         regel("negativChain") {
             HVIS { "negativRegel".harTruffet() }
-            this.OG { "førsteChain".harTruffet() }
+            OG { "førsteChain".harTruffet() }
             SÅ {
-                tak++
+                tak--
             }
             kommentar("Skal treffe hvis både 'negativRegel' og 'førsteChain' har truffet.")
         }
