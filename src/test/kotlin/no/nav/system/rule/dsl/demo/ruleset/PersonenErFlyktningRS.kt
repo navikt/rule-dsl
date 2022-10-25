@@ -43,7 +43,6 @@ class PersonenErFlyktningRS(
         regel("SettRelevantTrygdetid_kap19") {
             HVIS { !innKapittel20 }
             SÅ {
-                RETURNER(true)
                 trygdetid = innPersongrunnlag.trygdetidK19
             }
         }
