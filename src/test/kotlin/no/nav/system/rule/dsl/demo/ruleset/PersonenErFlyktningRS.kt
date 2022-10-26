@@ -59,21 +59,18 @@ class PersonenErFlyktningRS(
             OG { unntakFraForutgaendeMedlemskap!!.unntak }
             OG { unntakFraForutgaendeMedlemskap?.unntakType != null }
             OG { unntakFraForutgaendeMedlemskap!!.unntakType.erBlant(aktuelleUnntakstyper) }
-            kommentar("")
         }
         regel("AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning") {
             HVIS { unntakFraForutgaendeTT != null }
             OG { unntakFraForutgaendeTT!!.unntak }
             OG { unntakFraForutgaendeTT?.unntakType != null }
             OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
-            kommentar("")
         }
 
         regel("Overgangsregel_AP") {
             HVIS { innYtelseType.verdi == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEnn 1959 }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
-            kommentar("")
         }
         regel("Overgangsregel_AP_tidligereUT") {
             HVIS { innYtelseType.verdi == AP }
@@ -85,7 +82,6 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-            kommentar("")
         }
         regel("Overgangsregel_AP_tidligereGJP") {
             HVIS { innYtelseType.verdi == AP }
@@ -97,7 +93,6 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == GJP && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-            kommentar("")
         }
         regel("Overgangsregel_GJR_tidligereUT_GJT") {
             HVIS { innYtelseType.verdi == GJR }
@@ -109,7 +104,6 @@ class PersonenErFlyktningRS(
                     it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-            kommentar("")
         }
         regel("Overgangsregel_GJR_tidligereGJR") {
             HVIS { innYtelseType.verdi == GJR }
