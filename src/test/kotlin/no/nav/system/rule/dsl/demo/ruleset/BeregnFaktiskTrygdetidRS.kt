@@ -30,8 +30,6 @@ class BeregnFaktiskTrygdetidRS(
      * Nytt Pattern [norskeBoperioder] opprettes på bakgrunn av liste [boperiodeListe] med et filter på land.
      */
     private val norskeBoperioder = boperiodeListe.createPattern { it.land == LandEnum.NOR }
-
-    // TODO denne riktig?
     private val dato16år = fødselsdato.verdi.plusYears(16)
     private val dato1991 = Faktum(localDate(1991, 1, 1))
     private val svar = Trygdetid()

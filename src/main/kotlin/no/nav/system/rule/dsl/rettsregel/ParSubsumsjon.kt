@@ -23,25 +23,29 @@ class ParSubsumsjon(
     init {
         this.children.add(faktum1)
         this.children.add(faktum2)
+        this.evaluate()
     }
 
     override fun type(): RuleComponentType = PAR_SUBSUMSJON
 
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
-        return "${type()}: ${fired.svarord()} ${faktum1}$komparatorText${faktum2}"
+        val f1text = if (faktum1.anonymous) "'${faktum1.navn}'" else "'${faktum1.navn}' (${faktum1.verdi})"
+        val f2text = if (faktum2.anonymous) "'${faktum2.navn}'" else "'${faktum2.navn}' (${faktum2.verdi})"
+        return "${type()}: ${fired.svarord()} $f1text$komparatorText${f2text}"
     }
 }
 
 class MengdeSubsumsjon(
     override val komparator: MengdeKomparator,
-    private val faktum: Faktum<String>,
+    private val faktum: Faktum<*>,
     abstractRuleComponentList: List<AbstractRuleComponent>,
     override val utfallFunksjon: () -> Boolean,
 ) : AbstractSubsumsjon(komparator = komparator, utfallFunksjon = utfallFunksjon) {
 
     init {
         this.children.addAll(abstractRuleComponentList)
+        this.evaluate()
     }
 
     override fun type(): RuleComponentType = MENGDE_SUBSUMSJON
@@ -59,7 +63,7 @@ abstract class AbstractSubsumsjon(
     /**
      * Evaluates the predicate function.
      *
-     * @return returns true if further evaluation of remaining predicates in the rule should be prevented.
+     * @return returns false. Sumsumtions never terminates callers evaluation chain.
      */
     override fun evaluate(): Boolean {
         parent?.children?.add(this)

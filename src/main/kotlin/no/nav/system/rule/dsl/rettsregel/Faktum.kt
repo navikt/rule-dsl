@@ -6,7 +6,6 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.FAKTUM
 
 open class Faktum<T : Any>(open val navn: String) : AbstractRuleComponent() {
     lateinit var verdi: T
-
     var anonymous = false
 
     constructor(navn: String, verdi: T) : this(navn) {
@@ -17,13 +16,10 @@ open class Faktum<T : Any>(open val navn: String) : AbstractRuleComponent() {
         anonymous = true
     }
 
-    override fun name(): String {
-        return navn
-    }
+    override fun name(): String = navn
 
-    override fun type(): RuleComponentType {
-        return FAKTUM
-    }
+    override fun type(): RuleComponentType = FAKTUM
+
 
     override fun fired(): Boolean {
         throw IllegalAccessError("Fired should not be used on Faktum.")
@@ -31,7 +27,7 @@ open class Faktum<T : Any>(open val navn: String) : AbstractRuleComponent() {
 
     override fun toString(): String {
         return if (anonymous) {
-            "${type()}: '$navn'"
+            "${type()}: '$verdi'"
         } else {
             "${type()}: '$navn' ($verdi)"
         }

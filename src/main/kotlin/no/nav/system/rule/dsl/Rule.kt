@@ -216,9 +216,7 @@ open class Rule(
     override fun name(): String = name
     override fun fired(): Boolean = fired
     override fun type(): RuleComponentType = REGEL
-    override fun toString(): String {
-//        val utfallTekst = utfall?.let { " utfallType: ${it.type}" } ?: ""
-        return "${type()}: ${fired().svarord()} ${name()}"
-    }
+    override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
+
 }
 

@@ -9,7 +9,6 @@ import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum.*
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.helper.måneder
 import no.nav.system.rule.dsl.demo.helper.år
-import no.nav.system.rule.dsl.enums.ParKomparator
 import no.nav.system.rule.dsl.enums.UtfallType
 import no.nav.system.rule.dsl.enums.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.*
@@ -37,8 +36,6 @@ class PersonenErFlyktningRS(
     )
     private lateinit var trygdetid: Trygdetid
 
-    val SANN = Faktum("SANN", true) // TODO Hvordan kan vi gjøre dette på en annen måte
-
     override fun create() {
         regel("SettRelevantTrygdetid_kap19") {
             HVIS { !innKapittel20 }
@@ -54,19 +51,19 @@ class PersonenErFlyktningRS(
         }
 
         regel("AngittFlyktning_HarFlyktningFlaggetSatt") {
-            OG { innPersongrunnlag.flyktning.erSann() }
+            HVIS { innPersongrunnlag.flyktning }
             kommentar("Flyktningerflagget er angitt av saksbehandler.")
         }
         regel("AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning") {
             HVIS { unntakFraForutgaendeMedlemskap != null }
-            OG { unntakFraForutgaendeMedlemskap!!.unntak erLik SANN }
+            OG { unntakFraForutgaendeMedlemskap!!.unntak }
             OG { unntakFraForutgaendeMedlemskap?.unntakType != null }
             OG { unntakFraForutgaendeMedlemskap!!.unntakType.erBlant(aktuelleUnntakstyper) }
             kommentar("")
         }
         regel("AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning") {
             HVIS { unntakFraForutgaendeTT != null }
-            OG { unntakFraForutgaendeTT!!.unntak.erSann() }
+            OG { unntakFraForutgaendeTT!!.unntak }
             OG { unntakFraForutgaendeTT?.unntakType != null }
             OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
             kommentar("")
@@ -78,20 +75,13 @@ class PersonenErFlyktningRS(
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             kommentar("")
         }
-
-        // TODO Kom tibake til denne senere
-        fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): ParSubsumsjon {
-            return ParSubsumsjon(
-                ParKomparator.STØRRE_ELLER_LIK, Faktum(this), Faktum(target)
-            ) { this.count(quantifier) >= target }
-        }
         regel("Overgangsregel_AP_tidligereUT") {
             HVIS { innYtelseType.verdi == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
+                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
                     it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
@@ -103,7 +93,7 @@ class PersonenErFlyktningRS(
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
+                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
                     it.kravlinjeType == GJP && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
@@ -115,7 +105,7 @@ class PersonenErFlyktningRS(
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
+                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
                     it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
@@ -127,11 +117,10 @@ class PersonenErFlyktningRS(
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minst(1) {
+                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
                     it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1)
                 }
             }
-            kommentar("")
         }
         regel("AnvendtFlyktning_ikkeRelevant") {
             HVIS { "AngittFlyktning".ingenHarTruffet() }
@@ -141,14 +130,14 @@ class PersonenErFlyktningRS(
         }
         regel("AnvendtFlyktning_oppfylt") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
-            OG { innKravlinjeFremsattDatoFom2021.erUsann() }
+            OG { !innKravlinjeFremsattDatoFom2021 }
             SÅ {
                 RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_ingenOvergang") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
-            OG { innKravlinjeFremsattDatoFom2021.erSann() }
+            OG { innKravlinjeFremsattDatoFom2021 }
             OG { "Overgangsregel".ingenHarTruffet() }
             SÅ {
                 RETURNER(Faktum("Anvendt flyktning", IKKE_OPPFYLT))
@@ -156,7 +145,7 @@ class PersonenErFlyktningRS(
         }
         regel("AnvendtFlyktning_harOvergang") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
-            OG { innKravlinjeFremsattDatoFom2021.erSann() }
+            OG { innKravlinjeFremsattDatoFom2021 }
             OG { "Overgangsregel".minstEnHarTruffet() }
             SÅ {
                 RETURNER(Faktum("Anvendt flyktning", OPPFYLT))

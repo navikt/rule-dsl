@@ -1,6 +1,8 @@
 package no.nav.system.rule.dsl.rettsregel
 
-import no.nav.system.rule.dsl.enums.MengdeKomparator
+import no.nav.system.rule.dsl.AbstractRuleComponent
+import no.nav.system.rule.dsl.enums.MengdeKomparator.ER_BLANDT
+import no.nav.system.rule.dsl.enums.MengdeKomparator.MINST
 import no.nav.system.rule.dsl.enums.ParKomparator.*
 import java.time.LocalDate
 
@@ -8,7 +10,7 @@ import java.time.LocalDate
  * Datoer
  */
 infix fun Faktum<LocalDate>.erFørEllerLik(other: Faktum<LocalDate>) =
-    ParSubsumsjon(FØR_ELLER_LIK, this, other) { verdi <= other.verdi }
+    ParSubsumsjon(FØR_ELLER_LIK, this, other) { this.verdi <= other.verdi }
 
 infix fun Faktum<LocalDate>.erFør(other: Faktum<LocalDate>) = ParSubsumsjon(FØR, this, other) { verdi < other.verdi }
 
@@ -56,12 +58,7 @@ infix fun Faktum<out Number>.erStørre(other: Number) = ParSubsumsjon(
 
 /**
  * Boolean
- * TODO Burde ikke trenge disse. Faktum/regler (generellt alle RuleComponents) bør kunne brukes fritt som regelbetingelser. Vurder å legge inn Faktum.not override.
  */
-fun Faktum<Boolean>.erSann() = ParSubsumsjon(LIK, this, Faktum("SANN", true)) { verdi }
-
-fun Faktum<Boolean>.erUsann() = ParSubsumsjon(LIK, this, Faktum("USANN", false)) { !verdi }
-
 operator fun Faktum<Boolean>.not(): Faktum<Boolean> = Faktum(this.navn, !this.verdi)
 
 /**
@@ -95,7 +92,61 @@ infix fun <T : Any> Faktum<T>.erLik(ap: Faktum<T>) = ParSubsumsjon(
 ) { this.verdi == ap.verdi }
 
 infix fun <T : Any> Faktum<T>.erBlant(others: List<T>) = MengdeSubsumsjon(
-    MengdeKomparator.ER_BLANDT,
+    ER_BLANDT,
     Faktum(navn = this.navn, verdi = this.verdi.toString()),
     others.map { Faktum(it) }
 ) { this.verdi in others }
+
+/**
+ * Lister
+ */
+//fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): MengdeSubsumsjon {
+//    return MengdeSubsumsjon(
+//        MINST,
+//
+//    ) { this.count(quantifier) >= target }
+//}
+//@JvmName("mins")
+fun <T : Any> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
+    MINST,
+    Faktum("mål antall", target),
+    this.map { Faktum(it) },
+) { this.count(quantifier) >= target }
+//@JvmName("minstT")
+//fun <T : Any> Iterable<T>.minst(target: Faktum<Int>, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
+//    MINST,
+//    target,
+//    this.map { Faktum(it) },
+//) { this.count(quantifier) >= target.verdi }
+//fun <T : Any> Iterable<Faktum<T>>.minst(target: Int, quantifier: (Faktum<T>) -> Boolean) = MengdeSubsumsjon(
+//    MINST,
+//    Faktum("antall", target),
+//    this.toList(),
+//) { this.count(quantifier) >= target }
+//fun <T : AbstractRuleComponent> Iterable<T>.minst(target: Faktum<Int>, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
+//    MINST,
+//    target,
+//    this.toList(),
+//) {this.count(quantifier) >= target.verdi }
+
+fun <T : Any> Iterable<T>.minstEn(quantifier: (T) -> Boolean) = minst(1, quantifier)
+
+//inline fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): Boolean {
+//    return this.count(quantifier) >= target
+//}
+//
+//inline fun <T> Iterable<T>.maks(target: Int, quantifier: (T) -> Boolean): Boolean {
+//    return this.count(quantifier) <= target
+//}
+//
+//inline fun <T> Iterable<T>.akkurat(target: Int, quantifier: (T) -> Boolean): Boolean {
+//    return this.count(quantifier) == target
+//}
+//
+//inline fun <T> Iterable<T>.alle(quantifier: (T) -> Boolean): Boolean {
+//    return this.count(quantifier) == this.count()
+//}
+//
+//inline fun <T> Iterable<T>.ingen(quantifier: (T) -> Boolean): Boolean {
+//    return this.count(quantifier) == 0
+//}

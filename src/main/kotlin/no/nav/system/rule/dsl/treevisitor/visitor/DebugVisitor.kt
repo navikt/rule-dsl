@@ -1,17 +1,23 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
+import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 
 /**
  * Lists the complete tree of [AbstractRuleComponent]
  */
-class DebugVisitor : TreeVisitor {
+class DebugVisitor(
+    private val includeChildrenOfParSubsumsjon: Boolean = false,
+) : TreeVisitor {
     val debugString = StringBuilder()
     private var level = 0
 
     override fun visit(ruleComponent: AbstractRuleComponent) {
+
         debugString.append(" ".repeat(level * 2))
         debugString.append(ruleComponent.toString()).append("\n")
+
+//        if (!includeChildrenOfParSubsumsjon && ruleComponent is ParSubsumsjon) return
 
         level++
         ruleComponent.children.forEach { it.accept(this) }

@@ -5,7 +5,6 @@ import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.Rule
 import no.nav.system.rule.dsl.pattern.createPattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.erSann
 
 class MengdeSubsumsjonMedPatternRS(
     inputFakta: List<Faktum<Boolean>>,
@@ -15,7 +14,7 @@ class MengdeSubsumsjonMedPatternRS(
     @OptIn(DslDomainPredicate::class)
     override fun create() {
         regel("sann", faktumListe) { bool ->
-            HVIS { bool.erSann() }
+            HVIS { bool }
         }
         regel("alleHarTruffet") {
             HVIS { "sann".alleHarTruffet() }
