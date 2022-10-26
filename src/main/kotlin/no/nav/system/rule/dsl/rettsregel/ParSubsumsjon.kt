@@ -39,7 +39,7 @@ class ParSubsumsjon(
 class MengdeSubsumsjon(
     override val komparator: MengdeKomparator,
     private val faktum: Faktum<*>,
-    abstractRuleComponentList: List<AbstractRuleComponent>,
+    private val abstractRuleComponentList: List<AbstractRuleComponent>,
     override val utfallFunksjon: () -> Boolean,
 ) : AbstractSubsumsjon(komparator = komparator, utfallFunksjon = utfallFunksjon) {
 
@@ -51,7 +51,11 @@ class MengdeSubsumsjon(
     override fun type(): RuleComponentType = MENGDE_SUBSUMSJON
 
     override fun toString(): String {
-        return "${type()}: ${fired.svarord()} ${faktum.navn} (${faktum.verdi})${komparator.text}:"
+//        return "${type()}: ${fired.svarord()} ${faktum.navn} (${faktum.verdi})${komparator.text}:"
+        val komparatorText = if (fired) komparator.text else komparator.negated()
+        val f1text = if (faktum.anonymous) "'${faktum.navn}'" else "'${faktum.navn}' (${faktum.verdi})"
+        val f2text = abstractRuleComponentList.toString()
+        return "${type()}: ${fired.svarord()} $f1text$komparatorText${f2text}"
     }
 }
 
