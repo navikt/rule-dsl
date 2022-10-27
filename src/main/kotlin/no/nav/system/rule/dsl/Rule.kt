@@ -3,9 +3,7 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.AbstractSubsumsjon
-import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.erLik
+import no.nav.system.rule.dsl.rettsregel.*
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
@@ -124,6 +122,7 @@ open class Rule(
      */
     @OverloadResolutionByLambdaReturnType
     @JvmName("FagOG")
+    @DslDomainPredicate
     fun OG(arcFunction: () -> AbstractSubsumsjon) {
         predicateFunctionList.add(arcFunction)
     }
@@ -175,10 +174,9 @@ open class Rule(
                     parent = this@Rule
                 }
 
-                fired = fired && predicate.fired()
-                val terminateEvaluation = predicate.terminateEvaluation
+                fired = predicate.fired && fired
 
-                if (terminateEvaluation) {
+                if (predicate.terminateEvaluation) {
                     return@predLoop
                 }
             }

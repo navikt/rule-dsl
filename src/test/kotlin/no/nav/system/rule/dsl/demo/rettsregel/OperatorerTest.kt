@@ -1,5 +1,7 @@
 package no.nav.system.rule.dsl.demo.rettsregel
 
+import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
+import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.enums.MengdeKomparator
 import no.nav.system.rule.dsl.rettsregel.*
@@ -20,6 +22,23 @@ class OperatorerTest {
         val flagg = Faktum("flagg", true)
 
         val list = listOf("A", "B", "C")
+        val fvdgList = listOf(
+            ForsteVirkningsdatoGrunnlag(
+                virkningsdato = localDate(2000, 1, 1),
+                kravFremsattDato = localDate(1999, 1, 1),
+                kravlinjeType = YtelseEnum.GJP
+            ),
+            ForsteVirkningsdatoGrunnlag(
+                virkningsdato = localDate(2010, 1, 1),
+                kravFremsattDato = localDate(2009, 1, 1),
+                kravlinjeType = YtelseEnum.UT
+            ),
+            ForsteVirkningsdatoGrunnlag(
+                virkningsdato = localDate(2020, 1, 1),
+                kravFremsattDato = localDate(2019, 1, 1),
+                kravlinjeType = YtelseEnum.AP
+            )
+        )
         val A = Faktum("A", "A")
         val D = Faktum("D", "D")
     }
@@ -307,16 +326,25 @@ class OperatorerTest {
 
     /**
      * Lister
+     *
+     * Predikat:
+     *      innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
+     *         it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
+     *      }
+     *
+     * MendeSubsumsjon:
+     *      Minst 1 ForsteVirkningsdatoGrunnlag opp
+     *
      */
 //    @Test
 //    fun minst() {
-//        list.xminst(2) { it == A.verdi }.apply {
+//        fvdgList.xminst(1) { it == A.verdi }.apply {
 //            assertTrue(fired())
-//            assertEquals("mengde_subsumsjon: JA 'A' (A) er ikke blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
+//            assertEquals("mengde_subsumsjon: JA '1' blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
 //        }
 //    }
-
-//    fun <T : Any> Iterable<T>.xminst(target: Int, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
+//
+//    fun <FaktumGenerator> Iterable<FaktumGenerator>.xminst(target: Int, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
 //        MengdeKomparator.MINST,
 //        Faktum("mål antall", target),
 //        this.map { Faktum(it) },

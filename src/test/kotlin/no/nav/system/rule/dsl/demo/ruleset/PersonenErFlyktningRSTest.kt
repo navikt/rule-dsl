@@ -1,5 +1,6 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
+import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
@@ -76,6 +77,9 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).testAndDebug().get()
 
+        val regelOvergangsregel_AP = flyktningUtfall.children[0].children[2].children[0]
+
+        assertEquals(2, regelOvergangsregel_AP.children.size)
         assertEquals(IKKE_OPPFYLT, flyktningUtfall.verdi)
         assertTrue(flyktningUtfall.children[0].fired())
         assertEquals(3, flyktningUtfall.children[0].children.size)

@@ -66,6 +66,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         ruleFunctionMap[sequence] = {
             val rulesInPattern = mutableListOf<Rule>()
             var offset = 1
+
             for (patternElement in pattern.get()) {
                 val rule = Rule("$rulesetName.$navn.$offset", sequence + offset).apply {
                     nameWithoutPatternOffset = "$rulesetName.$navn"
@@ -78,6 +79,18 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
                 offset++
                 rulesInPattern.add(rule)
             }
+
+            /**
+             * An empty pattern rule without content is created for empty patterns.
+             * This makes it possible for other rules to chain this rule.
+             */
+            if (pattern.get().isEmpty()) {
+                val rule = Rule("$rulesetName.$navn", sequence)
+                rule.parent = this
+                children.add(rule)
+                rulesInPattern.add(rule)
+            }
+
             rulesInPattern
         }
     }

@@ -34,6 +34,22 @@ class PersonenErFlyktningRS(
     private val aktuelleUnntakstyper = listOf(
         FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP
     )
+    private val harUTfør2021 = Faktum(
+        "Uføretrygd før 2021",
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1) }
+    )
+    private val harGJPfør2021 = Faktum(
+        "Gjenlevendepensjon før 2021",
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1) }
+    )
+    private val harUTGJRfør2021 = Faktum(
+        "Gjenlevendetillegg før 2021",
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1) }
+    )
+    private val harGJRfør2021 = Faktum(
+        "Gjenlevenderett før 2021",
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1) }
+    )
     private lateinit var trygdetid: Trygdetid
 
     override fun create() {
@@ -66,7 +82,6 @@ class PersonenErFlyktningRS(
             OG { unntakFraForutgaendeTT?.unntakType != null }
             OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
         }
-
         regel("Overgangsregel_AP") {
             HVIS { innYtelseType.verdi == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEnn 1959 }
@@ -77,44 +92,28 @@ class PersonenErFlyktningRS(
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
-                    it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
-                }
-            }
+            OG { harUTfør2021 }
         }
         regel("Overgangsregel_AP_tidligereGJP") {
             HVIS { innYtelseType.verdi == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
-                    it.kravlinjeType == GJP && it.virkningsdato < localDate(2021, 1, 1)
-                }
-            }
+            OG { harGJPfør2021 }
         }
         regel("Overgangsregel_GJR_tidligereUT_GJT") {
             HVIS { innYtelseType.verdi == GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
-                    it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1)
-                }
-            }
+            OG { harUTGJRfør2021 }
         }
         regel("Overgangsregel_GJR_tidligereGJR") {
             HVIS { innYtelseType.verdi == GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
-            OG {
-                innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
-                    it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1)
-                }
-            }
+            OG { harGJRfør2021 }
         }
         regel("AnvendtFlyktning_ikkeRelevant") {
             HVIS { "AngittFlyktning".ingenHarTruffet() }

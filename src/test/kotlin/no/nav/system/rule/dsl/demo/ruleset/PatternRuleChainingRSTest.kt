@@ -31,4 +31,12 @@ class PatternRuleChainingRSTest {
         assertEquals(10,inntektsListe[1].beløp)
         assertEquals(15,inntektsListe[2].beløp)
     }
+
+    @Test
+    fun `skal ikke krasje dersom listen er tom`() {
+        val inntektsListe = listOf<Inntekt>()
+        val patternRuleChainingRS = PatternRuleChainingRS(inntektsListe).test().get()
+
+        assertFalse(patternRuleChainingRS)
+    }
 }

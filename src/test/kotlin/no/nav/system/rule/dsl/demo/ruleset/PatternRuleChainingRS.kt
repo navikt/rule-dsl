@@ -30,6 +30,10 @@ class PatternRuleChainingRS(innInntektListe: List<Inntekt>) :
             kommentar("Hvis ett innslag i 'noenInntektEtterUforhet' har truffet regelen 'endreInntekt', vil det returneres true.")
         }
 
+        regel("skalKunneRefererePatternregel") {
+            HVIS { "endreInntekt".harTruffet() }
+        }
+
         regel("defaultRegel") {
             HVIS { true }
             SÅ {

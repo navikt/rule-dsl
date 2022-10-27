@@ -13,6 +13,7 @@ infix fun Faktum<LocalDate>.erFørEllerLik(other: Faktum<LocalDate>) =
     ParSubsumsjon(FØR_ELLER_LIK, this, other) { this.verdi <= other.verdi }
 
 infix fun Faktum<LocalDate>.erFør(other: Faktum<LocalDate>) = ParSubsumsjon(FØR, this, other) { verdi < other.verdi }
+infix fun Faktum<LocalDate>.erFør(other: LocalDate) = ParSubsumsjon(FØR, this, Faktum(other)) { verdi < other }
 
 infix fun Faktum<LocalDate>.erEtterEllerLik(other: Faktum<LocalDate>) =
     ParSubsumsjon(ETTER_ELLER_LIK, this, other) { verdi >= other.verdi }
@@ -102,57 +103,3 @@ infix fun <T : Any> Faktum<T>.erIkkeBlant(others: List<T>) = MengdeSubsumsjon(
     Faktum(navn = this.navn, verdi = this.verdi.toString()),
     others.map { Faktum(it) }
 ) { this.verdi !in others }
-
-/**
- * Lister
- */
-//fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): MengdeSubsumsjon {
-//    return MengdeSubsumsjon(
-//        MINST,
-//
-//    ) { this.count(quantifier) >= target }
-//}
-//@JvmName("mins")
-fun <T : Any> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
-    MINST,
-    Faktum("mål antall", target),
-    this.map { Faktum(it) },
-) { this.count(quantifier) >= target }
-//@JvmName("minstT")
-//fun <T : Any> Iterable<T>.minst(target: Faktum<Int>, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
-//    MINST,
-//    target,
-//    this.map { Faktum(it) },
-//) { this.count(quantifier) >= target.verdi }
-//fun <T : Any> Iterable<Faktum<T>>.minst(target: Int, quantifier: (Faktum<T>) -> Boolean) = MengdeSubsumsjon(
-//    MINST,
-//    Faktum("antall", target),
-//    this.toList(),
-//) { this.count(quantifier) >= target }
-//fun <T : AbstractRuleComponent> Iterable<T>.minst(target: Faktum<Int>, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
-//    MINST,
-//    target,
-//    this.toList(),
-//) {this.count(quantifier) >= target.verdi }
-
-fun <T : Any> Iterable<T>.minstEn(quantifier: (T) -> Boolean) = minst(1, quantifier)
-
-//inline fun <T> Iterable<T>.minst(target: Int, quantifier: (T) -> Boolean): Boolean {
-//    return this.count(quantifier) >= target
-//}
-//
-//inline fun <T> Iterable<T>.maks(target: Int, quantifier: (T) -> Boolean): Boolean {
-//    return this.count(quantifier) <= target
-//}
-//
-//inline fun <T> Iterable<T>.akkurat(target: Int, quantifier: (T) -> Boolean): Boolean {
-//    return this.count(quantifier) == target
-//}
-//
-//inline fun <T> Iterable<T>.alle(quantifier: (T) -> Boolean): Boolean {
-//    return this.count(quantifier) == this.count()
-//}
-//
-//inline fun <T> Iterable<T>.ingen(quantifier: (T) -> Boolean): Boolean {
-//    return this.count(quantifier) == 0
-//}
