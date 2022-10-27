@@ -55,12 +55,23 @@ class OperatorerTest {
     }
 
     @Test
-    fun erFør() {
+    fun erFørMedFaktum() {
         (dato1990 erFør dato2000).apply {
             assertTrue(fired())
             assertEquals("par_subsumsjon: JA '1990-01-01' er før '2000-01-01'", toString())
         }
         (dato2000 erFør dato1990).apply {
+            assertFalse(fired())
+            assertEquals("par_subsumsjon: NEI '2000-01-01' må være før '1990-01-01'", toString())
+        }
+    }
+    @Test
+    fun erFørUtenFaktum() {
+        (dato1990 erFør localDate(2000, 1, 1)).apply {
+            assertTrue(fired())
+            assertEquals("par_subsumsjon: JA '1990-01-01' er før '2000-01-01'", toString())
+        }
+        (dato2000 erFør localDate(1990, 1, 1)).apply {
             assertFalse(fired())
             assertEquals("par_subsumsjon: NEI '2000-01-01' må være før '1990-01-01'", toString())
         }
