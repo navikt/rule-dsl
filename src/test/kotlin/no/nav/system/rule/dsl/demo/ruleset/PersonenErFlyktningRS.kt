@@ -48,7 +48,7 @@ class PersonenErFlyktningRS(
     )
     private val harGJRfør2021 = Faktum(
         "Gjenlevenderett før 2021",
-        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1) }
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1) }
     )
     private lateinit var trygdetid: Trygdetid
 
@@ -84,7 +84,7 @@ class PersonenErFlyktningRS(
         }
         regel("Overgangsregel_AP") {
             HVIS { innYtelseType.verdi == AP }
-            OG { innPersongrunnlag.fødselsdato erMindreEnn 1959 }
+            OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
         }
         regel("Overgangsregel_AP_tidligereUT") {

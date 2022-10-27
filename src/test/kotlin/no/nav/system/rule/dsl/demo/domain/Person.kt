@@ -13,5 +13,5 @@ data class Person(
     var trygdetidK19: Trygdetid = Trygdetid(5),
     var trygdetidK20: Trygdetid = Trygdetid(4),
     var inngangOgEksportgrunnlag: InngangOgEksportgrunnlag? = null,
-    var forsteVirkningsdatoGrunnlagListe: List<ForsteVirkningsdatoGrunnlag> = mutableListOf()
+    var forsteVirkningsdatoGrunnlagListe: MutableList<ForsteVirkningsdatoGrunnlag> = mutableListOf()
 )

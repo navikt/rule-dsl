@@ -86,7 +86,7 @@ class PersonenErFlyktningRSTest {
     }
 
     @Test
-    fun testErIkkeFlyktning_virkFom2021_overgang() {
+    fun testErFlyktning_virkFom2021_overgang() {
         val person = Person(
             fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
             flyktning = Faktum("Angitt flyktning", true),
@@ -109,5 +109,37 @@ class PersonenErFlyktningRSTest {
         assertTrue(overgangsregelTreSubsumsjon.children[0].fired())
         assertFalse(overgangsregelTreSubsumsjon.children[1].fired())
         assertFalse(overgangsregelTreSubsumsjon.children[2].fired())
+    }
+
+    @Test
+    fun testErFlyktning_Overgangsregel_GJR_tidligereGJR() {
+        val person = Person(
+            fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
+            flyktning = Faktum("Angitt flyktning", true),
+            trygdetidK19 = Trygdetid().apply { tt_fa_F2021.verdi = 20 }
+        ).apply {
+            this.forsteVirkningsdatoGrunnlagListe.add(
+                ForsteVirkningsdatoGrunnlag(
+                    localDate(2020, 1, 1),
+                    YtelseEnum.GJR
+                )
+            )
+        }
+
+        val flyktningUtfall = PersonenErFlyktningRS(
+            person,
+            Faktum("Ytelsestype", YtelseEnum.GJR),
+            Faktum("Kapittel20", false),
+            Faktum("Virkningstidspunkt", localDate(2027, 1, 1)),
+            Faktum("HarKravlinjeFremsattDatoFom2021", true)
+        ).testAndDebug().get()
+
+        assertEquals(OPPFYLT, flyktningUtfall.verdi)
+        assertTrue(flyktningUtfall.children[0].fired())
+        val overgangsregelTreSubsumsjon = flyktningUtfall.children[0].children[2] as MengdeSubsumsjon
+        assertEquals(MINST_EN_AV, overgangsregelTreSubsumsjon.komparator)
+        assertEquals(2, overgangsregelTreSubsumsjon.children.size)
+        assertFalse(overgangsregelTreSubsumsjon.children[0].fired())
+        assertTrue(overgangsregelTreSubsumsjon.children[1].fired())
     }
 }

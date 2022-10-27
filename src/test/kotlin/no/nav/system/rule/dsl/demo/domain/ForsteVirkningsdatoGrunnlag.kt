@@ -7,7 +7,6 @@ import java.time.LocalDate
 
 data class ForsteVirkningsdatoGrunnlag(
     val virkningsdato: LocalDate,
-    val kravFremsattDato: LocalDate,
     val kravlinjeType: YtelseEnum,
 ) : FaktumGenerator {
 

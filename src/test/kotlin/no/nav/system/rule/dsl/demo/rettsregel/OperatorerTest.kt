@@ -3,7 +3,6 @@ package no.nav.system.rule.dsl.demo.rettsregel
 import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
-import no.nav.system.rule.dsl.enums.MengdeKomparator
 import no.nav.system.rule.dsl.rettsregel.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -25,17 +24,14 @@ class OperatorerTest {
         val fvdgList = listOf(
             ForsteVirkningsdatoGrunnlag(
                 virkningsdato = localDate(2000, 1, 1),
-                kravFremsattDato = localDate(1999, 1, 1),
                 kravlinjeType = YtelseEnum.GJP
             ),
             ForsteVirkningsdatoGrunnlag(
                 virkningsdato = localDate(2010, 1, 1),
-                kravFremsattDato = localDate(2009, 1, 1),
                 kravlinjeType = YtelseEnum.UT
             ),
             ForsteVirkningsdatoGrunnlag(
                 virkningsdato = localDate(2020, 1, 1),
-                kravFremsattDato = localDate(2019, 1, 1),
                 kravlinjeType = YtelseEnum.AP
             )
         )
@@ -312,7 +308,10 @@ class OperatorerTest {
     fun erIkkeBlant() {
         (D erIkkeBlant list).apply {
             assertTrue(fired())
-            assertEquals("mengde_subsumsjon: JA 'D' (D) er ikke blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
+            assertEquals(
+                "mengde_subsumsjon: JA 'D' (D) er ikke blandt [faktum: 'A', faktum: 'B', faktum: 'C']",
+                toString()
+            )
         }
         (A erIkkeBlant list).apply {
             assertFalse(fired())
