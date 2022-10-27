@@ -175,10 +175,10 @@ open class Rule(
                     parent = this@Rule
                 }
 
-                val stopEval = predicate.evaluate()
                 fired = fired && predicate.fired()
+                val terminateEvaluation = predicate.terminateEvaluation
 
-                if (stopEval) {
+                if (terminateEvaluation) {
                     return@predLoop
                 }
             }

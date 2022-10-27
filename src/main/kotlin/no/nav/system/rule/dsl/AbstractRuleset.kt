@@ -156,7 +156,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.MINST_EN_AV,
             faktum = Faktum("Regelreferanse", this),
-            utfallFunksjon = { list.any { it.fired() } },
+            funksjon = { list.any { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }
@@ -174,7 +174,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.ALLE,
             faktum = Faktum("Regelreferanse", this),
-            utfallFunksjon = { list.all { it.fired() } },
+            funksjon = { list.all { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }
@@ -184,7 +184,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.INGEN,
             faktum = Faktum("Regelreferanse", this),
-            utfallFunksjon = { list.none { it.fired() } },
+            funksjon = { list.none { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }

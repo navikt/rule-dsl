@@ -11,16 +11,20 @@ open class Predicate(
     private val function: () -> Boolean,
 ) : AbstractRuleComponent() {
 
-    protected var fired: Boolean = false
+    /**
+     * Is true if the predicate should terminate further evaluation of predicates.
+     *
+     * Typicaly used by null-check predicates.
+     */
+    internal var terminateEvaluation: Boolean = false
 
     /**
      * Evaluates the predicate function.
      *
      * @return returns true if further evaluation of remaining predicates in the rule should be prevented.
      */
-    internal open fun evaluate(): Boolean {
-        fired = function.invoke()
-        return !fired
+    internal open val fired: Boolean by lazy {
+        function.invoke().also { terminateEvaluation = !it }
     }
 
     override fun name(): String = ""

@@ -1,8 +1,8 @@
 package no.nav.system.rule.dsl.rettsregel
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
-import no.nav.system.rule.dsl.enums.MengdeKomparator.ER_BLANDT
-import no.nav.system.rule.dsl.enums.MengdeKomparator.MINST
+import no.nav.system.rule.dsl.enums.MengdeKomparator
+import no.nav.system.rule.dsl.enums.MengdeKomparator.*
 import no.nav.system.rule.dsl.enums.ParKomparator.*
 import java.time.LocalDate
 
@@ -96,6 +96,12 @@ infix fun <T : Any> Faktum<T>.erBlant(others: List<T>) = MengdeSubsumsjon(
     Faktum(navn = this.navn, verdi = this.verdi.toString()),
     others.map { Faktum(it) }
 ) { this.verdi in others }
+
+infix fun <T : Any> Faktum<T>.erIkkeBlant(others: List<T>) = MengdeSubsumsjon(
+    ER_IKKE_BLANDT,
+    Faktum(navn = this.navn, verdi = this.verdi.toString()),
+    others.map { Faktum(it) }
+) { this.verdi !in others }
 
 /**
  * Lister

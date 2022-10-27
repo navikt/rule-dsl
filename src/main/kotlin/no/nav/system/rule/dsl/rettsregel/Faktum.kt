@@ -20,7 +20,6 @@ open class Faktum<T : Any>(open val navn: String) : AbstractRuleComponent() {
 
     override fun type(): RuleComponentType = FAKTUM
 
-
     override fun fired(): Boolean {
         throw IllegalAccessError("Fired should not be used on Faktum.")
     }

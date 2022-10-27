@@ -10,20 +10,16 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.MENGDE_SUBSUMSJON
 import no.nav.system.rule.dsl.enums.RuleComponentType.PAR_SUBSUMSJON
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
-/**
- * TODO Vurder om en subsumsjon (og Predicate) burde ha en evaluate variabel slik sonm Rule. Hensikten er å oppdage bruk av Sumsumsjoner som ikke har blitt evaluert enda (feilsituasjon)
- */
 class ParSubsumsjon(
     override val komparator: ParKomparator,
     private val faktum1: Faktum<*>,
     private val faktum2: Faktum<*>,
-    override val utfallFunksjon: () -> Boolean,
-) : AbstractSubsumsjon(komparator = komparator, utfallFunksjon = utfallFunksjon) {
+    override val funksjon: () -> Boolean,
+) : AbstractSubsumsjon(komparator = komparator, funksjon = funksjon) {
 
     init {
         this.children.add(faktum1)
         this.children.add(faktum2)
-        this.evaluate()
     }
 
     override fun type(): RuleComponentType = PAR_SUBSUMSJON
@@ -40,12 +36,11 @@ class MengdeSubsumsjon(
     override val komparator: MengdeKomparator,
     private val faktum: Faktum<*>,
     private val abstractRuleComponentList: List<AbstractRuleComponent>,
-    override val utfallFunksjon: () -> Boolean,
-) : AbstractSubsumsjon(komparator = komparator, utfallFunksjon = utfallFunksjon) {
+    override val funksjon: () -> Boolean,
+) : AbstractSubsumsjon(komparator = komparator, funksjon = funksjon) {
 
     init {
         this.children.addAll(abstractRuleComponentList)
-        this.evaluate()
     }
 
     override fun type(): RuleComponentType = MENGDE_SUBSUMSJON
@@ -61,17 +56,18 @@ class MengdeSubsumsjon(
 
 abstract class AbstractSubsumsjon(
     open val komparator: Komparator,
-    open val utfallFunksjon: () -> Boolean,
-) : Predicate(function = utfallFunksjon) {
+    open val funksjon: () -> Boolean,
+) : Predicate(function = funksjon) {
 
     /**
      * Evaluates the predicate function.
+     * Sumsumtions never terminates callers evaluation chain.
      *
-     * @return returns false. Sumsumtions never terminates callers evaluation chain.
+     * @return boolean result of function.
      */
-    override fun evaluate(): Boolean {
+    override val fired: Boolean by lazy {
         parent?.children?.add(this)
-        fired = utfallFunksjon.invoke()
-        return false
+        funksjon.invoke().also { terminateEvaluation = false }
     }
+
 }

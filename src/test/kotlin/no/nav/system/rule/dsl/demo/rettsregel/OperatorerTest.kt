@@ -1,6 +1,7 @@
 package no.nav.system.rule.dsl.demo.rettsregel
 
 import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.enums.MengdeKomparator
 import no.nav.system.rule.dsl.rettsregel.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -16,7 +17,7 @@ class OperatorerTest {
         val tjue = Faktum(20)
         val fem = Faktum(5)
 
-        val t = Faktum(true)
+        val flagg = Faktum("flagg", true)
 
         val list = listOf("A", "B", "C")
         val A = Faktum("A", "A")
@@ -177,12 +178,12 @@ class OperatorerTest {
      * Boolean
      */
     @Test
-    fun NOT() {
-        (t).apply {
-            assertEquals("faktum: 'true'", toString())
+    fun flagg() {
+        (flagg).apply {
+            assertEquals("faktum: 'flagg' (true)", toString())
         }
-        (!t).apply {
-            assertEquals("faktum: 'true' (false)", toString())
+        (!flagg).apply {
+            assertEquals("faktum: 'flagg' (false)", toString())
         }
 
     }
@@ -255,9 +256,9 @@ class OperatorerTest {
 
     @Test
     fun erLikFaktum() {
-        (t erLik Faktum(true)).apply {
+        (flagg erLik Faktum(true)).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA 'true' er lik 'true'", toString())
+            assertEquals("par_subsumsjon: JA 'flagg' (true) er lik 'true'", toString())
         }
         (tjue erLik Faktum(20)).apply {
             assertTrue(fired())
@@ -288,11 +289,38 @@ class OperatorerTest {
         }
     }
 
+    @Test
+    fun erIkkeBlant() {
+        (D erIkkeBlant list).apply {
+            assertTrue(fired())
+            assertEquals("mengde_subsumsjon: JA 'D' (D) er ikke blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
+        }
+        (A erIkkeBlant list).apply {
+            assertFalse(fired())
+            assertEquals(
+                "mengde_subsumsjon: NEI 'A' (A) må ikke være blandt [faktum: 'A', faktum: 'B', faktum: 'C']",
+                toString()
+            )
+        }
+    }
+
 
     /**
      * Lister
      */
-    //TODO
+//    @Test
+//    fun minst() {
+//        list.xminst(2) { it == A.verdi }.apply {
+//            assertTrue(fired())
+//            assertEquals("mengde_subsumsjon: JA 'A' (A) er ikke blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
+//        }
+//    }
+
+//    fun <T : Any> Iterable<T>.xminst(target: Int, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
+//        MengdeKomparator.MINST,
+//        Faktum("mål antall", target),
+//        this.map { Faktum(it) },
+//    ) { this.count(quantifier) >= target }
 
 
 }
