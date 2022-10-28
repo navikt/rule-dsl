@@ -201,20 +201,6 @@ class OperatorerTest {
     }
 
     /**
-     * Boolean
-     */
-    @Test
-    fun flagg() {
-        (flagg).apply {
-            assertEquals("faktum: 'flagg' (true)", toString())
-        }
-        (!flagg).apply {
-            assertEquals("faktum: 'flagg' (false)", toString())
-        }
-
-    }
-
-    /**
      * Dato > Tall
      */
     @Test

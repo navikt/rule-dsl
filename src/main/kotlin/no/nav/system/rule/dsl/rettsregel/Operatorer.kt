@@ -56,12 +56,6 @@ infix fun Faktum<out Number>.erStørre(other: Number) = ParSubsumsjon(
     STØRRE, this, Faktum(other)
 ) { verdi.toDouble() > other.toDouble() }
 
-
-/**
- * Boolean
- */
-operator fun Faktum<Boolean>.not(): Faktum<Boolean> = Faktum(this.navn, !this.verdi)
-
 /**
  * Dato > Tall
  */

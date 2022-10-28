@@ -131,6 +131,9 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).testAndDebug().get()
 
+
+        println(flyktningUtfall.debug())
+
         assertEquals(OPPFYLT, flyktningUtfall.verdi)
         assertTrue(flyktningUtfall.children[0].fired())
         val overgangsregelTreSubsumsjon = flyktningUtfall.children[0].children[2] as MengdeSubsumsjon

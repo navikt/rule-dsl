@@ -54,13 +54,13 @@ class PersonenErFlyktningRS(
 
     override fun create() {
         regel("SettRelevantTrygdetid_kap19") {
-            HVIS { !innKapittel20 }
+            HVIS { innKapittel20 erLik false }
             SÅ {
                 trygdetid = innPersongrunnlag.trygdetidK19
             }
         }
         regel("SettRelevantTrygdetid_kap20") {
-            HVIS { innKapittel20 }
+            HVIS { innKapittel20 erLik true }
             SÅ {
                 trygdetid = innPersongrunnlag.trygdetidK20
             }
@@ -122,7 +122,7 @@ class PersonenErFlyktningRS(
         }
         regel("AnvendtFlyktning_oppfylt") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
-            OG { !innKravlinjeFremsattDatoFom2021 }
+            OG { innKravlinjeFremsattDatoFom2021 erLik false }
             SÅ {
                 RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
             }
