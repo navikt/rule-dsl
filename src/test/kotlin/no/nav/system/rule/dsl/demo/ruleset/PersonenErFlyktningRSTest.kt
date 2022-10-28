@@ -1,8 +1,6 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
-import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
-import no.nav.system.rule.dsl.demo.domain.Person
-import no.nav.system.rule.dsl.demo.domain.Trygdetid
+import no.nav.system.rule.dsl.demo.domain.*
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.enums.MengdeKomparator.INGEN
@@ -31,11 +29,8 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).testAndDebug().get()
 
-        println(flyktningUtfall.debug())
-
         assertEquals(IKKE_RELEVANT, flyktningUtfall.verdi)
         assertTrue(flyktningUtfall.children[0].fired())
-
 
         val flyktningSubsum = flyktningUtfall.children[0].children.first() as MengdeSubsumsjon
         assertEquals(INGEN, flyktningSubsum.komparator)
@@ -66,7 +61,7 @@ class PersonenErFlyktningRSTest {
     fun testErIkkeFlyktning_virkFom2021_ikkeOvergang() {
         val person = Person(
             fødselsdato = Faktum("Fødselsdato", localDate(1980, 1, 1)),
-            flyktning = Faktum("Angitt flyktning", true),
+            inngangOgEksportgrunnlag = InngangOgEksportgrunnlag().apply { unntakFraForutgaendeMedlemskap.unntak.verdi = true }
         )
 
         val flyktningUtfall = PersonenErFlyktningRS(
@@ -77,6 +72,8 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).testAndDebug().get()
 
+        println(flyktningUtfall.debug())
+
         val regelOvergangsregel_AP = flyktningUtfall.children[0].children[2].children[0]
 
         assertEquals(2, regelOvergangsregel_AP.children.size)
@@ -86,7 +83,7 @@ class PersonenErFlyktningRSTest {
     }
 
     @Test
-    fun testErFlyktning_virkFom2021_overgang() {
+    fun testErFlyktning_virkFom2021_Overgangsregel_AP() {
         val person = Person(
             fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
             flyktning = Faktum("Angitt flyktning", true),
@@ -112,7 +109,7 @@ class PersonenErFlyktningRSTest {
     }
 
     @Test
-    fun testErFlyktning_Overgangsregel_GJR_tidligereGJR() {
+    fun testErFlyktning_virkFom2021_Overgangsregel_GJR_tidligereGJR() {
         val person = Person(
             fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
             flyktning = Faktum("Angitt flyktning", true),

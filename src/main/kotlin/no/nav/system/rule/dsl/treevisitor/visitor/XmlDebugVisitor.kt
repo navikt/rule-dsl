@@ -11,7 +11,7 @@ class XmlDebugVisitor : TreeVisitor {
     val debugString = StringBuilder()
     private var level = 0
 
-    private fun createTag(tagName: String, vararg attribs: Any) {
+    private fun createTag2(tagName: String, vararg attribs: Any) {
         debugString
             .append("<").append(tagName)
         var hasAbstractSubsumsjon = false
@@ -30,55 +30,35 @@ class XmlDebugVisitor : TreeVisitor {
                 .append(">").append("\n")
     }
 
+    private fun createTag(tagName: String, vararg attribs: String) {
+        debugString.append("<").append(tagName)
+        attribs.forEach { debugString.append(it) }
+        debugString.append(">")
+        debugString.append("\n")
+    }
+
+    private fun createContentTag(tagName: String, content: String, vararg attribs: String) {
+        debugString.append("<").append(tagName)
+        attribs.forEach { debugString.append(it) }
+        debugString.append(">")
+        debugString.append(content)
+        debugString.append("</$tagName>\n")
+    }
+
     override fun visit(ruleComponent: AbstractRuleComponent) {
         debugString.append(" ".repeat(level * 2))
-//        debugString.append("<")
-
-//        if (ruleComponent !is Faktum<*>) {
-//            debugString.append("<")
-//        }
 
         when (ruleComponent) {
-            is AbstractRuleService<*> -> createTag(ruleComponent.name())   // {
-//                debugString.append(ruleComponent.name()).append(">").append("\n")
-//            }
-            is AbstractRuleflow -> createTag(ruleComponent.name())//{
-//                debugString.append(ruleComponent.name()).append(">").append("\n")
-//            }
-            is AbstractRuleflow.Decision -> createTag(ruleComponent.name()) // {
-//                debugString.append(ruleComponent.name()).append(">").append("\n")
-//            }
-            is AbstractRuleflow.Decision.Branch -> createTag(
-                ruleComponent.name(),
-                " fired=${ruleComponent.fired()}"
-            ) //{
-//                debugString.append(ruleComponent.name()).append(" fired=${ruleComponent.fired()}").append(">").append("\n")
-//            }
-            is AbstractRuleset<*> -> createTag(ruleComponent.name()) //{
-//                debugString.append(ruleComponent.name()).append(">").append("\n")
-//            }
+            is AbstractRuleflow.Decision.Branch -> createTag(ruleComponent.name(), " fired=\"${ruleComponent.fired()}\"")
             is Rule -> {
                 val tagName = ruleComponent.name().replace("${ruleComponent.parent!!.name()}.", "").replace(" ", "_")
                 val comment =
                     if (ruleComponent.prettyDoc().isNotBlank()) " comment=\"${ruleComponent.prettyDoc()}\"" else ""
                 createTag("/$tagName", " fired=${ruleComponent.fired()}", comment)
-//                debugString.append("/")
-//                    .append(ruleComponent.name().replace("${ruleComponent.parent!!.name()}.", "").replace(" ", "_"))
-//                    .append(" fired=${ruleComponent.fired()}")
-//                if (ruleComponent.prettyDoc().isNotBlank()) {
-//                    debugString.append(" comment=\"${ruleComponent.prettyDoc()}\"")
-//                }
-//                debugString.append(">").append("\n")
             }
 
-            is AbstractSubsumsjon -> createTag("subsumsjon", " fired=${ruleComponent.fired()}", ruleComponent) //{
-//                debugString
-//                    .append("subsumsjon")
-//                    .append(" fired=${ruleComponent.fired()}").append(">")
-//                    .append(ruleComponent)
-//                    .append("</subsumsjon>")
-//                    .append("\n")
-//            }
+            is AbstractSubsumsjon -> createContentTag("subsumsjon", ruleComponent.toString()," type=\"${ruleComponent.type().name}\""," fired=\"${ruleComponent.fired()}\"") //{
+            else -> createTag(ruleComponent.name())
         }
 
         level++

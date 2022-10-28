@@ -46,7 +46,6 @@ class MengdeSubsumsjon(
     override fun type(): RuleComponentType = MENGDE_SUBSUMSJON
 
     override fun toString(): String {
-//        return "${type()}: ${fired.svarord()} ${faktum.navn} (${faktum.verdi})${komparator.text}:"
         val komparatorText = if (fired) komparator.text else komparator.negated()
         val f1text = if (faktum.anonymous) "'${faktum.navn}'" else "'${faktum.navn}' (${faktum.verdi})"
         val f2text = abstractRuleComponentList.toString()

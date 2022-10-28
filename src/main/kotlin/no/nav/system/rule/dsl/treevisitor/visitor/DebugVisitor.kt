@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
-import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
 
 /**
  * Lists the complete tree of [AbstractRuleComponent]
@@ -13,11 +13,10 @@ class DebugVisitor(
     private var level = 0
 
     override fun visit(ruleComponent: AbstractRuleComponent) {
-
-        if (!includeFaktum && ruleComponent is Faktum<*>) return
-
         debugString.append(" ".repeat(level * 2))
         debugString.append(ruleComponent.toString()).append("\n")
+
+        if (!includeFaktum && ruleComponent is ParSubsumsjon) return
 
         level++
         ruleComponent.children.forEach { it.accept(this) }

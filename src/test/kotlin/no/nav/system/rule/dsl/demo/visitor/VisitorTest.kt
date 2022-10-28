@@ -10,11 +10,13 @@ import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import no.nav.system.rule.dsl.treevisitor.visitor.xmlDebug
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class VisitorTest {
 
     @Test
+    @Disabled
     fun `debug visitor test`() {
         val params = Request(
             virkningstidspunkt = localDate(1990, 5, 1),
@@ -63,6 +65,7 @@ class VisitorTest {
     }
 
     @Test
+    @Disabled
     fun `XML debug visitor test`() {
         val params = Request(
             virkningstidspunkt = localDate(1990, 5, 1),

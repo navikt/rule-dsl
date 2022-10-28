@@ -65,7 +65,6 @@ class PersonenErFlyktningRS(
                 trygdetid = innPersongrunnlag.trygdetidK20
             }
         }
-
         regel("AngittFlyktning_HarFlyktningFlaggetSatt") {
             HVIS { innPersongrunnlag.flyktning }
             kommentar("Flyktningerflagget er angitt av saksbehandler.")
