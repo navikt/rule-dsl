@@ -91,8 +91,6 @@ open class Rule(
         predicateFunctionList.add { Predicate(function = predicateFunction) }
     }
 
-    // TODO Vurder å lag HVIS(predicateFunction: () -> Faktum<UtfallType>)
-
     @OverloadResolutionByLambdaReturnType
     @JvmName("FaktumHVIS")
     @DslDomainPredicate

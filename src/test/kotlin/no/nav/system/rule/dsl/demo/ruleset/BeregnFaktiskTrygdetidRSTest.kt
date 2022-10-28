@@ -3,7 +3,7 @@ package no.nav.system.rule.dsl.demo.ruleset
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
-import no.nav.system.rule.dsl.enums.UtfallType.IKKE_OPPFYLT
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.IKKE_OPPFYLT
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.treevisitor.visitor.RuleVisitor
 import org.junit.jupiter.api.Assertions

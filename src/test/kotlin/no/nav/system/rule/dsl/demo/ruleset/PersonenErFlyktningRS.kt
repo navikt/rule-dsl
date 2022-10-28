@@ -9,8 +9,8 @@ import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum.*
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.helper.måneder
 import no.nav.system.rule.dsl.demo.helper.år
-import no.nav.system.rule.dsl.enums.UtfallType
-import no.nav.system.rule.dsl.enums.UtfallType.*
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
 

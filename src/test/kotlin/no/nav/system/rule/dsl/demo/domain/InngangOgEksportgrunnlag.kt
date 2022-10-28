@@ -13,7 +13,3 @@ data class InngangOgEksportgrunnlag(
         Faktum("unntakFraForutgaendeTT type", UnntakEnum.FLYKT_ALDER)
     )
 )
-
-data class Unntak(val unntak: Faktum<Boolean>, val unntakType: Faktum<UnntakEnum>)
-
-

@@ -85,6 +85,13 @@ infix fun <T : Any> Faktum<T>.erLik(ap: T) = ParSubsumsjon(
 infix fun <T : Any> Faktum<T>.erLik(ap: Faktum<T>) = ParSubsumsjon(
     LIK, this, ap
 ) { this.verdi == ap.verdi }
+infix fun <T : Any> Faktum<T>.erUlik(ap: T) = ParSubsumsjon(
+    ULIK, this, Faktum(ap)
+) { this.verdi != ap }
+
+infix fun <T : Any> Faktum<T>.erUlik(ap: Faktum<T>) = ParSubsumsjon(
+    ULIK, this, ap
+) { this.verdi != ap.verdi }
 
 infix fun <T : Any> Faktum<T>.erBlant(others: List<T>) = MengdeSubsumsjon(
     ER_BLANDT,

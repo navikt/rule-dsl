@@ -24,9 +24,7 @@ abstract class AbstractRuleComponent {
             }
         }
 
-
     abstract fun name(): String
-
     abstract fun type(): RuleComponentType
     abstract fun fired(): Boolean
 

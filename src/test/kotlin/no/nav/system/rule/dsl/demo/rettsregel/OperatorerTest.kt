@@ -267,6 +267,18 @@ class OperatorerTest {
     }
 
     @Test
+    fun erUlik() {
+        (tjue erUlik 3).apply {
+            assertTrue(fired())
+            assertEquals("par_subsumsjon: JA '20' er ulik '3'", toString())
+        }
+        (tjue erUlik 20).apply {
+            assertFalse(fired())
+            assertEquals("par_subsumsjon: NEI '20' må være ulik '20'", toString())
+        }
+    }
+
+    @Test
     fun erLikFaktum() {
         (flagg erLik Faktum(true)).apply {
             assertTrue(fired())
@@ -283,6 +295,26 @@ class OperatorerTest {
         (fem erLik tjue).apply {
             assertFalse(fired())
             assertEquals("par_subsumsjon: NEI '5' må være lik '20'", toString())
+        }
+    }
+
+    @Test
+    fun erUlikFaktum() {
+        (flagg erUlik Faktum(false)).apply {
+            assertTrue(fired())
+            assertEquals("par_subsumsjon: JA 'flagg' (true) er ulik 'false'", toString())
+        }
+        (tjue erUlik Faktum(3)).apply {
+            assertTrue(fired())
+            assertEquals("par_subsumsjon: JA '20' er ulik '3'", toString())
+        }
+        (Faktum(false) erUlik Faktum(false)).apply {
+            assertFalse(fired())
+            assertEquals("par_subsumsjon: NEI 'false' må være ulik 'false'", toString())
+        }
+        (fem erUlik fem).apply {
+            assertFalse(fired())
+            assertEquals("par_subsumsjon: NEI '5' må være ulik '5'", toString())
         }
     }
 

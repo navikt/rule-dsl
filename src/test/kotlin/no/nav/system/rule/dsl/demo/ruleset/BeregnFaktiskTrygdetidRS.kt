@@ -6,12 +6,10 @@ import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
-import no.nav.system.rule.dsl.enums.UtfallType
-import no.nav.system.rule.dsl.enums.UtfallType.*
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.pattern.createPattern
-import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.erEtterEllerLik
-import no.nav.system.rule.dsl.rettsregel.erMindreEnn
+import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
@@ -83,13 +81,13 @@ class BeregnFaktiskTrygdetidRS(
         }
 
         regel("FastsettTrygdetid_ikkeFlyktning") {
-            HVIS { flyktningUtfall.verdi != OPPFYLT }
+            HVIS { flyktningUtfall erUlik OPPFYLT }
             SÅ {
                 svar.år = (svar.faktiskTrygdetidIMåneder.verdi / 12.0).roundToInt()
             }
         }
         regel("FastsettTrygdetid_Flyktning") {
-            HVIS { flyktningUtfall.verdi == OPPFYLT }
+            HVIS { flyktningUtfall erLik OPPFYLT }
             SÅ {
                 svar.år = 40
             }

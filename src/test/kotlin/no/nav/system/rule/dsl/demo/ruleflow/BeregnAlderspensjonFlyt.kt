@@ -6,7 +6,7 @@ import no.nav.system.rule.dsl.demo.domain.param.AlderspensjonParameter
 import no.nav.system.rule.dsl.demo.ruleset.BeregnFaktiskTrygdetidRS
 import no.nav.system.rule.dsl.demo.ruleset.BeregnGrunnpensjonRS
 import no.nav.system.rule.dsl.demo.ruleset.PersonenErFlyktningRS
-import no.nav.system.rule.dsl.enums.UtfallType
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.rettsregel.Faktum
 
 class BeregnAlderspensjonFlyt(

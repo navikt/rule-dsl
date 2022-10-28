@@ -1,6 +1,6 @@
 package no.nav.system.rule.dsl.demo.domain
 
-import no.nav.system.rule.dsl.enums.UtfallType
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.rettsregel.Faktum
 
 data class Trygdetid(

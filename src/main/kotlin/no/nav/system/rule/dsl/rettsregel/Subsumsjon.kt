@@ -10,6 +10,23 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.MENGDE_SUBSUMSJON
 import no.nav.system.rule.dsl.enums.RuleComponentType.PAR_SUBSUMSJON
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
+abstract class AbstractSubsumsjon(
+    open val komparator: Komparator,
+    open val funksjon: () -> Boolean,
+) : Predicate(function = funksjon) {
+
+    /**
+     * Evaluates the predicate function.
+     * Sumsumtions never terminates callers evaluation chain.
+     *
+     * @return boolean result of function.
+     */
+    override val fired: Boolean by lazy {
+        parent?.children?.add(this)
+        funksjon.invoke().also { terminateEvaluation = false }
+    }
+}
+
 class ParSubsumsjon(
     override val komparator: ParKomparator,
     private val faktum1: Faktum<*>,
@@ -51,22 +68,4 @@ class MengdeSubsumsjon(
         val f2text = abstractRuleComponentList.toString()
         return "${type()}: ${fired.svarord()} $f1text$komparatorText${f2text}"
     }
-}
-
-abstract class AbstractSubsumsjon(
-    open val komparator: Komparator,
-    open val funksjon: () -> Boolean,
-) : Predicate(function = funksjon) {
-
-    /**
-     * Evaluates the predicate function.
-     * Sumsumtions never terminates callers evaluation chain.
-     *
-     * @return boolean result of function.
-     */
-    override val fired: Boolean by lazy {
-        parent?.children?.add(this)
-        funksjon.invoke().also { terminateEvaluation = false }
-    }
-
 }

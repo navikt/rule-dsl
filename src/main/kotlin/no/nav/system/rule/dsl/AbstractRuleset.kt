@@ -151,21 +151,8 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         return maxSequence + 100
     }
 
-    /**
-     * Checks if a rule with name equal to receiver has fired.
-     *
-     * @receiver the rule name
-     * @return returns true if the rule is found and has fired.
-     */
-    protected fun String.harTruffet(): Boolean {
-        validateRuleExistance(this)
-        return children.filterIsInstance<Rule>()
-            .any { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
-    }
-
-
     protected fun String.minstEnHarTruffet(): MengdeSubsumsjon {
-        val list = finnReglerByName(this)
+        val list = findRulesByNameStartsWith(this)
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.MINST_EN_AV,
             faktum = Faktum("Regelreferanse", this),
@@ -176,14 +163,13 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     /**
      * "AngittFlyktning".alleHarTruffet()
-     * MengdeSumsumsjon:
-     *      ALLE
+     *      MengdeSumsumsjon ALLE
      *          "AngittFlyktning_r1"
      *          "AngittFlyktning_r2"
      *          "AngittFlyktning_r3"
      */
     protected fun String.alleHarTruffet(): MengdeSubsumsjon {
-        val list = finnReglerByName(this)
+        val list = findRulesByNameStartsWith(this)
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.ALLE,
             faktum = Faktum("Regelreferanse", this),
@@ -193,7 +179,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
     }
 
     protected fun String.ingenHarTruffet(): MengdeSubsumsjon {
-        val list = finnReglerByName(this)
+        val list = findRulesByNameStartsWith(this)
         return MengdeSubsumsjon(
             komparator = MengdeKomparator.INGEN,
             faktum = Faktum("Regelreferanse", this),
@@ -202,11 +188,17 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         )
     }
 
-    private fun finnReglerByName(rettsregelNavn: String): List<Rule> {
-        val list = children.filterIsInstance<Rule>()
-            .filter { rule -> rule.nameWithoutPatternOffset.startsWith("$rulesetName.$rettsregelNavn") }
-        if (list.isEmpty()) throw InvalidRulesetException("No rule with name that starts with ['$rettsregelNavn'] found during rule chaining.")
-        return list
+
+    /**
+     * Checks if a rule with name equal to receiver has fired.
+     *
+     * @receiver the rule name
+     * @return returns true if the rule is found and has fired.
+     */
+    protected fun String.harTruffet(): Boolean {
+        validateRuleExistance(this)
+        return children.filterIsInstance<Rule>()
+            .any { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
     }
 
     /**
@@ -249,11 +241,13 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
     /**
      * Function that validates the existance of given a [ruleName].
      */
-    private fun validateRuleExistance(ruleName: String) {
-        children.filterIsInstance<Rule>()
-            .filter { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$ruleName" }
+    private fun validateRuleExistance(ruleName: String) = findRulesByNameStartsWith(ruleName)
+
+    private fun findRulesByNameStartsWith(rettsregelNavn: String): List<Rule> {
+        return children.filterIsInstance<Rule>()
+            .filter { rule -> rule.nameWithoutPatternOffset.startsWith("$rulesetName.$rettsregelNavn") }
             .ifEmpty {
-                throw InvalidRulesetException("No rule with name ['$rulesetName.$ruleName'] found during rule chaining.")
+                throw InvalidRulesetException("No rule with name that starts with ['$rettsregelNavn'] found during rule chaining.")
             }
     }
 
