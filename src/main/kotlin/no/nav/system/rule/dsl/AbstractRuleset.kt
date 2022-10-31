@@ -95,12 +95,12 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         }
     }
 
-    open fun test(): Optional<T> {
+    internal fun test(): Optional<T> {
         return internalRun()
     }
 
     // TODO Slett før release?
-    open fun testAndDebug(): Optional<T> {
+    internal fun testAndDebug(): Optional<T> {
         val ret = internalRun()
         println(this.debug())
         return ret

@@ -27,7 +27,7 @@ class PersonenErFlyktningRSTest {
             Faktum("Kapittel20", false),
             Faktum("Virkningstidspunkt", localDate(2020, 1, 1)),
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
-        ).testAndDebug().get()
+        ).test().get()
 
         assertEquals(IKKE_RELEVANT, flyktningUtfall.verdi)
         assertTrue(flyktningUtfall.children[0].fired())
@@ -50,7 +50,7 @@ class PersonenErFlyktningRSTest {
             Faktum("Kapittel20", false),
             Faktum("Virkningstidspunkt", localDate(2020, 1, 1)),
             Faktum("HarKravlinjeFremsattDatoFom2021", false)
-        ).testAndDebug().get()
+        ).test().get()
 
         assertEquals(OPPFYLT, flyktningUtfall.verdi)
         assertEquals(1, flyktningUtfall.children[0].children[0].children.size)
@@ -70,7 +70,7 @@ class PersonenErFlyktningRSTest {
             Faktum("Kapittel20", false),
             Faktum("Virkningstidspunkt", localDate(2021, 1, 1)),
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
-        ).testAndDebug().get()
+        ).test().get()
 
         println(flyktningUtfall.debug())
 
@@ -96,7 +96,7 @@ class PersonenErFlyktningRSTest {
             Faktum("Kapittel20", false),
             Faktum("Virkningstidspunkt", localDate(2021, 1, 1)),
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
-        ).testAndDebug().get()
+        ).test().get()
 
         assertEquals(OPPFYLT, flyktningUtfall.verdi)
         assertTrue(flyktningUtfall.children[0].fired())
@@ -129,7 +129,7 @@ class PersonenErFlyktningRSTest {
             Faktum("Kapittel20", false),
             Faktum("Virkningstidspunkt", localDate(2027, 1, 1)),
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
-        ).testAndDebug().get()
+        ).test().get()
 
 
         println(flyktningUtfall.debug())
