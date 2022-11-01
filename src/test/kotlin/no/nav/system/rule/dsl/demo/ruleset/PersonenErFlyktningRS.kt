@@ -21,32 +21,32 @@ import java.time.LocalDate
 @OptIn(DslDomainPredicate::class)
 class PersonenErFlyktningRS(
     private val innPersongrunnlag: Person,
-    private val innYtelseType: Faktum<YtelseEnum>,
-    private val innKapittel20: Faktum<Boolean>,
-    private val innVirk: Faktum<LocalDate>,
-    private val innKravlinjeFremsattDatoFom2021: Faktum<Boolean>,
-) : AbstractRuleset<Faktum<UtfallType>>() {
-    private var dato67m: Faktum<LocalDate> =
-        Faktum("Fødselsdato67m", innPersongrunnlag.fødselsdato.verdi.withDayOfMonth(1) + 67.år + 1.måneder)
+    private val innYtelseType: Fact<YtelseEnum>,
+    private val innKapittel20: Fact<Boolean>,
+    private val innVirk: Fact<LocalDate>,
+    private val innKravlinjeFremsattDatoFom2021: Fact<Boolean>,
+) : AbstractRuleset<Fact<UtfallType>>() {
+    private var dato67m: Fact<LocalDate> =
+        Fact("Fødselsdato67m", innPersongrunnlag.fødselsdato.value.withDayOfMonth(1) + 67.år + 1.måneder)
     private val unntakFraForutgaendeMedlemskap =
         innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap
     private val unntakFraForutgaendeTT = innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT
     private val aktuelleUnntakstyper = listOf(
         FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP
     )
-    private val harUTfør2021 = Faktum(
+    private val harUTfør2021 = Fact(
         "Uføretrygd før 2021",
         innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1) }
     )
-    private val harGJPfør2021 = Faktum(
+    private val harGJPfør2021 = Fact(
         "Gjenlevendepensjon før 2021",
         innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1) }
     )
-    private val harUTGJRfør2021 = Faktum(
+    private val harUTGJRfør2021 = Fact(
         "Gjenlevendetillegg før 2021",
         innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1) }
     )
-    private val harGJRfør2021 = Faktum(
+    private val harGJRfør2021 = Fact(
         "Gjenlevenderett før 2021",
         innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1) }
     )
@@ -82,33 +82,33 @@ class PersonenErFlyktningRS(
             OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
         }
         regel("Overgangsregel_AP") {
-            HVIS { innYtelseType.verdi == AP }
+            HVIS { innYtelseType.value == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
         }
         regel("Overgangsregel_AP_tidligereUT") {
-            HVIS { innYtelseType.verdi == AP }
+            HVIS { innYtelseType.value == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG { harUTfør2021 }
         }
         regel("Overgangsregel_AP_tidligereGJP") {
-            HVIS { innYtelseType.verdi == AP }
+            HVIS { innYtelseType.value == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG { harGJPfør2021 }
         }
         regel("Overgangsregel_GJR_tidligereUT_GJT") {
-            HVIS { innYtelseType.verdi == GJR }
+            HVIS { innYtelseType.value == GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG { harUTGJRfør2021 }
         }
         regel("Overgangsregel_GJR_tidligereGJR") {
-            HVIS { innYtelseType.verdi == GJR }
+            HVIS { innYtelseType.value == GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
@@ -117,14 +117,14 @@ class PersonenErFlyktningRS(
         regel("AnvendtFlyktning_ikkeRelevant") {
             HVIS { "AngittFlyktning".ingenHarTruffet() }
             SÅ {
-                RETURNER(Faktum("Anvendt flyktning", IKKE_RELEVANT))
+                RETURNER(Fact("Anvendt flyktning", IKKE_RELEVANT))
             }
         }
         regel("AnvendtFlyktning_oppfylt") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
             OG { innKravlinjeFremsattDatoFom2021 erLik false }
             SÅ {
-                RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
+                RETURNER(Fact("Anvendt flyktning", OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_ingenOvergang") {
@@ -132,7 +132,7 @@ class PersonenErFlyktningRS(
             OG { innKravlinjeFremsattDatoFom2021 }
             OG { "Overgangsregel".ingenHarTruffet() }
             SÅ {
-                RETURNER(Faktum("Anvendt flyktning", IKKE_OPPFYLT))
+                RETURNER(Fact("Anvendt flyktning", IKKE_OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_harOvergang") {
@@ -140,7 +140,7 @@ class PersonenErFlyktningRS(
             OG { innKravlinjeFremsattDatoFom2021 }
             OG { "Overgangsregel".minstEnHarTruffet() }
             SÅ {
-                RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
+                RETURNER(Fact("Anvendt flyktning", OPPFYLT))
             }
         }
     }

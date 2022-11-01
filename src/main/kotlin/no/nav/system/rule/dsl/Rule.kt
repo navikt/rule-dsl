@@ -94,15 +94,15 @@ open class Rule(
     @OverloadResolutionByLambdaReturnType
     @JvmName("FaktumHVIS")
     @DslDomainPredicate
-    fun HVIS(predicateFunction: () -> Faktum<Boolean>) {
+    fun HVIS(predicateFunction: () -> Fact<Boolean>) {
         OG(predicateFunction)
     }
 
     @OverloadResolutionByLambdaReturnType
     @JvmName("FaktumOG")
     @DslDomainPredicate
-    fun OG(predicateFunction: () -> Faktum<Boolean>) {
-        predicateFunctionList.add { predicateFunction.invoke() erLik Faktum(true) }
+    fun OG(predicateFunction: () -> Fact<Boolean>) {
+        predicateFunctionList.add { predicateFunction.invoke() erLik Fact(true) }
     }
 
     /**
@@ -111,7 +111,7 @@ open class Rule(
     @OverloadResolutionByLambdaReturnType
     @JvmName("arcHVIS")
     @DslDomainPredicate
-    fun HVIS(arcFunction: () -> AbstractSubsumsjon) {
+    fun HVIS(arcFunction: () -> AbstractSubsumtion) {
         OG(arcFunction)
     }
 
@@ -121,7 +121,7 @@ open class Rule(
     @OverloadResolutionByLambdaReturnType
     @JvmName("arcOG")
     @DslDomainPredicate
-    fun OG(arcFunction: () -> AbstractSubsumsjon) {
+    fun OG(arcFunction: () -> AbstractSubsumtion) {
         predicateFunctionList.add(arcFunction)
     }
 
@@ -147,7 +147,7 @@ open class Rule(
             this.returnValue = Optional.empty()
         } else {
             this.returnValue = Optional.of(returnValue)
-            if (returnValue is Faktum<*>) returnValue.children.add(this)
+            if (returnValue is Fact<*>) returnValue.children.add(this)
         }
         returnRule = true
     }

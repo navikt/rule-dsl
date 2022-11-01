@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
-import no.nav.system.rule.dsl.rettsregel.ParSubsumsjon
+import no.nav.system.rule.dsl.rettsregel.PairSubsumtion
 
 /**
  * Lists the complete tree of [AbstractRuleComponent]
@@ -16,7 +16,7 @@ class DebugVisitor(
         debugString.append(" ".repeat(level * 2))
         debugString.append(ruleComponent.toString()).append("\n")
 
-        if (!includeFaktum && ruleComponent is ParSubsumsjon) return
+        if (!includeFaktum && ruleComponent is PairSubsumtion) return
 
         level++
         ruleComponent.children.forEach { it.accept(this) }

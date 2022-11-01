@@ -4,8 +4,8 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.AbstractRuleflow
 import no.nav.system.rule.dsl.Predicate
 import no.nav.system.rule.dsl.Rule
-import no.nav.system.rule.dsl.rettsregel.AbstractSubsumsjon
-import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.AbstractSubsumtion
+import no.nav.system.rule.dsl.rettsregel.Fact
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -18,7 +18,7 @@ class XmlDebugVisitor : TreeVisitor {
         debugString.append(" ".repeat(level * 2))
 
         var tagName = ruleComponent.name()
-        val relevantChildren = ruleComponent.children.filterNot { it is Faktum<*> }
+        val relevantChildren = ruleComponent.children.filterNot { it is Fact<*> }
         var leafElement = relevantChildren.isEmpty()
 
         when (ruleComponent) {
@@ -39,7 +39,7 @@ class XmlDebugVisitor : TreeVisitor {
                     openTag(tagName, " fired=\"${ruleComponent.fired()}\"", comment)
                 }
             }
-            is AbstractSubsumsjon -> {
+            is AbstractSubsumtion -> {
                 leafElement = true
                 openAndCloseContentTag(ruleComponent.type().toString(), ruleComponent.toString(), " fired=\"${ruleComponent.fired()}\"")
             }

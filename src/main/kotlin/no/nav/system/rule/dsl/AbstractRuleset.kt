@@ -1,13 +1,14 @@
 package no.nav.system.rule.dsl
 
-import no.nav.system.rule.dsl.enums.MengdeKomparator
+import no.nav.system.rule.dsl.enums.ListComparator
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.MengdeSubsumsjon
+import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
+import org.jetbrains.annotations.TestOnly
 import java.util.*
 
 /**
@@ -95,11 +96,12 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         }
     }
 
+    @TestOnly
     internal fun test(): Optional<T> {
         return internalRun()
     }
 
-    // TODO Slett før release?
+    @TestOnly
     internal fun testAndDebug(): Optional<T> {
         val ret = internalRun()
         println(this.debug())
@@ -120,6 +122,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     /**
      * Creates, sorts and evaluates the rules of the ruleset.
+     * Any rules returning a type incompatible with containing ruleset is considered user-error.
      */
     private fun internalRun(): Optional<T> {
         create()
@@ -128,6 +131,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             ruleSpawn.invoke().forEach {
                 it.evaluate()
                 if (it.returnRule) {
+                    @Suppress("UNCHECKED_CAST")
                     return it.returnValue as Optional<T>
                 }
             }
@@ -151,12 +155,12 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         return maxSequence + 100
     }
 
-    protected fun String.minstEnHarTruffet(): MengdeSubsumsjon {
+    protected fun String.minstEnHarTruffet(): ListSubsumtion {
         val list = findRulesByNameStartsWith(this)
-        return MengdeSubsumsjon(
-            komparator = MengdeKomparator.MINST_EN_AV,
-            faktum = Faktum("Regelreferanse", this),
-            funksjon = { list.any { it.fired() } },
+        return ListSubsumtion(
+            comparator = ListComparator.MINST_EN_AV,
+            fact = Fact("Regelreferanse", this),
+            function = { list.any { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }
@@ -168,22 +172,22 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      *          "AngittFlyktning_r2"
      *          "AngittFlyktning_r3"
      */
-    protected fun String.alleHarTruffet(): MengdeSubsumsjon {
+    protected fun String.alleHarTruffet(): ListSubsumtion {
         val list = findRulesByNameStartsWith(this)
-        return MengdeSubsumsjon(
-            komparator = MengdeKomparator.ALLE,
-            faktum = Faktum("Regelreferanse", this),
-            funksjon = { list.all { it.fired() } },
+        return ListSubsumtion(
+            comparator = ListComparator.ALLE,
+            fact = Fact("Regelreferanse", this),
+            function = { list.all { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }
 
-    protected fun String.ingenHarTruffet(): MengdeSubsumsjon {
+    protected fun String.ingenHarTruffet(): ListSubsumtion {
         val list = findRulesByNameStartsWith(this)
-        return MengdeSubsumsjon(
-            komparator = MengdeKomparator.INGEN,
-            faktum = Faktum("Regelreferanse", this),
-            funksjon = { list.none { it.fired() } },
+        return ListSubsumtion(
+            comparator = ListComparator.INGEN,
+            fact = Fact("Regelreferanse", this),
+            function = { list.none { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
     }

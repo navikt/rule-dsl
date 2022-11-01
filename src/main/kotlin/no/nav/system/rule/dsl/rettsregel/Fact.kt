@@ -4,19 +4,19 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.FAKTUM
 
-open class Faktum<T : Any> internal constructor(open val navn: String) : AbstractRuleComponent() {
-    lateinit var verdi: T
-    var anonymous = false
+open class Fact<T : Any> internal constructor(open val name: String) : AbstractRuleComponent() {
+    lateinit var value: T
+    private var anonymous = false
 
     constructor(navn: String, verdi: T) : this(navn) {
-        this.verdi = verdi
+        this.value = verdi
     }
 
     constructor(verdi: T) : this(verdi.toString(), verdi) {
         anonymous = true
     }
 
-    override fun name(): String = navn
+    override fun name(): String = name
 
     override fun type(): RuleComponentType = FAKTUM
 
@@ -26,9 +26,9 @@ open class Faktum<T : Any> internal constructor(open val navn: String) : Abstrac
 
     override fun toString(): String {
         return if (anonymous) {
-            "'$verdi'"
+            "'$value'"
         } else {
-            "'$navn' ($verdi)"
+            "'$name' ($value)"
         }
     }
 }

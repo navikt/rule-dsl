@@ -7,14 +7,14 @@ import no.nav.system.rule.dsl.demo.ruleset.BeregnFaktiskTrygdetidRS
 import no.nav.system.rule.dsl.demo.ruleset.BeregnGrunnpensjonRS
 import no.nav.system.rule.dsl.demo.ruleset.PersonenErFlyktningRS
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
-import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.Fact
 
 class BeregnAlderspensjonFlyt(
     private val parameter: AlderspensjonParameter,
 ) : AbstractRuleflow() {
 
     private var grunnpensjonSats = 0.0
-    private lateinit var flyktningUtfall: Faktum<UtfallType>
+    private lateinit var flyktningUtfall: Fact<UtfallType>
 
     override var ruleflow: () -> Unit = {
 
@@ -23,10 +23,10 @@ class BeregnAlderspensjonFlyt(
          */
         flyktningUtfall = PersonenErFlyktningRS(
             parameter.input.person,
-            Faktum("Ytelsestype", YtelseEnum.AP),
-            Faktum("Kapittel 20", false),
+            Fact("Ytelsestype", YtelseEnum.AP),
+            Fact("Kapittel 20", false),
             parameter.input.virkningstidspunkt,
-            Faktum("Søknadstidspunkt fom 2021", true)
+            Fact("Søknadstidspunkt fom 2021", true)
         ).run(this).get()
 
         /**

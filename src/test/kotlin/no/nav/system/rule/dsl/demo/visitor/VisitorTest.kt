@@ -6,11 +6,10 @@ import no.nav.system.rule.dsl.demo.domain.Request
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.ruleservice.BeregnAlderspensjonService
-import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.Fact
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import no.nav.system.rule.dsl.treevisitor.visitor.xmlDebug
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class VisitorTest {
@@ -21,7 +20,7 @@ class VisitorTest {
             virkningstidspunkt = localDate(1990, 5, 1),
             person = Person(
                 id = 1,
-                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
+                fødselsdato = Fact("Fødselsdato", localDate(1974, 3, 3)),
                 erGift = true,
                 boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
@@ -81,9 +80,9 @@ regeltjeneste: BeregnAlderspensjonService
       regel: NEI BeregnFaktiskTrygdetidRS.FastsettTrygdetid_Flyktning
         NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'
       regel: JA BeregnFaktiskTrygdetidRS.ReturnRegel
-    decision: BeregnAlderspensjonFlyt.Sivilstand gift?
-      branch: JA BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0
-      branch: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1
+    forgrening: BeregnAlderspensjonFlyt.Sivilstand gift?
+      gren: JA BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0
+      gren: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1
     regelsett: BeregnGrunnpensjonRS
       regel: NEI BeregnGrunnpensjonRS.FullTrygdetid
       regel: JA BeregnGrunnpensjonRS.RedusertTrygdetid
@@ -97,7 +96,7 @@ regeltjeneste: BeregnAlderspensjonService
             virkningstidspunkt = localDate(1990, 5, 1),
             person = Person(
                 id = 1,
-                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
+                fødselsdato = Fact("Fødselsdato", localDate(1974, 3, 3)),
                 erGift = true,
                 boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
@@ -146,7 +145,7 @@ regeltjeneste: BeregnAlderspensjonService
       <Overgangsregel_GJR_tidligereUT_GJT fired="false"></Overgangsregel_GJR_tidligereUT_GJT>
       <Overgangsregel_GJR_tidligereGJR fired="false"></Overgangsregel_GJR_tidligereGJR>
       <AnvendtFlyktning_ikkeRelevant fired="true">
-        <mengde_subsumsjon fired="true">JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]</mengde_subsumsjon>
+        <liste_subsumsjon fired="true">JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]</liste_subsumsjon>
           <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
             <par_subsumsjon fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</par_subsumsjon>
           </AngittFlyktning_HarFlyktningFlaggetSatt>
@@ -181,6 +180,5 @@ regeltjeneste: BeregnAlderspensjonService
   </BeregnAlderspensjonFlyt>
 </BeregnAlderspensjonService>""".trimIndent(), xml
         )
-
     }
 }

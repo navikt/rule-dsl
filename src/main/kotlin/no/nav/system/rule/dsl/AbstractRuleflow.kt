@@ -95,7 +95,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
         override fun name(): String = name
         override fun fired(): Boolean = true
-        override fun type(): RuleComponentType = DECISION
+        override fun type(): RuleComponentType = FORGRENING
         override fun toString(): String = "${type()}: ${name()}"
 
         class Branch(
@@ -123,7 +123,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
             override fun name(): String = name
             override fun fired(): Boolean = fired
-            override fun type(): RuleComponentType = BRANCH
+            override fun type(): RuleComponentType = GREN
             override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
         }
     }

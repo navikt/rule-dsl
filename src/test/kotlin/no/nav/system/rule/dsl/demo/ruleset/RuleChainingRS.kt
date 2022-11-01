@@ -5,7 +5,7 @@ import no.nav.system.rule.dsl.AbstractRuleset
 /**
  * Regelsett som demonstrerer rulechaining.
  */
-class RuleChainingRS(val kjørRegel: Boolean) : AbstractRuleset<Int>() {
+class RuleChainingRS(private val kjørRegel: Boolean) : AbstractRuleset<Int>() {
     private var tak: Int = 1000
 
     override fun create() {

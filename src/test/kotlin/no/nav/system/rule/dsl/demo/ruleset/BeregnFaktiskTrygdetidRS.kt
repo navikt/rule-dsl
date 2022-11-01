@@ -5,9 +5,9 @@ import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
-import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
+import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.pattern.createPattern
 import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
@@ -18,18 +18,18 @@ import kotlin.math.roundToInt
  * Demo regelsett viser bruk av Pattern og regelsporing.
  */
 class BeregnFaktiskTrygdetidRS(
-    fødselsdato: Faktum<LocalDate>,
-    private val virkningstidspunkt: Faktum<LocalDate>,
+    fødselsdato: Fact<LocalDate>,
+    private val virkningstidspunkt: Fact<LocalDate>,
     private val boperiodeListe: List<Boperiode>,
-    private val flyktningUtfall: Faktum<UtfallType>,
+    private val flyktningUtfall: Fact<UtfallType>,
 ) : AbstractRuleset<Trygdetid>() {
 
     /**
      * Nytt Pattern [norskeBoperioder] opprettes på bakgrunn av liste [boperiodeListe] med et filter på land.
      */
     private val norskeBoperioder = boperiodeListe.createPattern { it.land == LandEnum.NOR }
-    private val dato16år = fødselsdato.verdi.plusYears(16)
-    private val dato1991 = Faktum(localDate(1991, 1, 1))
+    private val dato16år = fødselsdato.value.plusYears(16)
+    private val dato1991 = Fact(localDate(1991, 1, 1))
     private val svar = Trygdetid()
 
     @OptIn(DslDomainPredicate::class)
@@ -41,7 +41,7 @@ class BeregnFaktiskTrygdetidRS(
         regel("BoPeriodeStartFør16år", norskeBoperioder) { boperiode ->
             HVIS { boperiode.fom < dato16år }
             SÅ {
-                svar.faktiskTrygdetidIMåneder.verdi += ChronoUnit.MONTHS.between(dato16år, boperiode.tom)
+                svar.faktiskTrygdetidIMåneder.value += ChronoUnit.MONTHS.between(dato16år, boperiode.tom)
             }
         }
 
@@ -51,14 +51,14 @@ class BeregnFaktiskTrygdetidRS(
         regel("BoPeriodeStartFom16år", norskeBoperioder) { boperiode ->
             HVIS { boperiode.fom >= dato16år }
             SÅ {
-                svar.faktiskTrygdetidIMåneder.verdi += ChronoUnit.MONTHS.between(boperiode.fom, boperiode.tom)
+                svar.faktiskTrygdetidIMåneder.value += ChronoUnit.MONTHS.between(boperiode.fom, boperiode.tom)
             }
         }
 
         regel("SettFireFemtedelskrav") {
             HVIS { true }
             SÅ {
-                svar.firefemtedelskrav = Faktum("firefemtedelskrav", 480)
+                svar.firefemtedelskrav = Fact("firefemtedelskrav", 480)
             }
         }
 
@@ -69,10 +69,10 @@ class BeregnFaktiskTrygdetidRS(
             HVIS { virkningstidspunkt erEtterEllerLik dato1991 }
             OG { svar.faktiskTrygdetidIMåneder erMindreEnn svar.firefemtedelskrav }
             SÅ {
-                svar.redusertFremtidigTrygdetid.verdi = OPPFYLT
+                svar.redusertFremtidigTrygdetid.value = OPPFYLT
             }
             ELLERS {
-                svar.redusertFremtidigTrygdetid.verdi = IKKE_OPPFYLT
+                svar.redusertFremtidigTrygdetid.value = IKKE_OPPFYLT
             }
             kommentar(
                 """Dersom faktisk trygdetid i Norge er mindre enn 4/5 av
@@ -83,7 +83,7 @@ class BeregnFaktiskTrygdetidRS(
         regel("FastsettTrygdetid_ikkeFlyktning") {
             HVIS { flyktningUtfall erUlik OPPFYLT }
             SÅ {
-                svar.år = (svar.faktiskTrygdetidIMåneder.verdi / 12.0).roundToInt()
+                svar.år = (svar.faktiskTrygdetidIMåneder.value / 12.0).roundToInt()
             }
         }
         regel("FastsettTrygdetid_Flyktning") {

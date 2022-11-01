@@ -1,7 +1,5 @@
 package no.nav.system.rule.dsl.demo.rettsregel
 
-import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
-import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.rettsregel.*
 import org.junit.jupiter.api.Assertions.*
@@ -10,33 +8,19 @@ import org.junit.jupiter.api.Test
 class OperatorerTest {
 
     companion object {
-        val dato1990 = Faktum(localDate(1990, 1, 1))
-        val dato2000 = Faktum(localDate(2000, 1, 1))
+        val dato1990 = Fact(localDate(1990, 1, 1))
+        val dato2000 = Fact(localDate(2000, 1, 1))
 
-        val year1996 = 1996
+        const val year1996 = 1996
 
-        val tjue = Faktum(20)
-        val fem = Faktum(5)
+        val tjue = Fact(20)
+        val fem = Fact(5)
 
-        val flagg = Faktum("flagg", true)
+        val flagg = Fact("flagg", true)
 
         val list = listOf("A", "B", "C")
-        val fvdgList = listOf(
-            ForsteVirkningsdatoGrunnlag(
-                virkningsdato = localDate(2000, 1, 1),
-                kravlinjeType = YtelseEnum.GJP
-            ),
-            ForsteVirkningsdatoGrunnlag(
-                virkningsdato = localDate(2010, 1, 1),
-                kravlinjeType = YtelseEnum.UT
-            ),
-            ForsteVirkningsdatoGrunnlag(
-                virkningsdato = localDate(2020, 1, 1),
-                kravlinjeType = YtelseEnum.AP
-            )
-        )
-        val A = Faktum("A", "A")
-        val D = Faktum("D", "D")
+        val A = Fact("A", "A")
+        val D = Fact("D", "D")
     }
 
     /**
@@ -65,6 +49,7 @@ class OperatorerTest {
             assertEquals("NEI '2000-01-01' må være før '1990-01-01'", toString())
         }
     }
+
     @Test
     fun erFørUtenFaktum() {
         (dato1990 erFør localDate(2000, 1, 1)).apply {
@@ -280,15 +265,15 @@ class OperatorerTest {
 
     @Test
     fun erLikFaktum() {
-        (flagg erLik Faktum(true)).apply {
+        (flagg erLik Fact(true)).apply {
             assertTrue(fired())
             assertEquals("JA 'flagg' (true) er lik 'true'", toString())
         }
-        (tjue erLik Faktum(20)).apply {
+        (tjue erLik Fact(20)).apply {
             assertTrue(fired())
             assertEquals("JA '20' er lik '20'", toString())
         }
-        (Faktum(false) erLik Faktum(true)).apply {
+        (Fact(false) erLik Fact(true)).apply {
             assertFalse(fired())
             assertEquals("NEI 'false' må være lik 'true'", toString())
         }
@@ -300,15 +285,15 @@ class OperatorerTest {
 
     @Test
     fun erUlikFaktum() {
-        (flagg erUlik Faktum(false)).apply {
+        (flagg erUlik Fact(false)).apply {
             assertTrue(fired())
             assertEquals("JA 'flagg' (true) er ulik 'false'", toString())
         }
-        (tjue erUlik Faktum(3)).apply {
+        (tjue erUlik Fact(3)).apply {
             assertTrue(fired())
             assertEquals("JA '20' er ulik '3'", toString())
         }
-        (Faktum(false) erUlik Faktum(false)).apply {
+        (Fact(false) erUlik Fact(false)).apply {
             assertFalse(fired())
             assertEquals("NEI 'false' må være ulik 'false'", toString())
         }

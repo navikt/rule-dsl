@@ -8,7 +8,7 @@ import no.nav.system.rule.dsl.rettsregel.helper.svarord
  * A single boolean statement used in evaluation of a rule.
  */
 open class Predicate(
-    private val function: () -> Boolean,
+    open val function: () -> Boolean,
 ) : AbstractRuleComponent() {
 
     /**
