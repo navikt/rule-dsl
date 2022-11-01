@@ -43,7 +43,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
     /**
      * DSL: Ruleflow Decision entry.
      */
-    fun decision(name: String, init: Decision.() -> Unit) {
+    fun forgrening(name: String, init: Decision.() -> Unit) {
         branchNameStack.push(name)
         val d = Decision(branchName())
         this.children.add(d)
@@ -59,7 +59,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
     override fun toString(): String = "${type()}: ${name()}"
 
     /**
-     *
+     * Represents a split in ruleflow logic. Each [Decision] can have multiple outcomes ([Branch]).
      */
     class Decision(
         private val name: String,
@@ -84,7 +84,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
          * DSL: Decision branch entry.
          * Defines a single branch inside a Decision.
          */
-        fun branch(init: Branch.() -> Unit): Branch {
+        fun gren(init: Branch.() -> Unit): Branch {
             val b = Branch("$name/branch ${branchList.size}")
             this.children.add(b)
             b.parent = this
@@ -107,9 +107,9 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
             /**
              * DSL: Branch condition entry.
-             * Defines a boolean condition that must be evaluated to true for the following [flow] to be run.
+             * Defines a boolean condition that must be evaluated to true for the following [flyt] to be run.
              */
-            fun condition(init: () -> Boolean) {
+            fun betingelse(init: () -> Boolean) {
                 condition = init
             }
 
@@ -117,7 +117,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
              * DSL: Branch flow entry.
              * Contains the code to be run.
              */
-            fun flow(flowInit: () -> Unit) {
+            fun flyt(flowInit: () -> Unit) {
                 flowFunction = flowInit
             }
 

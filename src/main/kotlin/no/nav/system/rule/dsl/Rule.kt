@@ -109,7 +109,7 @@ open class Rule(
      * DSL: Functional Predicate entry.
      */
     @OverloadResolutionByLambdaReturnType
-    @JvmName("FagHVIS")
+    @JvmName("arcHVIS")
     @DslDomainPredicate
     fun HVIS(arcFunction: () -> AbstractSubsumsjon) {
         OG(arcFunction)
@@ -119,7 +119,7 @@ open class Rule(
      * DSL: Functional Predicate entry.
      */
     @OverloadResolutionByLambdaReturnType
-    @JvmName("FagOG")
+    @JvmName("arcOG")
     @DslDomainPredicate
     fun OG(arcFunction: () -> AbstractSubsumsjon) {
         predicateFunctionList.add(arcFunction)
@@ -147,6 +147,7 @@ open class Rule(
             this.returnValue = Optional.empty()
         } else {
             this.returnValue = Optional.of(returnValue)
+            if (returnValue is Faktum<*>) returnValue.children.add(this)
         }
         returnRule = true
     }
@@ -172,6 +173,9 @@ open class Rule(
                     parent = this@Rule
                 }
 
+                /**
+                 * Predicate must be evaluated first or terminateEvaluation would not be set.
+                 */
                 fired = predicate.fired && fired
 
                 if (predicate.terminateEvaluation) {
@@ -185,14 +189,6 @@ open class Rule(
         } else {
             elseStatement.invoke()
         }
-        konstruerUtfall()
-    }
-
-    private fun konstruerUtfall() {
-        if (returnRule && returnValue.get() is Faktum<*>) {
-            (returnValue.get() as Faktum<*>).children.add(this)
-        }
-        // TODO Legg på prettyDoc og Kilde etterhvert.
     }
 
     /**

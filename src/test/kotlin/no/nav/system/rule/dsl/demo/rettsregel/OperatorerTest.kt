@@ -46,11 +46,11 @@ class OperatorerTest {
     fun erFørEllerLik() {
         (dato1990 erFørEllerLik dato2000).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '1990-01-01' er før eller lik '2000-01-01'", toString())
+            assertEquals("JA '1990-01-01' er før eller lik '2000-01-01'", toString())
         }
         (dato2000 erFørEllerLik dato1990).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '2000-01-01' må være før eller lik '1990-01-01'", toString())
+            assertEquals("NEI '2000-01-01' må være før eller lik '1990-01-01'", toString())
         }
     }
 
@@ -58,22 +58,22 @@ class OperatorerTest {
     fun erFørMedFaktum() {
         (dato1990 erFør dato2000).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '1990-01-01' er før '2000-01-01'", toString())
+            assertEquals("JA '1990-01-01' er før '2000-01-01'", toString())
         }
         (dato2000 erFør dato1990).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '2000-01-01' må være før '1990-01-01'", toString())
+            assertEquals("NEI '2000-01-01' må være før '1990-01-01'", toString())
         }
     }
     @Test
     fun erFørUtenFaktum() {
         (dato1990 erFør localDate(2000, 1, 1)).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '1990-01-01' er før '2000-01-01'", toString())
+            assertEquals("JA '1990-01-01' er før '2000-01-01'", toString())
         }
         (dato2000 erFør localDate(1990, 1, 1)).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '2000-01-01' må være før '1990-01-01'", toString())
+            assertEquals("NEI '2000-01-01' må være før '1990-01-01'", toString())
         }
     }
 
@@ -81,11 +81,11 @@ class OperatorerTest {
     fun erEtterEllerLik() {
         (dato2000 erEtterEllerLik dato1990).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '2000-01-01' er etter eller lik '1990-01-01'", toString())
+            assertEquals("JA '2000-01-01' er etter eller lik '1990-01-01'", toString())
         }
         (dato1990 erEtterEllerLik dato2000).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '1990-01-01' må være etter eller lik '2000-01-01'", toString())
+            assertEquals("NEI '1990-01-01' må være etter eller lik '2000-01-01'", toString())
         }
     }
 
@@ -93,11 +93,11 @@ class OperatorerTest {
     fun erEtter() {
         (dato2000 erEtter dato1990).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '2000-01-01' er etter '1990-01-01'", toString())
+            assertEquals("JA '2000-01-01' er etter '1990-01-01'", toString())
         }
         (dato1990 erEtter dato2000).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '1990-01-01' må være etter '2000-01-01'", toString())
+            assertEquals("NEI '1990-01-01' må være etter '2000-01-01'", toString())
         }
     }
 
@@ -108,11 +108,11 @@ class OperatorerTest {
     fun erMindreEllerLik() {
         (fem erMindreEllerLik tjue).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '5' er mindre eller lik '20'", toString())
+            assertEquals("JA '5' er mindre eller lik '20'", toString())
         }
         (tjue erMindreEllerLik fem).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '20' må være mindre eller lik '5'", toString())
+            assertEquals("NEI '20' må være mindre eller lik '5'", toString())
         }
     }
 
@@ -120,11 +120,11 @@ class OperatorerTest {
     fun erMindreEnn() {
         (fem erMindreEnn tjue).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '5' er mindre enn '20'", toString())
+            assertEquals("JA '5' er mindre enn '20'", toString())
         }
         (tjue erMindreEnn fem).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '20' må være mindre enn '5'", toString())
+            assertEquals("NEI '20' må være mindre enn '5'", toString())
         }
     }
 
@@ -132,11 +132,11 @@ class OperatorerTest {
     fun erStørreEllerLik() {
         (tjue erStørreEllerLik fem).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '20' er større eller lik '5'", toString())
+            assertEquals("JA '20' er større eller lik '5'", toString())
         }
         (fem erStørreEllerLik tjue).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '5' må være større eller lik '20'", toString())
+            assertEquals("NEI '5' må være større eller lik '20'", toString())
         }
     }
 
@@ -144,11 +144,11 @@ class OperatorerTest {
     fun erStørre() {
         (tjue erStørre fem).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '20' er større enn '5'", toString())
+            assertEquals("JA '20' er større enn '5'", toString())
         }
         (fem erStørre tjue).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '5' må være større enn '20'", toString())
+            assertEquals("NEI '5' må være større enn '20'", toString())
         }
     }
 
@@ -156,11 +156,11 @@ class OperatorerTest {
     fun erMindreEllerLikNumber() {
         (fem erMindreEllerLik 20).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '5' er mindre eller lik '20'", toString())
+            assertEquals("JA '5' er mindre eller lik '20'", toString())
         }
         (tjue erMindreEllerLik 5).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '20' må være mindre eller lik '5'", toString())
+            assertEquals("NEI '20' må være mindre eller lik '5'", toString())
         }
     }
 
@@ -168,11 +168,11 @@ class OperatorerTest {
     fun erMindreEnnNumber() {
         (fem erMindreEnn 20).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '5' er mindre enn '20'", toString())
+            assertEquals("JA '5' er mindre enn '20'", toString())
         }
         (tjue erMindreEnn 5).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '20' må være mindre enn '5'", toString())
+            assertEquals("NEI '20' må være mindre enn '5'", toString())
         }
     }
 
@@ -180,11 +180,11 @@ class OperatorerTest {
     fun erStørreEllerLikNumber() {
         (tjue erStørreEllerLik 5).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '20' er større eller lik '5'", toString())
+            assertEquals("JA '20' er større eller lik '5'", toString())
         }
         (fem erStørreEllerLik 20).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '5' må være større eller lik '20'", toString())
+            assertEquals("NEI '5' må være større eller lik '20'", toString())
         }
     }
 
@@ -192,11 +192,11 @@ class OperatorerTest {
     fun erStørreNumber() {
         (tjue erStørre 5).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '20' er større enn '5'", toString())
+            assertEquals("JA '20' er større enn '5'", toString())
         }
         (fem erStørre 20).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '5' må være større enn '20'", toString())
+            assertEquals("NEI '5' må være større enn '20'", toString())
         }
     }
 
@@ -207,11 +207,11 @@ class OperatorerTest {
     fun erMindreEllerLikDatoOgTall() {
         (dato1990 erMindreEllerLik year1996).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '1990-01-01' er mindre eller lik '1996'", toString())
+            assertEquals("JA '1990-01-01' er mindre eller lik '1996'", toString())
         }
         (dato2000 erMindreEllerLik year1996).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '2000-01-01' må være mindre eller lik '1996'", toString())
+            assertEquals("NEI '2000-01-01' må være mindre eller lik '1996'", toString())
         }
     }
 
@@ -219,11 +219,11 @@ class OperatorerTest {
     fun erMindreEnnDatoOgTall() {
         (dato1990 erMindreEnn year1996).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '1990-01-01' er mindre enn '1996'", toString())
+            assertEquals("JA '1990-01-01' er mindre enn '1996'", toString())
         }
         (dato2000 erMindreEnn year1996).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '2000-01-01' må være mindre enn '1996'", toString())
+            assertEquals("NEI '2000-01-01' må være mindre enn '1996'", toString())
         }
     }
 
@@ -231,11 +231,11 @@ class OperatorerTest {
     fun erStørreEllerLikDatoOgTall() {
         (dato2000 erStørreEllerLik year1996).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '2000-01-01' er større eller lik '1996'", toString())
+            assertEquals("JA '2000-01-01' er større eller lik '1996'", toString())
         }
         (dato1990 erStørreEllerLik year1996).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '1990-01-01' må være større eller lik '1996'", toString())
+            assertEquals("NEI '1990-01-01' må være større eller lik '1996'", toString())
         }
     }
 
@@ -243,11 +243,11 @@ class OperatorerTest {
     fun erStørreEnnDatoOgTall() {
         (dato2000 erStørreEnn year1996).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '2000-01-01' er større enn '1996'", toString())
+            assertEquals("JA '2000-01-01' er større enn '1996'", toString())
         }
         (dato1990 erStørreEnn year1996).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '1990-01-01' må være større enn '1996'", toString())
+            assertEquals("NEI '1990-01-01' må være større enn '1996'", toString())
         }
     }
 
@@ -258,11 +258,11 @@ class OperatorerTest {
     fun erLik() {
         (tjue erLik 20).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '20' er lik '20'", toString())
+            assertEquals("JA '20' er lik '20'", toString())
         }
         (tjue erLik 5).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '20' må være lik '5'", toString())
+            assertEquals("NEI '20' må være lik '5'", toString())
         }
     }
 
@@ -270,11 +270,11 @@ class OperatorerTest {
     fun erUlik() {
         (tjue erUlik 3).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '20' er ulik '3'", toString())
+            assertEquals("JA '20' er ulik '3'", toString())
         }
         (tjue erUlik 20).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '20' må være ulik '20'", toString())
+            assertEquals("NEI '20' må være ulik '20'", toString())
         }
     }
 
@@ -282,19 +282,19 @@ class OperatorerTest {
     fun erLikFaktum() {
         (flagg erLik Faktum(true)).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA 'flagg' (true) er lik 'true'", toString())
+            assertEquals("JA 'flagg' (true) er lik 'true'", toString())
         }
         (tjue erLik Faktum(20)).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '20' er lik '20'", toString())
+            assertEquals("JA '20' er lik '20'", toString())
         }
         (Faktum(false) erLik Faktum(true)).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI 'false' må være lik 'true'", toString())
+            assertEquals("NEI 'false' må være lik 'true'", toString())
         }
         (fem erLik tjue).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '5' må være lik '20'", toString())
+            assertEquals("NEI '5' må være lik '20'", toString())
         }
     }
 
@@ -302,19 +302,19 @@ class OperatorerTest {
     fun erUlikFaktum() {
         (flagg erUlik Faktum(false)).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA 'flagg' (true) er ulik 'false'", toString())
+            assertEquals("JA 'flagg' (true) er ulik 'false'", toString())
         }
         (tjue erUlik Faktum(3)).apply {
             assertTrue(fired())
-            assertEquals("par_subsumsjon: JA '20' er ulik '3'", toString())
+            assertEquals("JA '20' er ulik '3'", toString())
         }
         (Faktum(false) erUlik Faktum(false)).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI 'false' må være ulik 'false'", toString())
+            assertEquals("NEI 'false' må være ulik 'false'", toString())
         }
         (fem erUlik fem).apply {
             assertFalse(fired())
-            assertEquals("par_subsumsjon: NEI '5' må være ulik '5'", toString())
+            assertEquals("NEI '5' må være ulik '5'", toString())
         }
     }
 
@@ -322,12 +322,12 @@ class OperatorerTest {
     fun erBlant() {
         (A erBlant list).apply {
             assertTrue(fired())
-            assertEquals("mengde_subsumsjon: JA 'A' (A) er blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
+            assertEquals("JA 'A' (A) er blandt ['A', 'B', 'C']", toString())
         }
         (D erBlant list).apply {
             assertFalse(fired())
             assertEquals(
-                "mengde_subsumsjon: NEI 'D' (D) må være blandt [faktum: 'A', faktum: 'B', faktum: 'C']",
+                "NEI 'D' (D) må være blandt ['A', 'B', 'C']",
                 toString()
             )
         }
@@ -338,14 +338,14 @@ class OperatorerTest {
         (D erIkkeBlant list).apply {
             assertTrue(fired())
             assertEquals(
-                "mengde_subsumsjon: JA 'D' (D) er ikke blandt [faktum: 'A', faktum: 'B', faktum: 'C']",
+                "JA 'D' (D) er ikke blandt ['A', 'B', 'C']",
                 toString()
             )
         }
         (A erIkkeBlant list).apply {
             assertFalse(fired())
             assertEquals(
-                "mengde_subsumsjon: NEI 'A' (A) må ikke være blandt [faktum: 'A', faktum: 'B', faktum: 'C']",
+                "NEI 'A' (A) må ikke være blandt ['A', 'B', 'C']",
                 toString()
             )
         }
@@ -368,7 +368,7 @@ class OperatorerTest {
 //    fun minst() {
 //        fvdgList.xminst(1) { it == A.verdi }.apply {
 //            assertTrue(fired())
-//            assertEquals("mengde_subsumsjon: JA '1' blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
+//            assertEquals("JA '1' blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
 //        }
 //    }
 //

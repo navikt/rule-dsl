@@ -4,7 +4,7 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.FAKTUM
 
-open class Faktum<T : Any>(open val navn: String) : AbstractRuleComponent() {
+open class Faktum<T : Any> internal constructor(open val navn: String) : AbstractRuleComponent() {
     lateinit var verdi: T
     var anonymous = false
 
@@ -26,9 +26,9 @@ open class Faktum<T : Any>(open val navn: String) : AbstractRuleComponent() {
 
     override fun toString(): String {
         return if (anonymous) {
-            "${type()}: '$verdi'"
+            "'$verdi'"
         } else {
-            "${type()}: '$navn' ($verdi)"
+            "'$navn' ($verdi)"
         }
     }
 }

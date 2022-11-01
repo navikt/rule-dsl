@@ -39,19 +39,19 @@ class BeregnAlderspensjonFlyt(
             flyktningUtfall
         ).run(this).get()
 
-        decision("Sivilstand gift?") {
-            branch {
-                condition { parameter.input.person.erGift }
-                flow {
+        forgrening("Sivilstand gift?") {
+            gren {
+                betingelse { parameter.input.person.erGift }
+                flyt {
                     /**
                      * Task: Lav Sats
                      */
                     grunnpensjonSats = 0.90
                 }
             }
-            branch {
-                condition { !parameter.input.person.erGift }
-                flow {
+            gren {
+                betingelse { !parameter.input.person.erGift }
+                flyt {
                     /**
                      * Task: Høy Sats
                      */

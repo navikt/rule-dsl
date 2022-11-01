@@ -10,6 +10,10 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.MENGDE_SUBSUMSJON
 import no.nav.system.rule.dsl.enums.RuleComponentType.PAR_SUBSUMSJON
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
+/**
+ * Subsumsjon
+ * The application of a [function] on [Faktum].
+ */
 abstract class AbstractSubsumsjon(
     open val komparator: Komparator,
     open val funksjon: () -> Boolean,
@@ -17,7 +21,7 @@ abstract class AbstractSubsumsjon(
 
     /**
      * Evaluates the predicate function.
-     * Sumsumtions never terminates callers evaluation chain.
+     * Sumsumtions never terminates callers evaluation chain ([terminateEvaluation] )
      *
      * @return boolean result of function.
      */
@@ -27,6 +31,9 @@ abstract class AbstractSubsumsjon(
     }
 }
 
+/**
+ * Compares [faktum1] with [faktum2]
+ */
 class ParSubsumsjon(
     override val komparator: ParKomparator,
     private val faktum1: Faktum<*>,
@@ -43,12 +50,13 @@ class ParSubsumsjon(
 
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
-        val f1text = if (faktum1.anonymous) "'${faktum1.navn}'" else "'${faktum1.navn}' (${faktum1.verdi})"
-        val f2text = if (faktum2.anonymous) "'${faktum2.navn}'" else "'${faktum2.navn}' (${faktum2.verdi})"
-        return "${type()}: ${fired.svarord()} $f1text$komparatorText${f2text}"
+        return "${fired.svarord()} $faktum1$komparatorText$faktum2"
     }
 }
 
+/**
+ * Compares [faktum] relationship with items [abstractRuleComponentList]
+ */
 class MengdeSubsumsjon(
     override val komparator: MengdeKomparator,
     private val faktum: Faktum<*>,
@@ -64,8 +72,6 @@ class MengdeSubsumsjon(
 
     override fun toString(): String {
         val komparatorText = if (fired) komparator.text else komparator.negated()
-        val f1text = if (faktum.anonymous) "'${faktum.navn}'" else "'${faktum.navn}' (${faktum.verdi})"
-        val f2text = abstractRuleComponentList.toString()
-        return "${type()}: ${fired.svarord()} $f1text$komparatorText${f2text}"
+        return "${fired.svarord()} $faktum$komparatorText${abstractRuleComponentList}"
     }
 }

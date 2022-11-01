@@ -1,12 +1,10 @@
 package no.nav.system.rule.dsl.enums
 
-import no.nav.system.rule.dsl.enums.Komparator as Komparator
-
 interface Komparator {
     fun negated(): String
 }
 
-enum class ParKomparator( val text: String): Komparator {
+enum class ParKomparator(val text: String) : Komparator {
     FØR_ELLER_LIK(" er før eller lik "),
     FØR(" er før "),
     ETTER_ELLER_LIK(" er etter eller lik "),
@@ -34,7 +32,7 @@ enum class ParKomparator( val text: String): Komparator {
     }
 }
 
-enum class MengdeKomparator( val text: String): Komparator {
+enum class MengdeKomparator(val text: String) : Komparator {
     ER_BLANDT(" er blandt "),
     ER_IKKE_BLANDT(" er ikke blandt "),
     ALLE(" gjelder samtlige"),
@@ -42,7 +40,8 @@ enum class MengdeKomparator( val text: String): Komparator {
     MINST_EN_AV(" minst én er JA "),
     MINST(" minst "),
     MAKS(" maks "),
-    AKKURAT(" akkurat "),;
+    AKKURAT(" akkurat "),
+    ;
 
     override fun negated(): String {
         return when (this) {

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test
 class VisitorTest {
 
     @Test
-    @Disabled
     fun `debug visitor test`() {
         val params = Request(
             virkningstidspunkt = localDate(1990, 5, 1),
@@ -38,34 +37,61 @@ class VisitorTest {
 
         assertEquals(
             """
-                regeltjeneste: BeregnAlderspensjonService
-                  regelflyt: BeregnAlderspensjonFlyt
-                    regelsett: BeregnFaktiskTrygdetidRS
-                      regel: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.1 
-                      regel: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.2 
-                      regel: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.1 
-                      regel: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.2 
-                      regel: JA BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav 
-                      regel: NEI BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid  utfallType: IKKE_OPPFYLT
-                        par_subsumsjon: NEI faktum: 'virkningstidspunkt' (1990-05-01) må være fom faktum: '1991-01-01'
-                          faktum: 'virkningstidspunkt' (1990-05-01)
-                          faktum: '1991-01-01'
-                        par_subsumsjon: JA faktum: 'faktisk trygdetid i måneder' (224) er mindre enn faktum: 'firefemtedelskrav' (480)
-                          faktum: 'faktisk trygdetid i måneder' (224)
-                          faktum: 'firefemtedelskrav' (480)
-                      regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid 
-                      regel: JA BeregnFaktiskTrygdetidRS.ReturnRegel 
-                    decision: BeregnAlderspensjonFlyt.Sivilstand gift?
-                      branch: JA BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0
-                      branch: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1
-                    regelsett: BeregnGrunnpensjonRS
-                      regel: NEI BeregnGrunnpensjonRS.FullTrygdetid 
-                      regel: JA BeregnGrunnpensjonRS.RedusertTrygdetid""".trimIndent(), txt
+regeltjeneste: BeregnAlderspensjonService
+  regelflyt: BeregnAlderspensjonFlyt
+    regelsett: PersonenErFlyktningRS
+      regel: JA PersonenErFlyktningRS.SettRelevantTrygdetid_kap19
+        JA 'Kapittel 20' (false) er lik 'false'
+      regel: NEI PersonenErFlyktningRS.SettRelevantTrygdetid_kap20
+        NEI 'Kapittel 20' (false) må være lik 'true'
+      regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
+        NEI 'Angitt flyktning' (false) må være lik 'true'
+      regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning
+      regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning
+      regel: NEI PersonenErFlyktningRS.Overgangsregel_AP
+        NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'
+        NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'
+      regel: NEI PersonenErFlyktningRS.Overgangsregel_AP_tidligereUT
+        NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'
+        NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)
+        NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'
+        NEI 'Uføretrygd før 2021' (false) må være lik 'true'
+      regel: NEI PersonenErFlyktningRS.Overgangsregel_AP_tidligereGJP
+        NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'
+        NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)
+        NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'
+        NEI 'Gjenlevendepensjon før 2021' (false) må være lik 'true'
+      regel: NEI PersonenErFlyktningRS.Overgangsregel_GJR_tidligereUT_GJT
+      regel: NEI PersonenErFlyktningRS.Overgangsregel_GJR_tidligereGJR
+      regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
+        JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]
+          regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
+            NEI 'Angitt flyktning' (false) må være lik 'true'
+    regelsett: BeregnFaktiskTrygdetidRS
+      regel: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.1
+      regel: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.2
+      regel: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.1
+      regel: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFom16år.2
+      regel: JA BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav
+      regel: NEI BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid
+        NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik '1991-01-01'
+        JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)
+      regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid_ikkeFlyktning
+        JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'
+      regel: NEI BeregnFaktiskTrygdetidRS.FastsettTrygdetid_Flyktning
+        NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'
+      regel: JA BeregnFaktiskTrygdetidRS.ReturnRegel
+    decision: BeregnAlderspensjonFlyt.Sivilstand gift?
+      branch: JA BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0
+      branch: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1
+    regelsett: BeregnGrunnpensjonRS
+      regel: NEI BeregnGrunnpensjonRS.FullTrygdetid
+      regel: JA BeregnGrunnpensjonRS.RedusertTrygdetid
+                      """.trimIndent(), txt
         )
     }
 
     @Test
-    @Disabled
     fun `XML debug visitor test`() {
         val params = Request(
             virkningstidspunkt = localDate(1990, 5, 1),
@@ -87,32 +113,73 @@ class VisitorTest {
 
         assertEquals(
             """
-            <BeregnAlderspensjonService>
-              <BeregnAlderspensjonFlyt>
-                <BeregnFaktiskTrygdetidRS>
-                  </BoPeriodeStartFør16år.1 fired=true>
-                  </BoPeriodeStartFør16år.2 fired=false>
-                  </BoPeriodeStartFom16år.1 fired=false>
-                  </BoPeriodeStartFom16år.2 fired=true>
-                  </SettFireFemtedelskrav fired=true>
-                  </Skal_ha_redusert_fremtidig_trygdetid fired=false comment="Dersom faktisk trygdetid i Norge er mindre enn 4/5 av opptjeningstiden skal den framtidige trygdetiden være redusert.">
-                    <subsumsjon fired=false>par_subsumsjon: NEI faktum: 'virkningstidspunkt' (1990-05-01) må være fom faktum: '1991-01-01'</subsumsjon>
-                    <subsumsjon fired=true>par_subsumsjon: JA faktum: 'faktisk trygdetid i måneder' (224) er mindre enn faktum: 'firefemtedelskrav' (480)</subsumsjon>
-                  </FastsettTrygdetid fired=true>
-                  </ReturnRegel fired=true>
-                </BeregnFaktiskTrygdetidRS>
-                <BeregnAlderspensjonFlyt.Sivilstand gift?>
-                  <BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0 fired=true>
-                  </BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0>
-                  <BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1 fired=false>
-                  </BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1>
-                </BeregnAlderspensjonFlyt.Sivilstand gift?>
-                <BeregnGrunnpensjonRS>
-                  </FullTrygdetid fired=false>
-                  </RedusertTrygdetid fired=true>
-                </BeregnGrunnpensjonRS>
-              </BeregnAlderspensjonFlyt>
-            </BeregnAlderspensjonService>""".trimIndent(), xml
+<BeregnAlderspensjonService>
+  <BeregnAlderspensjonFlyt>
+    <PersonenErFlyktningRS>
+      <SettRelevantTrygdetid_kap19 fired="true">
+        <par_subsumsjon fired="true">JA 'Kapittel 20' (false) er lik 'false'</par_subsumsjon>
+      </SettRelevantTrygdetid_kap19>
+      <SettRelevantTrygdetid_kap20 fired="false">
+        <par_subsumsjon fired="false">NEI 'Kapittel 20' (false) må være lik 'true'</par_subsumsjon>
+      </SettRelevantTrygdetid_kap20>
+      <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
+        <par_subsumsjon fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</par_subsumsjon>
+      </AngittFlyktning_HarFlyktningFlaggetSatt>
+      <AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning fired="false"></AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning>
+      <AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning fired="false"></AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning>
+      <Overgangsregel_AP fired="false">
+        <par_subsumsjon fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</par_subsumsjon>
+        <par_subsumsjon fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</par_subsumsjon>
+      </Overgangsregel_AP>
+      <Overgangsregel_AP_tidligereUT fired="false">
+        <par_subsumsjon fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</par_subsumsjon>
+        <par_subsumsjon fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)</par_subsumsjon>
+        <par_subsumsjon fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</par_subsumsjon>
+        <par_subsumsjon fired="false">NEI 'Uføretrygd før 2021' (false) må være lik 'true'</par_subsumsjon>
+      </Overgangsregel_AP_tidligereUT>
+      <Overgangsregel_AP_tidligereGJP fired="false">
+        <par_subsumsjon fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</par_subsumsjon>
+        <par_subsumsjon fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)</par_subsumsjon>
+        <par_subsumsjon fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</par_subsumsjon>
+        <par_subsumsjon fired="false">NEI 'Gjenlevendepensjon før 2021' (false) må være lik 'true'</par_subsumsjon>
+      </Overgangsregel_AP_tidligereGJP>
+      <Overgangsregel_GJR_tidligereUT_GJT fired="false"></Overgangsregel_GJR_tidligereUT_GJT>
+      <Overgangsregel_GJR_tidligereGJR fired="false"></Overgangsregel_GJR_tidligereGJR>
+      <AnvendtFlyktning_ikkeRelevant fired="true">
+        <mengde_subsumsjon fired="true">JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]</mengde_subsumsjon>
+          <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
+            <par_subsumsjon fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</par_subsumsjon>
+          </AngittFlyktning_HarFlyktningFlaggetSatt>
+      </AnvendtFlyktning_ikkeRelevant>
+    </PersonenErFlyktningRS>
+    <BeregnFaktiskTrygdetidRS>
+      <BoPeriodeStartFør16år.1 fired="true"></BoPeriodeStartFør16år.1>
+      <BoPeriodeStartFør16år.2 fired="false"></BoPeriodeStartFør16år.2>
+      <BoPeriodeStartFom16år.1 fired="false"></BoPeriodeStartFom16år.1>
+      <BoPeriodeStartFom16år.2 fired="true"></BoPeriodeStartFom16år.2>
+      <SettFireFemtedelskrav fired="true"></SettFireFemtedelskrav>
+      <Skal_ha_redusert_fremtidig_trygdetid fired="false" comment="Dersom faktisk trygdetid i Norge er mindre enn 4/5 av opptjeningstiden skal den framtidige trygdetiden være redusert.">
+        <par_subsumsjon fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik '1991-01-01'</par_subsumsjon>
+        <par_subsumsjon fired="true">JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)</par_subsumsjon>
+      </Skal_ha_redusert_fremtidig_trygdetid>
+      <FastsettTrygdetid_ikkeFlyktning fired="true">
+        <par_subsumsjon fired="true">JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'</par_subsumsjon>
+      </FastsettTrygdetid_ikkeFlyktning>
+      <FastsettTrygdetid_Flyktning fired="false">
+        <par_subsumsjon fired="false">NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'</par_subsumsjon>
+      </FastsettTrygdetid_Flyktning>
+      <ReturnRegel fired="true"></ReturnRegel>
+    </BeregnFaktiskTrygdetidRS>
+    <BeregnAlderspensjonFlyt.Sivilstand gift?>
+      <BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0 fired="true"></BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0>
+      <BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1 fired="false"></BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1>
+    </BeregnAlderspensjonFlyt.Sivilstand gift?>
+    <BeregnGrunnpensjonRS>
+      <FullTrygdetid fired="false"></FullTrygdetid>
+      <RedusertTrygdetid fired="true"></RedusertTrygdetid>
+    </BeregnGrunnpensjonRS>
+  </BeregnAlderspensjonFlyt>
+</BeregnAlderspensjonService>""".trimIndent(), xml
         )
 
     }
