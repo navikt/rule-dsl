@@ -11,7 +11,7 @@ import no.nav.system.rule.dsl.Rule
 class DoublePattern<K, V>(
     private var firstPattern: SinglePattern<K>,
     private var secondPattern: SinglePattern<V>,
-    private var pairItemFunction: (K, V) -> Boolean
+    private var pairItemFunction: (K, V) -> Boolean,
 ) : Pattern<Pair<K, V>> {
 
     override val ruleResultMap: HashMap<Rule<*>, Pair<K, V>> = HashMap()

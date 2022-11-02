@@ -10,7 +10,7 @@ import no.nav.system.rule.dsl.Rule
  */
 class SinglePattern<P>(
     private val innListe: MutableList<P> = mutableListOf(),
-    private val filter: (P) -> Boolean = { true }
+    private val filter: (P) -> Boolean = { true },
 ) : MutableList<P> by innListe, Pattern<P> {
 
     override val ruleResultMap: HashMap<Rule<*>, P> = HashMap()
@@ -22,7 +22,7 @@ class SinglePattern<P>(
      */
     fun <V> combineWithPattern(
         otherPattern: SinglePattern<V>,
-        pairItemFunction: (P, V) -> Boolean
+        pairItemFunction: (P, V) -> Boolean,
     ): DoublePattern<P, V> {
         return DoublePattern(this, otherPattern, pairItemFunction)
     }

@@ -1,0 +1,367 @@
+package no.nav.system.rule.dsl.demo.rettsregel
+
+import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.rettsregel.*
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+
+class OperatorerTest {
+
+    companion object {
+        val dato1990 = Fact(localDate(1990, 1, 1))
+        val dato2000 = Fact(localDate(2000, 1, 1))
+
+        const val year1996 = 1996
+
+        val tjue = Fact(20)
+        val fem = Fact(5)
+
+        val flagg = Fact("flagg", true)
+
+        val list = listOf("A", "B", "C")
+        val A = Fact("A", "A")
+        val D = Fact("D", "D")
+    }
+
+    /**
+     * Datoer
+     */
+    @Test
+    fun erFørEllerLik() {
+        (dato1990 erFørEllerLik dato2000).apply {
+            assertTrue(fired())
+            assertEquals("JA '1990-01-01' er før eller lik '2000-01-01'", toString())
+        }
+        (dato2000 erFørEllerLik dato1990).apply {
+            assertFalse(fired())
+            assertEquals("NEI '2000-01-01' må være før eller lik '1990-01-01'", toString())
+        }
+    }
+
+    @Test
+    fun erFørMedFaktum() {
+        (dato1990 erFør dato2000).apply {
+            assertTrue(fired())
+            assertEquals("JA '1990-01-01' er før '2000-01-01'", toString())
+        }
+        (dato2000 erFør dato1990).apply {
+            assertFalse(fired())
+            assertEquals("NEI '2000-01-01' må være før '1990-01-01'", toString())
+        }
+    }
+
+    @Test
+    fun erFørUtenFaktum() {
+        (dato1990 erFør localDate(2000, 1, 1)).apply {
+            assertTrue(fired())
+            assertEquals("JA '1990-01-01' er før '2000-01-01'", toString())
+        }
+        (dato2000 erFør localDate(1990, 1, 1)).apply {
+            assertFalse(fired())
+            assertEquals("NEI '2000-01-01' må være før '1990-01-01'", toString())
+        }
+    }
+
+    @Test
+    fun erEtterEllerLik() {
+        (dato2000 erEtterEllerLik dato1990).apply {
+            assertTrue(fired())
+            assertEquals("JA '2000-01-01' er etter eller lik '1990-01-01'", toString())
+        }
+        (dato1990 erEtterEllerLik dato2000).apply {
+            assertFalse(fired())
+            assertEquals("NEI '1990-01-01' må være etter eller lik '2000-01-01'", toString())
+        }
+    }
+
+    @Test
+    fun erEtter() {
+        (dato2000 erEtter dato1990).apply {
+            assertTrue(fired())
+            assertEquals("JA '2000-01-01' er etter '1990-01-01'", toString())
+        }
+        (dato1990 erEtter dato2000).apply {
+            assertFalse(fired())
+            assertEquals("NEI '1990-01-01' må være etter '2000-01-01'", toString())
+        }
+    }
+
+    /**
+     * Tall
+     */
+    @Test
+    fun erMindreEllerLik() {
+        (fem erMindreEllerLik tjue).apply {
+            assertTrue(fired())
+            assertEquals("JA '5' er mindre eller lik '20'", toString())
+        }
+        (tjue erMindreEllerLik fem).apply {
+            assertFalse(fired())
+            assertEquals("NEI '20' må være mindre eller lik '5'", toString())
+        }
+    }
+
+    @Test
+    fun erMindreEnn() {
+        (fem erMindreEnn tjue).apply {
+            assertTrue(fired())
+            assertEquals("JA '5' er mindre enn '20'", toString())
+        }
+        (tjue erMindreEnn fem).apply {
+            assertFalse(fired())
+            assertEquals("NEI '20' må være mindre enn '5'", toString())
+        }
+    }
+
+    @Test
+    fun erStørreEllerLik() {
+        (tjue erStørreEllerLik fem).apply {
+            assertTrue(fired())
+            assertEquals("JA '20' er større eller lik '5'", toString())
+        }
+        (fem erStørreEllerLik tjue).apply {
+            assertFalse(fired())
+            assertEquals("NEI '5' må være større eller lik '20'", toString())
+        }
+    }
+
+    @Test
+    fun erStørre() {
+        (tjue erStørre fem).apply {
+            assertTrue(fired())
+            assertEquals("JA '20' er større enn '5'", toString())
+        }
+        (fem erStørre tjue).apply {
+            assertFalse(fired())
+            assertEquals("NEI '5' må være større enn '20'", toString())
+        }
+    }
+
+    @Test
+    fun erMindreEllerLikNumber() {
+        (fem erMindreEllerLik 20).apply {
+            assertTrue(fired())
+            assertEquals("JA '5' er mindre eller lik '20'", toString())
+        }
+        (tjue erMindreEllerLik 5).apply {
+            assertFalse(fired())
+            assertEquals("NEI '20' må være mindre eller lik '5'", toString())
+        }
+    }
+
+    @Test
+    fun erMindreEnnNumber() {
+        (fem erMindreEnn 20).apply {
+            assertTrue(fired())
+            assertEquals("JA '5' er mindre enn '20'", toString())
+        }
+        (tjue erMindreEnn 5).apply {
+            assertFalse(fired())
+            assertEquals("NEI '20' må være mindre enn '5'", toString())
+        }
+    }
+
+    @Test
+    fun erStørreEllerLikNumber() {
+        (tjue erStørreEllerLik 5).apply {
+            assertTrue(fired())
+            assertEquals("JA '20' er større eller lik '5'", toString())
+        }
+        (fem erStørreEllerLik 20).apply {
+            assertFalse(fired())
+            assertEquals("NEI '5' må være større eller lik '20'", toString())
+        }
+    }
+
+    @Test
+    fun erStørreNumber() {
+        (tjue erStørre 5).apply {
+            assertTrue(fired())
+            assertEquals("JA '20' er større enn '5'", toString())
+        }
+        (fem erStørre 20).apply {
+            assertFalse(fired())
+            assertEquals("NEI '5' må være større enn '20'", toString())
+        }
+    }
+
+    /**
+     * Dato > Tall
+     */
+    @Test
+    fun erMindreEllerLikDatoOgTall() {
+        (dato1990 erMindreEllerLik year1996).apply {
+            assertTrue(fired())
+            assertEquals("JA '1990-01-01' er mindre eller lik '1996'", toString())
+        }
+        (dato2000 erMindreEllerLik year1996).apply {
+            assertFalse(fired())
+            assertEquals("NEI '2000-01-01' må være mindre eller lik '1996'", toString())
+        }
+    }
+
+    @Test
+    fun erMindreEnnDatoOgTall() {
+        (dato1990 erMindreEnn year1996).apply {
+            assertTrue(fired())
+            assertEquals("JA '1990-01-01' er mindre enn '1996'", toString())
+        }
+        (dato2000 erMindreEnn year1996).apply {
+            assertFalse(fired())
+            assertEquals("NEI '2000-01-01' må være mindre enn '1996'", toString())
+        }
+    }
+
+    @Test
+    fun erStørreEllerLikDatoOgTall() {
+        (dato2000 erStørreEllerLik year1996).apply {
+            assertTrue(fired())
+            assertEquals("JA '2000-01-01' er større eller lik '1996'", toString())
+        }
+        (dato1990 erStørreEllerLik year1996).apply {
+            assertFalse(fired())
+            assertEquals("NEI '1990-01-01' må være større eller lik '1996'", toString())
+        }
+    }
+
+    @Test
+    fun erStørreEnnDatoOgTall() {
+        (dato2000 erStørreEnn year1996).apply {
+            assertTrue(fired())
+            assertEquals("JA '2000-01-01' er større enn '1996'", toString())
+        }
+        (dato1990 erStørreEnn year1996).apply {
+            assertFalse(fired())
+            assertEquals("NEI '1990-01-01' må være større enn '1996'", toString())
+        }
+    }
+
+    /**
+     * Generisk
+     */
+    @Test
+    fun erLik() {
+        (tjue erLik 20).apply {
+            assertTrue(fired())
+            assertEquals("JA '20' er lik '20'", toString())
+        }
+        (tjue erLik 5).apply {
+            assertFalse(fired())
+            assertEquals("NEI '20' må være lik '5'", toString())
+        }
+    }
+
+    @Test
+    fun erUlik() {
+        (tjue erUlik 3).apply {
+            assertTrue(fired())
+            assertEquals("JA '20' er ulik '3'", toString())
+        }
+        (tjue erUlik 20).apply {
+            assertFalse(fired())
+            assertEquals("NEI '20' må være ulik '20'", toString())
+        }
+    }
+
+    @Test
+    fun erLikFaktum() {
+        (flagg erLik Fact(true)).apply {
+            assertTrue(fired())
+            assertEquals("JA 'flagg' (true) er lik 'true'", toString())
+        }
+        (tjue erLik Fact(20)).apply {
+            assertTrue(fired())
+            assertEquals("JA '20' er lik '20'", toString())
+        }
+        (Fact(false) erLik Fact(true)).apply {
+            assertFalse(fired())
+            assertEquals("NEI 'false' må være lik 'true'", toString())
+        }
+        (fem erLik tjue).apply {
+            assertFalse(fired())
+            assertEquals("NEI '5' må være lik '20'", toString())
+        }
+    }
+
+    @Test
+    fun erUlikFaktum() {
+        (flagg erUlik Fact(false)).apply {
+            assertTrue(fired())
+            assertEquals("JA 'flagg' (true) er ulik 'false'", toString())
+        }
+        (tjue erUlik Fact(3)).apply {
+            assertTrue(fired())
+            assertEquals("JA '20' er ulik '3'", toString())
+        }
+        (Fact(false) erUlik Fact(false)).apply {
+            assertFalse(fired())
+            assertEquals("NEI 'false' må være ulik 'false'", toString())
+        }
+        (fem erUlik fem).apply {
+            assertFalse(fired())
+            assertEquals("NEI '5' må være ulik '5'", toString())
+        }
+    }
+
+    @Test
+    fun erBlant() {
+        (A erBlant list).apply {
+            assertTrue(fired())
+            assertEquals("JA 'A' (A) er blandt ['A', 'B', 'C']", toString())
+        }
+        (D erBlant list).apply {
+            assertFalse(fired())
+            assertEquals(
+                "NEI 'D' (D) må være blandt ['A', 'B', 'C']",
+                toString()
+            )
+        }
+    }
+
+    @Test
+    fun erIkkeBlant() {
+        (D erIkkeBlant list).apply {
+            assertTrue(fired())
+            assertEquals(
+                "JA 'D' (D) er ikke blandt ['A', 'B', 'C']",
+                toString()
+            )
+        }
+        (A erIkkeBlant list).apply {
+            assertFalse(fired())
+            assertEquals(
+                "NEI 'A' (A) må ikke være blandt ['A', 'B', 'C']",
+                toString()
+            )
+        }
+    }
+
+
+    /**
+     * Lister
+     *
+     * Predikat:
+     *      innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.minstEn {
+     *         it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1)
+     *      }
+     *
+     * MendeSubsumsjon:
+     *      Minst 1 ForsteVirkningsdatoGrunnlag opp
+     *
+     */
+//    @Test
+//    fun minst() {
+//        fvdgList.xminst(1) { it == A.verdi }.apply {
+//            assertTrue(fired())
+//            assertEquals("JA '1' blandt [faktum: 'A', faktum: 'B', faktum: 'C']", toString())
+//        }
+//    }
+//
+//    fun <FaktumGenerator> Iterable<FaktumGenerator>.xminst(target: Int, quantifier: (T) -> Boolean) = MengdeSubsumsjon(
+//        MengdeKomparator.MINST,
+//        Faktum("mål antall", target),
+//        this.map { Faktum(it) },
+//    ) { this.count(quantifier) >= target }
+
+
+}

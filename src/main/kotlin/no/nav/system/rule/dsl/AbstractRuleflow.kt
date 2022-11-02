@@ -1,18 +1,20 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.*
+import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import org.jetbrains.annotations.TestOnly
 import java.util.*
-import kotlin.reflect.KClass
 
 /**
  * Common ruleflow behaviour used by all ruleflow implementations.
  * Defines branching logic DSL (decision, branch, condition, flow).
  */
-abstract class AbstractRuleflow : AbstractRuleComponent() {
+abstract class AbstractRuleflow : AbstractResourceHolder() {
     /**
      * Tracks the full name of nested branches.
      */
-    protected val branchNameStack = Stack<String>()
+    private val branchNameStack = Stack<String>()
 
     /**
      * Tests the ruleflow without a parent ruleComponent.
@@ -41,7 +43,7 @@ abstract class AbstractRuleflow : AbstractRuleComponent() {
     /**
      * DSL: Ruleflow Decision entry.
      */
-    fun decision(name: String, init: Decision.() -> Unit) {
+    fun forgrening(name: String, init: Decision.() -> Unit) {
         branchNameStack.push(name)
         val d = Decision(branchName())
         this.children.add(d)
@@ -53,13 +55,14 @@ abstract class AbstractRuleflow : AbstractRuleComponent() {
 
     override fun name(): String = this.javaClass.simpleName
     override fun fired(): Boolean = true
-    override fun type(): String = "regelflyt"
+    override fun type(): RuleComponentType = REGELFLYT
+    override fun toString(): String = "${type()}: ${name()}"
 
     /**
-     *
+     * Represents a split in ruleflow logic. Each [Decision] can have multiple outcomes ([Branch]).
      */
     class Decision(
-        private val name: String
+        private val name: String,
     ) : AbstractRuleComponent() {
 
         private var branchList = mutableListOf<Branch>()
@@ -81,7 +84,7 @@ abstract class AbstractRuleflow : AbstractRuleComponent() {
          * DSL: Decision branch entry.
          * Defines a single branch inside a Decision.
          */
-        fun branch(init: Branch.() -> Unit): Branch {
+        fun gren(init: Branch.() -> Unit): Branch {
             val b = Branch("$name/branch ${branchList.size}")
             this.children.add(b)
             b.parent = this
@@ -92,10 +95,11 @@ abstract class AbstractRuleflow : AbstractRuleComponent() {
 
         override fun name(): String = name
         override fun fired(): Boolean = true
-        override fun type(): String = Decision::class.java.name
+        override fun type(): RuleComponentType = FORGRENING
+        override fun toString(): String = "${type()}: ${name()}"
 
         class Branch(
-            private val name: String
+            private val name: String,
         ) : AbstractRuleComponent() {
             lateinit var condition: () -> Boolean
             lateinit var flowFunction: () -> Unit
@@ -103,9 +107,9 @@ abstract class AbstractRuleflow : AbstractRuleComponent() {
 
             /**
              * DSL: Branch condition entry.
-             * Defines a boolean condition that must be evaluated to true for the following [flow] to be run.
+             * Defines a boolean condition that must be evaluated to true for the following [flyt] to be run.
              */
-            fun condition(init: () -> Boolean) {
+            fun betingelse(init: () -> Boolean) {
                 condition = init
             }
 
@@ -113,13 +117,14 @@ abstract class AbstractRuleflow : AbstractRuleComponent() {
              * DSL: Branch flow entry.
              * Contains the code to be run.
              */
-            fun flow(flowInit: () -> Unit) {
+            fun flyt(flowInit: () -> Unit) {
                 flowFunction = flowInit
             }
 
             override fun name(): String = name
             override fun fired(): Boolean = fired
-            override fun type(): String = Branch::class.java.name
+            override fun type(): RuleComponentType = GREN
+            override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
         }
     }
 }

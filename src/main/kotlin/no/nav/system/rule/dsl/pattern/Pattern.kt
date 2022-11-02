@@ -25,7 +25,7 @@ interface Pattern<P> {
      * @param rule the rule to register
      * @param patternElement the element the [rule] is evaluating
      */
-     fun registerRule(rule: Rule<*>, patternElement: P) {
+    fun registerRule(rule: Rule<*>, patternElement: P) {
         rule.pattern = this
         ruleResultMap[rule] = patternElement
     }

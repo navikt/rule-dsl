@@ -1,40 +1,22 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
-import no.nav.system.rule.dsl.*
+import no.nav.system.rule.dsl.AbstractRuleComponent
+import no.nav.system.rule.dsl.rettsregel.PairSubsumtion
 
 /**
  * Lists the complete tree of [AbstractRuleComponent]
  */
-class DebugVisitor : TreeVisitor {
+class DebugVisitor(
+    private val includeFaktum: Boolean = false,
+) : TreeVisitor {
     val debugString = StringBuilder()
     private var level = 0
 
     override fun visit(ruleComponent: AbstractRuleComponent) {
         debugString.append(" ".repeat(level * 2))
+        debugString.append(ruleComponent.toString()).append("\n")
 
-        when (ruleComponent) {
-            is Predicate -> {
-                debugString.append("predicate: ${ruleComponent.evaluatedDomainText()} fired: ${ruleComponent.fired()}\n")
-            }
-            is Rule<*> -> {
-                debugString.append("rule: ${ruleComponent.name()} fired: ${ruleComponent.fired()}\n")
-            }
-            is AbstractRuleset<*> -> {
-                debugString.append("ruleset: ${ruleComponent.rulesetName}\n")
-            }
-            is AbstractRuleflow -> {
-                debugString.append("ruleflow: ${ruleComponent.javaClass.simpleName}\n")
-            }
-            is AbstractRuleflow.Decision -> {
-                debugString.append("decision: ${ruleComponent.name()}\n")
-            }
-            is AbstractRuleflow.Decision.Branch -> {
-                debugString.append("branch: ${ruleComponent.name()} fired: ${ruleComponent.fired()}\n")
-            }
-            is AbstractRuleService<*> -> {
-                debugString.append("ruleservice: ${ruleComponent.name()}\n")
-            }
-        }
+        if (!includeFaktum && ruleComponent is PairSubsumtion) return
 
         level++
         ruleComponent.children.forEach { it.accept(this) }

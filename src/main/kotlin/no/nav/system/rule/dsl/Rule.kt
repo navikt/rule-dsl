@@ -1,9 +1,12 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.*
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.treevisitor.Conclusion
-import no.nav.system.rule.dsl.treevisitor.svarord
+import no.nav.system.rule.dsl.rettsregel.*
+import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import java.util.*
+import kotlin.experimental.ExperimentalTypeInference
 
 /**
  * A rule that evaluates a set of predicates and, if all predicates are true, executes an action statement.
@@ -16,25 +19,16 @@ import java.util.*
  * @param name the rule name
  * @param sequence the rule sequence
  */
+@OptIn(ExperimentalTypeInference::class)
 open class Rule<T : Any>(
     private val name: String,
-    internal val sequence: Int
-) : Comparable<Rule<T>>, AbstractRuleComponent() {
+    private val sequence: Int,
+) : Comparable<Rule<T>>, AbstractResourceHolder() {
 
     /**
      * Functional description of the rule
      */
     private var comment: String = ""
-
-    /**
-     * Each predicate function in the rule.
-     */
-    private val predicateList: ArrayList<Predicate> = ArrayList()
-
-    /**
-     * True if at least one predicate is a Domain predicate.
-     */
-    private var containsDomainPredicate: Boolean = false
 
     /**
      * Reference to optional pattern.
@@ -54,12 +48,12 @@ open class Rule<T : Any>(
     /**
      * Set to true if the rule has been evaluated.
      */
-    private var evaluated = false
+    internal var evaluated = false
 
     /**
      * Set to true if every predicate is true.
      */
-    private var fired = false
+    protected var fired = false
 
     /**
      * The code that executes if the rule is [fired]
@@ -67,47 +61,68 @@ open class Rule<T : Any>(
     private var actionStatement: () -> Unit = {}
 
     /**
+     * The code that executes if the rule is not [fired]
+     */
+    private var elseStatement: () -> Unit = {}
+
+    /**
      * The value this rule will return.
      */
-    var returnValue: Optional<T> = Optional.empty()
+    internal var returnValue: Optional<T> = Optional.empty()
 
     /**
      * Set to true if rule has a return value. When set to true this rule will stop ruleset evaluation if fired.
      */
-    var returnRule = false
+    internal var returnRule = false
+
+    private val predicateFunctionList = mutableListOf<() -> Predicate>()
 
     /**
-     * DSL: Predicate entry.
+     * DSL: Technical Predicate entry.
      */
     fun HVIS(predicate: () -> Boolean) {
         OG(predicate)
     }
 
     /**
-     * DSL: Domain Predicate entry.
-     */
-    @DslDomainPredicate
-    fun HVIS(fag: String, predicate: () -> Boolean) {
-        OG(fag, predicate)
-    }
-
-    /**
      * DSL: Technical Predicate entry.
      */
     fun OG(predicateFunction: () -> Boolean) {
-        predicateList.add(Predicate(function = predicateFunction))
+        predicateFunctionList.add { Predicate(function = predicateFunction) }
+    }
+
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("FaktumHVIS")
+    @DslDomainPredicate
+    fun HVIS(predicateFunction: () -> Fact<Boolean>) {
+        OG(predicateFunction)
+    }
+
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("FaktumOG")
+    @DslDomainPredicate
+    fun OG(predicateFunction: () -> Fact<Boolean>) {
+        predicateFunctionList.add { predicateFunction.invoke() erLik Fact(true) }
     }
 
     /**
-     * DSL: Domain Predicate entry.
+     * DSL: Functional Predicate entry.
      */
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("arcHVIS")
     @DslDomainPredicate
-    fun OG(domainText: String, predicateFunction: () -> Boolean) {
-        containsDomainPredicate = true
-        Predicate(domainText, predicateFunction).also {
-            children.add(it)
-            predicateList.add(it)
-        }
+    fun HVIS(arcFunction: () -> AbstractSubsumtion) {
+        OG(arcFunction)
+    }
+
+    /**
+     * DSL: Functional Predicate entry.
+     */
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("arcOG")
+    @DslDomainPredicate
+    fun OG(arcFunction: () -> AbstractSubsumtion) {
+        predicateFunctionList.add(arcFunction)
     }
 
     /**
@@ -118,6 +133,13 @@ open class Rule<T : Any>(
     }
 
     /**
+     * DSL: Else statement entry.
+     */
+    fun ELLERS(action: () -> Unit) {
+        this.elseStatement = action
+    }
+
+    /**
      * DSL: Return value entry.
      */
     fun RETURNER(returnValue: T? = null) {
@@ -125,6 +147,7 @@ open class Rule<T : Any>(
             this.returnValue = Optional.empty()
         } else {
             this.returnValue = Optional.of(returnValue)
+            if (returnValue is Fact<*>) returnValue.children.add(this)
         }
         returnRule = true
     }
@@ -137,40 +160,36 @@ open class Rule<T : Any>(
     }
 
     /**
-     * Evaluates the [predicateList]. A rule is considered [fired] once all predicates are evaluated to true.
+     * Evaluates the [children]. A rule is considered [fired] once all predicates are evaluated to true.
      * Rules that fire invoke their [actionStatement].
      */
     fun evaluate() {
-        fired = predicateList.isNotEmpty()
+        fired = predicateFunctionList.isNotEmpty()
         evaluated = true
 
-        predicateList.forEach { predicate ->
-            val stopEval = predicate.evaluate()
-            fired = fired && predicate.fired()
+        run predLoop@{
+            predicateFunctionList.forEach { predicateFunction ->
+                val predicate = predicateFunction.invoke().apply {
+                    parent = this@Rule
+                }
 
-            if (stopEval) {
-                return
+                /**
+                 * Predicate must be evaluated first or terminateEvaluation would not be set.
+                 */
+                fired = predicate.fired && fired
+
+                if (predicate.terminateEvaluation) {
+                    return@predLoop
+                }
             }
         }
 
         if (fired) {
             actionStatement.invoke()
+        } else {
+            elseStatement.invoke()
         }
     }
-
-    /**
-     * Creates a conclusion based on this rule object.
-     * Includes domaintext if available.
-     */
-    fun conclusion() = Conclusion(
-        evaluated = evaluated,
-        fired = fired,
-        ruleName = name(),
-        documentation = prettyDoc(),
-        reasons = predicateList
-            .filter { it.isDomainPredicate() }
-            .map { p -> "${p.fired().svarord()}: ${p.evaluatedDomainText()}" }
-    )
 
     /**
      * Ruleset ordering by rule sequence
@@ -188,5 +207,8 @@ open class Rule<T : Any>(
      */
     override fun name(): String = name
     override fun fired(): Boolean = fired
-    override fun type(): String = "regel"
+    override fun type(): RuleComponentType = REGEL
+    override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
+
 }
+

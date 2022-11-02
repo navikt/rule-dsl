@@ -1,7 +1,14 @@
 package no.nav.system.rule.dsl
 
-import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.enums.ListComparator
+import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
+import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
+import no.nav.system.rule.dsl.treevisitor.visitor.debug
+import org.jetbrains.annotations.TestOnly
 import java.util.*
 
 /**
@@ -10,12 +17,7 @@ import java.util.*
  * @param T the return type of the ruleset
  *
  */
-abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
-
-    /**
-     * List of rules that have been evaluated regardless of the rule has fired or not.
-     */
-    internal var evaluatedRuleList: MutableList<Rule<T>> = mutableListOf()
+abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     /**
      * Ruleset name
@@ -59,12 +61,13 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     inline fun <P> regel(
         navn: String,
         pattern: Pattern<P>,
-        crossinline createRuleContent: Rule<T>.(P) -> Unit
+        crossinline createRuleContent: Rule<T>.(P) -> Unit,
     ) {
         val sequence = nextSequence() // starting sequence for all the rules that will be created using this pattern
         ruleFunctionMap[sequence] = {
             val rulesInPattern = mutableListOf<Rule<T>>()
             var offset = 1
+
             for (patternElement in pattern.get()) {
                 val rule = Rule<T>("$rulesetName.$navn.$offset", sequence + offset).apply {
                     nameWithoutPatternOffset = "$rulesetName.$navn"
@@ -77,12 +80,32 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
                 offset++
                 rulesInPattern.add(rule)
             }
+
+            /**
+             * An empty pattern rule without content is created for empty patterns.
+             * This makes it possible for other rules to chain this rule.
+             */
+            if (pattern.get().isEmpty()) {
+                val rule = Rule<T>("$rulesetName.$navn", sequence)
+                rule.parent = this
+                children.add(rule)
+                rulesInPattern.add(rule)
+            }
+
             rulesInPattern
         }
     }
 
-    open fun test(): Optional<T> {
+    @TestOnly
+    internal fun test(): Optional<T> {
         return internalRun()
+    }
+
+    @TestOnly
+    internal fun testAndDebug(): Optional<T> {
+        val ret = internalRun()
+        println(this.debug())
+        return ret
     }
 
     /**
@@ -100,13 +123,12 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     /**
      * Creates, sorts and evaluates the rules of the ruleset.
      */
-    fun internalRun(): Optional<T> {
+    private fun internalRun(): Optional<T> {
         create()
 
         ruleFunctionMap.values.forEach { ruleSpawn ->
             ruleSpawn.invoke().forEach {
                 it.evaluate()
-                evaluatedRuleList.add(it)
                 if (it.returnRule) {
                     return it.returnValue
                 }
@@ -131,6 +153,44 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         return maxSequence + 100
     }
 
+    protected fun String.minstEnHarTruffet(): ListSubsumtion {
+        val list = findRulesByNameStartsWith(this)
+        return ListSubsumtion(
+            comparator = ListComparator.MINST_EN_AV,
+            fact = Fact("Regelreferanse", this),
+            function = { list.any { it.fired() } },
+            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
+        )
+    }
+
+    /**
+     * "AngittFlyktning".alleHarTruffet()
+     *      MengdeSumsumsjon ALLE
+     *          "AngittFlyktning_r1"
+     *          "AngittFlyktning_r2"
+     *          "AngittFlyktning_r3"
+     */
+    protected fun String.alleHarTruffet(): ListSubsumtion {
+        val list = findRulesByNameStartsWith(this)
+        return ListSubsumtion(
+            comparator = ListComparator.ALLE,
+            fact = Fact("Regelreferanse", this),
+            function = { list.all { it.fired() } },
+            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
+        )
+    }
+
+    protected fun String.ingenHarTruffet(): ListSubsumtion {
+        val list = findRulesByNameStartsWith(this)
+        return ListSubsumtion(
+            comparator = ListComparator.INGEN,
+            fact = Fact("Regelreferanse", this),
+            function = { list.none { it.fired() } },
+            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
+        )
+    }
+
+
     /**
      * Checks if a rule with name equal to receiver has fired.
      *
@@ -139,9 +199,8 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      */
     protected fun String.harTruffet(): Boolean {
         validateRuleExistance(this)
-
-        return evaluatedRuleList.stream()
-            .anyMatch { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
+        return children.filterIsInstance<Rule<T>>()
+            .any { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
     }
 
     /**
@@ -150,9 +209,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      * @receiver the rule name
      * @return returns true if the rule is found and has not fired.
      */
-    protected fun String.harIkkeTruffet(): Boolean {
-        return !this.harTruffet()
-    }
+    protected fun String.harIkkeTruffet(): Boolean = !this.harTruffet()
 
     /**
      * Checks if a pattern rule with name equal to receiver has fired on the specified [patternElement].
@@ -163,9 +220,8 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      */
     protected fun <P> String.harTruffet(patternElement: P): Boolean {
         validateRuleExistance(this)
-
-        return evaluatedRuleList.stream()
-            .anyMatch { rule ->
+        return children.filterIsInstance<Rule<T>>()
+            .any { rule ->
                 rule.nameWithoutPatternOffset == "$rulesetName.$this"
                         && rule.pattern.ruleResultMap.containsKey(rule)
                         && rule.pattern.ruleResultMap[rule] == patternElement
@@ -187,14 +243,19 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     /**
      * Function that validates the existance of given a [ruleName].
      */
-    private fun validateRuleExistance(ruleName: String) {
-        evaluatedRuleList.stream()
-            .filter { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$ruleName" }
-            .findAny()
-            .orElseThrow { InvalidRulesetException("No rule with name ['$rulesetName.$ruleName'] found during rule chaining.") }
+    private fun validateRuleExistance(ruleName: String) = findRulesByNameStartsWith(ruleName)
+
+    private fun findRulesByNameStartsWith(rettsregelNavn: String): List<Rule<T>> {
+        return children.filterIsInstance<Rule<T>>()
+            .filter { rule -> rule.nameWithoutPatternOffset.startsWith("$rulesetName.$rettsregelNavn") }
+            .ifEmpty {
+                throw InvalidRulesetException("No rule with name that starts with ['$rettsregelNavn'] found during rule chaining.")
+            }
     }
 
     override fun name(): String = rulesetName
     override fun fired(): Boolean = true
-    override fun type(): String = AbstractRuleset::class.java.name
+    override fun type(): RuleComponentType = REGELSETT
+    override fun toString(): String = "${type()}: $rulesetName"
+
 }

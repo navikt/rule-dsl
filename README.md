@@ -2,7 +2,9 @@
 
 ## Purpose
 Provides a lightweight framework to create, run and explain rules. Any application that needs rules coded in a structured manner may use this.
-The goal is to isolate functional rules from the technical code and thus make the rules more accessible to non technical personnel. 
+The goal is to isolate functional rules from the technical code and thus make the rules more accessible to non-technical personnel.
+
+Inspired by [dp-quiz](https://github.com/navikt/dp-quiz).
 
 ## Documentation
 ### Components
@@ -13,18 +15,22 @@ A set of classes inheriting **[AbstractRuleComponent](src/main/kotlin/no/nav/sys
     * **[Decision](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleflow.kt)** DSL syntax for a group of branches. 
 * **[AbstractRuleset](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleset.kt)** Wraps a set of rules that relate to a single topic.
 * **[Rule](src/main/kotlin/no/nav/system/rule/dsl/Rule.kt)** A single functional decision.
-* **[Predicate](src/main/kotlin/no/nav/system/rule/dsl/Predicate.kt)** Wraps the boolean expression and subject text.
+* **[Fact](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Fact.kt)** A name-value pair used by Subsumsjons.
+* **[Predicate](src/main/kotlin/no/nav/system/rule/dsl/Predicate.kt)** Wraps the boolean expression function for technical expressions (null checks and similar).
+    * **[AbstractSubsumtion](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt)** Base class for functional expressions.
+      * [PairSubsumsjon](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt) Compares two [Fact](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Fact.kt)s using [PairComparator](src/main/kotlin/no/nav/system/rule/dsl/enums/Comparator.kt).
+      * [ListSubsumtion](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt) Compares a [Fact](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Fact.kt)'s relationship to a list of [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt).
 
 ### Treestructure
 All [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt) are organized in a visitor-accepting tree using children and parent. By using this tree it is possible to track which context a common rulecomponent was executed in.
 ```kotlin
-ruleservice: BeregnAlderspensjonService
-  ruleflow: BeregnAlderspensjonFlyt
-    ruleset: BeregnFaktiskTrygdetidRS
-      rule: BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav fired: true
-      rule: BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid fired: false
-        predicate: Virkningsdato i saken, 1990-05-01, er før 1991-01-01. fired: false
-        predicate: Faktisk trygdetid, 224, er lavere enn fire-femtedelskravet (480). fired: true
+regeltjeneste: BeregnAlderspensjonService
+  regelflyt: BeregnAlderspensjonFlyt
+    regelsett: BeregnFaktiskTrygdetidRS
+      regel: JA BeregnFaktiskTrygdetidRS.SettFireFemtedelskrav
+      regel: NEI BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid
+        NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik '1991-01-01'
+        JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)
 ```
 See [VisitorTest](src/test/kotlin/no/nav/system/rule/dsl/demo/visitor/VisitorTest.kt) for complete example.
 
@@ -32,42 +38,45 @@ See [VisitorTest](src/test/kotlin/no/nav/system/rule/dsl/demo/visitor/VisitorTes
 [AbstractRuleComponents](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt) have a resourceMap containing [AbstractResource](src/main/kotlin/no/nav/system/rule/dsl/AbstractResource.kt) instantiated per service call. These objects typically contain resources like rates ("satser"), loggers and other global assets. See [AbstractDemoRuleService](src/test/kotlin/no/nav/system/rule/dsl/demo/ruleservice/AbstractDemoRuleService.kt) for demonstration.
 
 ### DSL
-A kotlin "mini-DSL", inspired by Kotlins [type-safe builders](https://kotlinlang.org/docs/type-safe-builders.html), provides a simple syntax for creating rules and describing logic flow control in ruleflows. The _domain_ in the DSL is generic _ruledevelopment_ and not specific to NAV. 
+A kotlin "mini-DSL", inspired by Kotlins [type-safe builders](https://kotlinlang.org/docs/type-safe-builders.html), provides a simple syntax for creating rules and describing logic flow control in ruleflows. The _domain_ in the DSL is generic _ruledevelopment_ and not specific to NAV.
+
+All DSL syntax is in norwegian.
 
 In [AbstractRuleflow](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleflow.kt):
 ```kotlin
-decision("Sivilstand gift?") {
-    branch {
+forgrening("Sivilstand gift?") {
+    gren {
       /**
-       *  A boolean condition governing the
-       *  execution of the [flow] block
+       *  Et boolsk uttrykk betinger eksekveringen av påfølgende flyt-blokk.
        */
-        condition { parameter.input.person.erGift }
-        flow {
+        betingelse { parameter.input.person.erGift }
+        flyt {
             grunnpensjonSats = 0.90
         }
     }
-    branch { } // second branch
+    gren { } // andre gren
 }
 ```
-A standard rule in [AbstractRuleset](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleset.kt):
+A standard rule in [AbstractRuleset](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleset.kt) with technical predicate and functional Subsumtion. A Functional Subsumtion is any expression that produces an object of type [AbstractSubsumsjon](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt). See custom [Operators](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Operators.kt).
 ```kotlin
 regel("RedusertTrygdetid") {
-  HVIS { trygdetid < 40 }
+  HVIS { trygdetid != null }         // technical predicate
+  OG { trygdetid erMindreEnn 40 }    // functional subsumtion
   SÅ {
       netto = grunnbeløp * sats * trygdetid / 40.0
   }
 }
 ```
 
-A rule with domain text:
+A rule with else-statement and a value return:
 ```kotlin
-regel("RedusertTrygdetid") {
-  HVIS("Trygdetiden er [lavere enn|lik] 40") {
-    trygdetid < 40
+regel("Trygdetid") {
+  HVIS { anvendtFlyktning erLik OPPFYLT }
+  SÅ {                  // action-statement runs if all predicates are true
+    RETURNER( 40 )      // returns a value and stops further evaluation of the ruleset.
   }
-  SÅ {
-    netto = grunnbeløp * sats * trygdetid / 40.0
+  ELLERS {              // else-statement runs if one or more predicates are false
+    RETURNER( faktiskTrygdetid )
   }
 }
 ```
@@ -88,7 +97,8 @@ regel("BoPeriodeStartFør16år", norskeBoperioder) { boperiode ->
 ### Visualization
 A rudimentary plugin for Intellij is in development for ruleflow visualization.
 
-<img src="src\main\doc\ruleflow example.png"/>
+<!--suppress HtmlUnknownTarget -->
+<img src="src\main\doc\ruleflow example.png" alt=""/>
 
 Repo: [pensjon-regler-editor](https://github.com/navikt/pensjon-regler-editor)
 
@@ -98,11 +108,11 @@ Maven:
 <dependency>
   <groupId>no.nav.system</groupId>
   <artifactId>rule.dsl</artifactId>
-  <version>1.2</version>
+  <version>1.4</version>
 </dependency>
 ```
 
 ## Contact
 External: Raise issues on GitHub
 
-Internal: On slack #pensjon-regler
+Internal: On slack [#pensjon-regler](https://nav-it.slack.com/archives/CDWRP7S4B)

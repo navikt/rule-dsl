@@ -1,6 +1,11 @@
 package no.nav.system.rule.dsl.treevisitor.visitor
 
-import no.nav.system.rule.dsl.*
+import no.nav.system.rule.dsl.AbstractRuleComponent
+import no.nav.system.rule.dsl.AbstractRuleflow
+import no.nav.system.rule.dsl.Predicate
+import no.nav.system.rule.dsl.Rule
+import no.nav.system.rule.dsl.rettsregel.AbstractSubsumtion
+import no.nav.system.rule.dsl.rettsregel.Fact
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -11,51 +16,66 @@ class XmlDebugVisitor : TreeVisitor {
 
     override fun visit(ruleComponent: AbstractRuleComponent) {
         debugString.append(" ".repeat(level * 2))
-        debugString.append("<")
+
+        var tagName = ruleComponent.name()
+        val relevantChildren = ruleComponent.children.filterNot { it is Fact<*> }
+        var leafElement = relevantChildren.isEmpty()
 
         when (ruleComponent) {
-            is AbstractRuleService<*> -> {
-                debugString.append(ruleComponent.name()).append(">").append("\n")
-            }
-            is AbstractRuleflow -> {
-                debugString.append(ruleComponent.name()).append(">").append("\n")
-            }
-            is AbstractRuleflow.Decision -> {
-                debugString.append(ruleComponent.name()).append(">").append("\n")
-            }
             is AbstractRuleflow.Decision.Branch -> {
-                debugString.append(ruleComponent.name()).append(" fired=${ruleComponent.fired()}").append(">").append("\n")
-            }
-            is AbstractRuleset<*> -> {
-                debugString.append(ruleComponent.name()).append(">").append("\n")
+                if (leafElement) {
+                    openAndCloseContentTag(tagName, "", " fired=\"${ruleComponent.fired()}\"")
+                } else {
+                    openTag(tagName, " fired=${ruleComponent.fired()}")
+                }
             }
             is Rule<*> -> {
-                debugString.append("/")
-                    .append(ruleComponent.name().replace("${ruleComponent.parent!!.name()}.", ""))
-                    .append(" fired=${ruleComponent.fired()}")
-                if (ruleComponent.prettyDoc().isNotBlank()) {
-                    debugString.append(" comment=\"${ruleComponent.prettyDoc()}\"")
+                tagName = tagName.replace("${ruleComponent.parent!!.name()}.", "").replace(" ", "_")
+                val comment =
+                    if (ruleComponent.prettyDoc().isNotBlank()) " comment=\"${ruleComponent.prettyDoc()}\"" else ""
+                if (leafElement) {
+                    openAndCloseContentTag(tagName, "", " fired=\"${ruleComponent.fired()}\"", comment)
+                } else {
+                    openTag(tagName, " fired=\"${ruleComponent.fired()}\"", comment)
                 }
-                debugString.append(">").append("\n")
             }
-            is Predicate -> {
-                debugString
-                    .append("predicate")
-                    .append(" fired=${ruleComponent.fired()}").append(">")
-                    .append(ruleComponent.evaluatedDomainText())
-                    .append("</predicate>")
-                    .append("\n")
+            is AbstractSubsumtion -> {
+                leafElement = true
+                openAndCloseContentTag(ruleComponent.type().toString(), ruleComponent.toString(), " fired=\"${ruleComponent.fired()}\"")
             }
+            is Predicate -> {}
+            else -> openTag(tagName)
         }
 
         level++
-        ruleComponent.children.forEach { it.accept(this) }
+        relevantChildren.forEach { it.accept(this) }
         level--
 
-        if (ruleComponent !is Rule<*> && ruleComponent !is Predicate) {
+        if (!leafElement) {
             debugString.append(" ".repeat(level * 2))
-            debugString.append("</${ruleComponent.name()}>\n")
+            closeTag(tagName)
         }
+    }
+
+    private fun openTag(tagName: String, vararg attribs: String) {
+        debugString.append("<").append(tagName)
+        attribs.forEach { debugString.append(it) }
+        debugString.append(">")
+        debugString.append("\n")
+    }
+
+    private fun closeTag(tagName: String) {
+        debugString.append("</").append(tagName)
+        debugString.append(">")
+        debugString.append("\n")
+    }
+
+    private fun openAndCloseContentTag(tagName: String, content: String, vararg attribs: String) {
+        debugString.append("<").append(tagName)
+        attribs.forEach { debugString.append(it) }
+        debugString.append(">")
+        debugString.append(content)
+        debugString.append("</$tagName>\n")
     }
 }
 
