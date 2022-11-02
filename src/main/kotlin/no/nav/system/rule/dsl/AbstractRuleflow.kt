@@ -14,6 +14,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
     /**
      * Tracks the full name of nested branches.
      */
+    @Suppress("MemberVisibilityCanBePrivate")
     protected val branchNameStack = Stack<String>()
 
     /**
@@ -63,7 +64,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
      */
     class Decision(
         private val name: String,
-    ) : AbstractRuleComponent() {
+    ) : AbstractResourceHolder() {
 
         private var branchList = mutableListOf<Branch>()
 
@@ -100,7 +101,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
         class Branch(
             private val name: String,
-        ) : AbstractRuleComponent() {
+        ) : AbstractResourceHolder() {
             lateinit var condition: () -> Boolean
             lateinit var flowFunction: () -> Unit
             var fired = false
