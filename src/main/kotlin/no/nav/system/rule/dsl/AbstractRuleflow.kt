@@ -14,7 +14,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
     /**
      * Tracks the full name of nested branches.
      */
-    private val branchNameStack = Stack<String>()
+    protected val branchNameStack = Stack<String>()
 
     /**
      * Tests the ruleflow without a parent ruleComponent.
