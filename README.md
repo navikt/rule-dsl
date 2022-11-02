@@ -108,7 +108,7 @@ Maven:
 <dependency>
   <groupId>no.nav.system</groupId>
   <artifactId>rule.dsl</artifactId>
-  <version>1.4</version>
+  <version>1.4.1</version>
 </dependency>
 ```
 
