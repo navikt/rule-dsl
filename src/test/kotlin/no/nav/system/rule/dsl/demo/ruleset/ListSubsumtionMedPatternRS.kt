@@ -8,7 +8,7 @@ import no.nav.system.rule.dsl.rettsregel.Fact
 
 class ListSubsumtionMedPatternRS(
     inputFakta: List<Fact<Boolean>>,
-) : AbstractRuleset<Rule>() {
+) : AbstractRuleset<Rule<*>>() {
     private val faktumListe = inputFakta.createPattern()
 
     @OptIn(DslDomainPredicate::class)

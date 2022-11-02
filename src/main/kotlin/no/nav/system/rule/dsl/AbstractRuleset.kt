@@ -32,7 +32,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      * Functions either create a single Rule object, or, if the function is created using the pattern, a rule object for each element in the pattern.
      */
     @PublishedApi
-    internal val ruleFunctionMap = mutableMapOf<Int, () -> List<Rule>>()
+    internal val ruleFunctionMap = mutableMapOf<Int, () -> List<Rule<T>>>()
 
     /**
      * Creates a standard rule using the rule mini-DSL.
@@ -40,10 +40,10 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      * @param navn the rule name
      * @param createRuleContent the Rule function that populates the Rule object.
      */
-    inline fun regel(navn: String, crossinline createRuleContent: Rule.() -> Unit) {
+    inline fun regel(navn: String, crossinline createRuleContent: Rule<T>.() -> Unit) {
         val sequence = nextSequence()
         ruleFunctionMap[sequence] = {
-            val rule = Rule("$rulesetName.$navn", sequence)
+            val rule = Rule<T>("$rulesetName.$navn", sequence)
             rule.parent = this
             children.add(rule)
             rule.createRuleContent()
@@ -61,15 +61,15 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
     inline fun <P> regel(
         navn: String,
         pattern: Pattern<P>,
-        crossinline createRuleContent: Rule.(P) -> Unit,
+        crossinline createRuleContent: Rule<T>.(P) -> Unit,
     ) {
         val sequence = nextSequence() // starting sequence for all the rules that will be created using this pattern
         ruleFunctionMap[sequence] = {
-            val rulesInPattern = mutableListOf<Rule>()
+            val rulesInPattern = mutableListOf<Rule<T>>()
             var offset = 1
 
             for (patternElement in pattern.get()) {
-                val rule = Rule("$rulesetName.$navn.$offset", sequence + offset).apply {
+                val rule = Rule<T>("$rulesetName.$navn.$offset", sequence + offset).apply {
                     nameWithoutPatternOffset = "$rulesetName.$navn"
                 }
                 pattern.registerRule(rule, patternElement)
@@ -86,7 +86,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
              * This makes it possible for other rules to chain this rule.
              */
             if (pattern.get().isEmpty()) {
-                val rule = Rule("$rulesetName.$navn", sequence)
+                val rule = Rule<T>("$rulesetName.$navn", sequence)
                 rule.parent = this
                 children.add(rule)
                 rulesInPattern.add(rule)
@@ -122,7 +122,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     /**
      * Creates, sorts and evaluates the rules of the ruleset.
-     * Any rules returning a type incompatible with containing ruleset is considered user-error.
      */
     private fun internalRun(): Optional<T> {
         create()
@@ -131,8 +130,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             ruleSpawn.invoke().forEach {
                 it.evaluate()
                 if (it.returnRule) {
-                    @Suppress("UNCHECKED_CAST")
-                    return it.returnValue as Optional<T>
+                    return it.returnValue
                 }
             }
         }
@@ -201,7 +199,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      */
     protected fun String.harTruffet(): Boolean {
         validateRuleExistance(this)
-        return children.filterIsInstance<Rule>()
+        return children.filterIsInstance<Rule<T>>()
             .any { rule -> rule.nameWithoutPatternOffset == "$rulesetName.$this" && rule.fired() }
     }
 
@@ -222,7 +220,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      */
     protected fun <P> String.harTruffet(patternElement: P): Boolean {
         validateRuleExistance(this)
-        return children.filterIsInstance<Rule>()
+        return children.filterIsInstance<Rule<T>>()
             .any { rule ->
                 rule.nameWithoutPatternOffset == "$rulesetName.$this"
                         && rule.pattern.ruleResultMap.containsKey(rule)
@@ -247,8 +245,8 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      */
     private fun validateRuleExistance(ruleName: String) = findRulesByNameStartsWith(ruleName)
 
-    private fun findRulesByNameStartsWith(rettsregelNavn: String): List<Rule> {
-        return children.filterIsInstance<Rule>()
+    private fun findRulesByNameStartsWith(rettsregelNavn: String): List<Rule<T>> {
+        return children.filterIsInstance<Rule<T>>()
             .filter { rule -> rule.nameWithoutPatternOffset.startsWith("$rulesetName.$rettsregelNavn") }
             .ifEmpty {
                 throw InvalidRulesetException("No rule with name that starts with ['$rettsregelNavn'] found during rule chaining.")

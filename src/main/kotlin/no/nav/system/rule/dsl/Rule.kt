@@ -20,10 +20,10 @@ import kotlin.experimental.ExperimentalTypeInference
  * @param sequence the rule sequence
  */
 @OptIn(ExperimentalTypeInference::class)
-open class Rule(
+open class Rule<T : Any>(
     private val name: String,
     private val sequence: Int,
-) : Comparable<Rule>, AbstractResourceHolder() {
+) : Comparable<Rule<T>>, AbstractResourceHolder() {
 
     /**
      * Functional description of the rule
@@ -68,7 +68,7 @@ open class Rule(
     /**
      * The value this rule will return.
      */
-    internal var returnValue: Optional<Any> = Optional.empty()
+    internal var returnValue: Optional<T> = Optional.empty()
 
     /**
      * Set to true if rule has a return value. When set to true this rule will stop ruleset evaluation if fired.
@@ -142,7 +142,7 @@ open class Rule(
     /**
      * DSL: Return value entry.
      */
-    fun RETURNER(returnValue: Any? = null) {
+    fun RETURNER(returnValue: T? = null) {
         if (returnValue == null) {
             this.returnValue = Optional.empty()
         } else {
@@ -194,7 +194,7 @@ open class Rule(
     /**
      * Ruleset ordering by rule sequence
      */
-    override fun compareTo(other: Rule): Int {
+    override fun compareTo(other: Rule<T>): Int {
         return compareValues(this.sequence, other.sequence)
     }
 

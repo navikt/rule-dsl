@@ -29,7 +29,7 @@ class XmlDebugVisitor : TreeVisitor {
                     openTag(tagName, " fired=${ruleComponent.fired()}")
                 }
             }
-            is Rule -> {
+            is Rule<*> -> {
                 tagName = tagName.replace("${ruleComponent.parent!!.name()}.", "").replace(" ", "_")
                 val comment =
                     if (ruleComponent.prettyDoc().isNotBlank()) " comment=\"${ruleComponent.prettyDoc()}\"" else ""
