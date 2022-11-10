@@ -6,8 +6,10 @@ import no.nav.system.rule.dsl.demo.domain.Request
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.ruleservice.BeregnAlderspensjonService
-import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.treevisitor.visitor.RuleVisitor
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
+import no.nav.system.rule.dsl.treevisitor.visitor.debugUp
 import no.nav.system.rule.dsl.treevisitor.visitor.xmlDebug
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -20,7 +22,7 @@ class VisitorTest {
             virkningstidspunkt = localDate(1990, 5, 1),
             person = Person(
                 id = 1,
-                fødselsdato = Fact("Fødselsdato", localDate(1974, 3, 3)),
+                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
                 erGift = true,
                 boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
@@ -96,7 +98,7 @@ regeltjeneste: BeregnAlderspensjonService
             virkningstidspunkt = localDate(1990, 5, 1),
             person = Person(
                 id = 1,
-                fødselsdato = Fact("Fødselsdato", localDate(1974, 3, 3)),
+                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
                 erGift = true,
                 boperioder = listOf(
                     Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
@@ -180,5 +182,40 @@ regeltjeneste: BeregnAlderspensjonService
   </BeregnAlderspensjonFlyt>
 </BeregnAlderspensjonService>""".trimIndent(), xml
         )
+    }
+
+
+    @Test
+    fun `rule visitor test`() {
+        val params = Request(
+            virkningstidspunkt = localDate(1990, 5, 1),
+            person = Person(
+                id = 1,
+                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
+                erGift = true,
+                boperioder = listOf(
+                    Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
+                    Boperiode(fom = localDate(2004, 1, 1), tom = localDate(2010, 12, 31), LandEnum.SWE),
+                    Boperiode(fom = localDate(2011, 1, 1), tom = localDate(2015, 12, 31), LandEnum.NOR),
+                    Boperiode(fom = localDate(2016, 1, 1), tom = localDate(2020, 12, 31), LandEnum.SWE)
+                )
+            )
+        )
+
+        val service = BeregnAlderspensjonService(params).also { it.run() }
+
+        val settTTrule = RuleVisitor { r -> r.name() == "PersonenErFlyktningRS.SettRelevantTrygdetid_kap20" }.run {
+            service.accept(this)
+            this.rule
+        }
+
+        println(settTTrule?.debugUp())
+
+        """
+            regeltjeneste: BeregnAlderspensjonService
+                regelflyt: BeregnAlderspensjonFlyt
+                    regelsett: PersonenErFlyktningRS
+                        regel: NEI PersonenErFlyktningRS.SettRelevantTrygdetid_kap20
+        """.trimIndent()
     }
 }

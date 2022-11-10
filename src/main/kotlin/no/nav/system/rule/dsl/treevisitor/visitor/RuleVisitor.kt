@@ -11,11 +11,11 @@ class RuleVisitor(
 ) : TreeVisitor {
     var rule: Rule<*>? = null
 
-    override fun visit(ruleComponent: AbstractRuleComponent) {
-        if (ruleComponent is Rule<*> && searchFunction.invoke(ruleComponent)) {
-            rule = ruleComponent
+    override fun visit(arc: AbstractRuleComponent) {
+        if (arc is Rule<*> && searchFunction.invoke(arc)) {
+            rule = arc
         } else {
-            ruleComponent.children.forEach { it.accept(this) }
+            arc.children.forEach { it.accept(this) }
         }
     }
 }

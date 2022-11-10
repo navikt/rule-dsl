@@ -4,7 +4,7 @@ import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.IKKE_OPPFYLT
-import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.treevisitor.visitor.RuleVisitor
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -23,12 +23,12 @@ class BeregnFaktiskTrygdetidRSTest {
         }
 
         BeregnFaktiskTrygdetidRS(
-            fødselsdato = Fact("Fødselsdato", localDate(1990, 1, 1)),
-            virkningstidspunkt = Fact(navn = "virkningstidspunkt", localDate(2000, 1, 1)),
+            fødselsdato = Faktum("Fødselsdato", localDate(1990, 1, 1)),
+            virkningstidspunkt = Faktum(navn = "virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2018, 12, 31), LandEnum.NOR)
             ),
-            Fact("Anvendt flyktning", IKKE_OPPFYLT)
+            Faktum("Anvendt flyktning", IKKE_OPPFYLT)
         ).run {
             test()
             accept(redFttVisitor)
@@ -54,12 +54,12 @@ class BeregnFaktiskTrygdetidRSTest {
         }
 
         BeregnFaktiskTrygdetidRS(
-            fødselsdato = Fact("Fødselsdato", localDate(1990, 1, 1)),
-            virkningstidspunkt = Fact("virkningstidspunkt", localDate(2000, 1, 1)),
+            fødselsdato = Faktum("Fødselsdato", localDate(1990, 1, 1)),
+            virkningstidspunkt = Faktum("virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2048, 12, 31), LandEnum.NOR)
             ),
-            Fact("Anvendt flyktning", IKKE_OPPFYLT)
+            Faktum("Anvendt flyktning", IKKE_OPPFYLT)
         ).run {
             test()
             accept(redFttVisitor)

@@ -5,7 +5,7 @@ import no.nav.system.rule.dsl.AbstractRuleflow
 import no.nav.system.rule.dsl.Predicate
 import no.nav.system.rule.dsl.Rule
 import no.nav.system.rule.dsl.rettsregel.AbstractSubsumtion
-import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.Faktum
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -14,34 +14,34 @@ class XmlDebugVisitor : TreeVisitor {
     val debugString = StringBuilder()
     private var level = 0
 
-    override fun visit(ruleComponent: AbstractRuleComponent) {
+    override fun visit(arc: AbstractRuleComponent) {
         debugString.append(" ".repeat(level * 2))
 
-        var tagName = ruleComponent.name()
-        val relevantChildren = ruleComponent.children.filterNot { it is Fact<*> }
+        var tagName = arc.name()
+        val relevantChildren = arc.children.filterNot { it is Faktum<*> }
         var leafElement = relevantChildren.isEmpty()
 
-        when (ruleComponent) {
+        when (arc) {
             is AbstractRuleflow.Decision.Branch -> {
                 if (leafElement) {
-                    openAndCloseContentTag(tagName, "", " fired=\"${ruleComponent.fired()}\"")
+                    openAndCloseContentTag(tagName, "", " fired=\"${arc.fired()}\"")
                 } else {
-                    openTag(tagName, " fired=${ruleComponent.fired()}")
+                    openTag(tagName, " fired=${arc.fired()}")
                 }
             }
             is Rule<*> -> {
-                tagName = tagName.replace("${ruleComponent.parent!!.name()}.", "").replace(" ", "_")
+                tagName = tagName.replace("${arc.parent!!.name()}.", "").replace(" ", "_")
                 val comment =
-                    if (ruleComponent.prettyDoc().isNotBlank()) " comment=\"${ruleComponent.prettyDoc()}\"" else ""
+                    if (arc.prettyDoc().isNotBlank()) " comment=\"${arc.prettyDoc()}\"" else ""
                 if (leafElement) {
-                    openAndCloseContentTag(tagName, "", " fired=\"${ruleComponent.fired()}\"", comment)
+                    openAndCloseContentTag(tagName, "", " fired=\"${arc.fired()}\"", comment)
                 } else {
-                    openTag(tagName, " fired=\"${ruleComponent.fired()}\"", comment)
+                    openTag(tagName, " fired=\"${arc.fired()}\"", comment)
                 }
             }
             is AbstractSubsumtion -> {
                 leafElement = true
-                openAndCloseContentTag(ruleComponent.type().toString(), ruleComponent.toString(), " fired=\"${ruleComponent.fired()}\"")
+                openAndCloseContentTag(arc.type().toString(), arc.toString(), " fired=\"${arc.fired()}\"")
             }
             is Predicate -> {}
             else -> openTag(tagName)

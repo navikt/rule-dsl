@@ -5,7 +5,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
 import no.nav.system.rule.dsl.treevisitor.visitor.debug
 import org.jetbrains.annotations.TestOnly
@@ -33,6 +33,11 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      */
     @PublishedApi
     internal val ruleFunctionMap = mutableMapOf<Int, () -> List<Rule<T>>>()
+
+    /**
+     * Value of first fired rule with returnValue.
+     */
+    var returnValue: T? = null
 
     /**
      * Creates a standard rule using the rule mini-DSL.
@@ -121,6 +126,13 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
     }
 
     /**
+     * Runs the ruleset
+     *
+     * @return nullable value T
+     */
+    fun runAndGet(parent: AbstractRuleComponent): T? = run(parent).orElse(null)
+
+    /**
      * Creates, sorts and evaluates the rules of the ruleset.
      */
     protected fun internalRun(): Optional<T> {
@@ -130,6 +142,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             ruleSpawn.invoke().forEach {
                 it.evaluate()
                 if (it.returnRule) {
+                    returnValue = it.returnValue.orElse(null)
                     return it.returnValue
                 }
             }
@@ -157,7 +170,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         val list = findRulesByNameStartsWith(this)
         return ListSubsumtion(
             comparator = ListComparator.MINST_EN_AV,
-            fact = Fact("Regelreferanse", this),
+            faktum = Faktum("Regelreferanse", this),
             function = { list.any { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
@@ -165,16 +178,16 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
 
     /**
      * "AngittFlyktning".alleHarTruffet()
-     *      MengdeSumsumsjon ALLE
-     *          "AngittFlyktning_r1"
-     *          "AngittFlyktning_r2"
-     *          "AngittFlyktning_r3"
+     *      ListSubsumsjon ALLE
+     *          "JA AngittFlyktning_r1"
+     *          "JA AngittFlyktning_r2"
+     *          "JA AngittFlyktning_r3"
      */
     protected fun String.alleHarTruffet(): ListSubsumtion {
         val list = findRulesByNameStartsWith(this)
         return ListSubsumtion(
             comparator = ListComparator.ALLE,
-            fact = Fact("Regelreferanse", this),
+            faktum = Faktum("Regelreferanse", this),
             function = { list.all { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )
@@ -184,7 +197,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         val list = findRulesByNameStartsWith(this)
         return ListSubsumtion(
             comparator = ListComparator.INGEN,
-            fact = Fact("Regelreferanse", this),
+            faktum = Faktum("Regelreferanse", this),
             function = { list.none { it.fired() } },
             abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
         )

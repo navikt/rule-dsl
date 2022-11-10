@@ -6,7 +6,7 @@ import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.enums.ListComparator.INGEN
 import no.nav.system.rule.dsl.enums.ListComparator.MINST_EN_AV
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
-import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -16,17 +16,20 @@ class PersonenErFlyktningRSTest {
     @Test
     fun testErIkkeFlyktning() {
         val person = Person(
-            fødselsdato = Fact("Fødselsdato", localDate(1980, 1, 1)),
-            flyktning = Fact("Angitt flyktning", false),
+            fødselsdato = Faktum("Fødselsdato", localDate(1980, 1, 1)),
+            flyktning = Faktum("Angitt flyktning", false),
         )
 
         val flyktningUtfall = PersonenErFlyktningRS(
             person,
-            Fact("Ytelsestype", YtelseEnum.AP),
-            Fact("Kapittel20", false),
-            Fact("Virkningstidspunkt", localDate(2020, 1, 1)),
-            Fact("HarKravlinjeFremsattDatoFom2021", true)
-        ).test().get()
+            Faktum("Ytelsestype", YtelseEnum.AP),
+            Faktum("Kapittel20", false),
+            Faktum("Virkningstidspunkt", localDate(2020, 1, 1)),
+            Faktum("HarKravlinjeFremsattDatoFom2021", true)
+        ).run {
+            test()
+            this.returnValue!!
+        }
 
         assertEquals(IKKE_RELEVANT, flyktningUtfall.value)
         assertTrue(flyktningUtfall.children[0].fired())
@@ -39,37 +42,43 @@ class PersonenErFlyktningRSTest {
     @Test
     fun testErFlyktning_virkFør2021() {
         val person = Person(
-            fødselsdato = Fact("Fødselsdato", localDate(1980, 1, 1)),
-            flyktning = Fact("Angitt flyktning", true),
+            fødselsdato = Faktum("Fødselsdato", localDate(1980, 1, 1)),
+            flyktning = Faktum("Angitt flyktning", true),
         )
 
-        val flyktningUtfall = PersonenErFlyktningRS(
+       val flyktningUtfall = PersonenErFlyktningRS(
             person,
-            Fact("Ytelsestype", YtelseEnum.AP),
-            Fact("Kapittel20", false),
-            Fact("Virkningstidspunkt", localDate(2020, 1, 1)),
-            Fact("HarKravlinjeFremsattDatoFom2021", false)
-        ).test().get()
+            Faktum("Ytelsestype", YtelseEnum.AP),
+            Faktum("Kapittel20", false),
+            Faktum("Virkningstidspunkt", localDate(2020, 1, 1)),
+            Faktum("HarKravlinjeFremsattDatoFom2021", false)
+        ).run {
+            test()
+            this.returnValue!!
+        }
 
         assertEquals(OPPFYLT, flyktningUtfall.value)
         assertEquals(1, flyktningUtfall.children[0].children[0].children.size)
-        assertEquals(2, flyktningUtfall.children[0].children[1].children.size)
+        assertEquals(1, flyktningUtfall.children[0].children[1].children.size)
     }
 
     @Test
     fun testErIkkeFlyktning_virkFom2021_ikkeOvergang() {
         val person = Person(
-            fødselsdato = Fact("Fødselsdato", localDate(1980, 1, 1)),
+            fødselsdato = Faktum("Fødselsdato", localDate(1980, 1, 1)),
             inngangOgEksportgrunnlag = InngangOgEksportgrunnlag().apply { unntakFraForutgaendeMedlemskap.unntak.value = true }
         )
 
         val flyktningUtfall = PersonenErFlyktningRS(
             person,
-            Fact("Ytelsestype", YtelseEnum.AP),
-            Fact("Kapittel20", false),
-            Fact("Virkningstidspunkt", localDate(2021, 1, 1)),
-            Fact("HarKravlinjeFremsattDatoFom2021", true)
-        ).test().get()
+            Faktum("Ytelsestype", YtelseEnum.AP),
+            Faktum("Kapittel20", false),
+            Faktum("Virkningstidspunkt", localDate(2021, 1, 1)),
+            Faktum("HarKravlinjeFremsattDatoFom2021", true)
+        ).run {
+            test()
+            this.returnValue!!
+        }
 
         val regelOvergangsregelAP = flyktningUtfall.children[0].children[2].children[0]
 
@@ -82,18 +91,21 @@ class PersonenErFlyktningRSTest {
     @Test
     fun testErFlyktning_virkFom2021_Overgangsregel_AP() {
         val person = Person(
-            fødselsdato = Fact("Fødselsdato", localDate(1958, 12, 31)),
-            flyktning = Fact("Angitt flyktning", true),
+            fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
+            flyktning = Faktum("Angitt flyktning", true),
             trygdetidK19 = Trygdetid().apply { tt_fa_F2021.value = 20 }
         )
 
         val flyktningUtfall = PersonenErFlyktningRS(
             person,
-            Fact("Ytelsestype", YtelseEnum.AP),
-            Fact("Kapittel20", false),
-            Fact("Virkningstidspunkt", localDate(2021, 1, 1)),
-            Fact("HarKravlinjeFremsattDatoFom2021", true)
-        ).test().get()
+            Faktum("Ytelsestype", YtelseEnum.AP),
+            Faktum("Kapittel20", false),
+            Faktum("Virkningstidspunkt", localDate(2021, 1, 1)),
+            Faktum("HarKravlinjeFremsattDatoFom2021", true)
+        ).run {
+            test()
+            this.returnValue!!
+        }
 
         assertEquals(OPPFYLT, flyktningUtfall.value)
         assertTrue(flyktningUtfall.children[0].fired())
@@ -108,8 +120,8 @@ class PersonenErFlyktningRSTest {
     @Test
     fun testErFlyktning_virkFom2021_Overgangsregel_GJR_tidligereGJR() {
         val person = Person(
-            fødselsdato = Fact("Fødselsdato", localDate(1958, 12, 31)),
-            flyktning = Fact("Angitt flyktning", true),
+            fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
+            flyktning = Faktum("Angitt flyktning", true),
             trygdetidK19 = Trygdetid().apply { tt_fa_F2021.value = 20 }
         ).apply {
             this.forsteVirkningsdatoGrunnlagListe.add(
@@ -122,11 +134,14 @@ class PersonenErFlyktningRSTest {
 
         val flyktningUtfall = PersonenErFlyktningRS(
             person,
-            Fact("Ytelsestype", YtelseEnum.GJR),
-            Fact("Kapittel20", false),
-            Fact("Virkningstidspunkt", localDate(2027, 1, 1)),
-            Fact("HarKravlinjeFremsattDatoFom2021", true)
-        ).test().get()
+            Faktum("Ytelsestype", YtelseEnum.GJR),
+            Faktum("Kapittel20", false),
+            Faktum("Virkningstidspunkt", localDate(2027, 1, 1)),
+            Faktum("HarKravlinjeFremsattDatoFom2021", true)
+        ).run {
+            test()
+            this.returnValue!!
+        }
 
         assertEquals(OPPFYLT, flyktningUtfall.value)
         assertTrue(flyktningUtfall.children[0].fired())

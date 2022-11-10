@@ -5,9 +5,9 @@ import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.FAKTUM
 import java.io.Serializable
 
-open class Fact<T : Any> internal constructor(open val name: String) : AbstractRuleComponent(), Serializable {
+open class Faktum<T : Any> internal constructor(open val name: String) : AbstractRuleComponent(), Serializable {
     lateinit var value: T
-    private var anonymous = false
+    internal var anonymous = false
 
     constructor(navn: String, verdi: T) : this(navn) {
         this.value = verdi

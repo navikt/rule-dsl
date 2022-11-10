@@ -4,10 +4,10 @@ import no.nav.system.rule.dsl.AbstractRuleset
 import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.Rule
 import no.nav.system.rule.dsl.pattern.createPattern
-import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.Faktum
 
 class ListSubsumtionMedPatternRS(
-    inputFakta: List<Fact<Boolean>>,
+    inputFakta: List<Faktum<Boolean>>,
 ) : AbstractRuleset<Rule<*>>() {
     private val faktumListe = inputFakta.createPattern()
 

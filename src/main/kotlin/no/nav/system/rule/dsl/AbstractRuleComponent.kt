@@ -31,7 +31,6 @@ abstract class AbstractRuleComponent {
     /**
      * Accepts implementations of [TreeVisitor] for operations on the ruleComponent-tree.
      */
-    fun accept(treeVisitor: TreeVisitor) {
-        treeVisitor.visit(this)
-    }
+    fun accept(treeVisitor: TreeVisitor) = treeVisitor.visit(this)
+
 }

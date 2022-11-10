@@ -11,7 +11,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.PAR_SUBSUMSJON
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
 /**
-  * The application of a [function] on [Fact].
+  * The application of a [function] on [Faktum].
  */
 abstract class AbstractSubsumtion(
     open val comparator: Comparator,
@@ -31,34 +31,36 @@ abstract class AbstractSubsumtion(
 }
 
 /**
- * Compares [fact1] with [fact2]
+ * Compares [faktum1] with [faktum2]
  */
 class PairSubsumtion(
     override val comparator: PairComparator,
-    private val fact1: Fact<*>,
-    private val fact2: Fact<*>,
+    private val faktum1: Faktum<*>,
+    private val faktum2: Faktum<*>,
     override val function: () -> Boolean,
 ) : AbstractSubsumtion(comparator = comparator, function = function) {
 
     init {
-        this.children.add(fact1)
-        this.children.add(fact2)
+//        this.children.add(faktum1)
+//        this.children.add(faktum2)
+        if (!faktum1.anonymous) this.children.add(faktum1)
+        if (!faktum2.anonymous) this.children.add(faktum2)
     }
 
     override fun type(): RuleComponentType = PAR_SUBSUMSJON
 
     override fun toString(): String {
         val komparatorText = if (fired) comparator.text else comparator.negated()
-        return "${fired.svarord()} $fact1$komparatorText$fact2"
+        return "${fired.svarord()} $faktum1$komparatorText$faktum2"
     }
 }
 
 /**
- * Compares [fact] relationship with items [abstractRuleComponentList]
+ * Compares [faktum] relationship with items [abstractRuleComponentList]
  */
 class ListSubsumtion(
     override val comparator: ListComparator,
-    private val fact: Fact<*>,
+    private val faktum: Faktum<*>,
     private val abstractRuleComponentList: List<AbstractRuleComponent>,
     override val function: () -> Boolean,
 ) : AbstractSubsumtion(comparator = comparator, function = function) {
@@ -71,6 +73,6 @@ class ListSubsumtion(
 
     override fun toString(): String {
         val komparatorText = if (fired) comparator.text else comparator.negated()
-        return "${fired.svarord()} $fact$komparatorText${abstractRuleComponentList}"
+        return "${fired.svarord()} $faktum$komparatorText${abstractRuleComponentList}"
     }
 }

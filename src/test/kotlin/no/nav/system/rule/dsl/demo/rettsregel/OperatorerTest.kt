@@ -8,19 +8,19 @@ import org.junit.jupiter.api.Test
 class OperatorerTest {
 
     companion object {
-        val dato1990 = Fact(localDate(1990, 1, 1))
-        val dato2000 = Fact(localDate(2000, 1, 1))
+        val dato1990 = Faktum(localDate(1990, 1, 1))
+        val dato2000 = Faktum(localDate(2000, 1, 1))
 
         const val year1996 = 1996
 
-        val tjue = Fact(20)
-        val fem = Fact(5)
+        val tjue = Faktum(20)
+        val fem = Faktum(5)
 
-        val flagg = Fact("flagg", true)
+        val flagg = Faktum("flagg", true)
 
         val list = listOf("A", "B", "C")
-        val A = Fact("A", "A")
-        val D = Fact("D", "D")
+        val A = Faktum("A", "A")
+        val D = Faktum("D", "D")
     }
 
     /**
@@ -265,15 +265,15 @@ class OperatorerTest {
 
     @Test
     fun erLikFaktum() {
-        (flagg erLik Fact(true)).apply {
+        (flagg erLik Faktum(true)).apply {
             assertTrue(fired())
             assertEquals("JA 'flagg' (true) er lik 'true'", toString())
         }
-        (tjue erLik Fact(20)).apply {
+        (tjue erLik Faktum(20)).apply {
             assertTrue(fired())
             assertEquals("JA '20' er lik '20'", toString())
         }
-        (Fact(false) erLik Fact(true)).apply {
+        (Faktum(false) erLik Faktum(true)).apply {
             assertFalse(fired())
             assertEquals("NEI 'false' må være lik 'true'", toString())
         }
@@ -285,15 +285,15 @@ class OperatorerTest {
 
     @Test
     fun erUlikFaktum() {
-        (flagg erUlik Fact(false)).apply {
+        (flagg erUlik Faktum(false)).apply {
             assertTrue(fired())
             assertEquals("JA 'flagg' (true) er ulik 'false'", toString())
         }
-        (tjue erUlik Fact(3)).apply {
+        (tjue erUlik Faktum(3)).apply {
             assertTrue(fired())
             assertEquals("JA '20' er ulik '3'", toString())
         }
-        (Fact(false) erUlik Fact(false)).apply {
+        (Faktum(false) erUlik Faktum(false)).apply {
             assertFalse(fired())
             assertEquals("NEI 'false' må være ulik 'false'", toString())
         }

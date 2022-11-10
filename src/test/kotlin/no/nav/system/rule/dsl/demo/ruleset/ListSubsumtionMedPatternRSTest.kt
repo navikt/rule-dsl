@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
 import no.nav.system.rule.dsl.enums.ListComparator.*
-import no.nav.system.rule.dsl.rettsregel.Fact
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -12,14 +12,14 @@ class ListSubsumtionMedPatternRSTest {
     @Test
     fun `test skal returnere OPPFYLT når ingen regler treffer`() {
 
-        val factListes = listOf(
-            Fact("bool1", false),
-            Fact("bool2", false),
-            Fact("bool3", false),
-            Fact("bool4", false)
+        val faktumListe = listOf(
+            Faktum("bool1", false),
+            Faktum("bool2", false),
+            Faktum("bool3", false),
+            Faktum("bool4", false)
         )
 
-        val rule = ListSubsumtionMedPatternRS(factListes).test().get()
+        val rule = ListSubsumtionMedPatternRS(faktumListe).test().get()
 
         assertTrue(rule.fired())
         val ingenSubsumsjon = rule.children.first() as ListSubsumtion
@@ -32,14 +32,14 @@ class ListSubsumtionMedPatternRSTest {
     @Test
     fun `test skal returnere OPPFYLT når minst èn regel treffer`() {
 
-        val factListes = listOf(
-            Fact("bool1", false),
-            Fact("bool2", false),
-            Fact("bool3", false),
-            Fact("bool4", true)
+        val faktumListe = listOf(
+            Faktum("bool1", false),
+            Faktum("bool2", false),
+            Faktum("bool3", false),
+            Faktum("bool4", true)
         )
 
-        val regel = ListSubsumtionMedPatternRS(factListes).test().get()
+        val regel = ListSubsumtionMedPatternRS(faktumListe).test().get()
 
         assertTrue(regel.fired())
         val minstEnSubsumsjon = regel.children.first() as ListSubsumtion
@@ -51,14 +51,14 @@ class ListSubsumtionMedPatternRSTest {
     @Test
     fun `test skal returnere OPPFYLT når alle regler treffer`() {
 
-        val factListes = listOf(
-            Fact("bool1", true),
-            Fact("bool2", true),
-            Fact("bool3", true),
-            Fact("bool4", true)
+        val faktumListe = listOf(
+            Faktum("bool1", true),
+            Faktum("bool2", true),
+            Faktum("bool3", true),
+            Faktum("bool4", true)
         )
 
-        val regel = ListSubsumtionMedPatternRS(factListes).test().get()
+        val regel = ListSubsumtionMedPatternRS(faktumListe).test().get()
 
         assertTrue(regel.fired())
         val alleSubsumsjon = regel.children.first() as ListSubsumtion

@@ -94,15 +94,15 @@ open class Rule<T : Any>(
     @OverloadResolutionByLambdaReturnType
     @JvmName("FaktumHVIS")
     @DslDomainPredicate
-    fun HVIS(predicateFunction: () -> Fact<Boolean>) {
+    fun HVIS(predicateFunction: () -> Faktum<Boolean>) {
         OG(predicateFunction)
     }
 
     @OverloadResolutionByLambdaReturnType
     @JvmName("FaktumOG")
     @DslDomainPredicate
-    fun OG(predicateFunction: () -> Fact<Boolean>) {
-        predicateFunctionList.add { predicateFunction.invoke() erLik Fact(true) }
+    fun OG(predicateFunction: () -> Faktum<Boolean>) {
+        predicateFunctionList.add { predicateFunction.invoke() erLik Faktum(true) }
     }
 
     /**
@@ -147,7 +147,7 @@ open class Rule<T : Any>(
             this.returnValue = Optional.empty()
         } else {
             this.returnValue = Optional.of(returnValue)
-            if (returnValue is Fact<*>) returnValue.children.add(this)
+            if (returnValue is Faktum<*>) returnValue.children.add(this)
         }
         returnRule = true
     }

@@ -18,10 +18,10 @@ import kotlin.math.roundToInt
  * Demo regelsett viser bruk av Pattern og regelsporing.
  */
 class BeregnFaktiskTrygdetidRS(
-    fødselsdato: Fact<LocalDate>,
-    private val virkningstidspunkt: Fact<LocalDate>,
+    fødselsdato: Faktum<LocalDate>,
+    private val virkningstidspunkt: Faktum<LocalDate>,
     private val boperiodeListe: List<Boperiode>,
-    private val flyktningUtfall: Fact<UtfallType>,
+    private val flyktningUtfall: Faktum<UtfallType>,
 ) : AbstractRuleset<Trygdetid>() {
 
     /**
@@ -29,7 +29,7 @@ class BeregnFaktiskTrygdetidRS(
      */
     private val norskeBoperioder = boperiodeListe.createPattern { it.land == LandEnum.NOR }
     private val dato16år = fødselsdato.value.plusYears(16)
-    private val dato1991 = Fact(localDate(1991, 1, 1))
+    private val dato1991 = Faktum(localDate(1991, 1, 1))
     private val svar = Trygdetid()
 
     @OptIn(DslDomainPredicate::class)
@@ -58,7 +58,7 @@ class BeregnFaktiskTrygdetidRS(
         regel("SettFireFemtedelskrav") {
             HVIS { true }
             SÅ {
-                svar.firefemtedelskrav = Fact("firefemtedelskrav", 480)
+                svar.firefemtedelskrav = Faktum("firefemtedelskrav", 480)
             }
         }
 
