@@ -4,7 +4,7 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.rettsregel.PairSubsumtion
 
 /**
- * Lists the complete tree of [AbstractRuleComponent]
+ * Lists the decendants of [AbstractRuleComponent]
  */
 class DebugVisitor(
     private val includeFaktum: Boolean = false,
@@ -38,7 +38,9 @@ class DebugUpVisitor : TreeVisitor {
         arc.parent?.accept(this)
     }
 
-    fun result(): String = upOrder.mapIndexed { index, s -> " ".repeat(index * 2) + s }.joinToString("\n")
+    fun result(): String = upOrder
+        .mapIndexed { index, s -> " ".repeat(index * 2) + s }
+        .joinToString("\n")
 }
 
 

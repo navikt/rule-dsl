@@ -206,16 +206,15 @@ regeltjeneste: BeregnAlderspensjonService
 
         val settTTrule = RuleVisitor { r -> r.name() == "PersonenErFlyktningRS.SettRelevantTrygdetid_kap20" }.run {
             service.accept(this)
-            this.rule
+            this.rule!!
         }
 
-        println(settTTrule?.debugUp())
-
+        assertEquals(
         """
             regeltjeneste: BeregnAlderspensjonService
-                regelflyt: BeregnAlderspensjonFlyt
-                    regelsett: PersonenErFlyktningRS
-                        regel: NEI PersonenErFlyktningRS.SettRelevantTrygdetid_kap20
-        """.trimIndent()
+              regelflyt: BeregnAlderspensjonFlyt
+                regelsett: PersonenErFlyktningRS
+                  regel: NEI PersonenErFlyktningRS.SettRelevantTrygdetid_kap20
+        """.trimIndent(), settTTrule.debugUp() )
     }
 }
