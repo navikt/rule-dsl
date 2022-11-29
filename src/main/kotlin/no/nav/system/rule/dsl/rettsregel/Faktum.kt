@@ -18,13 +18,8 @@ open class Faktum<T : Any> internal constructor(open val name: String) : Abstrac
     }
 
     override fun name(): String = name
-
     override fun type(): RuleComponentType = FAKTUM
-
-    override fun fired(): Boolean {
-        throw IllegalAccessError("Fired() should not be used on Faktum.")
-    }
-
+    override fun fired(): Boolean = throw IllegalAccessError("Fired() should not be used on Faktum.")
     override fun toString(): String {
         return if (anonymous) {
             "'$value'"

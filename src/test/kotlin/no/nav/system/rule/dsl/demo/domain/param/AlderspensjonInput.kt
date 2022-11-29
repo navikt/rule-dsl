@@ -6,6 +6,5 @@ import java.time.LocalDate
 
 data class AlderspensjonInput(
     val person: Person,
-    val virkningstidspunkt: Faktum<LocalDate>,
-    val grunnbeløpVedVirk: Int
+    val virkningstidspunkt: Faktum<LocalDate>
 )

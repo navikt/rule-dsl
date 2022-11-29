@@ -1,5 +1,6 @@
 package no.nav.system.rule.dsl
 
+import no.nav.system.rule.dsl.AbstractRuleflow.Decision.Branch
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
@@ -10,7 +11,7 @@ import java.util.*
  * Common ruleflow behaviour used by all ruleflow implementations.
  * Defines branching logic DSL (decision, branch, condition, flow).
  */
-abstract class AbstractRuleflow : AbstractResourceHolder() {
+abstract class AbstractRuleflow : AbstractResourceAccessor() {
     /**
      * Tracks the full name of nested branches.
      */
@@ -30,8 +31,10 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
      * Runs the ruleflow
      */
     open fun run(parent: AbstractRuleComponent) {
+        if (parent is AbstractResourceAccessor) {
+            this.resourceMap = parent.resourceMap
+        }
         parent.children.add(this)
-        this.parent = parent
 
         branchNameStack.push(this.javaClass.simpleName)
         ruleflow.invoke()
@@ -47,8 +50,8 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
     fun forgrening(name: String, init: Decision.() -> Unit) {
         branchNameStack.push(name)
         val d = Decision(branchName())
+        d.resourceMap = this.resourceMap
         this.children.add(d)
-        d.parent = this
         d.init()
         d.run()
         branchNameStack.pop()
@@ -64,7 +67,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
      */
     class Decision(
         private val name: String,
-    ) : AbstractResourceHolder() {
+    ) : AbstractResourceAccessor() {
 
         private var branchList = mutableListOf<Branch>()
 
@@ -86,9 +89,9 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
          * Defines a single branch inside a Decision.
          */
         fun gren(init: Branch.() -> Unit): Branch {
-            val b = Branch("$name/branch ${branchList.size}")
+            val b = Branch("$name/gren ${branchList.size}")
+            b.resourceMap = this.resourceMap
             this.children.add(b)
-            b.parent = this
             b.init()
             branchList.add(b)
             return b
@@ -101,7 +104,7 @@ abstract class AbstractRuleflow : AbstractResourceHolder() {
 
         class Branch(
             private val name: String,
-        ) : AbstractResourceHolder() {
+        ) : AbstractResourceAccessor() {
             lateinit var condition: () -> Boolean
             lateinit var flowFunction: () -> Unit
             var fired = false

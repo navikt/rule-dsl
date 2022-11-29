@@ -7,7 +7,7 @@ import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
-import no.nav.system.rule.dsl.treevisitor.visitor.debug
+import no.nav.system.rule.dsl.visitor.debug
 import org.jetbrains.annotations.TestOnly
 import java.util.*
 
@@ -17,7 +17,7 @@ import java.util.*
  * @param T the return type of the ruleset
  *
  */
-abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
+abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
 
     /**
      * Ruleset name
@@ -49,7 +49,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
         val sequence = nextSequence()
         ruleFunctionMap[sequence] = {
             val rule = Rule<T>("$rulesetName.$navn", sequence)
-            rule.parent = this
+//            rule.resourceMap = this.resourceMap
             children.add(rule)
             rule.createRuleContent()
             listOf(rule)
@@ -76,10 +76,10 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
             for (patternElement in pattern.get()) {
                 val rule = Rule<T>("$rulesetName.$navn.$offset", sequence + offset).apply {
                     nameWithoutPatternOffset = "$rulesetName.$navn"
+//                    resourceMap = this@AbstractRuleset.resourceMap
                 }
                 pattern.registerRule(rule, patternElement)
                 rule.patternOffset = offset
-                rule.parent = this
                 children.add(rule)
                 rule.createRuleContent(patternElement)
                 offset++
@@ -92,7 +92,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
              */
             if (pattern.get().isEmpty()) {
                 val rule = Rule<T>("$rulesetName.$navn", sequence)
-                rule.parent = this
                 children.add(rule)
                 rulesInPattern.add(rule)
             }
@@ -119,27 +118,22 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceHolder() {
      * @return value T wrapped in Optional
      */
     fun run(parent: AbstractRuleComponent): Optional<T> {
+        if (parent is AbstractResourceAccessor) this.resourceMap = parent.resourceMap
         parent.children.add(this)
-        this.parent = parent
 
         return internalRun()
     }
 
     /**
-     * Runs the ruleset
-     *
-     * @return nullable value T
-     */
-    fun runAndGet(parent: AbstractRuleComponent): T? = run(parent).orElse(null)
-
-    /**
      * Creates, sorts and evaluates the rules of the ruleset.
      */
+    @Suppress("MemberVisibilityCanBePrivate")
     protected fun internalRun(): Optional<T> {
         create()
 
         ruleFunctionMap.values.forEach { ruleSpawn ->
             ruleSpawn.invoke().forEach {
+                it.resourceMap = this.resourceMap
                 it.evaluate()
                 if (it.returnRule) {
                     returnValue = it.returnValue.orElse(null)

@@ -1,41 +1,46 @@
 package no.nav.system.rule.dsl.demo.visitor
 
+import no.nav.system.rule.dsl.Rule
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Request
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.ruleservice.BeregnAlderspensjonService
+import no.nav.system.rule.dsl.demo.ruleset.PersonenErFlyktningRS
+import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
+import no.nav.system.rule.dsl.resource.root
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.treevisitor.visitor.RuleVisitor
-import no.nav.system.rule.dsl.treevisitor.visitor.debug
-import no.nav.system.rule.dsl.treevisitor.visitor.debugUp
-import no.nav.system.rule.dsl.treevisitor.visitor.xmlDebug
+import no.nav.system.rule.dsl.visitor.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class VisitorTest {
+    private val serviceRequest = Request(
+        virkningstidspunkt = localDate(1990, 5, 1),
+        person = Person(
+            id = 1,
+            fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
+            erGift = true,
+            boperioder = listOf(
+                Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
+                Boperiode(fom = localDate(2004, 1, 1), tom = localDate(2010, 12, 31), LandEnum.SWE),
+                Boperiode(fom = localDate(2011, 1, 1), tom = localDate(2015, 12, 31), LandEnum.NOR),
+                Boperiode(fom = localDate(2016, 1, 1), tom = localDate(2020, 12, 31), LandEnum.SWE)
+            )
+        )
+    )
+    private val service = BeregnAlderspensjonService(serviceRequest).also { it.run() }
+
+
+    @Test
+    fun `find test`() {
+        val result = service.find { arc -> arc.type() == REGELSETT }
+        assertEquals(3, result.size)
+    }
 
     @Test
     fun `debug visitor test`() {
-        val params = Request(
-            virkningstidspunkt = localDate(1990, 5, 1),
-            person = Person(
-                id = 1,
-                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
-                erGift = true,
-                boperioder = listOf(
-                    Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
-                    Boperiode(fom = localDate(2004, 1, 1), tom = localDate(2010, 12, 31), LandEnum.SWE),
-                    Boperiode(fom = localDate(2011, 1, 1), tom = localDate(2015, 12, 31), LandEnum.NOR),
-                    Boperiode(fom = localDate(2016, 1, 1), tom = localDate(2020, 12, 31), LandEnum.SWE)
-                )
-            )
-        )
-
-        val service = BeregnAlderspensjonService(params).also { it.run() }
-        val txt = service.debug()
-
         assertEquals(
             """
 regeltjeneste: BeregnAlderspensjonService
@@ -83,35 +88,17 @@ regeltjeneste: BeregnAlderspensjonService
         NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'
       regel: JA BeregnFaktiskTrygdetidRS.ReturnRegel
     forgrening: BeregnAlderspensjonFlyt.Sivilstand gift?
-      gren: JA BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0
-      gren: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1
+      gren: JA BeregnAlderspensjonFlyt.Sivilstand gift?/gren 0
+      gren: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/gren 1
     regelsett: BeregnGrunnpensjonRS
       regel: NEI BeregnGrunnpensjonRS.FullTrygdetid
       regel: JA BeregnGrunnpensjonRS.RedusertTrygdetid
-                      """.trimIndent(), txt
+                      """.trimIndent(), service.debug()
         )
     }
 
     @Test
     fun `XML debug visitor test`() {
-        val params = Request(
-            virkningstidspunkt = localDate(1990, 5, 1),
-            person = Person(
-                id = 1,
-                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
-                erGift = true,
-                boperioder = listOf(
-                    Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
-                    Boperiode(fom = localDate(2004, 1, 1), tom = localDate(2010, 12, 31), LandEnum.SWE),
-                    Boperiode(fom = localDate(2011, 1, 1), tom = localDate(2015, 12, 31), LandEnum.NOR),
-                    Boperiode(fom = localDate(2016, 1, 1), tom = localDate(2020, 12, 31), LandEnum.SWE)
-                )
-            )
-        )
-
-
-        val xml = BeregnAlderspensjonService(params).also { it.run() }.xmlDebug()
-
         assertEquals(
             """
 <BeregnAlderspensjonService>
@@ -172,49 +159,94 @@ regeltjeneste: BeregnAlderspensjonService
       <ReturnRegel fired="true"></ReturnRegel>
     </BeregnFaktiskTrygdetidRS>
     <BeregnAlderspensjonFlyt.Sivilstand gift?>
-      <BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0 fired="true"></BeregnAlderspensjonFlyt.Sivilstand gift?/branch 0>
-      <BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1 fired="false"></BeregnAlderspensjonFlyt.Sivilstand gift?/branch 1>
+      <BeregnAlderspensjonFlyt.Sivilstand gift?/gren 0 fired="true"></BeregnAlderspensjonFlyt.Sivilstand gift?/gren 0>
+      <BeregnAlderspensjonFlyt.Sivilstand gift?/gren 1 fired="false"></BeregnAlderspensjonFlyt.Sivilstand gift?/gren 1>
     </BeregnAlderspensjonFlyt.Sivilstand gift?>
     <BeregnGrunnpensjonRS>
       <FullTrygdetid fired="false"></FullTrygdetid>
       <RedusertTrygdetid fired="true"></RedusertTrygdetid>
     </BeregnGrunnpensjonRS>
   </BeregnAlderspensjonFlyt>
-</BeregnAlderspensjonService>""".trimIndent(), xml
+</BeregnAlderspensjonService>""".trimIndent(), service.xmlDebug()
         )
     }
 
-
     @Test
-    fun `rule visitor test`() {
-        val params = Request(
-            virkningstidspunkt = localDate(1990, 5, 1),
-            person = Person(
-                id = 1,
-                fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)),
-                erGift = true,
-                boperioder = listOf(
-                    Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2003, 12, 31), LandEnum.NOR),
-                    Boperiode(fom = localDate(2004, 1, 1), tom = localDate(2010, 12, 31), LandEnum.SWE),
-                    Boperiode(fom = localDate(2011, 1, 1), tom = localDate(2015, 12, 31), LandEnum.NOR),
-                    Boperiode(fom = localDate(2016, 1, 1), tom = localDate(2020, 12, 31), LandEnum.SWE)
-                )
-            )
-        )
-
-        val service = BeregnAlderspensjonService(params).also { it.run() }
-
-        val settTTrule = RuleVisitor { r -> r.name() == "PersonenErFlyktningRS.SettRelevantTrygdetid_kap20" }.run {
+    fun `trace visitor, one`() {
+        val ruleVisitor = ArcTraceVisitor { r ->
+            r.name() == "PersonenErFlyktningRS.SettRelevantTrygdetid_kap20"
+        }.apply {
             service.accept(this)
-            this.rule!!
         }
 
+        assertEquals(service, (ruleVisitor.result.first() as Rule<*>).root())
         assertEquals(
-        """
+            """
             regeltjeneste: BeregnAlderspensjonService
               regelflyt: BeregnAlderspensjonFlyt
                 regelsett: PersonenErFlyktningRS
                   regel: NEI PersonenErFlyktningRS.SettRelevantTrygdetid_kap20
-        """.trimIndent(), settTTrule.debugUp() )
+        """.trimIndent(), ruleVisitor.trace()
+        )
+    }
+
+    @Test
+    fun `trace visitor, all`() {
+        assertEquals(service.debug(), service.trace())
+    }
+
+    @Test
+    fun `trace visitor, some`() {
+        val searchTrygdetidVisitor =
+            ArcTraceVisitor { r ->
+                r.name().endsWith("AnvendtFlyktning_ikkeRelevant") || r.name().endsWith("FastsettTrygdetid_ikkeFlyktning")
+            }.apply {
+                service.accept(this)
+            }
+
+        assertEquals(
+            """
+            regeltjeneste: BeregnAlderspensjonService
+              regelflyt: BeregnAlderspensjonFlyt
+                regelsett: PersonenErFlyktningRS
+                  regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
+                regelsett: BeregnFaktiskTrygdetidRS
+                  regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid_ikkeFlyktning
+        """.trimIndent(), searchTrygdetidVisitor.trace()
+        )
+    }
+
+    @Test
+    fun `trace visitor, qualified branches`() {
+        val searchFlyktningVisitor =
+            ArcTraceVisitor(
+                qualifier = { arc -> arc.name() != PersonenErFlyktningRS::class.java.simpleName },
+                target = { r -> r.name().contains("Flyktning") }
+            ).apply {
+                service.accept(this)
+            }
+
+        assertEquals(
+            """
+            regeltjeneste: BeregnAlderspensjonService
+              regelflyt: BeregnAlderspensjonFlyt
+                regelsett: BeregnFaktiskTrygdetidRS
+                  regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid_ikkeFlyktning
+                  regel: NEI BeregnFaktiskTrygdetidRS.FastsettTrygdetid_Flyktning
+            """.trimIndent(), searchFlyktningVisitor.trace()
+        )
+    }
+
+    @Test
+    fun `trace visitor, by type`() {
+        assertEquals(
+            """
+            regeltjeneste: BeregnAlderspensjonService
+              regelflyt: BeregnAlderspensjonFlyt
+                regelsett: PersonenErFlyktningRS
+                regelsett: BeregnFaktiskTrygdetidRS
+                regelsett: BeregnGrunnpensjonRS
+            """.trimIndent(), service.trace(targetType = REGELSETT)
+        )
     }
 }

@@ -11,7 +11,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.PAR_SUBSUMSJON
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
 /**
-  * The application of a [function] on [Faktum].
+ * The application of a [function] on [Faktum].
  */
 abstract class AbstractSubsumtion(
     open val comparator: Comparator,
@@ -25,7 +25,6 @@ abstract class AbstractSubsumtion(
      * @return boolean result of function.
      */
     override val fired: Boolean by lazy {
-        parent?.children?.add(this)
         function.invoke().also { terminateEvaluation = false }
     }
 }
@@ -41,8 +40,6 @@ class PairSubsumtion(
 ) : AbstractSubsumtion(comparator = comparator, function = function) {
 
     init {
-//        this.children.add(faktum1)
-//        this.children.add(faktum2)
         if (!faktum1.anonymous) this.children.add(faktum1)
         if (!faktum2.anonymous) this.children.add(faktum2)
     }

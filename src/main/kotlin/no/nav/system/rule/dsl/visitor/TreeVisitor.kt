@@ -1,4 +1,4 @@
-package no.nav.system.rule.dsl.treevisitor.visitor
+package no.nav.system.rule.dsl.visitor
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
 

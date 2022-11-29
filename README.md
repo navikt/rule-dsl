@@ -22,7 +22,7 @@ A set of classes inheriting **[AbstractRuleComponent](src/main/kotlin/no/nav/sys
       * [ListSubsumtion](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt) Compares a [Faktum](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Faktum.kt)'s relationship to a list of [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt).
 
 ### Treestructure
-All [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt) are organized in a visitor-accepting tree using children and parent. By using this tree it is possible to track which context a common rulecomponent was executed in.
+All [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt) are organized in a visitor-accepting tree structure. This tree enables tracking of the context a rulecomponent was executed in.
 ```kotlin
 regeltjeneste: BeregnAlderspensjonService
   regelflyt: BeregnAlderspensjonFlyt
@@ -32,7 +32,12 @@ regeltjeneste: BeregnAlderspensjonService
         NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik '1991-01-01'
         JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)
 ```
-See [VisitorTest](src/test/kotlin/no/nav/system/rule/dsl/demo/visitor/VisitorTest.kt) for complete example.
+Noteworthy methods are:
+* [root()](src/main/kotlin/no/nav/system/rule/dsl/resource/Root.kt) returns the top level [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt).
+* [debug()](src/main/kotlin/no/nav/system/rule/dsl/visitor/DebugVisitor.kt) debug string of all decendants.
+* [trace( _searchfunction_ )](src/main/kotlin/no/nav/system/rule/dsl/visitor/ArcTraceVisitor.kt) searches for, and traces path to, [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt)
+
+See [VisitorTest](src/test/kotlin/no/nav/system/rule/dsl/demo/visitor/VisitorTest.kt) for examples.
 
 ### Resource
 [AbstractRuleComponents](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt) have a resourceMap containing [AbstractResource](src/main/kotlin/no/nav/system/rule/dsl/AbstractResource.kt) instantiated per service call. These objects typically contain resources like rates ("satser"), loggers and other global assets. See [AbstractDemoRuleService](src/test/kotlin/no/nav/system/rule/dsl/demo/ruleservice/AbstractDemoRuleService.kt) for demonstration.
@@ -108,7 +113,7 @@ Maven:
 <dependency>
   <groupId>no.nav.system</groupId>
   <artifactId>rule.dsl</artifactId>
-  <version>1.4.2</version>
+  <version>1.4.4</version>
 </dependency>
 ```
 

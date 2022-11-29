@@ -1,4 +1,4 @@
-package no.nav.system.rule.dsl.treevisitor.visitor
+package no.nav.system.rule.dsl.visitor
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.AbstractRuleflow
@@ -30,7 +30,7 @@ class XmlDebugVisitor : TreeVisitor {
                 }
             }
             is Rule<*> -> {
-                tagName = tagName.replace("${arc.parent!!.name()}.", "").replace(" ", "_")
+                tagName = tagName.substringAfter(".").replace(" ", "_")
                 val comment =
                     if (arc.prettyDoc().isNotBlank()) " comment=\"${arc.prettyDoc()}\"" else ""
                 if (leafElement) {

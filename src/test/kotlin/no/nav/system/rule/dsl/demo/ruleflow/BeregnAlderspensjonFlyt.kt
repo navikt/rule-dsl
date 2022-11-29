@@ -1,18 +1,18 @@
 package no.nav.system.rule.dsl.demo.ruleflow
 
 import no.nav.system.rule.dsl.AbstractRuleflow
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.domain.param.AlderspensjonParameter
+import no.nav.system.rule.dsl.demo.ruleservice.grunnbeløpByDate
 import no.nav.system.rule.dsl.demo.ruleset.BeregnFaktiskTrygdetidRS
 import no.nav.system.rule.dsl.demo.ruleset.BeregnGrunnpensjonRS
 import no.nav.system.rule.dsl.demo.ruleset.PersonenErFlyktningRS
-import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.rettsregel.Faktum
 
 class BeregnAlderspensjonFlyt(
     private val parameter: AlderspensjonParameter,
 ) : AbstractRuleflow() {
-
     private var grunnpensjonSats = 0.0
     private lateinit var flyktningUtfall: Faktum<UtfallType>
 
@@ -64,7 +64,7 @@ class BeregnAlderspensjonFlyt(
          * Task: Beregn Grunnpensjon
          */
         parameter.output.grunnpensjon = BeregnGrunnpensjonRS(
-            parameter.input.grunnbeløpVedVirk,
+            grunnbeløpByDate(parameter.input.virkningstidspunkt.value),
             parameter.output.anvendtTrygdetid!!.år,
             grunnpensjonSats
         ).run(this).get()

@@ -9,15 +9,14 @@ import no.nav.system.rule.dsl.demo.ruleflow.BeregnAlderspensjonFlyt
 import no.nav.system.rule.dsl.rettsregel.Faktum
 
 class BeregnAlderspensjonService(
-    private val request: Request
+    private val request: Request,
 ) : AbstractDemoRuleService<Response>() {
     override val ruleService: () -> Response = {
 
         val parameter = AlderspensjonParameter(
             input = AlderspensjonInput(
                 person = request.person,
-                virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt),
-                grunnbeløpVedVirk = grunnbeløpByDate(request.virkningstidspunkt)
+                virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt)
             ),
             output = AlderspensjonOutput()
         )

@@ -23,7 +23,7 @@ import kotlin.experimental.ExperimentalTypeInference
 open class Rule<T : Any>(
     private val name: String,
     private val sequence: Int,
-) : Comparable<Rule<T>>, AbstractResourceHolder() {
+) : Comparable<Rule<T>>, AbstractResourceAccessor() {
 
     /**
      * Functional description of the rule
@@ -169,8 +169,10 @@ open class Rule<T : Any>(
 
         run predLoop@{
             predicateFunctionList.forEach { predicateFunction ->
-                val predicate = predicateFunction.invoke().apply {
-                    parent = this@Rule
+                val predicate = predicateFunction.invoke()
+
+                if (predicate is AbstractSubsumtion) {
+                    this.children.add(predicate)
                 }
 
                 /**
