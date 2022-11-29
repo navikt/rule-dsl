@@ -6,7 +6,7 @@
 
     <groupId>no.nav.system</groupId>
     <artifactId>rule.dsl</artifactId>
-    <version>1.4.4</version>
+    <version>1.4.5</version>
     <packaging>jar</packaging>
     <name>rule-dsl</name>
 
