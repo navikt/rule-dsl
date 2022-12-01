@@ -3,6 +3,7 @@ package no.nav.system.rule.dsl.visitor
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.rettsregel.PairSubsumtion
+import no.nav.system.rule.dsl.rettsregel.helper.isLeafPairSubsumtion
 
 /**
  * Searches the ruleComponent tree for target [AbstractRuleComponent]s matching [target].
@@ -29,7 +30,7 @@ class ArcTraceVisitor(
     }
 
     private fun traceVisit(parent: TraceNode) {
-        if (parent.arc is PairSubsumtion) return
+        if (parent.arc.isLeafPairSubsumtion()) return
         parent.arc.children.filter(qualifier).forEach { child ->
             TraceNode(
                 parent = parent,

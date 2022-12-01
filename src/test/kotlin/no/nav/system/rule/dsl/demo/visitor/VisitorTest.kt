@@ -84,8 +84,18 @@ regeltjeneste: BeregnAlderspensjonService
         JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)
       regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid_ikkeFlyktning
         JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'
+          'Anvendt flyktning' (IKKE_RELEVANT)
+            regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
+              JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]
+                regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
+                  NEI 'Angitt flyktning' (false) må være lik 'true'
       regel: NEI BeregnFaktiskTrygdetidRS.FastsettTrygdetid_Flyktning
         NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'
+          'Anvendt flyktning' (IKKE_RELEVANT)
+            regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
+              JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]
+                regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
+                  NEI 'Angitt flyktning' (false) må være lik 'true'
       regel: JA BeregnFaktiskTrygdetidRS.ReturnRegel
     forgrening: BeregnAlderspensjonFlyt.Sivilstand gift?
       gren: JA BeregnAlderspensjonFlyt.Sivilstand gift?/gren 0
@@ -198,9 +208,10 @@ regeltjeneste: BeregnAlderspensjonService
     @Test
     fun `trace visitor, some`() {
         val searchTrygdetidVisitor =
-            ArcTraceVisitor { r ->
-                r.name().endsWith("AnvendtFlyktning_ikkeRelevant") || r.name().endsWith("FastsettTrygdetid_ikkeFlyktning")
-            }.apply {
+            ArcTraceVisitor(
+                qualifier = {arc -> arc.name() != PersonenErFlyktningRS::class.java.simpleName},
+                target = { r -> r.name().endsWith("asdasdasd") || r.name().endsWith("AnvendtFlyktning_ikkeRelevant") }
+            ).apply {
                 service.accept(this)
             }
 
@@ -208,10 +219,15 @@ regeltjeneste: BeregnAlderspensjonService
             """
             regeltjeneste: BeregnAlderspensjonService
               regelflyt: BeregnAlderspensjonFlyt
-                regelsett: PersonenErFlyktningRS
-                  regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
                 regelsett: BeregnFaktiskTrygdetidRS
                   regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid_ikkeFlyktning
+                    JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'
+                      'Anvendt flyktning' (IKKE_RELEVANT)
+                        regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
+                  regel: NEI BeregnFaktiskTrygdetidRS.FastsettTrygdetid_Flyktning
+                    NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'
+                      'Anvendt flyktning' (IKKE_RELEVANT)
+                        regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
         """.trimIndent(), searchTrygdetidVisitor.trace()
         )
     }
@@ -232,7 +248,17 @@ regeltjeneste: BeregnAlderspensjonService
               regelflyt: BeregnAlderspensjonFlyt
                 regelsett: BeregnFaktiskTrygdetidRS
                   regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid_ikkeFlyktning
+                    JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'
+                      'Anvendt flyktning' (IKKE_RELEVANT)
+                        regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
+                          JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]
+                            regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
                   regel: NEI BeregnFaktiskTrygdetidRS.FastsettTrygdetid_Flyktning
+                    NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'
+                      'Anvendt flyktning' (IKKE_RELEVANT)
+                        regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
+                          JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]
+                            regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
             """.trimIndent(), searchFlyktningVisitor.trace()
         )
     }

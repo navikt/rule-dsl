@@ -2,12 +2,13 @@ package no.nav.system.rule.dsl.visitor
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.rettsregel.PairSubsumtion
+import no.nav.system.rule.dsl.rettsregel.helper.isLeafPairSubsumtion
 
 /**
  * Lists the decendants of [AbstractRuleComponent]
  */
 class DebugVisitor(
-    private val includeFaktum: Boolean = false,
+    private val includeLeafFaktum: Boolean = false,
 ) : TreeVisitor {
     private val debugString = StringBuilder()
     private var level = 0
@@ -16,7 +17,7 @@ class DebugVisitor(
         debugString.append(" ".repeat(level * 2))
         debugString.append(arc.toString()).append("\n")
 
-        if (!includeFaktum && arc is PairSubsumtion) return
+        if (!includeLeafFaktum && arc.isLeafPairSubsumtion()) return
 
         level++
         arc.children.forEach { it.accept(this) }
@@ -26,8 +27,8 @@ class DebugVisitor(
     fun result(): String = debugString.toString().trim()
 }
 
-fun AbstractRuleComponent.debug(): String {
-    return DebugVisitor().run {
+fun AbstractRuleComponent.debug(includeLeafFaktum: Boolean = false): String {
+    return DebugVisitor(includeLeafFaktum).run {
         this@debug.accept(this)
         this.result()
     }

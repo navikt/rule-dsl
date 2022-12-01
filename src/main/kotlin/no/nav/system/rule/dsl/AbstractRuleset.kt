@@ -36,6 +36,8 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
 
     /**
      * Value of first fired rule with returnValue.
+     * TODO Vurder om denne kan igjen bli private. Behovet for sporing at regelsett, og deretter uthenting av returverdien, er kanskje ikke lenger nødvendig.
+     * (Det var PersonenErFlyktningRS som benyttet dette en gang).
      */
     var returnValue: T? = null
 
@@ -49,7 +51,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
         val sequence = nextSequence()
         ruleFunctionMap[sequence] = {
             val rule = Rule<T>("$rulesetName.$navn", sequence)
-//            rule.resourceMap = this.resourceMap
             children.add(rule)
             rule.createRuleContent()
             listOf(rule)
@@ -76,7 +77,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
             for (patternElement in pattern.get()) {
                 val rule = Rule<T>("$rulesetName.$navn.$offset", sequence + offset).apply {
                     nameWithoutPatternOffset = "$rulesetName.$navn"
-//                    resourceMap = this@AbstractRuleset.resourceMap
                 }
                 pattern.registerRule(rule, patternElement)
                 rule.patternOffset = offset
