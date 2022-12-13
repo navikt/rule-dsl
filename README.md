@@ -34,10 +34,13 @@ regeltjeneste: BeregnAlderspensjonService
 ```
 Noteworthy methods are:
 * [root()](src/main/kotlin/no/nav/system/rule/dsl/resource/Root.kt) returns the top level [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt).
-* [debug()](src/main/kotlin/no/nav/system/rule/dsl/visitor/DebugVisitor.kt) debug string of all decendants.
-* [trace( _searchfunction_ )](src/main/kotlin/no/nav/system/rule/dsl/visitor/ArcTraceVisitor.kt) searches for, and traces path to, [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt)
+* [debug()](src/main/kotlin/no/nav/system/rule/dsl/inspections/Debug.kt) debug string of all decendants.
+* [xmlDebug()](src/main/kotlin/no/nav/system/rule/dsl/inspections/XmlDebug.kt) debug xml of all decendants.
+* [trace( _searchfunction_ )](src/main/kotlin/no/nav/system/rule/dsl/inspections/ArcTrace.kt) searches for, and traces path to, [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt)
+* [find( _searchfunction_ )](src/main/kotlin/no/nav/system/rule/dsl/inspections/Find.kt) searches the ruleComponent tree for target [AbstractRuleComponents](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt)
 
-See [VisitorTest](src/test/kotlin/no/nav/system/rule/dsl/demo/visitor/VisitorTest.kt) for examples.
+
+See [InspectionTest](src/test/kotlin/no/nav/system/rule/dsl/demo/inspection/InspectionTest.kt) for examples.
 
 ### Resource
 [AbstractRuleComponents](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt) have a resourceMap containing [AbstractResource](src/main/kotlin/no/nav/system/rule/dsl/AbstractResource.kt) instantiated per service call. These objects typically contain resources like rates ("satser"), loggers and other global assets. See [AbstractDemoRuleService](src/test/kotlin/no/nav/system/rule/dsl/demo/ruleservice/AbstractDemoRuleService.kt) for demonstration.
@@ -113,7 +116,7 @@ Maven:
 <dependency>
   <groupId>no.nav.system</groupId>
   <artifactId>rule.dsl</artifactId>
-  <version>1.4.4</version>
+  <version>1.4.7</version>
 </dependency>
 ```
 

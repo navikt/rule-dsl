@@ -1,7 +1,6 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
-import no.nav.system.rule.dsl.visitor.TreeVisitor
 
 /**
  * Common functionality across all components of the DSL.
@@ -19,10 +18,5 @@ abstract class AbstractRuleComponent {
     abstract fun name(): String
     abstract fun type(): RuleComponentType
     abstract fun fired(): Boolean
-
-    /**
-     * Accepts implementations of [TreeVisitor] for operations on the ruleComponent-tree.
-     */
-    fun accept(treeVisitor: TreeVisitor) = treeVisitor.visit(this)
 
 }
