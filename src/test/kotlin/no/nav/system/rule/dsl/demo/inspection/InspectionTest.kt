@@ -1,6 +1,5 @@
-package no.nav.system.rule.dsl.demo.visitor
+package no.nav.system.rule.dsl.demo.inspection
 
-import no.nav.system.rule.dsl.Rule
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Request
@@ -9,13 +8,15 @@ import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.ruleservice.BeregnAlderspensjonService
 import no.nav.system.rule.dsl.demo.ruleset.PersonenErFlyktningRS
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
-import no.nav.system.rule.dsl.resource.root
+import no.nav.system.rule.dsl.inspections.debug
+import no.nav.system.rule.dsl.inspections.find
+import no.nav.system.rule.dsl.inspections.trace
+import no.nav.system.rule.dsl.inspections.xmlDebug
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.visitor.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class VisitorTest {
+class InspectionTest {
     private val serviceRequest = Request(
         virkningstidspunkt = localDate(1990, 5, 1),
         person = Person(
@@ -40,7 +41,7 @@ class VisitorTest {
     }
 
     @Test
-    fun `debug visitor test`() {
+    fun `debug inspect test`() {
         assertEquals(
             """
 regeltjeneste: BeregnAlderspensjonService
@@ -108,7 +109,7 @@ regeltjeneste: BeregnAlderspensjonService
     }
 
     @Test
-    fun `XML debug visitor test`() {
+    fun `XML debug inspect test`() {
         assertEquals(
             """
 <BeregnAlderspensjonService>
@@ -162,9 +163,25 @@ regeltjeneste: BeregnAlderspensjonService
       </Skal_ha_redusert_fremtidig_trygdetid>
       <FastsettTrygdetid_ikkeFlyktning fired="true">
         <par_subsumsjon fired="true">JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'</par_subsumsjon>
+          <Anvendt flyktning>
+            <AnvendtFlyktning_ikkeRelevant fired="true">
+              <liste_subsumsjon fired="true">JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]</liste_subsumsjon>
+                <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
+                  <par_subsumsjon fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</par_subsumsjon>
+                </AngittFlyktning_HarFlyktningFlaggetSatt>
+            </AnvendtFlyktning_ikkeRelevant>
+          </Anvendt flyktning>
       </FastsettTrygdetid_ikkeFlyktning>
       <FastsettTrygdetid_Flyktning fired="false">
         <par_subsumsjon fired="false">NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'</par_subsumsjon>
+          <Anvendt flyktning>
+            <AnvendtFlyktning_ikkeRelevant fired="true">
+              <liste_subsumsjon fired="true">JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]</liste_subsumsjon>
+                <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
+                  <par_subsumsjon fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</par_subsumsjon>
+                </AngittFlyktning_HarFlyktningFlaggetSatt>
+            </AnvendtFlyktning_ikkeRelevant>
+          </Anvendt flyktning>
       </FastsettTrygdetid_Flyktning>
       <ReturnRegel fired="true"></ReturnRegel>
     </BeregnFaktiskTrygdetidRS>
@@ -182,38 +199,12 @@ regeltjeneste: BeregnAlderspensjonService
     }
 
     @Test
-    fun `trace visitor, one`() {
-        val ruleVisitor = ArcTraceVisitor { r ->
-            r.name() == "PersonenErFlyktningRS.SettRelevantTrygdetid_kap20"
-        }.apply {
-            service.accept(this)
-        }
-
-        assertEquals(service, (ruleVisitor.result.first() as Rule<*>).root())
-        assertEquals(
-            """
-            regeltjeneste: BeregnAlderspensjonService
-              regelflyt: BeregnAlderspensjonFlyt
-                regelsett: PersonenErFlyktningRS
-                  regel: NEI PersonenErFlyktningRS.SettRelevantTrygdetid_kap20
-        """.trimIndent(), ruleVisitor.trace()
-        )
+    fun `trace inspect, all`() {
+        assertEquals(service.debug(), service.trace(target = { true }))
     }
 
     @Test
-    fun `trace visitor, all`() {
-        assertEquals(service.debug(), service.trace())
-    }
-
-    @Test
-    fun `trace visitor, some`() {
-        val searchTrygdetidVisitor =
-            ArcTraceVisitor(
-                qualifier = {arc -> arc.name() != PersonenErFlyktningRS::class.java.simpleName},
-                target = { r -> r.name().endsWith("asdasdasd") || r.name().endsWith("AnvendtFlyktning_ikkeRelevant") }
-            ).apply {
-                service.accept(this)
-            }
+    fun `trace inspect, some`() {
 
         assertEquals(
             """
@@ -228,19 +219,15 @@ regeltjeneste: BeregnAlderspensjonService
                     NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'
                       'Anvendt flyktning' (IKKE_RELEVANT)
                         regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
-        """.trimIndent(), searchTrygdetidVisitor.trace()
-        )
-    }
-
-    @Test
-    fun `trace visitor, qualified branches`() {
-        val searchFlyktningVisitor =
-            ArcTraceVisitor(
+        """.trimIndent(), service.trace(
                 qualifier = { arc -> arc.name() != PersonenErFlyktningRS::class.java.simpleName },
-                target = { r -> r.name().contains("Flyktning") }
-            ).apply {
-                service.accept(this)
-            }
+                target = { r -> r.name().endsWith("AnvendtFlyktning_ikkeRelevant") }
+            )
+        )
+    }
+
+    @Test
+    fun `trace inspect, qualified branches`() {
 
         assertEquals(
             """
@@ -259,12 +246,18 @@ regeltjeneste: BeregnAlderspensjonService
                         regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
                           JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]
                             regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
-            """.trimIndent(), searchFlyktningVisitor.trace()
+            """.trimIndent(),
+            service.trace(
+                qualifier = { arc -> arc.name() != PersonenErFlyktningRS::class.java.simpleName },
+                target = { r ->
+                    r.name().contains("Flyktning")
+                }
+            )
         )
     }
 
     @Test
-    fun `trace visitor, by type`() {
+    fun `trace inspect, by type`() {
         assertEquals(
             """
             regeltjeneste: BeregnAlderspensjonService

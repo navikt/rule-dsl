@@ -4,10 +4,11 @@ import no.nav.system.rule.dsl.enums.ListComparator
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
+import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
-import no.nav.system.rule.dsl.visitor.debug
+import no.nav.system.rule.dsl.inspections.trace
 import org.jetbrains.annotations.TestOnly
 import java.util.*
 
