@@ -7,7 +7,7 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
  */
 fun AbstractRuleComponent.find(
     qualifier: (AbstractRuleComponent) -> Boolean = { true },
-    target: (AbstractRuleComponent) -> Boolean = { true }
+    target: (AbstractRuleComponent) -> Boolean
 ): MutableList<AbstractRuleComponent> {
     val result: MutableList<AbstractRuleComponent> = mutableListOf()
     inspect(this, result, qualifier, target)

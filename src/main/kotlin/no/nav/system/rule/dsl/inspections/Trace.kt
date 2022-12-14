@@ -2,11 +2,11 @@ package no.nav.system.rule.dsl.inspections
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
-import no.nav.system.rule.dsl.rettsregel.helper.isLeafPairSubsumtion
+import no.nav.system.rule.dsl.rettsregel.helper.isLeafFaktum
 
 /**
  * Searches the ruleComponent tree for target [AbstractRuleComponent]s matching [target].
- * Shows the path from where the visitor was accepted to where [target]s where found.
+ * Shows the path from the receiver to where [target]s where found.
  *
  * @param qualifier A ruleComponent that resolves [qualifier] expression as true is eligible for search.
  * @param target A ruleComponent that matches [target] expression is added to [result]
@@ -17,11 +17,12 @@ fun AbstractRuleComponent.trace(targetType: RuleComponentType): String {
 
 
 fun AbstractRuleComponent.trace(
+    includeLeafFaktum: Boolean = false,
     qualifier: (AbstractRuleComponent) -> Boolean = { true },
     target: (AbstractRuleComponent) -> Boolean
 ): String {
     val rootTraceNode = TraceNode(parent = null, arc = this).apply {
-        inspect(this, qualifier, target)
+        inspect(this, includeLeafFaktum, qualifier, target)
     }
 
     return rootTraceNode.toString()
@@ -29,11 +30,14 @@ fun AbstractRuleComponent.trace(
 
 private fun inspect(
     parent: TraceNode,
+    includeLeafFaktum: Boolean = false,
     qualifier: (AbstractRuleComponent) -> Boolean,
     target: (AbstractRuleComponent) -> Boolean
 ) {
-    if (parent.arc.isLeafPairSubsumtion()) return
-    parent.arc.children.filter(qualifier).forEach { child ->
+    if (parent.arc.isLeafFaktum()) return
+    parent.arc.children
+        .filter(qualifier)
+        .filterNot { !includeLeafFaktum && it.isLeafFaktum() }.forEach { child ->
         TraceNode(
             parent = parent,
             arc = child
@@ -42,7 +46,7 @@ private fun inspect(
             if (target.invoke(child)) {
                 this.verify()
             }
-            inspect(this, qualifier, target)
+            inspect(this, includeLeafFaktum, qualifier, target)
         }
     }
 }

@@ -36,7 +36,7 @@ Noteworthy methods are:
 * [root()](src/main/kotlin/no/nav/system/rule/dsl/resource/Root.kt) returns the top level [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt).
 * [debug()](src/main/kotlin/no/nav/system/rule/dsl/inspections/Debug.kt) debug string of all decendants.
 * [xmlDebug()](src/main/kotlin/no/nav/system/rule/dsl/inspections/XmlDebug.kt) debug xml of all decendants.
-* [trace( _searchfunction_ )](src/main/kotlin/no/nav/system/rule/dsl/inspections/ArcTrace.kt) searches for, and traces path to, [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt)
+* [trace( _searchfunction_ )](src/main/kotlin/no/nav/system/rule/dsl/inspections/Trace.kt) searches for, and traces path to, [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt)
 * [find( _searchfunction_ )](src/main/kotlin/no/nav/system/rule/dsl/inspections/Find.kt) searches the ruleComponent tree for target [AbstractRuleComponents](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt)
 
 

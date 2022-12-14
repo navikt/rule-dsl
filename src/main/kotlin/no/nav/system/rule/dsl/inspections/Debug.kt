@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.inspections
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
-import no.nav.system.rule.dsl.rettsregel.helper.isLeafPairSubsumtion
+import no.nav.system.rule.dsl.rettsregel.helper.isLeafFaktum
 
 
 fun AbstractRuleComponent.debug(includeLeafFaktum: Boolean = false) : String {
@@ -14,7 +14,9 @@ private fun inspect(arc: AbstractRuleComponent, level: Int, includeLeafFaktum: B
     debugString.append(" ".repeat(level * 2))
     debugString.append(arc.toString()).append("\n")
 
-    if (!includeLeafFaktum && arc.isLeafPairSubsumtion()) return
+    //if (!includeLeafFaktum && arc.isLeafPairSubsumtion()) return
 
-    arc.children.forEach { inspect(it, level + 1, includeLeafFaktum, debugString) }
+    arc.children.filterNot { !includeLeafFaktum && it.isLeafFaktum() }.forEach {
+        inspect(it, level + 1, includeLeafFaktum, debugString)
+    }
 }

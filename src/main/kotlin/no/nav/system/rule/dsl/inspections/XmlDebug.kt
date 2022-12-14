@@ -5,7 +5,7 @@ import no.nav.system.rule.dsl.AbstractRuleflow
 import no.nav.system.rule.dsl.Predicate
 import no.nav.system.rule.dsl.Rule
 import no.nav.system.rule.dsl.rettsregel.AbstractSubsumtion
-import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.helper.isLeafFaktum
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -20,7 +20,7 @@ fun AbstractRuleComponent.xmlDebug(): String {
 private fun inspect(arc: AbstractRuleComponent, debugString: StringBuilder, level: Int) {
     debugString.append(" ".repeat(level * 2))
     var tagName = arc.name()
-    val relevantChildren = arc.children.filterNot { it is Faktum<*> }
+    val relevantChildren = arc.children.filterNot { it.isLeafFaktum() }
     var leafElement = relevantChildren.isEmpty()
 
     when (arc) {

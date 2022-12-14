@@ -1,8 +1,9 @@
 package no.nav.system.rule.dsl.rettsregel.helper
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
-import no.nav.system.rule.dsl.rettsregel.PairSubsumtion
+import no.nav.system.rule.dsl.rettsregel.Faktum
 
 fun Boolean.svarord() = if (this) "JA" else "NEI"
 
-fun AbstractRuleComponent.isLeafPairSubsumtion(): Boolean = this is PairSubsumtion && this.children.all { c -> c.children.isEmpty() }
+fun AbstractRuleComponent.isLeafFaktum(): Boolean =
+    this is Faktum<*> && this.children.all { c -> c.children.isEmpty() }

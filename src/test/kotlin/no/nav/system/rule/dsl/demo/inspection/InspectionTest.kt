@@ -163,9 +163,25 @@ regeltjeneste: BeregnAlderspensjonService
       </Skal_ha_redusert_fremtidig_trygdetid>
       <FastsettTrygdetid_ikkeFlyktning fired="true">
         <par_subsumsjon fired="true">JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'</par_subsumsjon>
+          <Anvendt flyktning>
+            <AnvendtFlyktning_ikkeRelevant fired="true">
+              <liste_subsumsjon fired="true">JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]</liste_subsumsjon>
+                <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
+                  <par_subsumsjon fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</par_subsumsjon>
+                </AngittFlyktning_HarFlyktningFlaggetSatt>
+            </AnvendtFlyktning_ikkeRelevant>
+          </Anvendt flyktning>
       </FastsettTrygdetid_ikkeFlyktning>
       <FastsettTrygdetid_Flyktning fired="false">
         <par_subsumsjon fired="false">NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'</par_subsumsjon>
+          <Anvendt flyktning>
+            <AnvendtFlyktning_ikkeRelevant fired="true">
+              <liste_subsumsjon fired="true">JA 'Regelreferanse' (AngittFlyktning) ingen [regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt]</liste_subsumsjon>
+                <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
+                  <par_subsumsjon fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</par_subsumsjon>
+                </AngittFlyktning_HarFlyktningFlaggetSatt>
+            </AnvendtFlyktning_ikkeRelevant>
+          </Anvendt flyktning>
       </FastsettTrygdetid_Flyktning>
       <ReturnRegel fired="true"></ReturnRegel>
     </BeregnFaktiskTrygdetidRS>
@@ -205,7 +221,7 @@ regeltjeneste: BeregnAlderspensjonService
                         regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
         """.trimIndent(), service.trace(
                 qualifier = { arc -> arc.name() != PersonenErFlyktningRS::class.java.simpleName },
-                target = { r -> r.name().endsWith("asdasdasd") || r.name().endsWith("AnvendtFlyktning_ikkeRelevant") }
+                target = { r -> r.name().endsWith("AnvendtFlyktning_ikkeRelevant") }
             )
         )
     }

@@ -19,8 +19,7 @@ class BeregnFaktiskTrygdetidRSTest {
 
     @Test
     fun `test fagregel 'Redusert fremtidig trygdetid' har truffet`() {
-        var result: MutableList<AbstractRuleComponent> = mutableListOf()
-        BeregnFaktiskTrygdetidRS(
+        val result = BeregnFaktiskTrygdetidRS(
             fødselsdato = Faktum("Fødselsdato", localDate(1990, 1, 1)),
             virkningstidspunkt = Faktum(navn = "virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
@@ -29,7 +28,7 @@ class BeregnFaktiskTrygdetidRSTest {
             Faktum("Anvendt flyktning", IKKE_OPPFYLT)
         ).run {
             test()
-            result = find { regel -> regel.name() == "BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid" }
+            find { regel -> regel.name() == "BeregnFaktiskTrygdetidRS.Skal ha redusert fremtidig trygdetid" }
         }
 
         assertTrue(result.isNotEmpty())
