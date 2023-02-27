@@ -1,6 +1,7 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
+import java.io.Serializable
 
 /**
  * Common functionality across all components of the DSL.
@@ -12,7 +13,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType
  * Resources are all classes that needs to be instantiated once per ruleService call, typically resources
  * are Rates (norsk "Sats"), Console-capture or anything else non-static.
  */
-abstract class AbstractRuleComponent {
+abstract class AbstractRuleComponent : Serializable {
     val children: MutableList<AbstractRuleComponent> = mutableListOf()
 
     abstract fun name(): String

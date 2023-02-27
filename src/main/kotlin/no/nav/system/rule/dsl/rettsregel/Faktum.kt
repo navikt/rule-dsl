@@ -9,6 +9,11 @@ open class Faktum<T : Any> internal constructor(open val name: String) : Abstrac
     lateinit var value: T
     internal var anonymous = false
 
+    constructor(): this(name = "anonymous") {
+        anonymous = true
+    }
+
+
     constructor(navn: String, verdi: T) : this(navn) {
         this.value = verdi
     }
