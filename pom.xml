@@ -16,7 +16,7 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
-        <kotlin.version>1.7.20</kotlin.version>
+        <kotlin.version>1.9.10</kotlin.version>
         <jupiter.version>5.9.1</jupiter.version>
         <surefire.plugin.version>3.0.0-M7</surefire.plugin.version>
     </properties>
