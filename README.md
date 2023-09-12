@@ -108,8 +108,6 @@ A rudimentary plugin for Intellij is in development for ruleflow visualization.
 <!--suppress HtmlUnknownTarget -->
 <img src="src\main\doc\ruleflow example.png" alt=""/>
 
-Repo: [pensjon-regler-editor](https://github.com/navikt/pensjon-regler-editor)
-
 ### Usage
 Maven:
 ```xml
