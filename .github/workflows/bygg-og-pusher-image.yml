@@ -6,6 +6,13 @@ on:
 
 jobs:
   automatisk-bygg:
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      deployments: write
+      packages: write
+      pull-requests: write
     name: Automatisk bygg og deploy av rule-dsl
     runs-on: ubuntu-latest
     steps:
