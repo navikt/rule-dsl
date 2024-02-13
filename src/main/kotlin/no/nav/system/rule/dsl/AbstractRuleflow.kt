@@ -22,9 +22,9 @@ abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
      * Tests the ruleflow without a parent ruleComponent.
      */
     @TestOnly
-    open fun test() {
+    open fun test(): T {
         branchNameStack.push(this.javaClass.simpleName)
-        ruleflow.invoke()
+        return ruleflow.invoke()
     }
 
     /**
