@@ -1,47 +1,51 @@
 package no.nav.system.rule.dsl.demo.ruleflow
 
 import no.nav.system.rule.dsl.AbstractRuleflow
+import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
-import no.nav.system.rule.dsl.demo.domain.param.AlderspensjonParameter
+import no.nav.system.rule.dsl.demo.domain.param.AlderspensjonOutput
 import no.nav.system.rule.dsl.demo.ruleservice.grunnbeløpByDate
 import no.nav.system.rule.dsl.demo.ruleset.BeregnFaktiskTrygdetidRS
 import no.nav.system.rule.dsl.demo.ruleset.BeregnGrunnpensjonRS
 import no.nav.system.rule.dsl.demo.ruleset.PersonenErFlyktningRS
 import no.nav.system.rule.dsl.rettsregel.Faktum
+import java.time.LocalDate
 
 class BeregnAlderspensjonFlyt(
-    private val parameter: AlderspensjonParameter,
-) : AbstractRuleflow() {
+    private val person: Person,
+    private val virkningstidspunkt: Faktum<LocalDate>,
+) : AbstractRuleflow<AlderspensjonOutput>() {
     private var grunnpensjonSats = 0.0
     private lateinit var flyktningUtfall: Faktum<UtfallType>
+    private var output = AlderspensjonOutput()
 
-    override var ruleflow: () -> Unit = {
+    override var ruleflow: () -> AlderspensjonOutput = {
 
         /**
          * Sjekk om anvendtFlyktning
          */
         flyktningUtfall = PersonenErFlyktningRS(
-            parameter.input.person,
+            person,
             Faktum("Ytelsestype", YtelseEnum.AP),
             Faktum("Kapittel 20", false),
-            parameter.input.virkningstidspunkt,
+            virkningstidspunkt,
             Faktum("Søknadstidspunkt fom 2021", true)
         ).run(this).get()
 
         /**
          * Task: Beregn Trygdetid
          */
-        parameter.output.anvendtTrygdetid = BeregnFaktiskTrygdetidRS(
-            parameter.input.person.fødselsdato,
-            parameter.input.virkningstidspunkt,
-            parameter.input.person.boperioder,
+        output.anvendtTrygdetid = BeregnFaktiskTrygdetidRS(
+            person.fødselsdato,
+            virkningstidspunkt,
+            person.boperioder,
             flyktningUtfall
         ).run(this).get()
 
         forgrening("Sivilstand gift?") {
             gren {
-                betingelse { parameter.input.person.erGift }
+                betingelse { person.erGift }
                 flyt {
                     /**
                      * Task: Lav Sats
@@ -50,7 +54,7 @@ class BeregnAlderspensjonFlyt(
                 }
             }
             gren {
-                betingelse { !parameter.input.person.erGift }
+                betingelse { !person.erGift }
                 flyt {
                     /**
                      * Task: Høy Sats
@@ -63,10 +67,12 @@ class BeregnAlderspensjonFlyt(
         /**
          * Task: Beregn Grunnpensjon
          */
-        parameter.output.grunnpensjon = BeregnGrunnpensjonRS(
-            grunnbeløpByDate(parameter.input.virkningstidspunkt.value),
-            parameter.output.anvendtTrygdetid!!.år,
+        output.grunnpensjon = BeregnGrunnpensjonRS(
+            grunnbeløpByDate(virkningstidspunkt.value),
+            output.anvendtTrygdetid!!.år,
             grunnpensjonSats
         ).run(this).get()
+
+        output
     }
 }

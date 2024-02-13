@@ -11,7 +11,7 @@ import java.util.*
  * Common ruleflow behaviour used by all ruleflow implementations.
  * Defines branching logic DSL (decision, branch, condition, flow).
  */
-abstract class AbstractRuleflow : AbstractResourceAccessor() {
+abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
     /**
      * Tracks the full name of nested branches.
      */
@@ -30,17 +30,17 @@ abstract class AbstractRuleflow : AbstractResourceAccessor() {
     /**
      * Runs the ruleflow
      */
-    open fun run(parent: AbstractRuleComponent) {
+    open fun run(parent: AbstractRuleComponent): T {
         if (parent is AbstractResourceAccessor) {
             this.resourceMap = parent.resourceMap
         }
         parent.children.add(this)
 
         branchNameStack.push(this.javaClass.simpleName)
-        ruleflow.invoke()
+        return ruleflow.invoke()
     }
 
-    protected abstract var ruleflow: () -> Unit
+    protected abstract var ruleflow: () -> T
 
     private fun branchName(): String = branchNameStack.elements().toList().joinToString(".")
 

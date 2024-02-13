@@ -15,10 +15,12 @@ A set of classes inheriting **[AbstractRuleComponent](src/main/kotlin/no/nav/sys
     * **[Decision](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleflow.kt)** DSL syntax for a group of branches. 
 * **[AbstractRuleset](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleset.kt)** Wraps a set of rules that relate to a single topic.
 * **[Rule](src/main/kotlin/no/nav/system/rule/dsl/Rule.kt)** A single functional decision.
-* **[Faktum](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Faktum.kt)** A name-value pair used by Subsumsjons.
+* **[Faktum](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Faktum.kt)** A name-value pair used by Subsumtion.
 * **[Predicate](src/main/kotlin/no/nav/system/rule/dsl/Predicate.kt)** Wraps the boolean expression function for technical expressions (null checks and similar).
     * **[AbstractSubsumtion](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt)** Base class for functional expressions.
-      * [PairSubsumsjon](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt) Compares two [Faktum](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Faktum.kt)s using [PairComparator](src/main/kotlin/no/nav/system/rule/dsl/enums/Comparator.kt).
+        * [PairSubsumtion](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt) Compares
+          two [Faktum](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Faktum.kt)s
+          using [PairComparator](src/main/kotlin/no/nav/system/rule/dsl/enums/Comparator.kt).
       * [ListSubsumtion](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Subsumtion.kt) Compares a [Faktum](src/main/kotlin/no/nav/system/rule/dsl/rettsregel/Faktum.kt)'s relationship to a list of [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt).
 
 ### Treestructure
