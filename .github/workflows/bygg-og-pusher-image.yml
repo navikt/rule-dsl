@@ -1,11 +1,9 @@
-name: Automatisk bygg og deploy rule-dsl
-on:
-  push:
-    branches:
-      - main
+name: Bygg og deploy rule-dsl
+
+on: workflow_dispatch
 
 jobs:
-  automatisk-bygg:
+  bygg:
     permissions:
       actions: read
       checks: read
@@ -13,11 +11,11 @@ jobs:
       deployments: write
       packages: write
       pull-requests: write
-    name: Automatisk bygg og deploy av rule-dsl
+    name: Bygg og deploy av rule-dsl
     runs-on: ubuntu-latest
     steps:
       - name: Kanseller tidligere kjøringer
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
       - name: Sjekk ut kode
@@ -29,7 +27,7 @@ jobs:
           distribution: temurin
           java-version: 21
       - name: Cache Maven pakker
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
