@@ -68,7 +68,7 @@ open class Rule<T : Any>(
     /**
      * The value this rule will return.
      */
-    internal var returnValue: Optional<T> = Optional.empty()
+    internal var returnValue: T? = null
 
     /**
      * Set to true if rule has a return value. When set to true this rule will stop ruleset evaluation if fired.
@@ -144,9 +144,9 @@ open class Rule<T : Any>(
      */
     fun RETURNER(returnValue: T? = null) {
         if (returnValue == null) {
-            this.returnValue = Optional.empty()
+            this.returnValue = null
         } else {
-            this.returnValue = Optional.of(returnValue)
+            this.returnValue = returnValue
             if (returnValue is Faktum<*>) returnValue.children.add(this)
         }
         returnRule = true

@@ -8,9 +8,7 @@ import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
-import no.nav.system.rule.dsl.inspections.trace
 import org.jetbrains.annotations.TestOnly
-import java.util.*
 
 /**
  * Abstract Ruleset manages creation, ordering and execution of rules specified in implementing classes.
@@ -102,12 +100,12 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
     }
 
     @TestOnly
-    open fun test(): Optional<T> {
+    open fun test(): T? {
         return internalRun()
     }
 
     @TestOnly
-    internal fun testAndDebug(): Optional<T> {
+    internal fun testAndDebug(): T? {
         val ret = internalRun()
         println(this.debug())
         return ret
@@ -118,7 +116,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
      *
      * @return value T wrapped in Optional
      */
-    fun run(parent: AbstractRuleComponent): Optional<T> {
+    fun run(parent: AbstractRuleComponent): T? {
         if (parent is AbstractResourceAccessor) this.resourceMap = parent.resourceMap
         parent.children.add(this)
 
@@ -129,7 +127,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
      * Creates, sorts and evaluates the rules of the ruleset.
      */
     @Suppress("MemberVisibilityCanBePrivate")
-    protected fun internalRun(): Optional<T> {
+    protected fun internalRun(): T? {
         create()
 
         ruleFunctionMap.values.forEach { ruleSpawn ->
@@ -137,12 +135,12 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
                 it.resourceMap = this.resourceMap
                 it.evaluate()
                 if (it.returnRule) {
-                    returnValue = it.returnValue.orElse(null)
+                    returnValue = it.returnValue
                     return it.returnValue
                 }
             }
         }
-        return Optional.empty()
+        return null
     }
 
     /**
