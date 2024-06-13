@@ -10,13 +10,13 @@ class RuleChainingRSTest {
 
     @Test
     fun `test hvor førstRegel kjører`() {
-        val ruleChainingRS = RuleChainingRS(true).test().get()
+        val ruleChainingRS = RuleChainingRS(true).test()
         assertEquals(1003, ruleChainingRS)
     }
 
     @Test
     fun `test hvor førsteRegel ikke kjører`() {
-        val ruleChainingRS = RuleChainingRS(false).test().get()
+        val ruleChainingRS = RuleChainingRS(false).test()
         assertEquals(999, ruleChainingRS)
     }
 

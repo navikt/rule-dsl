@@ -8,7 +8,7 @@ class PatternRSTest {
     fun `skal returnere korrekt sum`() {
         val list1 = mutableListOf(2, 4, 6, 8, 10)
         val list2 = mutableListOf(1, 3, 5, 7, 9)
-        val sum = PatternRS(list1, list2).test().get()
+        val sum = PatternRS(list1, list2).test()
 
         assertEquals(110, sum)
     }
