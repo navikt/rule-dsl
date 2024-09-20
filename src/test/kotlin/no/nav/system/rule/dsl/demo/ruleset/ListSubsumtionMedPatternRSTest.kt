@@ -19,7 +19,7 @@ class ListSubsumtionMedPatternRSTest {
             Faktum("bool4", false)
         )
 
-        val rule = ListSubsumtionMedPatternRS(faktumListe).test().get()
+        val rule = ListSubsumtionMedPatternRS(faktumListe).test()
 
         assertTrue(rule.fired())
         val ingenSubsumsjon = rule.children.first() as ListSubsumtion
@@ -39,7 +39,7 @@ class ListSubsumtionMedPatternRSTest {
             Faktum("bool4", true)
         )
 
-        val regel = ListSubsumtionMedPatternRS(faktumListe).test().get()
+        val regel = ListSubsumtionMedPatternRS(faktumListe).test()
 
         assertTrue(regel.fired())
         val minstEnSubsumsjon = regel.children.first() as ListSubsumtion
@@ -58,7 +58,7 @@ class ListSubsumtionMedPatternRSTest {
             Faktum("bool4", true)
         )
 
-        val regel = ListSubsumtionMedPatternRS(faktumListe).test().get()
+        val regel = ListSubsumtionMedPatternRS(faktumListe).test()
 
         assertTrue(regel.fired())
         val alleSubsumsjon = regel.children.first() as ListSubsumtion

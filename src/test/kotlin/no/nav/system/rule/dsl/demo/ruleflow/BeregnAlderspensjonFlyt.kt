@@ -31,7 +31,7 @@ class BeregnAlderspensjonFlyt(
             Faktum("Kapittel 20", false),
             virkningstidspunkt,
             Faktum("Søknadstidspunkt fom 2021", true)
-        ).run(this).get()
+        ).run(this)
 
         /**
          * Task: Beregn Trygdetid
@@ -41,7 +41,7 @@ class BeregnAlderspensjonFlyt(
             virkningstidspunkt,
             person.boperioder,
             flyktningUtfall
-        ).run(this).get()
+        ).run(this)
 
         forgrening("Sivilstand gift?") {
             gren {
@@ -71,7 +71,7 @@ class BeregnAlderspensjonFlyt(
             grunnbeløpByDate(virkningstidspunkt.value),
             output.anvendtTrygdetid!!.år,
             grunnpensjonSats
-        ).run(this).get()
+        ).run(this)
 
         output
     }

@@ -8,9 +8,7 @@ import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
-import no.nav.system.rule.dsl.inspections.trace
 import org.jetbrains.annotations.TestOnly
-import java.util.*
 
 /**
  * Abstract Ruleset manages creation, ordering and execution of rules specified in implementing classes.
@@ -40,7 +38,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
      * TODO Vurder om denne kan igjen bli private. Behovet for sporing at regelsett, og deretter uthenting av returverdien, er kanskje ikke lenger nødvendig.
      * (Det var PersonenErFlyktningRS som benyttet dette en gang).
      */
-    var returnValue: T? = null
+    lateinit var returnValue: T
 
     /**
      * Creates a standard rule using the rule mini-DSL.
@@ -102,12 +100,12 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
     }
 
     @TestOnly
-    open fun test(): Optional<T> {
+    open fun test(): T {
         return internalRun()
     }
 
     @TestOnly
-    internal fun testAndDebug(): Optional<T> {
+    internal fun testAndDebug(): T {
         val ret = internalRun()
         println(this.debug())
         return ret
@@ -118,7 +116,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
      *
      * @return value T wrapped in Optional
      */
-    fun run(parent: AbstractRuleComponent): Optional<T> {
+    fun run(parent: AbstractRuleComponent): T {
         if (parent is AbstractResourceAccessor) this.resourceMap = parent.resourceMap
         parent.children.add(this)
 
@@ -129,7 +127,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
      * Creates, sorts and evaluates the rules of the ruleset.
      */
     @Suppress("MemberVisibilityCanBePrivate")
-    protected fun internalRun(): Optional<T> {
+    protected fun internalRun(): T {
         create()
 
         ruleFunctionMap.values.forEach { ruleSpawn ->
@@ -137,12 +135,18 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
                 it.resourceMap = this.resourceMap
                 it.evaluate()
                 if (it.returnRule) {
-                    returnValue = it.returnValue.orElse(null)
+                    returnValue = it.returnValue
                     return it.returnValue
                 }
             }
         }
-        return Optional.empty()
+
+        /**
+         * Ruleset must be of type Unit if no rules have returned a value.
+         * If the ruleset is not of type Unit, a ClassCastException is thrown _when the value is used_.
+         */
+        @Suppress("UNCHECKED_CAST")
+        return Unit as T
     }
 
     /**

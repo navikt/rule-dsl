@@ -1,11 +1,12 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
-import no.nav.system.rule.dsl.enums.RuleComponentType.*
+import no.nav.system.rule.dsl.enums.RuleComponentType.REGEL
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.*
+import no.nav.system.rule.dsl.rettsregel.AbstractSubsumtion
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.erLik
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
-import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
 
 /**
@@ -68,7 +69,7 @@ open class Rule<T : Any>(
     /**
      * The value this rule will return.
      */
-    internal var returnValue: Optional<T> = Optional.empty()
+    internal lateinit var returnValue: T
 
     /**
      * Set to true if rule has a return value. When set to true this rule will stop ruleset evaluation if fired.
@@ -142,13 +143,9 @@ open class Rule<T : Any>(
     /**
      * DSL: Return value entry.
      */
-    fun RETURNER(returnValue: T? = null) {
-        if (returnValue == null) {
-            this.returnValue = Optional.empty()
-        } else {
-            this.returnValue = Optional.of(returnValue)
-            if (returnValue is Faktum<*>) returnValue.children.add(this)
-        }
+    fun RETURNER(returnValue: T) {
+        this.returnValue = returnValue
+        if (returnValue is Faktum<*>) returnValue.children.add(this)
         returnRule = true
     }
 

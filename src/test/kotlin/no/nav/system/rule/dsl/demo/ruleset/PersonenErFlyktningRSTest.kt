@@ -1,11 +1,14 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
-import no.nav.system.rule.dsl.demo.domain.*
+import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
+import no.nav.system.rule.dsl.demo.domain.InngangOgEksportgrunnlag
+import no.nav.system.rule.dsl.demo.domain.Person
+import no.nav.system.rule.dsl.demo.domain.Trygdetid
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.enums.ListComparator.INGEN
 import no.nav.system.rule.dsl.enums.ListComparator.MINST_EN_AV
-import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
 import org.junit.jupiter.api.Assertions.*
@@ -28,7 +31,7 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).run {
             test()
-            this.returnValue!!
+            this.returnValue
         }
 
         assertEquals(IKKE_RELEVANT, flyktningUtfall.value)
@@ -46,7 +49,7 @@ class PersonenErFlyktningRSTest {
             flyktning = Faktum("Angitt flyktning", true),
         )
 
-       val flyktningUtfall = PersonenErFlyktningRS(
+        val flyktningUtfall = PersonenErFlyktningRS(
             person,
             Faktum("Ytelsestype", YtelseEnum.AP),
             Faktum("Kapittel20", false),
@@ -54,7 +57,7 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", false)
         ).run {
             test()
-            this.returnValue!!
+            this.returnValue
         }
 
         assertEquals(OPPFYLT, flyktningUtfall.value)
@@ -66,7 +69,9 @@ class PersonenErFlyktningRSTest {
     fun testErIkkeFlyktning_virkFom2021_ikkeOvergang() {
         val person = Person(
             fødselsdato = Faktum("Fødselsdato", localDate(1980, 1, 1)),
-            inngangOgEksportgrunnlag = InngangOgEksportgrunnlag().apply { unntakFraForutgaendeMedlemskap.unntak.value = true }
+            inngangOgEksportgrunnlag = InngangOgEksportgrunnlag().apply {
+                unntakFraForutgaendeMedlemskap.unntak.value = true
+            }
         )
 
         val flyktningUtfall = PersonenErFlyktningRS(
@@ -77,7 +82,7 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).run {
             test()
-            this.returnValue!!
+            this.returnValue
         }
 
         val regelOvergangsregelAP = flyktningUtfall.children[0].children[2].children[0]
@@ -104,7 +109,7 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).run {
             test()
-            this.returnValue!!
+            this.returnValue
         }
 
         assertEquals(OPPFYLT, flyktningUtfall.value)
@@ -140,7 +145,7 @@ class PersonenErFlyktningRSTest {
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
         ).run {
             test()
-            this.returnValue!!
+            this.returnValue
         }
 
         assertEquals(OPPFYLT, flyktningUtfall.value)
