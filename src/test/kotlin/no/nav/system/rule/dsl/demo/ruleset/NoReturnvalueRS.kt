@@ -5,6 +5,6 @@ import no.nav.system.rule.dsl.AbstractRuleset
 /**
  * Regelsett med type Int uten returnverdi er ugyldig.
  */
-class NoReturnvalueRS : AbstractRuleset<Int>() {
+class NoReturnValueRS : AbstractRuleset<Int>() {
     override fun create() {}
 }

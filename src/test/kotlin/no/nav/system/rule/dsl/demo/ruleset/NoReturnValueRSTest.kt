@@ -9,7 +9,7 @@ class NoReturnValueRSTest {
     @Test
     fun `test hvor førstRegel kjører`() {
         assertThrows<ClassCastException> {
-            NoReturnvalueRS().test() + 1
+            NoReturnValueRS().test() + 1
         }
     }
 }
