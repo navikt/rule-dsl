@@ -40,9 +40,6 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
      */
     lateinit var returnValue: T
 
-    private val defaultReturnValue: T = Any() as T
-
-
     /**
      * Creates a standard rule using the rule mini-DSL.
      *
@@ -143,7 +140,13 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
                 }
             }
         }
-        return defaultReturnValue
+
+        /**
+         * Ruleset must be of type Unit if no rules have returned a value.
+         * If the ruleset is not of type Unit, a ClassCastException is thrown _when the value is used_.
+         */
+        @Suppress("UNCHECKED_CAST")
+        return Unit as T
     }
 
     /**
