@@ -8,8 +8,7 @@ import no.nav.system.rule.dsl.pattern.createPattern
  * Test that should demonstrate rulechaining.
  * Rulechaining refers to having rules check if previous rules have fired, example [endreInntekt.harTruffet()]
  */
-class PatternRuleChainingRS(innInntektListe: List<Inntekt>) :
-    AbstractRuleset<Boolean>() {
+class PatternRuleChainingRS(innInntektListe: List<Inntekt>) : AbstractRuleset<Boolean>() {
 
     private var noenInntektEtterUforhet = innInntektListe.createPattern()
 
