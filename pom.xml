@@ -17,8 +17,8 @@
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.source>21</maven.compiler.source>
         <kotlin.version>2.0.20</kotlin.version>
-        <jupiter.version>5.11.0</jupiter.version>
-        <surefire.plugin.version>3.5.0</surefire.plugin.version>
+        <jupiter.version>5.11.2</jupiter.version>
+        <surefire.plugin.version>3.5.1</surefire.plugin.version>
         <maven.source.plugin.version>3.3.1</maven.source.plugin.version>
     </properties>
 
