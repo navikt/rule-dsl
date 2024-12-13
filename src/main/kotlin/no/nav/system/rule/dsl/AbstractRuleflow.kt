@@ -1,6 +1,5 @@
 package no.nav.system.rule.dsl
 
-import no.nav.system.rule.dsl.AbstractRuleflow.Decision.Branch
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
@@ -103,10 +102,12 @@ abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
         override fun toString(): String = "${type()}: ${name()}"
 
         class Branch(
-            private val name: String,
+            defaultName: String,
         ) : AbstractResourceAccessor() {
             lateinit var condition: () -> Boolean
             lateinit var flowFunction: () -> Unit
+            private var betingelseName: String = defaultName
+
             var fired = false
 
             /**
@@ -115,6 +116,10 @@ abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
              */
             fun betingelse(init: () -> Boolean) {
                 condition = init
+            }
+            fun betingelse(name: String, init: () -> Boolean) {
+                condition = init
+                betingelseName = name
             }
 
             /**
@@ -125,7 +130,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
                 flowFunction = flowInit
             }
 
-            override fun name(): String = name
+            override fun name(): String = betingelseName
             override fun fired(): Boolean = fired
             override fun type(): RuleComponentType = GREN
             override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"

@@ -98,9 +98,9 @@ regeltjeneste: BeregnAlderspensjonService
                 regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
                   NEI 'Angitt flyktning' (false) må være lik 'true'
       regel: JA BeregnFaktiskTrygdetidRS.ReturnRegel
-    forgrening: BeregnAlderspensjonFlyt.Sivilstand gift?
-      gren: JA BeregnAlderspensjonFlyt.Sivilstand gift?/gren 0
-      gren: NEI BeregnAlderspensjonFlyt.Sivilstand gift?/gren 1
+    forgrening: BeregnAlderspensjonFlyt.Sivilstand?
+      gren: JA Gift
+      gren: NEI Ugift
     regelsett: BeregnGrunnpensjonRS
       regel: NEI BeregnGrunnpensjonRS.FullTrygdetid
       regel: JA BeregnGrunnpensjonRS.RedusertTrygdetid
@@ -185,10 +185,10 @@ regeltjeneste: BeregnAlderspensjonService
       </FastsettTrygdetid_Flyktning>
       <ReturnRegel fired="true"></ReturnRegel>
     </BeregnFaktiskTrygdetidRS>
-    <BeregnAlderspensjonFlyt.Sivilstand gift?>
-      <BeregnAlderspensjonFlyt.Sivilstand gift?/gren 0 fired="true"></BeregnAlderspensjonFlyt.Sivilstand gift?/gren 0>
-      <BeregnAlderspensjonFlyt.Sivilstand gift?/gren 1 fired="false"></BeregnAlderspensjonFlyt.Sivilstand gift?/gren 1>
-    </BeregnAlderspensjonFlyt.Sivilstand gift?>
+    <BeregnAlderspensjonFlyt.Sivilstand?>
+      <Gift fired="true"></Gift>
+      <Ugift fired="false"></Ugift>
+    </BeregnAlderspensjonFlyt.Sivilstand?>
     <BeregnGrunnpensjonRS>
       <FullTrygdetid fired="false"></FullTrygdetid>
       <RedusertTrygdetid fired="true"></RedusertTrygdetid>

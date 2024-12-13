@@ -43,9 +43,9 @@ class BeregnAlderspensjonFlyt(
             flyktningUtfall
         ).run(this)
 
-        forgrening("Sivilstand gift?") {
+        forgrening("Sivilstand?") {
             gren {
-                betingelse { person.erGift }
+                betingelse("Gift") { person.erGift }
                 flyt {
                     /**
                      * Task: Lav Sats
@@ -54,7 +54,7 @@ class BeregnAlderspensjonFlyt(
                 }
             }
             gren {
-                betingelse { !person.erGift }
+                betingelse("Ugift") { !person.erGift }
                 flyt {
                     /**
                      * Task: Høy Sats
