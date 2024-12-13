@@ -6,7 +6,7 @@
 
     <groupId>no.nav.system</groupId>
     <artifactId>rule.dsl</artifactId>
-    <version>1.6.3</version>
+    <version>1.6.4</version>
     <packaging>jar</packaging>
     <name>rule-dsl</name>
 
@@ -16,7 +16,7 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.source>21</maven.compiler.source>
-        <kotlin.version>2.0.21</kotlin.version>
+        <kotlin.version>2.1.0</kotlin.version>
         <jupiter.version>5.11.3</jupiter.version>
         <surefire.plugin.version>3.5.2</surefire.plugin.version>
         <maven.source.plugin.version>3.3.1</maven.source.plugin.version>
