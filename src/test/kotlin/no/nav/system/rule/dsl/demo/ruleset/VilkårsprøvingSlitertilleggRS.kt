@@ -30,22 +30,8 @@ class VilkårsprøvingSlitertilleggRS(
     private val veietGrunnbeløpListeSiste3år =
         Faktum("veietGrunnbeløpSiste3år", veietGrunnbeløpListe.filter { it.år in siste3år.value })
 
-    private var vilårInntekt3årOppfylt = false
-    private var vilkårInntektForrigeårOppfylt = false
-
     @OptIn(DslDomainPredicate::class)
     override fun create() {
-
-//        regel("SumInntektSiste3år", inntektListeSiste3år ) { inntekt ->
-//            HVIS { true }
-//            SÅ { sumInntektSiste3år += inntekt.belop}
-//
-//        }
-
-//        regel("SumVeietGrunnbeløpSiste3år", veietGrunnbeløpListeSiste3år) { veietGrunnbeløp ->
-//            HVIS { true }
-//            SÅ { sumVeietGrunnbeløpSiste3år += veietGrunnbeløp.beløp }
-//        }
 
         regel("SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-TRE-ÅR") {
 
@@ -57,7 +43,6 @@ class VilkårsprøvingSlitertilleggRS(
                 Faktum("", veietGrunnbeløpListeSiste3år.value.sumOf { it.beløp } / ANTALL_ÅR_TILBAKE.toDouble())
 
             HVIS { gjennomsnittligInntektSiste3år erMindreEllerLik G_FAKTOR_OVRE_INNTEKTSGRENSE * gjennomsnittligVeietGrunnbeløpSiste3år.value }
-            SÅ { vilårInntekt3årOppfylt = true }
         }
 
         regel("SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR") {
@@ -70,7 +55,6 @@ class VilkårsprøvingSlitertilleggRS(
                 veietGrunnbeløpListeSiste3år.value.first { it.år == forrigeår.value }.beløp)
 
             HVIS { inntektForrigeår erStørreEllerLik  1 * veietGrunnbeløpForrigeår.value }
-            SÅ { vilkårInntektForrigeårOppfylt = true }
         }
 
         regel("Test") {
