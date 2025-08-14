@@ -37,33 +37,44 @@ class VilkårsprøvingSlitertilleggRS(
 
             val gjennomsnittligInntektSiste3år = Faktum(
                 "gjennomsnittligInntektSiste3år",
-                inntektSiste3år.value.sumOf { it.belop } / ANTALL_ÅR_TILBAKE.toDouble())
+                inntektSiste3år.value.sumOf { it.beløp } / ANTALL_ÅR_TILBAKE.toDouble())
 
             val gjennomsnittligVeietGrunnbeløpSiste3år =
                 Faktum("", veietGrunnbeløpListeSiste3år.value.sumOf { it.beløp } / ANTALL_ÅR_TILBAKE.toDouble())
 
             HVIS { gjennomsnittligInntektSiste3år erMindreEllerLik G_FAKTOR_OVRE_INNTEKTSGRENSE * gjennomsnittligVeietGrunnbeløpSiste3år.value }
+
+            kommentar("""
+                https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering
+                Identifikator: SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-TRE-ÅR
+            """.trimIndent())
         }
 
         regel("SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR") {
 
             val inntektForrigeår = Faktum("inntektForrigeår",
-                inntektSiste3år.value.first { it.år == forrigeår.value }.belop)
+                inntektSiste3år.value.first { it.år == forrigeår.value }.beløp)
 
             val veietGrunnbeløpForrigeår = Faktum(
                 "veietGrunnbeløpForrigeår",
                 veietGrunnbeløpListeSiste3år.value.first { it.år == forrigeår.value }.beløp)
 
             HVIS { inntektForrigeår erStørreEllerLik  1 * veietGrunnbeløpForrigeår.value }
+
+            kommentar("""
+                https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering
+                Identifikator: SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR 
+            """)
         }
 
         regel("vilkårOppfylt") {
-            HVIS { true }
+            HVIS { "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR".harTruffet() }
+            OG {  "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR".harTruffet() }
             SÅ {
                 RETURNER(
                     Faktum(
                         "vilkårOppfylt",
-                        "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR".harTruffet() && "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR".harTruffet()
+                       true
                     )
                 )}
         }
