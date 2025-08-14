@@ -57,7 +57,7 @@ class VilkårsprøvingSlitertilleggRS(
             HVIS { inntektForrigeår erStørreEllerLik  1 * veietGrunnbeløpForrigeår.value }
         }
 
-        regel("Test") {
+        regel("vilkårOppfylt") {
             HVIS { true }
             SÅ {
                 RETURNER(
