@@ -9,6 +9,11 @@ import no.nav.system.rule.dsl.rettsregel.erMindreEllerLik
 import no.nav.system.rule.dsl.rettsregel.erStørreEllerLik
 import java.time.LocalDate
 
+/**
+ * Vilkårsprøve slitertillegg
+ * Lovtolkning: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering
+ */
+
 class VilkårsprøvingSlitertilleggRS(
     val inntektListe: List<PensjonsgivendeInntekt>,
     val veietGrunnbeløpListe: List<VeietGrunnbeløp>, // antar veiet grunnbeløp siste 3 år
@@ -45,7 +50,6 @@ class VilkårsprøvingSlitertilleggRS(
             HVIS { gjennomsnittligInntektSiste3år erMindreEllerLik G_FAKTOR_OVRE_INNTEKTSGRENSE * gjennomsnittligVeietGrunnbeløpSiste3år.value }
 
             kommentar("""
-                https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering
                 Identifikator: SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-TRE-ÅR
             """.trimIndent())
         }
@@ -53,30 +57,38 @@ class VilkårsprøvingSlitertilleggRS(
         regel("SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR") {
 
             val inntektForrigeår = Faktum("inntektForrigeår",
-                inntektSiste3år.value.first { it.år == forrigeår.value }.beløp)
+                inntektSiste3år.value.first { it.år == forrigeår.value}.beløp)
 
             val veietGrunnbeløpForrigeår = Faktum(
                 "veietGrunnbeløpForrigeår",
-                veietGrunnbeløpListeSiste3år.value.first { it.år == forrigeår.value }.beløp)
+                veietGrunnbeløpListeSiste3år.value.first { it.år == forrigeår.value}.beløp)
 
             HVIS { inntektForrigeår erStørreEllerLik  1 * veietGrunnbeløpForrigeår.value }
 
             kommentar("""
-                https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering
                 Identifikator: SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR 
             """)
         }
 
         regel("vilkårOppfylt") {
-            HVIS { "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR".harTruffet() }
-            OG {  "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR".harTruffet() }
+            val x = "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-TRE-ÅR".minstEnHarTruffet()
+            HVIS { "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-TRE-ÅR".minstEnHarTruffet() }
+            OG {  "SLITERTILLEGG-INNGANGSVILKÅR-INNTEKT-FORRIGE-ÅR".minstEnHarTruffet() }
             SÅ {
                 RETURNER(
                     Faktum(
                         "vilkårOppfylt",
-                       true
+
                     )
                 )}
+            ELLERS {
+                RETURNER(
+                    Faktum(
+                        "vilkårOppfylt",
+                        false
+                    )
+                )
+            }
         }
     }
 }

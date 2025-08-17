@@ -6,7 +6,7 @@ import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.inspections.debug
 import org.junit.jupiter.api.Test
 
-class VilkårsprøvingSlitertilleggRSTest {
+class VilkårsprøvingSlitertilleggRSTest2 {
 
     val inntektsListe = listOf(
         PensjonsgivendeInntekt(100_000, 2020),
@@ -29,15 +29,12 @@ class VilkårsprøvingSlitertilleggRSTest {
 
 
 
-        VilkårsprøvingSlitertilleggRS(
+        val svar = VilkårsprøvingSlitertilleggRS(
             inntektListe = inntektsListe,
             veietGrunnbeløpListe = veietGrunnbeløpListe,
             uttaksdato = localDate(2025, 1, 1)
-        ).run {
-            test()
-            println(debug(includeLeafFaktum = true))
-            //find { regel -> regel.name() == "VilkårsprøvingSlitertilleggRS.vilkårOppfylt" }
-        }
+        ).test()
+        println(svar.debug(true))
         assert(true)
 //        assert(resultat.isNotEmpty())
 //        (resultat.first() as Rule<*>).let { regelVilkårOppfylt ->

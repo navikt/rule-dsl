@@ -9,6 +9,7 @@ import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.enums.ListComparator.INGEN
 import no.nav.system.rule.dsl.enums.ListComparator.MINST_EN_AV
+import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
 import org.junit.jupiter.api.Assertions.*
@@ -147,6 +148,8 @@ class PersonenErFlyktningRSTest {
             test()
             this.returnValue
         }
+
+        println(flyktningUtfall.debug(includeLeafFaktum = true))
 
         assertEquals(OPPFYLT, flyktningUtfall.value)
         assertTrue(flyktningUtfall.children[0].fired())

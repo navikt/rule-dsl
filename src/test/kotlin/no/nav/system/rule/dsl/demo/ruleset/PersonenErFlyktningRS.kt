@@ -1,16 +1,17 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
-import no.nav.system.rule.dsl.*
+import no.nav.system.rule.dsl.AbstractRuleset
+import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum.*
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.helper.måneder
 import no.nav.system.rule.dsl.demo.helper.år
-import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
-import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
 
@@ -36,19 +37,43 @@ class PersonenErFlyktningRS(
     )
     private val harUTfør2021 = Faktum(
         "Uføretrygd før 2021",
-        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1) }
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any {
+            it.kravlinjeType == UT && it.virkningsdato < localDate(
+                2021,
+                1,
+                1
+            )
+        }
     )
     private val harGJPfør2021 = Faktum(
         "Gjenlevendepensjon før 2021",
-        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT && it.virkningsdato < localDate(2021, 1, 1) }
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any {
+            it.kravlinjeType == UT && it.virkningsdato < localDate(
+                2021,
+                1,
+                1
+            )
+        }
     )
     private val harUTGJRfør2021 = Faktum(
         "Gjenlevendetillegg før 2021",
-        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(2021, 1, 1) }
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any {
+            it.kravlinjeType == UT_GJR && it.virkningsdato < localDate(
+                2021,
+                1,
+                1
+            )
+        }
     )
     private val harGJRfør2021 = Faktum(
         "Gjenlevenderett før 2021",
-        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == GJR && it.virkningsdato < localDate(2021, 1, 1) }
+        innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any {
+            it.kravlinjeType == GJR && it.virkningsdato < localDate(
+                2021,
+                1,
+                1
+            )
+        }
     )
     private lateinit var trygdetid: Trygdetid
 
