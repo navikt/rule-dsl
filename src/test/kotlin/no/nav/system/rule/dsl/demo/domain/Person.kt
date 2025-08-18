@@ -15,7 +15,21 @@ data class Person(
     var trygdetidK20: Trygdetid = Trygdetid(4),
     var inngangOgEksportgrunnlag: InngangOgEksportgrunnlag? = null,
     var forsteVirkningsdatoGrunnlagListe: MutableList<ForsteVirkningsdatoGrunnlag> = mutableListOf()
-)
+) {
+    override fun toString(): String = """
+        Person(
+            id=$id, 
+            rolle='$rolle', 
+            fødselsdato=${fødselsdato.value}, 
+            erGift=$erGift, 
+            boperioder=$boperioder, 
+            flyktning=${flyktning.value}, 
+            trygdetidK19=$trygdetidK19, 
+            trygdetidK20=$trygdetidK20, 
+            inngangOgEksportgrunnlag=$inngangOgEksportgrunnlag, 
+            forsteVirkningsdatoGrunnlagListe=$forsteVirkningsdatoGrunnlagListe
+        )""".trimIndent()
+}
 
 fun Faktum<Person>.boperioderLand(land: LandEnum) =
     this.value.boperioder.filter { it.land == land }.map { Faktum("boperiode $land", it)}
