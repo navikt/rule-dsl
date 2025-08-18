@@ -253,6 +253,7 @@ class BeregnAlderspensjonService2(
         Faktum("person", request.person).let { person ->
 
             val virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt)
+
             val personErFlyktning = personErFlyktning(
                 person,
                 Faktum("Ytelsestype", YtelseEnum.AP),
@@ -262,16 +263,18 @@ class BeregnAlderspensjonService2(
             )
             val trygdetid = utledTrygdetidNorge(person, virkningstidspunkt, personErFlyktning)
 
+            val grunnpensjon = beregnGrunnpensjon(
+                Faktum("grunnbeløp",grunnbeløpByDate(virkningstidspunkt.value)),
+                Faktum("trygdetid",trygdetid.verdi().år),
+                Faktum("er gift", person.verdi().erGift).hvis(
+                    ja = Faktum("sats", 0.90),
+                    nei = Faktum("sats", 1.00)
+                )
+            )
+
             Response(
                 anvendtTrygdetid = trygdetid.verdi(),
-                grunnpensjon = beregnGrunnpensjon(
-                    Faktum("grunnbeløp",grunnbeløpByDate(virkningstidspunkt.value)),
-                    Faktum("trygdetid",trygdetid.verdi().år),
-                    Faktum("er gift", person.verdi().erGift).hvis(
-                        ja = Faktum("sats", 0.90),
-                        nei = Faktum("sats", 1.00)
-                    )
-                ).verdi()
+                grunnpensjon = grunnpensjon.verdi()
             )
         }
     }
