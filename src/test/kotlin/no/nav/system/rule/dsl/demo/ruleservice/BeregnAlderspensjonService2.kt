@@ -7,7 +7,6 @@ import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
-import no.nav.system.rule.dsl.demo.ruleflow.BeregnAlderspensjonFlyt
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -213,7 +212,7 @@ fun utledTrygdetidNorge(
     val firefemtedelkrav = Faktum("firefemtedel krav", 480L)
     val dato1991 = Faktum(localDate(1991, 1, 1))
 
-    Faktum("trygdetid", Trygdetid(
+    Trygdetid(
         faktiskTrygdetidIMåneder = sumBotid,
         redusertFremtidigTrygdetid = og(
             virkningstidspunkt.erStørreEllerLik(dato1991),
@@ -226,8 +225,24 @@ fun utledTrygdetidNorge(
             ja = 40,
             nei = { (sumBotid.verdi() / 12.0).roundToInt() }
         )
-    ))
+    ).let { trygdetid -> Faktum("trygdetid", trygdetid) }
 }
+
+fun beregnGrunnpensjon(
+    grunnbeløp: Faktum<Int>,
+    trygdetid: Faktum<Int>,
+    sats: Faktum<Double>,
+): Faktum<Grunnpensjon> = Grunnpensjon(
+    grunnbeløp = grunnbeløp.verdi(),
+    prosentsats = sats.verdi(),
+    netto = trygdetid.erLik(40).hvis(
+        ja = { (grunnbeløp.verdi() * sats.verdi()).roundToInt() },
+        nei = {
+            val maksTrygdetid = 40.0
+            (grunnbeløp.verdi() * sats.verdi() * trygdetid.verdi() / maksTrygdetid).roundToInt()
+        }
+    )
+).let { grunnpensjon -> Faktum("grunnpensjon", grunnpensjon) }
 
 
 class BeregnAlderspensjonService2(
@@ -235,19 +250,30 @@ class BeregnAlderspensjonService2(
 ) : AbstractDemoRuleService<Response>() {
     override val ruleService: () -> Response = {
 
-        val output =
-            BeregnAlderspensjonFlyt(
-                request.person,
-                Faktum("virkningstidspunkt", request.virkningstidspunkt)
-            ).run(this)
+        Faktum("person", request.person).let { person ->
 
+            val virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt)
+            val personErFlyktning = personErFlyktning(
+                person,
+                Faktum("Ytelsestype", YtelseEnum.AP),
+                Faktum("Kapittel 20", false),
+                virkningstidspunkt,
+                Faktum("Søknadstidspunkt fom 2021", true)
+            )
+            val trygdetid = utledTrygdetidNorge(person, virkningstidspunkt, personErFlyktning)
 
-
-
-        Response(
-            anvendtTrygdetid = output.anvendtTrygdetid,
-            grunnpensjon = output.grunnpensjon
-        )
+            Response(
+                anvendtTrygdetid = trygdetid.verdi(),
+                grunnpensjon = beregnGrunnpensjon(
+                    Faktum("grunnbeløp",grunnbeløpByDate(virkningstidspunkt.value)),
+                    Faktum("trygdetid",trygdetid.verdi().år),
+                    Faktum("er gift", person.verdi().erGift).hvis(
+                        ja = Faktum("sats", 0.90),
+                        nei = Faktum("sats", 1.00)
+                    )
+                ).verdi()
+            )
+        }
     }
 }
 
