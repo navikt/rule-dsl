@@ -1,16 +1,17 @@
 package no.nav.system.rule.dsl.demo.ruleservice
 
-import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
-import no.nav.system.rule.dsl.demo.domain.Person
-import no.nav.system.rule.dsl.demo.domain.Request
-import no.nav.system.rule.dsl.demo.domain.Response
+import no.nav.system.rule.dsl.demo.domain.*
+import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
+import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.ruleflow.BeregnAlderspensjonFlyt
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import kotlin.math.roundToInt
 
 fun <T : Any> Faktum<Boolean>.hvis(ja: () -> T, nei: () -> T) = if (this.value) ja() else nei()
 fun <T : Any> Faktum<Boolean>.hvis(ja: T, nei: () -> T) = if (this.value) ja else nei()
@@ -57,6 +58,12 @@ fun <T> Faktum<T>.erStørreEllerLik(other: Faktum<T>)
     Faktum("er større eller lik", true)
 else
     Faktum("er ikke større eller lik", false)
+
+fun <T> Faktum<T>.erMindre(other: Faktum<T>)
+        where T : Any, T : Comparable<T> = if (this.value < other.value)
+    Faktum("er mindre", true)
+else
+    Faktum("er ikke mindre", false)
 
 fun Faktum<Boolean>.erUsant() = !this.value
 
@@ -183,6 +190,46 @@ fun personErFlyktning(
         }
     )
 
+fun sumBotidNorgeMåneder(
+    person: Faktum<Person>,
+): Faktum<Long> = Faktum(
+    "dato16år",
+    person.value.fødselsdato.value.plusYears(16)
+).let { dato16år ->
+    person.boperioderLand(LandEnum.NOR).sumOf { boperiode ->
+        Faktum("", boperiode.verdi().fom).erMindre(dato16år).hvis(
+            ja = { ChronoUnit.MONTHS.between(dato16år.verdi(), boperiode.verdi().tom) },
+            nei = { ChronoUnit.MONTHS.between(boperiode.verdi().fom, boperiode.verdi().tom) }
+        )
+    }.let { sum -> Faktum("sum botid måneder", sum) }
+}
+
+fun utledTrygdetidNorge(
+    person: Faktum<Person>,
+    virkningstidspunkt: Faktum<LocalDate>,
+    flyktningUtfall: Faktum<UtfallType>,
+): Faktum<Trygdetid> = sumBotidNorgeMåneder(person).let { sumBotid ->
+
+    val firefemtedelkrav = Faktum("firefemtedel krav", 480L)
+    val dato1991 = Faktum(localDate(1991, 1, 1))
+
+    Faktum("trygdetid", Trygdetid(
+        faktiskTrygdetidIMåneder = sumBotid,
+        redusertFremtidigTrygdetid = og(
+            virkningstidspunkt.erStørreEllerLik(dato1991),
+            sumBotid.erMindre(firefemtedelkrav)
+        ).hvis(
+            ja = Faktum("redusert fremtidig trygdetid", UtfallType.OPPFYLT),
+            nei = Faktum("ikke redusert fremtidig trygdetid", UtfallType.IKKE_OPPFYLT)
+        ),
+        år = flyktningUtfall.erLik(UtfallType.OPPFYLT).hvis(
+            ja = 40,
+            nei = { (sumBotid.verdi() / 12.0).roundToInt() }
+        )
+    ))
+}
+
+
 class BeregnAlderspensjonService2(
     private val request: Request,
 ) : AbstractDemoRuleService<Response>() {
@@ -193,6 +240,8 @@ class BeregnAlderspensjonService2(
                 request.person,
                 Faktum("virkningstidspunkt", request.virkningstidspunkt)
             ).run(this)
+
+
 
 
         Response(

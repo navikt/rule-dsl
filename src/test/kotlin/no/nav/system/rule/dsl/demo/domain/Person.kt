@@ -1,5 +1,6 @@
 package no.nav.system.rule.dsl.demo.domain
 
+import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import java.time.LocalDate
 
@@ -15,3 +16,6 @@ data class Person(
     var inngangOgEksportgrunnlag: InngangOgEksportgrunnlag? = null,
     var forsteVirkningsdatoGrunnlagListe: MutableList<ForsteVirkningsdatoGrunnlag> = mutableListOf()
 )
+
+fun Faktum<Person>.boperioderLand(land: LandEnum) =
+    this.value.boperioder.filter { it.land == land }.map { Faktum("boperiode $land", it)}
