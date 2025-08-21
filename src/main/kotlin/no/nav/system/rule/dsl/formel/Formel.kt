@@ -5,6 +5,54 @@ import no.nav.system.rule.dsl.rettsregel.Faktum
 import redempt.crunch.Crunch.compileExpression
 import java.io.Serializable
 
+/**
+ * Represents a mathematical formula with traceable computation and human-readable notation.
+ * 
+ * Formel provides:
+ * - **Immutable mathematical expressions** that preserve both human-readable notation and computational content
+ * - **Type safety** for Int and Double operations
+ * - **Variable tracking** to prevent naming conflicts
+ * - **Locking mechanism** for performance and encapsulation
+ * 
+ * ## Locking Behavior
+ * 
+ * Formulas can be either **locked** or **unlocked**:
+ * 
+ * ### Unlocked Formulas (default for simple operations)
+ * - Variables are expanded into parent formulas
+ * - Full mathematical expression is visible in notation
+ * - More detailed tracing but potentially verbose
+ * 
+ * ### Locked Formulas (default for builder-created formulas)
+ * - Treated as atomic units in parent formulas  
+ * - Referenced by name only, not expanded
+ * - Stored as sub-formulas for hierarchical structure
+ * - Better performance and cleaner notation for complex expressions
+ * 
+ * ## Examples
+ * ```kotlin
+ * // Simple variables (unlocked)
+ * val grunnbeløp = Formel.variable("G", 118620)
+ * val sats = Formel.variable("sats", 0.45)
+ * 
+ * // Simple expression (unlocked)
+ * val beregning = grunnbeløp * sats  // Shows: "G * sats" in notation
+ * 
+ * // Complex locked formula
+ * val kompleksBeløp = FormelBuilder.create<Int>()
+ *     .name("bruttoAlderspensjon")
+ *     .prefix("AP")
+ *     .expression(someVeryComplexCalculation)
+ *     .locked()  // This is the default
+ *     .build()
+ * 
+ * // When used in another formula:
+ * val total = kompleksBeløp + tillegg  // Shows: "AP_bruttoAlderspensjon + tillegg"
+ *                                        // (not the full complex calculation)
+ * ```
+ * 
+ * @param T The numeric type (Int or Double)
+ */
 class Formel<T : Number> internal constructor(
     val emne: String,
     val prefix: String,
@@ -13,6 +61,10 @@ class Formel<T : Number> internal constructor(
     val innhold: String,
     val subFormelList: Set<Formel<out Number>>,
     val namedVarMap: Map<String, Number>,
+    /**
+     * When true, this formula is treated as an atomic unit in parent formulas.
+     * See class documentation for detailed explanation.
+     */
     val locked: Boolean,
     internal val shouldBeDouble: Boolean
 ) : Faktum<T>(), Serializable {
@@ -34,7 +86,9 @@ class Formel<T : Number> internal constructor(
 
     /**
      * Named Variable constructor
+     * @deprecated Use Formel.variable(name, value) instead
      */
+    @Deprecated("Use Formel.variable(name, value) instead", ReplaceWith("Formel.variable(emne, num)"))
     constructor(emne: String, num: T) : this(
         emne = emne,
         prefix = "",
@@ -48,8 +102,10 @@ class Formel<T : Number> internal constructor(
     )
 
     /**
-     * Anonymous Variable constructor
+     * Anonymous Variable constructor  
+     * @deprecated Use Formel.constant(value) instead
      */
+    @Deprecated("Use Formel.constant(value) instead", ReplaceWith("Formel.constant(num)"))
     constructor(num: T) : this(
         emne = num.toString(),
         prefix = "",
@@ -225,7 +281,43 @@ class Formel<T : Number> internal constructor(
     
     companion object {
         /**
-         * Type-safe factory method for creating Formel instances
+         * Creates a named variable formula.
+         * Example: Formel.variable("grunnbeløp", 118620)
+         */
+        fun <T : Number> variable(name: String, value: T): Formel<T> {
+            return Formel(
+                emne = name,
+                prefix = "",
+                postfix = "",
+                notasjon = name,
+                innhold = value.toString(),
+                subFormelList = emptySet(),
+                namedVarMap = mapOf(name to value),
+                locked = false,
+                shouldBeDouble = value is Double
+            )
+        }
+        
+        /**
+         * Creates a constant value formula.
+         * Example: Formel.constant(42)
+         */
+        fun <T : Number> constant(value: T): Formel<T> {
+            return Formel(
+                emne = value.toString(),
+                prefix = "",
+                postfix = "",
+                notasjon = value.toString(),
+                innhold = value.toString(),
+                subFormelList = emptySet(),
+                namedVarMap = emptyMap(),
+                locked = false,
+                shouldBeDouble = value is Double
+            )
+        }
+        
+        /**
+         * Type-safe factory method for creating Formel instances (internal use)
          */
         internal fun <K : Number> createTypedFormel(
             emne: String,
@@ -297,7 +389,7 @@ class Formel<T : Number> internal constructor(
         } else expr
     }
 
-    fun toBuilder(): Builder<T> = Builder<T>().formel(this).emne(this.emne)
+    fun toBuilder(): FormelBuilder<T> = FormelBuilder.create<T>().expression(this).name(this.emne)
     
     /**
      * Creates a copy of this formula with a new emne (name)

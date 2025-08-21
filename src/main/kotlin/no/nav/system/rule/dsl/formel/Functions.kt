@@ -1,6 +1,5 @@
 package no.nav.system.rule.dsl.formel
 
-import no.nav.system.rule.dsl.formel.Formel
 
 // avrund explicitly returns Int
 fun avrund(formel: Formel<Double>): Formel<Int> =
@@ -35,11 +34,11 @@ fun kMax(formelA: Formel<Double>, formelB: Formel<Double>): Formel<Double> =
 
 // Both operands are Int, result should be Int
 fun kMax(maks: Int, formel: Formel<Int>): Formel<Int> =
-    applySyntax2arg(Formel(maks), formel, false, maxFunction)
+    applySyntax2arg(Formel.constant(maks), formel, false, maxFunction)
 
 // At least one operand is Double, result should be Double
 fun kMax(maks: Double, formel: Formel<Double>): Formel<Double> =
-    applySyntax2arg(Formel(maks), formel, true, maxFunction)
+    applySyntax2arg(Formel.constant(maks), formel, true, maxFunction)
 
 /**
  * MIN
@@ -58,11 +57,11 @@ fun kMin(formelA: Formel<Double>, formelB: Formel<Double>): Formel<Double> =
 
 // Both operands are Int, result should be Int
 fun kMin(maks: Int, formel: Formel<Int>): Formel<Int> =
-    applySyntax2arg(Formel(maks), formel, false, minFunction)
+    applySyntax2arg(Formel.constant(maks), formel, false, minFunction)
 
 // At least one operand is Double, result should be Double
 fun kMin(maks: Double, formel: Formel<Double>): Formel<Double> =
-    applySyntax2arg(Formel(maks), formel, true, minFunction)
+    applySyntax2arg(Formel.constant(maks), formel, true, minFunction)
 
 private fun <T : Number> applySyntax1arg(formel: Formel<*>, shouldBeDouble: Boolean, syntax: (String) -> String): Formel<T> {
     return Formel<T>(
