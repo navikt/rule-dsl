@@ -1,14 +1,13 @@
 package no.nav.system.rule.dsl.demo.formel
 
-import no.nav.system.rule.dsl.formel.Builder.Companion.kmath
 import no.nav.system.rule.dsl.formel.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class OperatorTest {
 
-    val intFormel: Formel<Int> = Formel("int", 11)
-    val dblFormel: Formel<Double> = Formel("dbl", 22.2)
+    private val intFormel: Formel<Int> = Formel.variable("int", 11)
+    private val dblFormel: Formel<Double> = Formel.variable("dbl", 22.2)
 
     @Test
     fun plusOperators() {
@@ -27,20 +26,20 @@ class OperatorTest {
         val dblFormelPlusIntFormel: Formel<Double> = dblFormel + intFormel
         val dblFormelPlusDblFormel: Formel<Double> = dblFormel + dblFormel
 
-        val kintPlusIntFormel = kmath<Int>().formel(1 + intFormel).build()
-        val kintFormelPlusInt = kmath<Int>().formel(intFormel + 1).build()
-        val kdblPlusDblFormel = kmath<Double>().formel(2.2 + dblFormel).build()
-        val kdblFormelPlusDbl = kmath<Double>().formel(dblFormel + 2.2).build()
+        val dslIntPlusIntFormel = formula<Int> { expression(1 + intFormel) }
+        val dslIntFormelPlusInt = formula<Int> { expression(intFormel + 1) }
+        val dslDblPlusDblFormel = formula<Double> { expression(2.2 + dblFormel) }
+        val dslDblFormelPlusDbl = formula<Double> { expression(dblFormel + 2.2) }
 
-        val kintPlusDblFormel = kmath<Double>().formel(1 + dblFormel).build()
-        val kdblFormelPlusInt = kmath<Double>().formel(dblFormel + 1).build()
-        val kdblPlusIntFormel = kmath<Double>().formel(2.2 + intFormel).build()
-        val kintFormelPlusDbl = kmath<Double>().formel(intFormel + 2.2).build()
+        val dslIntPlusDblFormel = formula<Double> { expression(1 + dblFormel) }
+        val dslDblFormelPlusInt = formula<Double> { expression(dblFormel + 1) }
+        val dslDblPlusIntFormel = formula<Double> { expression(2.2 + intFormel) }
+        val dslIntFormelPlusDbl = formula<Double> { expression(intFormel + 2.2) }
 
-        val kintFormelPlusIntFormel = kmath<Int>().formel(intFormel + intFormel).build()
-        val kintFormelPlusDblFormel = kmath<Double>().formel(intFormel + dblFormel).build()
-        val kdblFormelPlusIntFormel = kmath<Double>().formel(dblFormel + intFormel).build()
-        val kdblFormelPlusDblFormel = kmath<Double>().formel(dblFormel + dblFormel).build()
+        val dslIntFormelPlusIntFormel = formula<Int> { expression(intFormel + intFormel) }
+        val dslIntFormelPlusDblFormel = formula<Double> { expression(intFormel + dblFormel) }
+        val dslDblFormelPlusIntFormel = formula<Double> { expression(dblFormel + intFormel) }
+        val dslDblFormelPlusDblFormel = formula<Double> { expression(dblFormel + dblFormel) }
 
         assertEquals(12, intPlusIntFormel.resultat())
         assertEquals(12, intFormelPlusInt.resultat())
@@ -57,20 +56,20 @@ class OperatorTest {
         assertEquals(33.2, dblFormelPlusIntFormel.resultat())
         assertEquals(44.4, dblFormelPlusDblFormel.resultat())
 
-        assertEquals(12, kintPlusIntFormel.resultat())
-        assertEquals(12, kintFormelPlusInt.resultat())
-        assertEquals(24.4, kdblPlusDblFormel.resultat())
-        assertEquals(24.4, kdblFormelPlusDbl.resultat())
+        assertEquals(12, dslIntPlusIntFormel.resultat())
+        assertEquals(12, dslIntFormelPlusInt.resultat())
+        assertEquals(24.4, dslDblPlusDblFormel.resultat())
+        assertEquals(24.4, dslDblFormelPlusDbl.resultat())
 
-        assertEquals(23.2, kintPlusDblFormel.resultat())
-        assertEquals(23.2, kdblFormelPlusInt.resultat())
-        assertEquals(13.2, kdblPlusIntFormel.resultat())
-        assertEquals(13.2, kintFormelPlusDbl.resultat())
+        assertEquals(23.2, dslIntPlusDblFormel.resultat())
+        assertEquals(23.2, dslDblFormelPlusInt.resultat())
+        assertEquals(13.2, dslDblPlusIntFormel.resultat())
+        assertEquals(13.2, dslIntFormelPlusDbl.resultat())
 
-        assertEquals(22, kintFormelPlusIntFormel.resultat())
-        assertEquals(33.2, kintFormelPlusDblFormel.resultat())
-        assertEquals(33.2, kdblFormelPlusIntFormel.resultat())
-        assertEquals(44.4, kdblFormelPlusDblFormel.resultat())
+        assertEquals(22, dslIntFormelPlusIntFormel.resultat())
+        assertEquals(33.2, dslIntFormelPlusDblFormel.resultat())
+        assertEquals(33.2, dslDblFormelPlusIntFormel.resultat())
+        assertEquals(44.4, dslDblFormelPlusDblFormel.resultat())
     }
 
     @Test
@@ -90,20 +89,20 @@ class OperatorTest {
         val dblFormelMinusIntFormel: Formel<Double> = dblFormel - intFormel
         val dblFormelMinusDblFormel: Formel<Double> = dblFormel - dblFormel
 
-        val kintMinusIntFormel = kmath<Int>().formel(1 - intFormel).build()
-        val kintFormelMinusInt = kmath<Int>().formel(intFormel - 1).build()
-        val kdblMinusDblFormel = kmath<Double>().formel(2.2 - dblFormel).build()
-        val kdblFormelMinusDbl = kmath<Double>().formel(dblFormel - 2.2).build()
+        val dslIntMinusIntFormel = formula<Int> { expression(1 - intFormel) }
+        val dslIntFormelMinusInt = formula<Int> { expression(intFormel - 1) }
+        val dslDblMinusDblFormel = formula<Double> { expression(2.2 - dblFormel) }
+        val dslDblFormelMinusDbl = formula<Double> { expression(dblFormel - 2.2) }
 
-        val kintMinusDblFormel = kmath<Double>().formel(1 - dblFormel).build()
-        val kdblFormelMinusInt = kmath<Double>().formel(dblFormel - 1).build()
-        val kdblMinusIntFormel = kmath<Double>().formel(2.2 - intFormel).build()
-        val kintFormelMinusDbl = kmath<Double>().formel(intFormel - 2.2).build()
+        val dslIntMinusDblFormel = formula<Double> { expression(1 - dblFormel) }
+        val dslDblFormelMinusInt = formula<Double> { expression(dblFormel - 1) }
+        val dslDblMinusIntFormel = formula<Double> { expression(2.2 - intFormel) }
+        val dslIntFormelMinusDbl = formula<Double> { expression(intFormel - 2.2) }
 
-        val kintFormelMinusIntFormel = kmath<Int>().formel(intFormel - intFormel).build()
-        val kintFormelMinusDblFormel = kmath<Double>().formel(intFormel - dblFormel).build()
-        val kdblFormelMinusIntFormel = kmath<Double>().formel(dblFormel - intFormel).build()
-        val kdblFormelMinusDblFormel = kmath<Double>().formel(dblFormel - dblFormel).build()
+        val dslIntFormelMinusIntFormel = formula<Int> { expression(intFormel - intFormel) }
+        val dslIntFormelMinusDblFormel = formula<Double> { expression(intFormel - dblFormel) }
+        val dslDblFormelMinusIntFormel = formula<Double> { expression(dblFormel - intFormel) }
+        val dslDblFormelMinusDblFormel = formula<Double> { expression(dblFormel - dblFormel) }
 
         // Asserts
         assertEquals(-10, intMinusIntFormel.resultat())
@@ -121,20 +120,20 @@ class OperatorTest {
         assertEquals(11.2, dblFormelMinusIntFormel.resultat())
         assertEquals(0.0, dblFormelMinusDblFormel.resultat())
 
-        assertEquals(-10, kintMinusIntFormel.resultat())
-        assertEquals(10, kintFormelMinusInt.resultat())
-        assertEquals(-20.0, kdblMinusDblFormel.resultat())
-        assertEquals(20.0, kdblFormelMinusDbl.resultat())
+        assertEquals(-10, dslIntMinusIntFormel.resultat())
+        assertEquals(10, dslIntFormelMinusInt.resultat())
+        assertEquals(-20.0, dslDblMinusDblFormel.resultat())
+        assertEquals(20.0, dslDblFormelMinusDbl.resultat())
 
-        assertEquals(-21.2, kintMinusDblFormel.resultat())
-        assertEquals(21.2, kdblFormelMinusInt.resultat())
-        assertEquals(-8.8, kdblMinusIntFormel.resultat())
-        assertEquals(8.8, kintFormelMinusDbl.resultat())
+        assertEquals(-21.2, dslIntMinusDblFormel.resultat())
+        assertEquals(21.2, dslDblFormelMinusInt.resultat())
+        assertEquals(-8.8, dslDblMinusIntFormel.resultat())
+        assertEquals(8.8, dslIntFormelMinusDbl.resultat())
 
-        assertEquals(0, kintFormelMinusIntFormel.resultat())
-        assertEquals(-11.2, kintFormelMinusDblFormel.resultat())
-        assertEquals(11.2, kdblFormelMinusIntFormel.resultat())
-        assertEquals(0.0, kdblFormelMinusDblFormel.resultat())
+        assertEquals(0, dslIntFormelMinusIntFormel.resultat())
+        assertEquals(-11.2, dslIntFormelMinusDblFormel.resultat())
+        assertEquals(11.2, dslDblFormelMinusIntFormel.resultat())
+        assertEquals(0.0, dslDblFormelMinusDblFormel.resultat())
     }
 
     @Test
@@ -154,20 +153,20 @@ class OperatorTest {
         val dblFormelTimesIntFormel: Formel<Double> = dblFormel * intFormel
         val dblFormelTimesDblFormel: Formel<Double> = dblFormel * dblFormel
 
-        val kintTimesIntFormel = kmath<Int>().formel(2 * intFormel).build()
-        val kintFormelTimesInt = kmath<Int>().formel(intFormel * 2).build()
-        val kdblTimesDblFormel = kmath<Double>().formel(2.2 * dblFormel).build()
-        val kdblFormelTimesDbl = kmath<Double>().formel(dblFormel * 2.2).build()
+        val dslIntTimesIntFormel = formula<Int> { expression(2 * intFormel) }
+        val dslIntFormelTimesInt = formula<Int> { expression(intFormel * 2) }
+        val dslDblTimesDblFormel = formula<Double> { expression(2.2 * dblFormel) }
+        val dslDblFormelTimesDbl = formula<Double> { expression(dblFormel * 2.2) }
 
-        val kintTimesDblFormel = kmath<Double>().formel(2 * dblFormel).build()
-        val kdblFormelTimesInt = kmath<Double>().formel(dblFormel * 2).build()
-        val kdblTimesIntFormel = kmath<Double>().formel(2.2 * intFormel).build()
-        val kintFormelTimesDbl = kmath<Double>().formel(intFormel * 2.2).build()
+        val dslIntTimesDblFormel = formula<Double> { expression(2 * dblFormel) }
+        val dslDblFormelTimesInt = formula<Double> { expression(dblFormel * 2) }
+        val dslDblTimesIntFormel = formula<Double> { expression(2.2 * intFormel) }
+        val dslIntFormelTimesDbl = formula<Double> { expression(intFormel * 2.2) }
 
-        val kintFormelTimesIntFormel = kmath<Int>().formel(intFormel * intFormel).build()
-        val kintFormelTimesDblFormel = kmath<Double>().formel(intFormel * dblFormel).build()
-        val kdblFormelTimesIntFormel = kmath<Double>().formel(dblFormel * intFormel).build()
-        val kdblFormelTimesDblFormel = kmath<Double>().formel(dblFormel * dblFormel).build()
+        val dslIntFormelTimesIntFormel = formula<Int> { expression(intFormel * intFormel) }
+        val dslIntFormelTimesDblFormel = formula<Double> { expression(intFormel * dblFormel) }
+        val dslDblFormelTimesIntFormel = formula<Double> { expression(dblFormel * intFormel) }
+        val dslDblFormelTimesDblFormel = formula<Double> { expression(dblFormel * dblFormel) }
 
         // Asserts
         assertEquals(22, intTimesIntFormel.resultat())
@@ -185,20 +184,20 @@ class OperatorTest {
         assertEquals(244.2, dblFormelTimesIntFormel.resultat())
         assertEquals(492.84, dblFormelTimesDblFormel.resultat())
 
-        assertEquals(22, kintTimesIntFormel.resultat())
-        assertEquals(22, kintFormelTimesInt.resultat())
-        assertEquals(48.84, kdblTimesDblFormel.resultat())
-        assertEquals(48.84, kdblFormelTimesDbl.resultat())
+        assertEquals(22, dslIntTimesIntFormel.resultat())
+        assertEquals(22, dslIntFormelTimesInt.resultat())
+        assertEquals(48.84, dslDblTimesDblFormel.resultat())
+        assertEquals(48.84, dslDblFormelTimesDbl.resultat())
 
-        assertEquals(44.4, kintTimesDblFormel.resultat())
-        assertEquals(44.4, kdblFormelTimesInt.resultat())
-        assertEquals(24.20, kdblTimesIntFormel.resultat(), 0.0001)
-        assertEquals(24.20, kintFormelTimesDbl.resultat(), 0.0001)
+        assertEquals(44.4, dslIntTimesDblFormel.resultat())
+        assertEquals(44.4, dslDblFormelTimesInt.resultat())
+        assertEquals(24.20, dslDblTimesIntFormel.resultat(), 0.0001)
+        assertEquals(24.20, dslIntFormelTimesDbl.resultat(), 0.0001)
 
-        assertEquals(121, kintFormelTimesIntFormel.resultat())
-        assertEquals(244.2, kintFormelTimesDblFormel.resultat())
-        assertEquals(244.2, kdblFormelTimesIntFormel.resultat())
-        assertEquals(492.84, kdblFormelTimesDblFormel.resultat())
+        assertEquals(121, dslIntFormelTimesIntFormel.resultat())
+        assertEquals(244.2, dslIntFormelTimesDblFormel.resultat())
+        assertEquals(244.2, dslDblFormelTimesIntFormel.resultat())
+        assertEquals(492.84, dslDblFormelTimesDblFormel.resultat())
     }
 
     @Test
@@ -218,20 +217,20 @@ class OperatorTest {
         val dblFormelDividedByIntFormel: Formel<Double> = dblFormel / intFormel
         val dblFormelDividedByDblFormel: Formel<Double> = dblFormel / dblFormel
 
-        val kintDividedByIntFormel = kmath<Double>().formel(20 / intFormel).build()
-        val kintFormelDividedByInt = kmath<Double>().formel(intFormel / 2).build()
-        val kdblDividedByDblFormel = kmath<Double>().formel(48.4 / dblFormel).build()
-        val kdblFormelDividedByDbl = kmath<Double>().formel(dblFormel / 2.2).build()
+        val dslIntDividedByIntFormel = formula<Double> { expression(20 / intFormel) }
+        val dslIntFormelDividedByInt = formula<Double> { expression(intFormel / 2) }
+        val dslDblDividedByDblFormel = formula<Double> { expression(48.4 / dblFormel) }
+        val dslDblFormelDividedByDbl = formula<Double> { expression(dblFormel / 2.2) }
 
-        val kintDividedByDblFormel = kmath<Double>().formel(22 / dblFormel).build()
-        val kdblFormelDividedByInt = kmath<Double>().formel(dblFormel / 2).build()
-        val kdblDividedByIntFormel = kmath<Double>().formel(44.0 / intFormel).build()
-        val kintFormelDividedByDbl = kmath<Double>().formel(intFormel / 2.2).build()
+        val dslIntDividedByDblFormel = formula<Double> { expression(22 / dblFormel) }
+        val dslDblFormelDividedByInt = formula<Double> { expression(dblFormel / 2) }
+        val dslDblDividedByIntFormel = formula<Double> { expression(44.0 / intFormel) }
+        val dslIntFormelDividedByDbl = formula<Double> { expression(intFormel / 2.2) }
 
-        val kintFormelDividedByIntFormel = kmath<Double>().formel(intFormel / intFormel).build()
-        val kintFormelDividedByDblFormel = kmath<Double>().formel(intFormel / dblFormel).build()
-        val kdblFormelDividedByIntFormel = kmath<Double>().formel(dblFormel / intFormel).build()
-        val kdblFormelDividedByDblFormel = kmath<Double>().formel(dblFormel / dblFormel).build()
+        val dslIntFormelDividedByIntFormel = formula<Double> { expression(intFormel / intFormel) }
+        val dslIntFormelDividedByDblFormel = formula<Double> { expression(intFormel / dblFormel) }
+        val dslDblFormelDividedByIntFormel = formula<Double> { expression(dblFormel / intFormel) }
+        val dslDblFormelDividedByDblFormel = formula<Double> { expression(dblFormel / dblFormel) }
 
         // Asserts
         assertEquals(1.8181, intDividedByIntFormel.resultat(), 0.0001)
@@ -249,20 +248,20 @@ class OperatorTest {
         assertEquals(2.0181, dblFormelDividedByIntFormel.resultat(), 0.0001)
         assertEquals(1.0, dblFormelDividedByDblFormel.resultat())
 
-        assertEquals(1.8181, kintDividedByIntFormel.resultat(), 0.0001)
-        assertEquals(5.5, kintFormelDividedByInt.resultat())
-        assertEquals(2.1801, kdblDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(10.0909, kdblFormelDividedByDbl.resultat(), 0.0001)
+        assertEquals(1.8181, dslIntDividedByIntFormel.resultat(), 0.0001)
+        assertEquals(5.5, dslIntFormelDividedByInt.resultat())
+        assertEquals(2.1801, dslDblDividedByDblFormel.resultat(), 0.0001)
+        assertEquals(10.0909, dslDblFormelDividedByDbl.resultat(), 0.0001)
 
-        assertEquals(0.9909, kintDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(11.1, kdblFormelDividedByInt.resultat())
-        assertEquals(4.0, kdblDividedByIntFormel.resultat())
-        assertEquals(5.0, kintFormelDividedByDbl.resultat())
+        assertEquals(0.9909, dslIntDividedByDblFormel.resultat(), 0.0001)
+        assertEquals(11.1, dslDblFormelDividedByInt.resultat())
+        assertEquals(4.0, dslDblDividedByIntFormel.resultat())
+        assertEquals(5.0, dslIntFormelDividedByDbl.resultat())
 
-        assertEquals(1.0, kintFormelDividedByIntFormel.resultat())
-        assertEquals(0.4954, kintFormelDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(2.0181, kdblFormelDividedByIntFormel.resultat(), 0.0001)
-        assertEquals(1.0, kdblFormelDividedByDblFormel.resultat())
+        assertEquals(1.0, dslIntFormelDividedByIntFormel.resultat())
+        assertEquals(0.4954, dslIntFormelDividedByDblFormel.resultat(), 0.0001)
+        assertEquals(2.0181, dslDblFormelDividedByIntFormel.resultat(), 0.0001)
+        assertEquals(1.0, dslDblFormelDividedByDblFormel.resultat())
     }
 
 

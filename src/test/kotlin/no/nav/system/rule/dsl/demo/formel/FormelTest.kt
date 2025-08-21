@@ -2,7 +2,7 @@ package no.nav.system.rule.dsl.demo.formel
 
 import no.nav.system.rule.dsl.demo.domain.Tilleggspensjon
 import no.nav.system.rule.dsl.formel.*
-import no.nav.system.rule.dsl.formel.Builder.Companion.kmath
+import no.nav.system.rule.dsl.formel.FormelBuilder.Companion.kmath
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -68,7 +68,7 @@ class FormelTest {
         assertEquals(2000, brutto.resultat())
         assertEquals(2000, netto.resultat())
 
-        netto -= 500
+        netto = brutto - 500
 
         assertEquals(2000, brutto.resultat())
         assertEquals(1500, netto.resultat())
@@ -356,7 +356,7 @@ class FormelTest {
             tpE91.toBuilder().emne("G").build()
         }.also {
             assertEquals(
-                "Illegal circular reference. Formula name G cannot contain named variables of same name.",
+                "Circular reference detected: Formula name 'G' cannot contain variables with the same name.",
                 it.message
             )
         }
@@ -477,7 +477,7 @@ class FormelTest {
                 .build()
         }.also {
             assertEquals(
-                "Illegal circular reference. Formula name a cannot contain named variables of same name.",
+                "Circular reference detected: Formula name 'a' cannot contain variables with the same name.",
                 it.message
             )
         }
@@ -826,7 +826,7 @@ class FormelTest {
             kmath<Float>()
         }.also {
             assertEquals(
-                "Illegal class kotlin.Float. Legal types are Int or Double.",
+                "Unsupported type class kotlin.Float. Only Int and Double are supported.",
                 it.message
             )
         }

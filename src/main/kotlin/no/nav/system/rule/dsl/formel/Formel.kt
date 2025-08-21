@@ -389,7 +389,10 @@ class Formel<T : Number> internal constructor(
         } else expr
     }
 
-    fun toBuilder(): FormelBuilder<T> = FormelBuilder.create<T>().expression(this).name(this.emne)
+    fun toBuilder(): FormelBuilder<T> {
+        @Suppress("UNCHECKED_CAST")
+        return FormelBuilder<T>().expression(this).name(this.emne)
+    }
     
     /**
      * Creates a copy of this formula with a new emne (name)

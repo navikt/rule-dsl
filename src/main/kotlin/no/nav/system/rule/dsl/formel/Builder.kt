@@ -25,7 +25,7 @@ typealias Builder<T> = FormelBuilder<T>
  *     .build()
  * ```
  */
-class FormelBuilder<T : Number> private constructor() {
+class FormelBuilder<T : Number> @PublishedApi internal constructor() {
     companion object {
         /**
          * Creates a new formula builder.
