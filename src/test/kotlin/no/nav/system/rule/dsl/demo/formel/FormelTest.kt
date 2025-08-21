@@ -627,7 +627,7 @@ class FormelTest {
             .formel(a + a)
             .build()
 
-        val sumCopy = Formel(sum)
+        val sumCopy = sum.copy()
         assertEquals(1, sumCopy.subFormelList.size, "Should have one subformula in formula 'sum' after copying")
         assertTrue(sumCopy.namedVarMap.isEmpty(), "Should have no vars in formula 'sum' after copying")
     }

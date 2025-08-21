@@ -5,31 +5,32 @@ import no.nav.system.rule.dsl.rettsregel.Faktum
 import redempt.crunch.Crunch.compileExpression
 import java.io.Serializable
 
-class Formel<T : Number>(
-    var emne: String,
-    var prefix: String,
-    var postfix: String,
-    var notasjon: String,
-    var innhold: String,
+class Formel<T : Number> internal constructor(
+    val emne: String,
+    val prefix: String,
+    val postfix: String,
+    val notasjon: String,
+    val innhold: String,
+    val subFormelList: Set<Formel<out Number>>,
+    val namedVarMap: Map<String, Number>,
+    val locked: Boolean,
+    internal val shouldBeDouble: Boolean
 ) : Faktum<T>(), Serializable {
 
     /**
-     * Private Copy constructor
+     * Copy constructor for creating modified versions
      */
-    constructor(formel: Formel<T>) : this(
+    private constructor(formel: Formel<T>) : this(
         emne = formel.emne,
         prefix = formel.prefix,
         postfix = formel.postfix,
         notasjon = formel.notasjon,
-        innhold = formel.innhold
-    ) {
-        this.locked = formel.locked
-        this.shouldBeDouble = formel.shouldBeDouble
-        formel.subFormelList.forEach {
-            this.subFormelList.add(Formel(it))
-        }
-        this.namedVarMap.putAll(formel.namedVarMap)
-    }
+        innhold = formel.innhold,
+        subFormelList = formel.subFormelList.map { Formel(it) }.toSet(),
+        namedVarMap = formel.namedVarMap.toMap(),
+        locked = formel.locked,
+        shouldBeDouble = formel.shouldBeDouble
+    )
 
     /**
      * Named Variable constructor
@@ -39,12 +40,12 @@ class Formel<T : Number>(
         prefix = "",
         postfix = "",
         notasjon = emne,
-        innhold = num.toString()
-    ) {
-        // Set shouldBeDouble based on the actual type of the number
+        innhold = num.toString(),
+        subFormelList = emptySet(),
+        namedVarMap = mapOf(emne to num),
+        locked = false,
         shouldBeDouble = num is Double
-        namedVarMap[emne] = num
-    }
+    )
 
     /**
      * Anonymous Variable constructor
@@ -54,22 +55,13 @@ class Formel<T : Number>(
         prefix = "",
         postfix = "",
         notasjon = num.toString(),
-        innhold = num.toString()
-    ) {
-        // Set shouldBeDouble based on the actual type of the number
+        innhold = num.toString(),
+        subFormelList = emptySet(),
+        namedVarMap = emptyMap(),
+        locked = false,
         shouldBeDouble = num is Double
-    }
+    )
 
-    val subFormelList: LinkedHashSet<Formel<out Number>> = linkedSetOf()
-
-    val namedVarMap: MutableMap<String, Number> = mutableMapOf()
-
-    /**
-     * Formulas that are locked behave differently when used in composition of a new formula.
-     * The new formula will not expand the locked formulas content into its own content, instead
-     * it will reference the locked formula by name only, and add it as a subformula.
-     */
-    var locked = false
 
     fun navn(): String {
         return listOf(prefix, emne, postfix)
@@ -82,70 +74,106 @@ class Formel<T : Number>(
 
     @Suppress("UNCHECKED_CAST")
     private val lazyResultat: T by lazy {
-        val result = compileExpression(innhold, evalEnv).evaluate()
-        if (shouldBeDouble) {
-            result as T
-        } else {
-            // Convert to Int if this formula should be an integer
-            result.toInt() as T
+        try {
+            // Validate the expression before evaluation
+            validateExpression()
+            
+            val result = compileExpression(innhold, evalEnv).evaluate()
+            
+            // Check for mathematical errors
+            if (result.isNaN() || result.isInfinite()) {
+                throw ArithmeticException("Mathematical operation resulted in $result for expression: $innhold")
+            }
+            
+            if (shouldBeDouble) {
+                result as T
+            } else {
+                // Convert to Int if this formula should be an integer
+                result.toInt() as T
+            }
+        } catch (e: Exception) {
+            throw ArithmeticException("Error evaluating formula '${navn()}': ${e.message}").initCause(e)
+        }
+    }
+    
+    /**
+     * Validates the mathematical expression for common errors
+     */
+    private fun validateExpression() {
+        // Check for division by zero patterns
+        if (innhold.contains("/ 0") || innhold.contains("/0")) {
+            throw ArithmeticException("Division by zero detected in formula '${navn()}': $innhold")
+        }
+        
+        // Check for obvious invalid expressions
+        if (innhold.isBlank()) {
+            throw IllegalStateException("Formula '${navn()}' has empty content")
         }
     }
 
-    /**
-     * The Math framework (redempt.crunch) always evaluates to a double.
-     * For mostly display reasons, we keep track of whether the formula should be displayed as a double or int.
-     * This is true when:
-     * - Any operand is a Double type
-     * - Division operation is used (always produces decimals)
-     * - Functions that explicitly return Double
-     */
-    internal var shouldBeDouble: Boolean = false
 
-    @Suppress("UNCHECKED_CAST")
     internal fun <K : Number> expand(operator: OperatorEnum, right: Formel<out Number>): Formel<K> {
         val left = this
-        addParanthesisIfNeeded(left, operator, right)
+        val leftWithParens = addParanthesisIfNeeded(left, operator, right).first
+        val rightWithParens = addParanthesisIfNeeded(left, operator, right).second
 
         // Determine if result should be double:
         // 1. If either operand is already a double
         // 2. If operation is division (always produces decimal results)
         val resultShouldBeDouble = left.shouldBeDouble || right.shouldBeDouble || operator == DIVIDE
 
-        val expandedFormel: Formel<out Number> = Formel<K>(
-            emne = left.emne,
-            prefix = left.prefix,
-            postfix = left.postfix,
-            notasjon = "${left.finalNotasjon()}${operator.syntax}${right.finalNotasjon()}",
-            innhold = "${left.finalInnhold()}${operator.syntax}${right.finalInnhold()}"
-        )
-        expandedFormel.apply {
-            shouldBeDouble = resultShouldBeDouble
+        // Build subformula list
+        val newSubFormulas = buildSet {
             if (left.locked) {
-                subFormelList.add(left)
+                add(left)
             } else {
-                subFormelList.addAll(left.subFormelList)
+                addAll(left.subFormelList)
             }
             if (right.locked) {
-                subFormelList.add(right)
+                add(right)
             } else {
-                subFormelList.addAll(right.subFormelList)
+                addAll(right.subFormelList)
             }
-            this.emne = "anonymous#${this.hashCode()}"
-            this.verifyAndUpdateVarMap(left, right)
         }
-        return expandedFormel as Formel<K>
+
+        // Build variable map and check for conflicts
+        val newVarMap = buildMap {
+            if (!left.locked) putAll(left.namedVarMap)
+            if (!right.locked) putAll(right.namedVarMap)
+        }
+        
+        // Validate no conflicts
+        validateNoConflicts(left, right)
+
+        // Create the result with proper type safety
+        val result = createTypedFormel<K>(
+            emne = "anonymous#${System.identityHashCode(left)}${System.identityHashCode(right)}",
+            prefix = left.prefix,
+            postfix = left.postfix,
+            notasjon = "${leftWithParens.finalNotasjon()}${operator.syntax}${rightWithParens.finalNotasjon()}",
+            innhold = "${leftWithParens.finalInnhold()}${operator.syntax}${rightWithParens.finalInnhold()}",
+            subFormelList = newSubFormulas,
+            namedVarMap = newVarMap,
+            locked = false,
+            shouldBeDouble = resultShouldBeDouble
+        )
+        
+        return result
     }
 
     /**
-     * Sjekker at variabler fra to forskjellige formler ikke er i konflikt med hverandre, dvs har samme navn men forskjellige verdier.
+     * Validates that variables from two different formulas are not in conflict
      */
-    private fun verifyAndUpdateVarMap(
+    private fun validateNoConflicts(
         left: Formel<*>,
-        right: Formel<*>,
+        right: Formel<*>
     ) {
+        // Check for formula name conflicts
         if (left.navn() == right.navn() && left.resultat() != right.resultat()) {
             throw IllegalArgumentException("Formula conflict: '${left.navn()}' with value ${left.resultat()} would be reassigned to value ${right.resultat()}")
         }
+        
+        // Check for variable conflicts if both formulas are unlocked
         if (!left.locked && !right.locked) {
             left.namedVarMap.forEach { (leftName, leftValue) ->
                 if (right.namedVarMap.containsKey(leftName) && right.namedVarMap[leftName] != leftValue) {
@@ -153,43 +181,100 @@ class Formel<T : Number>(
                 }
             }
         }
-        /**
-         * If a formula ([left] or [right]) is locked, its variables will not be used in resulting formula, only its name will be present.
-         */
-        if (!left.locked) namedVarMap += left.namedVarMap
-        if (!right.locked) namedVarMap += right.namedVarMap
     }
 
     fun toDouble(): Formel<Double> {
-        val doubleFormel = Formel<Double>(
+        return Formel(
             emne = this.emne,
             prefix = this.prefix,
             postfix = this.postfix,
             notasjon = if (this.notasjon == "0") "0.0" else this.notasjon,
-            innhold = if (this.innhold == "0") "0.0" else this.innhold
+            innhold = if (this.innhold == "0") "0.0" else this.innhold,
+            subFormelList = this.subFormelList,
+            namedVarMap = this.namedVarMap,
+            locked = this.locked,
+            shouldBeDouble = true  // Explicitly set to double
         )
-        doubleFormel.shouldBeDouble = true  // Explicitly set to double
-        return doubleFormel
     }
 
-    private fun addParanthesisIfNeeded(
-        left: Formel<T>,
-        operator: OperatorEnum,
-        right: Formel<out Number>,
-    ) {
-        if (operator == TIMES || operator == DIVIDE) {
-            checkAndAddParanthesis(left)
-            checkAndAddParanthesis(right)
-        } else if (operator == MINUS) {
-            checkAndAddParanthesis(right)
+    /**
+     * Creates a copy of this formula with modified properties
+     */
+    internal fun copy(
+        emne: String = this.emne,
+        prefix: String = this.prefix,
+        postfix: String = this.postfix,
+        notasjon: String = this.notasjon,
+        innhold: String = this.innhold,
+        subFormelList: Set<Formel<out Number>> = this.subFormelList,
+        namedVarMap: Map<String, Number> = this.namedVarMap,
+        locked: Boolean = this.locked,
+        shouldBeDouble: Boolean = this.shouldBeDouble
+    ): Formel<T> {
+        return Formel<T>(
+            emne = emne,
+            prefix = prefix,
+            postfix = postfix,
+            notasjon = notasjon,
+            innhold = innhold,
+            subFormelList = subFormelList,
+            namedVarMap = namedVarMap,
+            locked = locked,
+            shouldBeDouble = shouldBeDouble
+        )
+    }
+    
+    companion object {
+        /**
+         * Type-safe factory method for creating Formel instances
+         */
+        internal fun <K : Number> createTypedFormel(
+            emne: String,
+            prefix: String,
+            postfix: String,
+            notasjon: String,
+            innhold: String,
+            subFormelList: Set<Formel<out Number>>,
+            namedVarMap: Map<String, Number>,
+            locked: Boolean,
+            shouldBeDouble: Boolean
+        ): Formel<K> {
+            return Formel<K>(
+                emne = emne,
+                prefix = prefix,
+                postfix = postfix,
+                notasjon = notasjon,
+                innhold = innhold,
+                subFormelList = subFormelList,
+                namedVarMap = namedVarMap,
+                locked = locked,
+                shouldBeDouble = shouldBeDouble
+            )
         }
     }
 
-    private fun checkAndAddParanthesis(expr: Formel<out Number>) {
+    private fun addParanthesisIfNeeded(
+        left: Formel<*>,
+        operator: OperatorEnum,
+        right: Formel<out Number>
+    ): Pair<Formel<*>, Formel<out Number>> {
+        val leftWithParens = if (operator == TIMES || operator == DIVIDE) {
+            addParanthesisIfNeeded(left)
+        } else left
+        
+        val rightWithParens = if (operator == TIMES || operator == DIVIDE || operator == MINUS) {
+            addParanthesisIfNeeded(right)
+        } else right
+        
+        return leftWithParens to rightWithParens
+    }
+
+    private fun addParanthesisIfNeeded(expr: Formel<out Number>): Formel<out Number> {
         var level = 0
         val plus = PLUS.syntax.trim().first()
         val minus = MINUS.syntax.trim().first()
         var needsPara = false
+        
         expr.notasjon.toCharArray().forEach {
             if (level == 0 && (it == plus || it == minus)) {
                 needsPara = true
@@ -197,14 +282,28 @@ class Formel<T : Number>(
                 level++
             } else if (it == ')') level--
         }
-        if (needsPara) {
-            expr.notasjon = "(${expr.notasjon})"
-            expr.innhold = "(${expr.innhold})"
-        }
+        
+        return if (needsPara) {
+            Formel(
+                emne = expr.emne,
+                prefix = expr.prefix,
+                postfix = expr.postfix,
+                notasjon = "(${expr.notasjon})",
+                innhold = "(${expr.innhold})",
+                subFormelList = expr.subFormelList,
+                namedVarMap = expr.namedVarMap,
+                locked = expr.locked,
+                shouldBeDouble = expr.shouldBeDouble
+            )
+        } else expr
     }
 
-    fun toBuilder(): Builder<T> = Builder<T>().formel(Formel(this)).emne(this.emne)
-    fun emne(newEmne: String): Formel<T> = this.apply { emne = newEmne }
+    fun toBuilder(): Builder<T> = Builder<T>().formel(this).emne(this.emne)
+    
+    /**
+     * Creates a copy of this formula with a new emne (name)
+     */
+    fun emne(newEmne: String): Formel<T> = this.copy(emne = newEmne)
 
     /**
      * TODO Kanskje denne implementasjonen skal erstatte [notasjon] feltet. Det er forvirrende at det finnes to måter å hente ut notasjonen på.

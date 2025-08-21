@@ -25,13 +25,13 @@ class Builder<T : Number>(
     fun build(): Formel<T> {
         val prettyEmne = builderEmne.trim().replace(" ", "_")
         val formel = builderFormel ?: throw IllegalStateException("Ingen formel angitt av funksjon .formel(..).")
-        formel.locked = builderLocked
         validateState(prettyEmne, formel)
-        return formel.apply {
-            prefix = builderPrefix.trim()
-            emne = prettyEmne
-            postfix = builderPostfix.trim()
-        }
+        return formel.copy(
+            prefix = builderPrefix.trim(),
+            emne = prettyEmne,
+            postfix = builderPostfix.trim(),
+            locked = builderLocked
+        )
     }
 
     private fun validateState(prettyName: String, formel: Formel<*>) {

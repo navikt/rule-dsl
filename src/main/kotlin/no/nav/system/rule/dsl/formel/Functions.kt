@@ -1,5 +1,7 @@
 package no.nav.system.rule.dsl.formel
 
+import no.nav.system.rule.dsl.formel.Formel
+
 // avrund explicitly returns Int
 fun avrund(formel: Formel<Double>): Formel<Int> =
     applySyntax1arg(formel, false) { "avrund( $it )" }
@@ -63,31 +65,29 @@ fun kMin(maks: Double, formel: Formel<Double>): Formel<Double> =
     applySyntax2arg(Formel(maks), formel, true, minFunction)
 
 private fun <T : Number> applySyntax1arg(formel: Formel<*>, shouldBeDouble: Boolean, syntax: (String) -> String): Formel<T> {
-    val result = Formel<T>(
+    return Formel<T>(
         emne = formel.emne,
         prefix = formel.prefix,
         postfix = formel.postfix,
         notasjon = syntax.invoke(formel.notasjon),
-        innhold = syntax.invoke(formel.innhold)
+        innhold = syntax.invoke(formel.innhold),
+        subFormelList = formel.subFormelList,
+        namedVarMap = formel.namedVarMap,
+        locked = formel.locked,
+        shouldBeDouble = shouldBeDouble
     )
-
-    result.subFormelList += formel.subFormelList
-    result.namedVarMap += formel.namedVarMap
-    result.shouldBeDouble = shouldBeDouble
-    return result
 }
 
 private fun <T : Number> applySyntax2arg(formelA: Formel<*>, formelB: Formel<*>, shouldBeDouble: Boolean, syntax: (String, String) -> String): Formel<T> {
-    val result = Formel<T>(
+    return Formel<T>(
         emne = formelA.emne,
         prefix = formelA.prefix,
         postfix = formelA.postfix,
         notasjon = syntax.invoke(formelA.notasjon, formelB.notasjon),
-        innhold = syntax.invoke(formelA.innhold, formelB.innhold)
+        innhold = syntax.invoke(formelA.innhold, formelB.innhold),
+        subFormelList = formelA.subFormelList + formelB.subFormelList,
+        namedVarMap = formelA.namedVarMap + formelB.namedVarMap,
+        locked = false, // Functions typically create unlocked results
+        shouldBeDouble = shouldBeDouble
     )
-
-    result.subFormelList += formelA.subFormelList + formelB.subFormelList
-    result.namedVarMap += formelA.namedVarMap + formelB.namedVarMap
-    result.shouldBeDouble = shouldBeDouble
-    return result
 }
