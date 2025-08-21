@@ -114,8 +114,7 @@ class Formel<T : Number> internal constructor(
 
     internal fun <K : Number> expand(operator: OperatorEnum, right: Formel<out Number>): Formel<K> {
         val left = this
-        val leftWithParens = addParanthesisIfNeeded(left, operator, right).first
-        val rightWithParens = addParanthesisIfNeeded(left, operator, right).second
+        val (leftWithParanthesis, rightWithParanthesis) = addParanthesisIfNeeded(left, operator, right)
 
         // Determine if result should be double:
         // 1. If either operand is already a double
@@ -150,8 +149,8 @@ class Formel<T : Number> internal constructor(
             emne = "anonymous#${System.identityHashCode(left)}${System.identityHashCode(right)}",
             prefix = left.prefix,
             postfix = left.postfix,
-            notasjon = "${leftWithParens.finalNotasjon()}${operator.syntax}${rightWithParens.finalNotasjon()}",
-            innhold = "${leftWithParens.finalInnhold()}${operator.syntax}${rightWithParens.finalInnhold()}",
+            notasjon = "${leftWithParanthesis.finalNotasjon()}${operator.syntax}${rightWithParanthesis.finalNotasjon()}",
+            innhold = "${leftWithParanthesis.finalInnhold()}${operator.syntax}${rightWithParanthesis.finalInnhold()}",
             subFormelList = newSubFormulas,
             namedVarMap = newVarMap,
             locked = false,
