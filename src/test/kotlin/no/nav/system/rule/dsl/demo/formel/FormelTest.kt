@@ -2,7 +2,6 @@ package no.nav.system.rule.dsl.demo.formel
 
 import no.nav.system.rule.dsl.demo.domain.Tilleggspensjon
 import no.nav.system.rule.dsl.formel.*
-import no.nav.system.rule.dsl.formel.FormelBuilder.Companion.kmath
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -14,7 +13,7 @@ class FormelTest {
 
     @Test
     fun simpleIntFormel() {
-        val grunnbeløp = Formel<Int>("Grunnbeløp", 5000)
+        val grunnbeløp = Formel.variable("Grunnbeløp", 5000)
         val grunnbeløpPlussTusen: Formel<Int> = 1000 + grunnbeløp
 
         assertEquals("1000 + Grunnbeløp", grunnbeløpPlussTusen.notasjon)
@@ -25,7 +24,7 @@ class FormelTest {
 
     @Test
     fun simpleDoubleFormel() {
-        val fem = Formel<Int>("fem", 5)
+        val fem = Formel.variable("fem", 5)
         val toOgEnHalv: Formel<Double> = fem / 2
 
         assertEquals("fem / 2", toOgEnHalv.notasjon)
@@ -35,8 +34,8 @@ class FormelTest {
 
     @Test
     fun gjenbrukAvFormel() {
-        val G = Formel("G", 1000)
-        val SPT = Formel("SPT", 2.0)
+        val G = Formel.variable("G", 1000)
+        val SPT = Formel.variable("SPT", 2.0)
 
         val brutto: Formel<Double> = G * SPT
 
@@ -50,10 +49,10 @@ class FormelTest {
     @Test
     fun immutableFormel() {
 
-        val desimal = Formel("tiKommaTo", 10.2)
+        val desimal = Formel.variable("tiKommaTo", 10.2)
 
-        val heltall = kmath<Int>()
-            .formel(avrund(desimal))
+        val heltall = FormelBuilder.create<Int>()
+            .expression(avrund(desimal))
             .build()
 
         assertEquals(10, heltall.resultat())
@@ -62,7 +61,7 @@ class FormelTest {
 
     @Test
     fun copyDefaultFormelFromFelt_auto() {
-        val brutto = Formel(2000)
+        val brutto = Formel.constant(2000)
         var netto = brutto
 
         assertEquals(2000, brutto.resultat())
@@ -76,8 +75,8 @@ class FormelTest {
 
     @Test
     fun integerDivisionResultsInDouble() {
-        val a = Formel("a", 1)
-        val b = Formel("b", 4)
+        val a = Formel.variable("a", 1)
+        val b = Formel.variable("b", 4)
 
         assertEquals(0.25, (a / b).resultat())
         assertEquals(0.25, (a / 4).resultat())
@@ -86,21 +85,21 @@ class FormelTest {
 
     @Test
     fun paranteser_enkel() {
-        val SPT = Formel("SPT", 4.3)
-        val OPT = Formel("OPT", 2.3)
-        val PÅ = Formel("PÅ", 20)
+        val SPT = Formel.variable("SPT", 4.3)
+        val OPT = Formel.variable("OPT", 2.3)
+        val PÅ = Formel.variable("PÅ", 20)
 
-        val formel1 = kmath<Double>()
-            .emne("f1")
-            .formel((SPT - OPT) * PÅ)
+        val formel1 = FormelBuilder.create<Double>()
+            .name("f1")
+            .expression((SPT - OPT) * PÅ)
             .build()
         assertEquals(40.0, formel1.resultat())
         assertEquals("(SPT - OPT) * PÅ", formel1.notasjon)
         assertEquals("(4.3 - 2.3) * 20", formel1.innhold)
 
-        val formel2 = kmath<Double>()
-            .emne("f2")
-            .formel(PÅ * (SPT - OPT))
+        val formel2 = FormelBuilder.create<Double>()
+            .name("f2")
+            .expression(PÅ * (SPT - OPT))
             .build()
         assertEquals(40.0, formel2.resultat())
         assertEquals("PÅ * (SPT - OPT)", formel2.notasjon)
@@ -109,13 +108,13 @@ class FormelTest {
 
     @Test
     fun paranteser_middels() {
-        val SPT = Formel("SPT", 4.3)
-        val OPT = Formel("OPT", 2.3)
-        val PÅ = Formel("PÅ", 20)
+        val SPT = Formel.variable("SPT", 4.3)
+        val OPT = Formel.variable("OPT", 2.3)
+        val PÅ = Formel.variable("PÅ", 20)
 
-        val formel1 = kmath<Double>()
-            .emne("f1")
-            .formel((SPT - OPT) * (PÅ) * PÅ)
+        val formel1 = FormelBuilder.create<Double>()
+            .name("f1")
+            .expression((SPT - OPT) * (PÅ) * PÅ)
             .build()
         assertEquals(800.0, formel1.resultat())
         assertEquals("(SPT - OPT) * PÅ * PÅ", formel1.notasjon)
@@ -124,11 +123,11 @@ class FormelTest {
 
     @Test
     fun paranteser_negativeVerdier() {
-        val a = Formel("a", -2)
-        val b = Formel("b", 1)
-        val f = kmath<Int>()
-            .emne("hello")
-            .formel(4 - (a + b))
+        val a = Formel.variable("a", -2)
+        val b = Formel.variable("b", 1)
+        val f = FormelBuilder.create<Int>()
+            .name("hello")
+            .expression(4 - (a + b))
             .build()
 
         assertEquals(5, f.resultat())
@@ -138,11 +137,11 @@ class FormelTest {
 
     @Test
     fun paranteser_negativeVerdier2() {
-        val a = Formel("a", -2)
-        val b = Formel("b", 1)
-        val f = kmath<Int>()
-            .emne("hello")
-            .formel(-4 - (a - b))
+        val a = Formel.variable("a", -2)
+        val b = Formel.variable("b", 1)
+        val f = FormelBuilder.create<Int>()
+            .name("hello")
+            .expression(-4 - (a - b))
             .build()
 
         assertEquals(-1, f.resultat())
@@ -152,11 +151,11 @@ class FormelTest {
 
     @Test
     fun paranteser_positiveVerdier() {
-        val a = Formel("a", 2)
-        val b = Formel("b", 1)
-        val f = kmath<Int>()
-            .emne("hello")
-            .formel(4 - (a + b))
+        val a = Formel.variable("a", 2)
+        val b = Formel.variable("b", 1)
+        val f = FormelBuilder.create<Int>()
+            .name("hello")
+            .expression(4 - (a + b))
             .build()
 
         assertEquals(1, f.resultat())
@@ -166,11 +165,11 @@ class FormelTest {
 
     @Test
     fun paranteser_negativeVerdier_reversed() {
-        val a = Formel("a", -2)
-        val b = Formel("b", 1)
-        val f = kmath<Int>()
-            .emne("hello")
-            .formel((a + b) - 4)
+        val a = Formel.variable("a", -2)
+        val b = Formel.variable("b", 1)
+        val f = FormelBuilder.create<Int>()
+            .name("hello")
+            .expression((a + b) - 4)
             .build()
 
         assertEquals(-5, f.resultat())
@@ -180,11 +179,11 @@ class FormelTest {
 
     @Test
     fun paranteser_positiveVerdier_reversed() {
-        val a = Formel("a", 2)
-        val b = Formel("b", 1)
-        val f = kmath<Int>()
-            .emne("hello")
-            .formel(4 - (a + b))
+        val a = Formel.variable("a", 2)
+        val b = Formel.variable("b", 1)
+        val f = FormelBuilder.create<Int>()
+            .name("hello")
+            .expression(4 - (a + b))
             .build()
 
         assertEquals(1, f.resultat())
@@ -194,21 +193,21 @@ class FormelTest {
 
     @Test
     fun funksjon_avrund() {
-        val YPT = Formel("YPT", 7.33)
+        val YPT = Formel.variable("YPT", 7.33)
 
-        val formel1 = kmath<Int>()
-            .emne("avrund YPT")
-            .formel(avrund(YPT))
+        val formel1 = FormelBuilder.create<Int>()
+            .name("avrund YPT")
+            .expression(avrund(YPT))
             .build()
         assertEquals(7, formel1.resultat())
         assertEquals("avrund( YPT )", formel1.notasjon)
         assertEquals("avrund( 7.33 )", formel1.innhold)
 
-        val SPT = Formel("SPT", 4.4)
+        val SPT = Formel.variable("SPT", 4.4)
 
-        val formel2 = kmath<Int>()
-            .emne("avrund SPT")
-            .formel(avrund(avrund(SPT) * 0.4))
+        val formel2 = FormelBuilder.create<Int>()
+            .name("avrund SPT")
+            .expression(avrund(avrund(SPT) * 0.4))
             .build()
         assertEquals(2, formel2.resultat())
         assertEquals("avrund( avrund( SPT ) * 0.4 )", formel2.notasjon)
@@ -217,25 +216,25 @@ class FormelTest {
 
     @Test
     fun copyFormelWithSubFormel() {
-        val G = Formel(200000)
+        val G = Formel.constant(200000)
 
-        val tpF92 = kmath<Double>()
-            .emne("tp_f92")
-            .formel(0.5 * G)
+        val tpF92 = FormelBuilder.create<Double>()
+            .name("tp_f92")
+            .expression(0.5 * G)
             .build()
-        val tpE91 = kmath<Int>()
-            .emne("tp_e91")
-            .formel(1 * G)
+        val tpE91 = FormelBuilder.create<Int>()
+            .name("tp_e91")
+            .expression(1 * G)
             .build()
-        val tp = kmath<Double>()
-            .emne("tp")
-            .formel(tpF92 + tpE91)
+        val tp = FormelBuilder.create<Double>()
+            .name("tp")
+            .expression(tpF92 + tpE91)
             .build()
         assertEquals(2, tp.subFormelList.size)
 
-        val tpPlus = kmath<Double>()
-            .emne("tpPlus")
-            .formel(tp + 1)
+        val tpPlus = FormelBuilder.create<Double>()
+            .name("tpPlus")
+            .expression(tp + 1)
             .build()
 
         assertEquals(300001.0, tpPlus.resultat())
@@ -247,13 +246,13 @@ class FormelTest {
 
     @Test
     fun conflictingVars() {
-        val G = Formel("G", 100000)
-        val alsoGbutDifferent = Formel("G", 200000)
+        val G = Formel.variable("G", 100000)
+        val alsoGbutDifferent = Formel.variable("G", 200000)
 
         assertThrows<IllegalArgumentException> {
-            kmath<Int>()
-                .emne("double G is bad")
-                .formel(G + 1 + alsoGbutDifferent)
+            FormelBuilder.create<Int>()
+                .name("double G is bad")
+                .expression(G + 1 + alsoGbutDifferent)
                 .build()
         }.also {
             assertEquals("Variable conflict: 'G' with value 100000 would be reassigned to value 200000", it.message)
@@ -268,11 +267,11 @@ class FormelTest {
 
     @Test
     fun conflictingVars2() {
-        val G1 = Formel("G", 95000)
-        val G2 = Formel("G", 95001)
-        val SPT = Formel("SPT", 4.23)
-        val påF92 = Formel("PÅ_F92", 25)
-        val påE91 = Formel("PÅ_E91", 15)
+        val G1 = Formel.variable("G", 95000)
+        val G2 = Formel.variable("G", 95001)
+        val SPT = Formel.variable("SPT", 4.23)
+        val påF92 = Formel.variable("PÅ_F92", 25)
+        val påE91 = Formel.variable("PÅ_E91", 15)
 
         val tpF92 = avrund(0.45 * G1 * SPT * påF92 / 40)
         val tpE91 = avrund(0.45 * G2 * SPT * påE91 / 40)
@@ -286,14 +285,14 @@ class FormelTest {
 
     @Test
     fun noConflictWhenLocked() {
-        val G1 = Formel("G", 95000)
-        val G2 = Formel("G", 95001)
-        val SPT = Formel("SPT", 4.23)
-        val påF92 = Formel("PÅ_F92", 25)
-        val påE91 = Formel("PÅ_E91", 15)
+        val G1 = Formel.variable("G", 95000)
+        val G2 = Formel.variable("G", 95001)
+        val SPT = Formel.variable("SPT", 4.23)
+        val påF92 = Formel.variable("PÅ_F92", 25)
+        val påE91 = Formel.variable("PÅ_E91", 15)
 
-        val tpF92 = kmath<Int>().emne("tp_f92").formel(avrund(0.45 * G1 * SPT * påF92 / 40)).build()
-        val tpE91 = kmath<Int>().emne("tp_e91").formel(avrund(0.45 * G2 * SPT * påE91 / 40)).build()
+        val tpF92 = FormelBuilder.create<Int>().name("tp_f92").expression(avrund(0.45 * G1 * SPT * påF92 / 40)).build()
+        val tpE91 = FormelBuilder.create<Int>().name("tp_e91").expression(avrund(0.45 * G2 * SPT * påE91 / 40)).build()
 
         assertDoesNotThrow {
             tpF92 + tpE91
@@ -302,14 +301,14 @@ class FormelTest {
 
     @Test
     fun conflictWhenUnlocked() {
-        val G1 = Formel("G", 95000)
-        val G2 = Formel("G", 95001)
-        val SPT = Formel("SPT", 4.23)
-        val påF92 = Formel("PÅ_F92", 25)
-        val påE91 = Formel("PÅ_E91", 15)
+        val G1 = Formel.variable("G", 95000)
+        val G2 = Formel.variable("G", 95001)
+        val SPT = Formel.variable("SPT", 4.23)
+        val påF92 = Formel.variable("PÅ_F92", 25)
+        val påE91 = Formel.variable("PÅ_E91", 15)
 
-        val tpF92 = kmath<Int>().emne("tp_f92").formel(avrund(0.45 * G1 * SPT * påF92 / 40)).unlock().build()
-        val tpE91 = kmath<Int>().emne("tp_e91").formel(avrund(0.45 * G2 * SPT * påE91 / 40)).unlock().build()
+        val tpF92 = FormelBuilder.create<Int>().name("tp_f92").expression(avrund(0.45 * G1 * SPT * påF92 / 40)).unlocked().build()
+        val tpE91 = FormelBuilder.create<Int>().name("tp_e91").expression(avrund(0.45 * G2 * SPT * påE91 / 40)).unlocked().build()
 
         assertThrows<IllegalArgumentException> {
             tpF92 + tpE91
@@ -320,20 +319,20 @@ class FormelTest {
 
     @Test
     fun conflictingFormulas() {
-        val G = Formel("G", 40000)
-        val tpF92 = kmath<Double>()
-            .emne("duplikatnavn")
-            .formel(0.5 * G)
+        val G = Formel.variable("G", 40000)
+        val tpF92 = FormelBuilder.create<Double>()
+            .name("duplikatnavn")
+            .expression(0.5 * G)
             .build()
-        val tpE91 = kmath<Int>()
-            .emne("duplikatnavn")
-            .formel(2 * G)
+        val tpE91 = FormelBuilder.create<Int>()
+            .name("duplikatnavn")
+            .expression(2 * G)
             .build()
 
         assertThrows<IllegalArgumentException> {
-            kmath<Double>()
-                .emne("sum")
-                .formel(tpF92 + tpE91)
+            FormelBuilder.create<Double>()
+                .name("sum")
+                .expression(tpF92 + tpE91)
                 .build().toString()
         }.also {
             assertEquals(
@@ -345,15 +344,15 @@ class FormelTest {
 
     @Test
     fun conflictingVars_renameToExistingNamedVariable() {
-        val G = Formel("G", 95000)
+        val G = Formel.variable("G", 95000)
 
-        val tpE91 = kmath<Int>()
-            .emne("tp")
-            .formel(2 * G)
+        val tpE91 = FormelBuilder.create<Int>()
+            .name("tp")
+            .expression(2 * G)
             .build()
 
         assertThrows<IllegalArgumentException> {
-            tpE91.toBuilder().emne("G").build()
+            tpE91.toBuilder().name("G").build()
         }.also {
             assertEquals(
                 "Circular reference detected: Formula name 'G' cannot contain variables with the same name.",
@@ -364,23 +363,23 @@ class FormelTest {
 
     @Test
     fun conflictingVars_renameToExistingFormel() {
-        val G = Formel("G", 95000)
-        val tpF92 = kmath<Double>()
-            .emne("tp_f92")
-            .formel(0.5 * G)
+        val G = Formel.variable("G", 95000)
+        val tpF92 = FormelBuilder.create<Double>()
+            .name("tp_f92")
+            .expression(0.5 * G)
             .build()
-        val tpE91 = kmath<Int>()
-            .emne("tp_e91")
-            .formel(2 * G)
+        val tpE91 = FormelBuilder.create<Int>()
+            .name("tp_e91")
+            .expression(2 * G)
             .build()
 
-        val copy = tpE91.toBuilder().emne("tp_f92").build()
+        val copy = tpE91.toBuilder().name("tp_f92").build()
 
         assertThrows<IllegalArgumentException> {
-            kmath<Double>()
-                .emne("sum")
+            FormelBuilder.create<Double>()
+                .name("sum")
                 //  .rename(tp_e91, "tp_f92")
-                .formel(tpF92 + copy)
+                .expression(tpF92 + copy)
                 .build().toString()
         }.also {
             assertEquals(
@@ -392,21 +391,21 @@ class FormelTest {
 
     @Test
     fun noConflict_renamedFormel() {
-        val G = Formel("G", 40000)
-        val tpF92 = kmath<Double>()
-            .emne("duplikatnavn")
-            .formel(0.5 * G)
+        val G = Formel.variable("G", 40000)
+        val tpF92 = FormelBuilder.create<Double>()
+            .name("duplikatnavn")
+            .expression(0.5 * G)
             .build()
-        val tpE91 = kmath<Int>()
-            .emne("duplikatnavn")
-            .formel(2 * G)
+        val tpE91 = FormelBuilder.create<Int>()
+            .name("duplikatnavn")
+            .expression(2 * G)
             .build()
 
-        val copy = tpE91.toBuilder().emne("e91").build()
+        val copy = tpE91.toBuilder().name("e91").build()
         assertDoesNotThrow {
-            kmath<Double>()
-                .emne("sum")
-                .formel(tpF92 + copy)
+            FormelBuilder.create<Double>()
+                .name("sum")
+                .expression(tpF92 + copy)
                 .build().toString()
         }
         assertEquals("duplikatnavn", tpE91.emne)
@@ -425,8 +424,8 @@ class FormelTest {
     @Test
     @Disabled
     fun shouldNotFailWhenConsumeSubformulaWithConflictingVar() {
-        val G = Formel("G", 100000)
-        val alsoG = Formel("G", 200000)
+        val G = Formel.variable("G", 100000)
+        val alsoG = Formel.variable("G", 200000)
 
         val tpF92 = 0.5 * G
         val tpE91 = 1 * alsoG
@@ -438,18 +437,18 @@ class FormelTest {
 
     @Test
     fun shouldShowSeperateFormulas() {
-        val G = Formel("G", 95000)
-        val SPT = Formel("SPT", 4.23)
-        val påF92 = Formel("PÅ_F92", 25)
-        val påE91 = Formel("PÅ_E91", 15)
+        val G = Formel.variable("G", 95000)
+        val SPT = Formel.variable("SPT", 4.23)
+        val påF92 = Formel.variable("PÅ_F92", 25)
+        val påE91 = Formel.variable("PÅ_E91", 15)
 
-        val tpF92 = kmath<Int>()
-            .emne("tp_f92")
-            .formel(avrund(0.45 * G * SPT * påF92 / 40))
+        val tpF92 = FormelBuilder.create<Int>()
+            .name("tp_f92")
+            .expression(avrund(0.45 * G * SPT * påF92 / 40))
             .build()
-        val tpE91 = kmath<Int>()
-            .emne("tp_e91")
-            .formel(avrund(0.45 * G * SPT * påE91 / 40))
+        val tpE91 = FormelBuilder.create<Int>()
+            .name("tp_e91")
+            .expression(avrund(0.45 * G * SPT * påE91 / 40))
             .build()
 
         val sum = tpF92 + tpE91
@@ -471,9 +470,9 @@ class FormelTest {
     @Throws
     fun shouldFailOnCircularReference() {
         assertThrows<IllegalArgumentException> {
-            kmath<Int>()
-                .emne("a")
-                .formel(Formel("a", 1) + 1)
+            FormelBuilder.create<Int>()
+                .name("a")
+                .expression(Formel.variable("a", 1) + 1)
                 .build()
         }.also {
             assertEquals(
@@ -485,13 +484,13 @@ class FormelTest {
 
     @Test
     fun shouldResolveSubformulaOnce() {
-        val a = kmath<Int>()
-            .emne("a")
-            .formel(Formel("x", 10) + 5)
+        val a = FormelBuilder.create<Int>()
+            .name("a")
+            .expression(Formel.variable("x", 10) + 5)
             .build()
-        val sum = kmath<Int>()
-            .emne("sum")
-            .formel(a + a)
+        val sum = FormelBuilder.create<Int>()
+            .name("sum")
+            .expression(a + a)
             .build()
         assertEquals(1, sum.subFormelList.size, "Should have one subformula in formula 'sum' ")
         assertTrue(sum.namedVarMap.isEmpty(), "namedVarMap should be empty.")
@@ -500,8 +499,8 @@ class FormelTest {
     @Test
     fun anonymousFormelAllowed() {
         assertDoesNotThrow {
-            kmath<Int>()
-                .formel(Formel("a", 1))
+            FormelBuilder.create<Int>()
+                .expression(Formel.variable("a", 1))
                 .build().also {
                     assertTrue(it.navn().startsWith("anonymous"))
                 }
@@ -510,15 +509,15 @@ class FormelTest {
 
     @Test
     fun revurderYtelse1967_SIR250725_2() {
-        val G = Formel("G", 79216)
-        var OPT = Formel("OPT", 2.47)
-        var PÅ = Formel("PÅ", 16)
-        var SPT = Formel("SPT", 2.47)
-        var OÅ = Formel("OÅ", 20)
+        val G = Formel.variable("G", 79216)
+        var OPT = Formel.variable("OPT", 2.47)
+        var PÅ = Formel.variable("PÅ", 16)
+        var SPT = Formel.variable("SPT", 2.47)
+        var OÅ = Formel.variable("OÅ", 20)
 
-        val tpBrukerUtenPTBrutto = kmath<Int>()
-            .emne("bruker_utenPT")
-            .formel(avrund(0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * 1 / 12))
+        val tpBrukerUtenPTBrutto = FormelBuilder.create<Int>()
+            .name("bruker_utenPT")
+            .expression(avrund(0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * 1 / 12))
             .build()
         assertEquals(5870, tpBrukerUtenPTBrutto.resultat())
         assertEquals(
@@ -530,16 +529,16 @@ class FormelTest {
             tpBrukerUtenPTBrutto.innhold
         )
 
-        OPT = Formel("OPT", 4.0)
-        PÅ = Formel("PÅ", 17)
-        SPT = Formel("SPT", 6.46)
-        OÅ = Formel("OÅ", 20)
-        val tpPst = Formel("tp_pst", 0.55)
-        val UFG = Formel("UFG", 100)
+        OPT = Formel.variable("OPT", 4.0)
+        PÅ = Formel.variable("PÅ", 17)
+        SPT = Formel.variable("SPT", 6.46)
+        OÅ = Formel.variable("OÅ", 20)
+        val tpPst = Formel.variable("tp_pst", 0.55)
+        val UFG = Formel.variable("UFG", 100)
 
-        val tpAvdodBrutto = kmath<Int>()
-            .emne("avdød")
-            .formel(avrund(0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * UFG / 100 * 1 / 12 * tpPst))
+        val tpAvdodBrutto = FormelBuilder.create<Int>()
+            .name("avdød")
+            .expression(avrund(0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * UFG / 100 * 1 / 12 * tpPst))
             .build()
         assertEquals(7263, tpAvdodBrutto.resultat())
         assertEquals(
@@ -551,9 +550,9 @@ class FormelTest {
             tpAvdodBrutto.innhold
         )
 
-        val tpSammenstillBrutto = kmath<Int>()
-            .emne("brutto")
-            .formel(avrund(tpBrukerUtenPTBrutto * 0.55 + tpAvdodBrutto))
+        val tpSammenstillBrutto = FormelBuilder.create<Int>()
+            .name("brutto")
+            .expression(avrund(tpBrukerUtenPTBrutto * 0.55 + tpAvdodBrutto))
             .build()
 
         assertEquals(10492, tpSammenstillBrutto.resultat())
@@ -583,17 +582,17 @@ class FormelTest {
 
     @Test
     fun anonymousSubformulaAreRenamedInHighlevelContext() {
-        val to = Formel(2)
-        val tre = Formel(3)
+        val to = Formel.constant(2)
+        val tre = Formel.constant(3)
 
         /**
          * anonyme formler uten kjennskap til kontekst
          */
-        val anonF1 = kmath<Int>()
-            .formel(to * tre)
+        val anonF1 = FormelBuilder.create<Int>()
+            .expression(to * tre)
             .build()
-        val anonF2 = kmath<Int>()
-            .formel(tre + to)
+        val anonF2 = FormelBuilder.create<Int>()
+            .expression(tre + to)
             .build()
 
         /**
@@ -601,9 +600,9 @@ class FormelTest {
          */
         val copyAnonF1 = anonF1.emne("poengtillegg")
         val copyAnonF2 = anonF2.emne("avdod")
-        val tpSumBrutto = kmath<Double>()
-            .emne("tpSum")
-            .formel(copyAnonF1 * 0.5 + copyAnonF2)
+        val tpSumBrutto = FormelBuilder.create<Double>()
+            .name("tpSum")
+            .expression(copyAnonF1 * 0.5 + copyAnonF2)
             .build()
 
         assertEquals("poengtillegg * 0.5 + avdod", tpSumBrutto.notasjon)
@@ -618,13 +617,13 @@ class FormelTest {
 
     @Test
     fun shouldCopySubFormelList() {
-        val a = kmath<Int>()
-            .emne("a")
-            .formel(Formel("x", 10) + 5)
+        val a = FormelBuilder.create<Int>()
+            .name("a")
+            .expression(Formel.variable("x", 10) + 5)
             .build()
-        val sum = kmath<Int>()
-            .emne("sum")
-            .formel(a + a)
+        val sum = FormelBuilder.create<Int>()
+            .name("sum")
+            .expression(a + a)
             .build()
 
         val sumCopy = sum.copy()
@@ -634,16 +633,16 @@ class FormelTest {
 
     @Test
     fun gamleResultatMåIkkeOverskrive() {
-        val orginal = kmath<Double>()
-            .emne("hundre")
-            .formel(Formel("bpa", 100.0))
+        val orginal = FormelBuilder.create<Double>()
+            .name("hundre")
+            .expression(Formel.variable("bpa", 100.0))
             .build()
 
         assertEquals(100.0, orginal.resultat())
 
-        val tohundreOgTjue = kmath<Double>()
-            .emne("tohundreOgTjue")
-            .formel(orginal + 120)
+        val tohundreOgTjue = FormelBuilder.create<Double>()
+            .name("tohundreOgTjue")
+            .expression(orginal + 120)
             .build()
 
         assertEquals(220.0, tohundreOgTjue.resultat())
@@ -655,31 +654,31 @@ class FormelTest {
 
     @Test
     fun beregnYtelse_BERYP_04_forhoyelseUtenNyttUft() {
-        val G = Formel("G", 75000)
-        val påF92 = Formel("PÅ_F92", 0)
-        val påE91 = Formel("PÅ_E91", 40)
-        val SPT = Formel("SPT", 1.6)
-        val UFG = Formel("UFG", 30)
-        val YUG = Formel("YUG", 30)
-        val YPT = Formel("YPT", 5.08)
-        val påYskE91 = Formel("PÅ_YSK_E91", 40)
-        val påYsk = Formel("PÅ_YSK", 40)
-        val påYskF92 = Formel("PÅ_YSK_F92", 0)
+        val G = Formel.variable("G", 75000)
+        val påF92 = Formel.variable("PÅ_F92", 0)
+        val påE91 = Formel.variable("PÅ_E91", 40)
+        val SPT = Formel.variable("SPT", 1.6)
+        val UFG = Formel.variable("UFG", 30)
+        val YUG = Formel.variable("YUG", 30)
+        val YPT = Formel.variable("YPT", 5.08)
+        val påYskE91 = Formel.variable("PÅ_YSK_E91", 40)
+        val påYsk = Formel.variable("PÅ_YSK", 40)
+        val påYskF92 = Formel.variable("PÅ_YSK_F92", 0)
 
         /**
          * Uføre andelen
          */
-        val e91 = kmath<Double>()
-            .emne("e91")
-            .formel(0.42 * G * SPT * påE91 / 40 * UFG / 100)
+        val e91 = FormelBuilder.create<Double>()
+            .name("e91")
+            .expression(0.42 * G * SPT * påE91 / 40 * UFG / 100)
             .build()
-        val f92 = kmath<Double>()
-            .emne("f92")
-            .formel(0.45 * G * SPT * påF92 / 40 * UFG / 100)
+        val f92 = FormelBuilder.create<Double>()
+            .name("f92")
+            .expression(0.45 * G * SPT * påF92 / 40 * UFG / 100)
             .build()
-        val uføreTpSumBrutto = kmath<Int>()
-            .emne("uføre")
-            .formel(avrund((f92 + e91) * 1 / 12))
+        val uføreTpSumBrutto = FormelBuilder.create<Int>()
+            .name("uføre")
+            .expression(avrund((f92 + e91) * 1 / 12))
             .build()
         assertEquals(1260, uføreTpSumBrutto.resultat())
         assertEquals(2, uføreTpSumBrutto.subFormelList.size)
@@ -689,33 +688,33 @@ class FormelTest {
         /**
          * Restandel Uføre
          */
-        val upF92 = kmath<Double>()
-            .emne("up_f92")
-            .formel(0.45 * G * SPT * påF92 / 40 * (UFG - YUG) / 100)
+        val upF92 = FormelBuilder.create<Double>()
+            .name("up_f92")
+            .expression(0.45 * G * SPT * påF92 / 40 * (UFG - YUG) / 100)
             .build()
-        val upE91 = kmath<Double>()
-            .emne("up_e91")
-            .formel(0.42 * G * SPT * påE91 / 40 * (UFG - YUG) / 100)
+        val upE91 = FormelBuilder.create<Double>()
+            .name("up_e91")
+            .expression(0.42 * G * SPT * påE91 / 40 * (UFG - YUG) / 100)
             .build()
 
         /**
          * Andel yrkesskade
          */
-        val ypF92 = kmath<Double>()
-            .emne("yp_f92")
-            .formel(0.45 * G * YPT * påYskF92 / påYsk * YUG / 100)
+        val ypF92 = FormelBuilder.create<Double>()
+            .name("yp_f92")
+            .expression(0.45 * G * YPT * påYskF92 / påYsk * YUG / 100)
             .build()
-        val ypE91 = kmath<Double>()
-            .emne("yp_e91")
-            .formel(0.42 * G * YPT * påYskE91 / påYsk * YUG / 100)
+        val ypE91 = FormelBuilder.create<Double>()
+            .name("yp_e91")
+            .expression(0.42 * G * YPT * påYskE91 / påYsk * YUG / 100)
             .build()
 
         /**
          * Sammenstill restandel uføre og andel yrkesskade
          */
-        val yrkeBerTpSumBrutto = kmath<Int>()
-            .emne("ysk")
-            .formel(avrund((ypF92 + ypE91) * 1 / 12) + avrund((upF92 + upE91) * 1 / 12))
+        val yrkeBerTpSumBrutto = FormelBuilder.create<Int>()
+            .name("ysk")
+            .expression(avrund((ypF92 + ypE91) * 1 / 12) + avrund((upF92 + upE91) * 1 / 12))
             .build()
         assertEquals(4001, yrkeBerTpSumBrutto.resultat())
         assertEquals(4, yrkeBerTpSumBrutto.subFormelList.size)
@@ -732,9 +731,9 @@ class FormelTest {
          * Kontekst er 'ukjent'. Dvs generellt regelsett for SAM_BER som legger sammen to delberegninger uten å vite detaljer.
          * Som i regelkoden er SAMBER skapt på bakgrunn av kopi av uføreber.
          */
-        val samberTpsumBrutto = kmath<Int>()
-            .emne("sum")
-            .formel(uføreTpSumBrutto + yrkeBerTpSumBrutto)
+        val samberTpsumBrutto = FormelBuilder.create<Int>()
+            .name("sum")
+            .expression(uføreTpSumBrutto + yrkeBerTpSumBrutto)
             .build()
         assertEquals(2, samberTpsumBrutto.subFormelList.size)
         assertEquals("uføre + ysk", samberTpsumBrutto.notasjon)
@@ -743,12 +742,12 @@ class FormelTest {
 
     @Test
     fun toHtml() {
-        val femti = Formel(50)
-        val formel = kmath<Double>()
+        val femti = Formel.constant(50)
+        val formel = FormelBuilder.create<Double>()
             .prefix("TP")
-            .emne("eksportforbud")
+            .name("eksportforbud")
             .postfix("bruttoPerAr")
-            .formel(femti * 2.0)
+            .expression(femti * 2.0)
             .build()
 
         val expected = """
@@ -764,10 +763,10 @@ class FormelTest {
 
     @Test
     fun customFunction_afpAvrundNetto() {
-        val bpa = Formel("bpa", 140452.77285)
-        val bpaUtb = kmath<Double>()
-            .emne("avkortet")
-            .formel(afpAvrundNetto(bpa, Formel("utbetalingsprosent", 57)) * 12.0)
+        val bpa = Formel.variable("bpa", 140452.77285)
+        val bpaUtb = FormelBuilder.create<Double>()
+            .name("avkortet")
+            .expression(afpAvrundNetto(bpa, Formel.variable("utbetalingsprosent", 57)) * 12.0)
             .build()
 
         assertEquals(80064.0, bpaUtb.resultat())
@@ -776,7 +775,7 @@ class FormelTest {
 
     @Test
     fun `skal returnere høyeste verdi ved bruk av kMax med to Formler som input`() {
-        val G = Formel("G", 2000)
+        val G = Formel.variable("G", 2000)
         val f = 100 + G
 
         val kMax = kMax(G, f)
@@ -785,7 +784,7 @@ class FormelTest {
 
     @Test
     fun `skal returnere høyeste verdi ved bruk av kMax med Number og Formlel som input`() {
-        val G = Formel("G", 2000)
+        val G = Formel.variable("G", 2000)
 
         val kMax = kMax(3000, G)
         assertEquals(3000, kMax.resultat())
@@ -793,7 +792,7 @@ class FormelTest {
 
     @Test
     fun `skal returnere lavest verdi ved bruk av kMax med to Formler som input`() {
-        val G = Formel("G", 2000)
+        val G = Formel.variable("G", 2000)
         val f = 100 + G
 
         val kMax = kMin(G, f)
@@ -802,7 +801,7 @@ class FormelTest {
 
     @Test
     fun `skal returnere lavest verdi ved bruk av kMax med Number og Formlel som input`() {
-        val G = Formel("G", 2000)
+        val G = Formel.variable("G", 2000)
 
         val kMax = kMin(3000, G)
         assertEquals(2000, kMax.resultat())
@@ -810,12 +809,12 @@ class FormelTest {
 
     @Test
     fun `skal kunne utvide formel`() {
-        val gp = Formel("Grunnpensjon", 200.0)
-        val tp = Formel("Tilleggspensjon", 300.0)
+        val gp = Formel.variable("Grunnpensjon", 200.0)
+        val tp = Formel.variable("Tilleggspensjon", 300.0)
 
-        var sum = kmath<Int>().formel(avrund(gp + tp)).build()
+        var sum = FormelBuilder.create<Int>().expression(avrund(gp + tp)).build()
 
-        sum += Formel("Minstenivåtillegg", 500)
+        sum += Formel.variable("Minstenivåtillegg", 500)
 
         assertEquals(1000, sum.resultat())
     }
@@ -823,7 +822,7 @@ class FormelTest {
     @Test
     fun `skal feile ved ustøttet type`() {
         assertThrows<IllegalArgumentException> {
-            kmath<Float>()
+            FormelBuilder.create<Float>()
         }.also {
             assertEquals(
                 "Unsupported type class kotlin.Float. Only Int and Double are supported.",
@@ -846,18 +845,18 @@ class FormelTest {
     fun subformelMedEgneFelt() {
         val tp = Tilleggspensjon()
 
-        tp.apKap19MedGJR = kmath<Int>()
-            .formel(Formel("MedGJR", 34000))
+        tp.apKap19MedGJR = FormelBuilder.create<Int>()
+            .expression(Formel.variable("MedGJR", 34000))
             .build()
 
-        tp.apKap19UtenGJR = kmath<Int>()
-            .formel(Formel("MedGJR", 28000))
+        tp.apKap19UtenGJR = FormelBuilder.create<Int>()
+            .expression(Formel.variable("MedGJR", 28000))
             .build()
 
-        val uttaksgrad = Formel("uttaksgrad", 50)
+        val uttaksgrad = Formel.variable("uttaksgrad", 50)
 
-        tp.referansebelop = kmath<Int>()
-            .formel(avrund((tp.apKap19MedGJR - tp.apKap19UtenGJR) * 100 / uttaksgrad))
+        tp.referansebelop = FormelBuilder.create<Int>()
+            .expression(avrund((tp.apKap19MedGJR - tp.apKap19UtenGJR) * 100 / uttaksgrad))
             .build()
 
         assertEquals(34000, tp.apKap19MedGJR.resultat())
