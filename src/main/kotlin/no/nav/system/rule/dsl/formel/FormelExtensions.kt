@@ -10,7 +10,7 @@ package no.nav.system.rule.dsl.formel
 fun <T : Number> Formel<T>.named(name: String): Formel<T> = copy(emne = name)
 
 /**
- * Creates a locked copy of this formula  
+ * Creates a locked copy of this formula
  */
 fun <T : Number> Formel<T>.locked(): Formel<T> = copy(locked = true)
 
@@ -36,7 +36,7 @@ operator fun <T : Number> Formel<T>.plusAssign(right: Number): Unit =
     throw UnsupportedOperationException("Formulas are immutable. Use 'formula = formula + value' instead of 'formula += value'")
 
 /**
- * Operator overloading for -= (returns new formula, doesn't mutate)  
+ * Operator overloading for -= (returns new formula, doesn't mutate)
  */
 operator fun <T : Number> Formel<T>.minusAssign(right: Number): Unit =
     throw UnsupportedOperationException("Formulas are immutable. Use 'formula = formula - value' instead of 'formula -= value'")
