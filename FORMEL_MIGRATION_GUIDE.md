@@ -26,7 +26,6 @@ val grunnbeløp = Formel.variable("grunnbeløp", 118620)  // Clear intent
 val constant = Formel.constant(42)                      // Clear intent
 
 // Or even shorter with DSL:
-import no.nav.system.rule.dsl.formel.*
 val grunnbeløp = variable("grunnbeløp", 118620)
 val constant = constant(42)
 ```
