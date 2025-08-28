@@ -29,7 +29,7 @@ class FormelDslTest {
     fun `constant DSL function creates constant formula`() {
         val constant42 = constant(42)
         
-        assertTrue(constant42.emne.startsWith("anonymous"))
+        assertTrue(constant42.name.startsWith("anonymous"))
         assertEquals(42, constant42.resultat())
         assertEquals("42", constant42.notasjon)
         assertEquals("42", constant42.innhold)
@@ -39,7 +39,7 @@ class FormelDslTest {
     fun `constant DSL function works with Double values`() {
         val pi = constant(3.14159)
         
-        assertTrue(pi.emne.startsWith("anonymous"))
+        assertTrue(pi.name.startsWith("anonymous"))
         assertEquals(3.14159, pi.resultat())
         assertEquals("3.14159", pi.notasjon)
         assertEquals("3.14159", pi.innhold)
@@ -94,7 +94,7 @@ class FormelDslTest {
             unlocked()
         }
         
-        assertTrue(sum.emne.startsWith("anonymous"))
+        assertTrue(sum.name.startsWith("anonymous"))
         assertEquals("CALC", sum.prefix)
         assertFalse(sum.locked)
         assertEquals(30, sum.resultat())
@@ -112,7 +112,7 @@ class FormelDslTest {
             postfix("result")
         }
         
-        assertTrue(division.emne.startsWith("anonymous"))
+        assertTrue(division.name.startsWith("anonymous"))
         assertEquals("result", division.postfix)
         assertTrue(division.locked) // Default for builder formulas
         assertEquals(2.75, division.resultat())
