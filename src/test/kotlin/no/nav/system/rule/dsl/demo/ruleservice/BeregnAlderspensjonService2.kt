@@ -7,6 +7,8 @@ import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
+import no.nav.system.rule.dsl.demo.ruleservice.FaktumTracker.printPath
+import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -77,7 +79,7 @@ fun harYtelseFørDato(
 ): Faktum<Boolean> = Faktum(
     "$ytelse før $dato",
     forsteVirkningsdatoGrunnlagListe.any { it.kravlinjeType == ytelse && it.virkningsdato < dato }
-)
+).tracked()
 
 
 fun overgangsregler(
@@ -86,9 +88,12 @@ fun overgangsregler(
     virkningstidspunkt: Faktum<LocalDate>,
     kap20: Faktum<Boolean>
 ): Faktum<Boolean> {
-    val fødselsdato = person.value.fødselsdato
-    val fødselår = Faktum("fødselsår", fødselsdato.value.year)
-    val dato67m = Faktum<LocalDate>("Fødselsdato67m", fødselsdato.value.withDayOfMonth(1).plusYears(67).plusMonths(1))
+    val fødselsdato = person.value.fødselsdato.tracked()
+    val fødselår = Faktum("fødselsår", fødselsdato.value.year).tracked()
+    val dato67m = Faktum<LocalDate>(
+        "Fødselsdato67m",
+        fødselsdato.value.withDayOfMonth(1).plusYears(67).plusMonths(1)
+    ).tracked()
 
     val harYtelseFør2021 = listOf(
         YtelseEnum.UT,
@@ -102,18 +107,18 @@ fun overgangsregler(
     val trygdetid = kap20.hvis(
         ja = person.value.trygdetidK20.tt_fa_F2021,
         nei = person.value.trygdetidK19.tt_fa_F2021
-    )
+    ).tracked()
 
     val fødtFør1960OgTrygdetid20 = og(
         fødselår.erMindreEllerLik(1959),
         trygdetid.erStørreEllerLik(20)
-    )
+    ).tracked()
 
     return when {
         og(
             ytelse.erLik(YtelseEnum.AP),
             fødtFør1960OgTrygdetid20
-        ).verdi() -> Faktum("Overgangsregel_AP", true)
+        ).tracked().verdi() -> Faktum("Overgangsregel_AP", true)
 
         og(
             ytelse.erLik(YtelseEnum.AP),
@@ -122,8 +127,8 @@ fun overgangsregler(
             eller(
                 harYtelseFør2021[YtelseEnum.UT]!!,
                 harYtelseFør2021[YtelseEnum.GJP]!!
-            )
-        ).verdi() -> Faktum("Overgangsregel_AP_tidligereYtelse", true)
+            ).tracked()
+        ).tracked().verdi() -> Faktum("Overgangsregel_AP_tidligereYtelse", true)
 
         og(
             ytelse.erLik(YtelseEnum.GJR),
@@ -132,8 +137,8 @@ fun overgangsregler(
             eller(
                 harYtelseFør2021[YtelseEnum.UT_GJR]!!,
                 harYtelseFør2021[YtelseEnum.GJR]!!
-            )
-        ).verdi() -> Faktum("Overgangsregel_GJR_tidligereUT_GJT", true)
+            ).tracked()
+        ).tracked().verdi() -> Faktum("Overgangsregel_GJR_tidligereUT_GJT", true)
 
         else -> Faktum("Ingen overgangsregel", false)
     }
@@ -149,7 +154,7 @@ fun unntakForutgående(
     og(
         unntak ?: Faktum(tekst, false),
         unntakType?.erIListen(aktuelleUnntakstype) ?: Faktum(tekst, false)
-    )
+    ).tracked()
 }
 
 fun angittFlyktning(person: Faktum<Person>): Faktum<Boolean> =
@@ -159,12 +164,12 @@ fun angittFlyktning(person: Faktum<Person>): Faktum<Boolean> =
             person.value.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap?.unntak,
             person.value.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap?.unntakType,
             "InngangOgEksportgrunnlag/unntakFraForutgaendeMedlemskap er ikke oppgitt"
-        ),
+        ).tracked(),
         unntakForutgående(
             person.value.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT?.unntak,
             person.value.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT?.unntakType,
             "InngangOgEksportgrunnlag/unntakFraForutgaendeTT er ikke oppgitt"
-        )
+        ).tracked()
     )
 
 fun personErFlyktning(
@@ -187,7 +192,7 @@ fun personErFlyktning(
                 }
             )
         }
-    )
+    ).tracked()
 
 fun sumBotidNorgeMåneder(
     person: Faktum<Person>,
@@ -201,7 +206,7 @@ fun sumBotidNorgeMåneder(
             nei = { ChronoUnit.MONTHS.between(boperiode.verdi().fom, boperiode.verdi().tom) }
         )
     }.let { sum -> Faktum("sum botid måneder", sum) }
-}
+}.tracked()
 
 fun utledTrygdetidNorge(
     person: Faktum<Person>,
@@ -209,11 +214,12 @@ fun utledTrygdetidNorge(
     flyktningUtfall: Faktum<UtfallType>,
 ): Faktum<Trygdetid> = sumBotidNorgeMåneder(person).let { sumBotid ->
 
-    val firefemtedelkrav = Faktum("firefemtedel krav", 480L)
+    val firefemtedelkrav = Faktum("firefemtedelskrav", 480L)
     val dato1991 = Faktum(localDate(1991, 1, 1))
 
     Trygdetid(
         faktiskTrygdetidIMåneder = sumBotid,
+        firefemtedelskrav = firefemtedelkrav,
         redusertFremtidigTrygdetid = og(
             virkningstidspunkt.erStørreEllerLik(dato1991),
             sumBotid.erMindre(firefemtedelkrav)
@@ -226,7 +232,7 @@ fun utledTrygdetidNorge(
             nei = { (sumBotid.verdi() / 12.0).roundToInt() }
         )
     ).let { trygdetid -> Faktum("trygdetid", trygdetid) }
-}
+}.tracked()
 
 fun beregnGrunnpensjon(
     grunnbeløp: Faktum<Int>,
@@ -242,17 +248,23 @@ fun beregnGrunnpensjon(
             (grunnbeløp.verdi() * sats.verdi() * trygdetid.verdi() / maksTrygdetid).roundToInt()
         }
     )
-).let { grunnpensjon -> Faktum("grunnpensjon", grunnpensjon) }
+).let { grunnpensjon -> Faktum("grunnpensjon", grunnpensjon) }.tracked()
 
+object GrunnbeløpProvider {
+    private val resource = GrunnbeløpSatsResource()
 
-class BeregnAlderspensjonService2(
-    private val request: Request,
-) : AbstractDemoRuleService<Response>() {
-    override val ruleService: () -> Response = {
+    fun getGrunnbeløp(dato: LocalDate): Int =
+        resource.grunnbeløpMap.entries
+            .find { entry -> dato in entry.key }?.value ?: 0
+}
 
-        Faktum("person", request.person).let { person ->
+fun beregnAlderspensjonService(request: Request): Response =
 
-            val virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt)
+    FaktumTracker.startSession().let { sesjon ->
+
+        Faktum("person", request.person).tracked().let { person ->
+
+            val virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt).tracked()
 
             val personErFlyktning = personErFlyktning(
                 person,
@@ -264,13 +276,18 @@ class BeregnAlderspensjonService2(
             val trygdetid = utledTrygdetidNorge(person, virkningstidspunkt, personErFlyktning)
 
             val grunnpensjon = beregnGrunnpensjon(
-                Faktum("grunnbeløp",grunnbeløpByDate(virkningstidspunkt.value)),
-                Faktum("trygdetid",trygdetid.verdi().år),
+                Faktum("grunnbeløp", GrunnbeløpProvider.getGrunnbeløp(virkningstidspunkt.value)),
+                Faktum("trygdetid", trygdetid.verdi().år),
                 Faktum("er gift", person.verdi().erGift).hvis(
                     ja = Faktum("sats", 0.90),
                     nei = Faktum("sats", 1.00)
                 )
             )
+
+            printPath()
+
+//            println(trygdetid.debug(true))
+//            println(grunnpensjon.debug(true))
 
             Response(
                 anvendtTrygdetid = trygdetid.verdi(),
@@ -278,5 +295,3 @@ class BeregnAlderspensjonService2(
             )
         }
     }
-}
-

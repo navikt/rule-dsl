@@ -12,10 +12,10 @@ import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class BeregnAlderspensjonServiceTest2 {
+class BeregnAlderspensjonServiceTest3 {
 
     @Test
-    fun `redusert fremtidig trygdetid og høy sats`() {
+    fun `redusert fremtidig trygdetid og høy sats med regelgraf`() {
         val params = Request(
             virkningstidspunkt = localDate(2020, 1, 1), person = Person(
                 id = 1, fødselsdato = Faktum("Fødselsdato", localDate(1980, 3, 3)), erGift = false, boperioder = listOf(
@@ -24,7 +24,7 @@ class BeregnAlderspensjonServiceTest2 {
             )
         )
 
-        val response: Response = beregnAlderspensjonService(params)
+        val response: Response = BeregnAlderspensjonService3(params).run()
 
         assertEquals(3, response.anvendtTrygdetid?.år)
         assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.value)
@@ -36,7 +36,7 @@ class BeregnAlderspensjonServiceTest2 {
     }
 
     @Test
-    fun `ikke redusert fremtidig trygdetid og lav sats`() {
+    fun `ikke redusert fremtidig trygdetid og lav sats med regelgraf`() {
         val params = Request(
             virkningstidspunkt = localDate(1990, 5, 1), person = Person(
                 id = 1, fødselsdato = Faktum("Fødselsdato", localDate(1974, 3, 3)), erGift = true, boperioder = listOf(
@@ -48,7 +48,7 @@ class BeregnAlderspensjonServiceTest2 {
             )
         )
 
-        val response = beregnAlderspensjonService(params)
+        val response = BeregnAlderspensjonService3(params).run()
 
         assertEquals(19, response.anvendtTrygdetid?.år)
         assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.value)
