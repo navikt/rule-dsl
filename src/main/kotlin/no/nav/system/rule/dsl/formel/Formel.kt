@@ -191,14 +191,8 @@ class Formel<T : Number> internal constructor(
             }
         }
 
-        // Build variable map and check for conflicts
-        val newVarMap = buildMap {
-            if (!left.locked) putAll(left.namedVarMap)
-            if (!right.locked) putAll(right.namedVarMap)
-        }
-        
-        // Validate no conflicts
-        validateNoConflicts(left, right)
+        // Build and validate variable map in one step
+        val newVarMap = mergeAndValidateVarMaps(left, right)
 
         // Create the result with proper type safety
         val result = createTypedFormel<K>(
@@ -217,8 +211,44 @@ class Formel<T : Number> internal constructor(
     }
 
     /**
-     * Validates that variables from two different formulas are not in conflict
+     * Merges variable maps from two formulas while validating for conflicts.
+     * Only unlocked formulas contribute variables and can create conflicts.
+     * Locked formulas are treated as atomic units and don't participate in variable merging.
      */
+    internal fun mergeAndValidateVarMaps(
+        left: Formel<*>,
+        right: Formel<*>
+    ): Map<String, Number> {
+        // Check for formula name conflicts first
+        if (left.navn() == right.navn() && left.resultat() != right.resultat()) {
+            throw IllegalArgumentException("Formula conflict: '${left.navn()}' with value ${left.resultat()} would be reassigned to value ${right.resultat()}")
+        }
+        
+        // Build merged variable map with conflict detection
+        return buildMap {
+            // Add variables from left formula if it's unlocked
+            if (!left.locked) {
+                putAll(left.namedVarMap)
+            }
+            
+            // Add variables from right formula if it's unlocked, checking for conflicts
+            if (!right.locked) {
+                right.namedVarMap.forEach { (rightName, rightValue) ->
+                    val existingValue = this[rightName]
+                    if (existingValue != null && existingValue != rightValue) {
+                        throw IllegalArgumentException("Variable conflict: '$rightName' with value $existingValue would be reassigned to value $rightValue")
+                    }
+                    put(rightName, rightValue)
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates that variables from two different formulas are not in conflict
+     * @deprecated Use mergeAndValidateVarMaps instead
+     */
+    @Deprecated("Use mergeAndValidateVarMaps instead", ReplaceWith("mergeAndValidateVarMaps(left, right)"))
     private fun validateNoConflicts(
         left: Formel<*>,
         right: Formel<*>

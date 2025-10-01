@@ -24,20 +24,20 @@ private val maxFunction: (String, String) -> String = { a, b -> "max( $a, $b )" 
 
 // Both operands are Int, result should be Int
 @JvmName("maxIntInt")
-fun kMax(formelA: Formel<Int>, formelB: Formel<Int>): Formel<Int> =
+fun max(formelA: Formel<Int>, formelB: Formel<Int>): Formel<Int> =
     applySyntax2arg(formelA, formelB, false, maxFunction)
 
 // Both operands are Double, result should be Double
 @JvmName("maxDblDbl")
-fun kMax(formelA: Formel<Double>, formelB: Formel<Double>): Formel<Double> =
+fun max(formelA: Formel<Double>, formelB: Formel<Double>): Formel<Double> =
     applySyntax2arg(formelA, formelB, true, maxFunction)
 
 // Both operands are Int, result should be Int
-fun kMax(maks: Int, formel: Formel<Int>): Formel<Int> =
+fun max(maks: Int, formel: Formel<Int>): Formel<Int> =
     applySyntax2arg(Formel.constant(maks), formel, false, maxFunction)
 
 // At least one operand is Double, result should be Double
-fun kMax(maks: Double, formel: Formel<Double>): Formel<Double> =
+fun max(maks: Double, formel: Formel<Double>): Formel<Double> =
     applySyntax2arg(Formel.constant(maks), formel, true, maxFunction)
 
 /**
@@ -47,24 +47,24 @@ private val minFunction: (String, String) -> String = { a, b -> "min( $a, $b )" 
 
 // Both operands are Int, result should be Int
 @JvmName("minIntInt")
-fun kMin(formelA: Formel<Int>, formelB: Formel<Int>): Formel<Int> =
+fun min(formelA: Formel<Int>, formelB: Formel<Int>): Formel<Int> =
     applySyntax2arg(formelA, formelB, false, minFunction)
 
 // Both operands are Double, result should be Double
 @JvmName("minDblDbl")
-fun kMin(formelA: Formel<Double>, formelB: Formel<Double>): Formel<Double> =
+fun min(formelA: Formel<Double>, formelB: Formel<Double>): Formel<Double> =
     applySyntax2arg(formelA, formelB, true, minFunction)
 
 // Both operands are Int, result should be Int
-fun kMin(maks: Int, formel: Formel<Int>): Formel<Int> =
+fun min(maks: Int, formel: Formel<Int>): Formel<Int> =
     applySyntax2arg(Formel.constant(maks), formel, false, minFunction)
 
 // At least one operand is Double, result should be Double
-fun kMin(maks: Double, formel: Formel<Double>): Formel<Double> =
+fun min(maks: Double, formel: Formel<Double>): Formel<Double> =
     applySyntax2arg(Formel.constant(maks), formel, true, minFunction)
 
 private fun <T : Number> applySyntax1arg(formel: Formel<*>, shouldBeDouble: Boolean, syntax: (String) -> String): Formel<T> {
-    return Formel<T>(
+    return Formel(
         emne = formel.emne,
         prefix = formel.prefix,
         postfix = formel.postfix,
@@ -78,14 +78,14 @@ private fun <T : Number> applySyntax1arg(formel: Formel<*>, shouldBeDouble: Bool
 }
 
 private fun <T : Number> applySyntax2arg(formelA: Formel<*>, formelB: Formel<*>, shouldBeDouble: Boolean, syntax: (String, String) -> String): Formel<T> {
-    return Formel<T>(
+    return Formel(
         emne = formelA.emne,
         prefix = formelA.prefix,
         postfix = formelA.postfix,
         notasjon = syntax.invoke(formelA.notasjon, formelB.notasjon),
         innhold = syntax.invoke(formelA.innhold, formelB.innhold),
         subFormelList = formelA.subFormelList + formelB.subFormelList,
-        namedVarMap = formelA.namedVarMap + formelB.namedVarMap,
+        namedVarMap = formelA.mergeAndValidateVarMaps(formelA, formelB),
         locked = false, // Functions typically create unlocked results
         shouldBeDouble = shouldBeDouble
     )

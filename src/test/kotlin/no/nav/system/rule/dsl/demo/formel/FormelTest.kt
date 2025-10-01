@@ -778,7 +778,7 @@ class FormelTest {
         val G = Formel.variable("G", 2000)
         val f = 100 + G
 
-        val kMax = kMax(G, f)
+        val kMax = max(G, f)
         assertEquals(2100, kMax.resultat())
     }
 
@@ -786,7 +786,7 @@ class FormelTest {
     fun `skal returnere høyeste verdi ved bruk av kMax med Number og Formlel som input`() {
         val G = Formel.variable("G", 2000)
 
-        val kMax = kMax(3000, G)
+        val kMax = max(3000, G)
         assertEquals(3000, kMax.resultat())
     }
 
@@ -795,7 +795,7 @@ class FormelTest {
         val G = Formel.variable("G", 2000)
         val f = 100 + G
 
-        val kMax = kMin(G, f)
+        val kMax = min(G, f)
         assertEquals(2000, kMax.resultat())
     }
 
@@ -803,7 +803,7 @@ class FormelTest {
     fun `skal returnere lavest verdi ved bruk av kMax med Number og Formlel som input`() {
         val G = Formel.variable("G", 2000)
 
-        val kMax = kMin(3000, G)
+        val kMax = min(3000, G)
         assertEquals(2000, kMax.resultat())
     }
 
