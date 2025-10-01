@@ -34,7 +34,7 @@ class BeregnAlderspensjonFlyt(
         ).run(this)
 
         /**
-         * Task: Beregn Trygdetid
+         * Task: Beregn no.nav.pensjon.sliterordning.grunnlag.Trygdetid
          */
         output.anvendtTrygdetid = BeregnFaktiskTrygdetidRS(
             person.fødselsdato,

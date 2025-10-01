@@ -7,8 +7,8 @@ import no.nav.system.rule.dsl.rettsregel.Faktum
 
 class BeregnAlderspensjonService(
     private val request: Request,
-) : AbstractDemoRuleService<Response>() {
-    override val ruleService: () -> Response = {
+) : AbstractDemoRuleService<Response.Alderspensjon>() {
+    override val ruleService: () -> Response.Alderspensjon = {
 
         val output =
             BeregnAlderspensjonFlyt(
@@ -16,7 +16,7 @@ class BeregnAlderspensjonService(
                 Faktum("virkningstidspunkt", request.virkningstidspunkt)
             ).run(this)
 
-        Response(
+        Response.Alderspensjon(
             anvendtTrygdetid = output.anvendtTrygdetid,
             grunnpensjon = output.grunnpensjon
         )

@@ -3,7 +3,6 @@ package no.nav.system.rule.dsl.demo.ruleservice
 import no.nav.system.rule.dsl.demo.domain.Boperiode
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Request
-import no.nav.system.rule.dsl.demo.domain.Response
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.IKKE_OPPFYLT
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.OPPFYLT
@@ -24,7 +23,7 @@ class BeregnAlderspensjonServiceTest {
             )
         )
 
-        val response: Response = BeregnAlderspensjonService(params).run()
+        val response = BeregnAlderspensjonService(params).run()
 
         assertEquals(3, response.anvendtTrygdetid?.år)
         assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.value)
