@@ -1,5 +1,7 @@
 package no.nav.pensjon.sliterordning.resultat
 
+import no.nav.system.rule.dsl.rettsregel.Faktum
+
 data class Slitertillegg(
     val grunnbeløp: Int,
     val antallMånederEtterNedreAldersgrense: Long,
@@ -13,4 +15,8 @@ data class SlitertilleggVårVersjon(
     val grunnbeløp: Int,
     val antallMånederEtterNedreAldersgrense: Long,
     val slitertilleggBeregnet: Double
+)
+
+data class SlitertilleggFaktum(
+    val slitertilleggBeregnet: Faktum<Double>
 )

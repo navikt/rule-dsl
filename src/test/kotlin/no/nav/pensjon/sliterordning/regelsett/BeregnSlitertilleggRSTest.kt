@@ -5,6 +5,7 @@ import no.nav.pensjon.sliterordning.grunnlag.NormertPensjonsalder
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.grunnlag.Trygdetid
 import no.nav.pensjon.sliterordning.resultat.Slitertillegg
+import no.nav.system.rule.dsl.inspections.debug
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
