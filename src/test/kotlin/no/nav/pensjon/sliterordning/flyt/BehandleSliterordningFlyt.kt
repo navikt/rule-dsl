@@ -13,20 +13,32 @@ class BehandleSliterordningFlyt(
     val person: Person
 ) : AbstractRuleflow<Response.Sliterordning>() {
     override var ruleflow: () -> Response.Sliterordning = {
+        
         val innvilget = VilkårsprøvSlitertilleggRS().run(this)
-        val resultat: Response.Sliterordning =
-            forgrening("innvilget?") {
+        var sliterordning: Response.Sliterordning? = null
 
-                gren {
-                    betingelse("JA") {
-                        innvilget == true
-                    }
-                    flyt {
-                        return BeregnSlitertilleggRS(uttakstidspunkt, virkningstidspunkt, person).run(this)
-                    }
-
+        forgrening("innvilget?") {
+            gren {
+                betingelse("JA") { innvilget }
+                flyt {
+                    sliterordning = Response
+                        .Sliterordning
+                        .Innvilget(
+                            BeregnSlitertilleggRS(uttakstidspunkt, virkningstidspunkt, person).run(this)
+                        )
                 }
-
             }
+
+            gren {
+                betingelse("NEI") {
+                    innvilget == false
+                }
+                flyt {
+                    sliterordning = Response.Sliterordning.Avslag("avslag")
+                }
+            }
+        }
+
+        sliterordning!!
     }
 }
