@@ -1,6 +1,6 @@
 package no.nav.pensjon.sliterordning.resultat
 
-import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.formel.Formel
 
 data class Slitertillegg(
     val grunnbeløp: Int,
@@ -18,5 +18,5 @@ data class SlitertilleggVårVersjon(
 )
 
 data class SlitertilleggFaktum(
-    val slitertilleggBeregnet: Faktum<Double>
+    val slitertilleggBeregnet: Formel<Double>
 )
