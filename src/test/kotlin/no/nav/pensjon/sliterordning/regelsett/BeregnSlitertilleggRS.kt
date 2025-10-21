@@ -5,20 +5,20 @@ import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
 import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.TRE_ÅR
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.resultat.Slitertillegg
-import no.nav.system.rule.dsl.AbstractRuleset
-import no.nav.system.rule.dsl.demo.ruleservice.AbstractDemoRuleService
 import no.nav.system.rule.dsl.demo.ruleservice.grunnbeløpByYearMonth
 import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 class BeregnSlitertilleggRS(
-    val virkningstidspunkt: YearMonth, val person: Person
+    val uttakstidspunkt: YearMonth,
+    val virkningstidspunkt: YearMonth,
+    val person: Person
 ) : AbstractDemoRuleset<Slitertillegg>() {
 
     private val grunnbeløp by lazy { grunnbeløpByYearMonth(virkningstidspunkt) }
     private val antallMånederEtterNedreAldersgrense =
-        ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), virkningstidspunkt)
+        ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), uttakstidspunkt)
 
     private var fulltSlitertillegg: Double = 0.0
     private var justertSlitertillegg: Double = 0.0

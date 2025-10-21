@@ -5,21 +5,28 @@ import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
 import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.TRE_ÅR
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.resultat.SlitertilleggVårVersjon
-import no.nav.system.rule.dsl.AbstractRuleset
 import no.nav.system.rule.dsl.demo.ruleservice.grunnbeløpByYearMonth
 import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-
+/**
+ * Regelsett for beregning av slitertillegg - vår versjon
+ *
+ * https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering#
+ *
+ *
+ *
+ */
 class BeregnSlitertilleggRSVårVersjon(
+    val uttakstidspunkt: YearMonth,
     val virkningstidspunkt: YearMonth,
     val person: Person
 ) : AbstractDemoRuleset<SlitertilleggVårVersjon>() {
 
     private val grunnbeløp by lazy { grunnbeløpByYearMonth(virkningstidspunkt) }
     private val antallMånederEtterNedreAldersgrense =
-        ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), virkningstidspunkt)
+        ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), uttakstidspunkt)
 
     private var fulltSlitertillegg: Double = 0.0
     private var justeringsFaktor: Double = 0.0
