@@ -13,7 +13,7 @@ class BehandleSliterordningFlyt(
     val person: Person
 ) : AbstractRuleflow<Response.Sliterordning>() {
     override var ruleflow: () -> Response.Sliterordning = {
-        
+
         val innvilget = VilkårsprøvSlitertilleggRS().run(this)
         var sliterordning: Response.Sliterordning? = null
 
@@ -30,9 +30,7 @@ class BehandleSliterordningFlyt(
             }
 
             gren {
-                betingelse("NEI") {
-                    innvilget == false
-                }
+                betingelse("NEI") { !innvilget }
                 flyt {
                     sliterordning = Response.Sliterordning.Avslag("avslag")
                 }
