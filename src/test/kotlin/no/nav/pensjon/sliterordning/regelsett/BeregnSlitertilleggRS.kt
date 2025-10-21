@@ -5,8 +5,11 @@ import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
 import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.TRE_ÅR
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.resultat.Slitertillegg
+import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.ruleservice.grunnbeløpByYearMonth
 import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.erMindreEnn
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -17,14 +20,17 @@ class BeregnSlitertilleggRS(
 ) : AbstractDemoRuleset<Slitertillegg>() {
 
     private val grunnbeløp by lazy { grunnbeløpByYearMonth(virkningstidspunkt) }
-    private val antallMånederEtterNedreAldersgrense =
+    private val antallMånederEtterNedreAldersgrense = Faktum(
+        "antallMånederEtterNedreAldersgrense",
         ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), uttakstidspunkt)
+    )
 
     private var fulltSlitertillegg: Double = 0.0
     private var justertSlitertillegg: Double = 0.0
     private var avkortetSlitertilleggEtterTrygdetid: Double = 0.0
     private var slitertilleggBeregnet: Double = 0.0
 
+    @OptIn(DslDomainPredicate::class)
     override fun create() {
         regel("SLITERTILLEGG-BEREGNING-UAVKORTET") {
             HVIS { true }
@@ -34,10 +40,10 @@ class BeregnSlitertilleggRS(
         }
 
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
-            HVIS { antallMånederEtterNedreAldersgrense < TRE_ÅR }
+            HVIS { antallMånederEtterNedreAldersgrense erMindreEnn TRE_ÅR }
             SÅ {
                 justertSlitertillegg =
-                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense) / TRE_ÅR.toDouble())
+                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense.value) / TRE_ÅR.toDouble())
             }
             ELLERS {
                 justertSlitertillegg = 0.0
@@ -56,7 +62,7 @@ class BeregnSlitertilleggRS(
             HVIS { true }
             SÅ {
                 slitertilleggBeregnet =
-                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense) / TRE_ÅR.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
+                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense.value) / TRE_ÅR.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
             }
         }
 
@@ -66,7 +72,7 @@ class BeregnSlitertilleggRS(
                 RETURNER(
                     Slitertillegg(
                         grunnbeløp = grunnbeløp,
-                        antallMånederEtterNedreAldersgrense = antallMånederEtterNedreAldersgrense,
+                        antallMånederEtterNedreAldersgrense = antallMånederEtterNedreAldersgrense.value,
                         fulltSlitertillegg = fulltSlitertillegg,
                         justertSlitertillegg = justertSlitertillegg,
                         avkortetSlitertilleggEtterTrygdetid = avkortetSlitertilleggEtterTrygdetid,
