@@ -29,7 +29,7 @@ class BeregnFaktiskTrygdetidRS(
      */
     private val norskeBoperioder = boperiodeListe.createPattern { it.land == LandEnum.NOR }
     private val dato16år = fødselsdato.value.plusYears(16)
-    private val dato1991 = Faktum(localDate(1991, 1, 1))
+    private val dato1991 = Faktum("januar 1991", localDate(1991, 1, 1))
     private val svar = Trygdetid()
 
     @OptIn(DslDomainPredicate::class)
