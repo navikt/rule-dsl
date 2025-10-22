@@ -3,7 +3,7 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGEL
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.AbstractSubsumtion
+import no.nav.system.rule.dsl.rettsregel.DomainPredicate
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.erLik
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
@@ -112,7 +112,7 @@ open class Rule<T : Any>(
     @OverloadResolutionByLambdaReturnType
     @JvmName("arcHVIS")
     @DslDomainPredicate
-    fun HVIS(arcFunction: () -> AbstractSubsumtion) {
+    fun HVIS(arcFunction: () -> DomainPredicate) {
         OG(arcFunction)
     }
 
@@ -122,7 +122,7 @@ open class Rule<T : Any>(
     @OverloadResolutionByLambdaReturnType
     @JvmName("arcOG")
     @DslDomainPredicate
-    fun OG(arcFunction: () -> AbstractSubsumtion) {
+    fun OG(arcFunction: () -> DomainPredicate) {
         predicateFunctionList.add(arcFunction)
     }
 
@@ -168,7 +168,7 @@ open class Rule<T : Any>(
             predicateFunctionList.forEach { predicateFunction ->
                 val predicate = predicateFunction.invoke()
 
-                if (predicate is AbstractSubsumtion) {
+                if (predicate is DomainPredicate) {
                     this.children.add(predicate)
                 }
 

@@ -2,7 +2,6 @@ package no.nav.system.rule.dsl.inspections
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
-import no.nav.system.rule.dsl.rettsregel.helper.isLeafFaktum
 
 /**
  * Searches the ruleComponent tree for target [AbstractRuleComponent]s matching [target].
@@ -34,21 +33,20 @@ private fun inspect(
     qualifier: (AbstractRuleComponent) -> Boolean,
     target: (AbstractRuleComponent) -> Boolean
 ) {
-    if (parent.arc.isLeafFaktum()) return
     parent.arc.children
         .filter(qualifier)
-        .filterNot { !includeLeafFaktum && it.isLeafFaktum() }.forEach { child ->
-        TraceNode(
-            parent = parent,
-            arc = child
-        ).apply {
-            parent.children.add(this)
-            if (target.invoke(child)) {
-                this.verify()
+        .forEach { child ->
+            TraceNode(
+                parent = parent,
+                arc = child
+            ).apply {
+                parent.children.add(this)
+                if (target.invoke(child)) {
+                    this.verify()
+                }
+                inspect(this, includeLeafFaktum, qualifier, target)
             }
-            inspect(this, includeLeafFaktum, qualifier, target)
         }
-    }
 }
 
 

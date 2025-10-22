@@ -1,17 +1,15 @@
 package no.nav.system.rule.dsl.enums
 
 enum class RuleComponentType {
-    PAR_SUBSUMSJON,
-    LISTE_SUBSUMSJON,
-    FAKTUM,
-    PREDIKAT,
+    REGELTJENESTE,
+    REGELFLYT,
     FORGRENING,
     GREN,
-    REGEL,
-    REGELFLYT,
     REGELSETT,
-    REGELTJENESTE,
-    FORMEL;
+    REGEL,
+    PREDIKAT,
+    DOMENE_PREDIKAT_PAR,
+    DOMENE_PREDIKAT_LISTE;
 
     override fun toString(): String {
         return name.lowercase()

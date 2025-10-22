@@ -7,10 +7,7 @@ import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
-import no.nav.system.rule.dsl.enums.ListComparator.INGEN
-import no.nav.system.rule.dsl.enums.ListComparator.MINST_EN_AV
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

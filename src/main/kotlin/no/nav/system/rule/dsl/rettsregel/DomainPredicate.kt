@@ -5,21 +5,21 @@ import no.nav.system.rule.dsl.enums.Comparator
 import no.nav.system.rule.dsl.enums.ListComparator
 import no.nav.system.rule.dsl.enums.PairComparator
 import no.nav.system.rule.dsl.enums.RuleComponentType
-import no.nav.system.rule.dsl.enums.RuleComponentType.LISTE_SUBSUMSJON
-import no.nav.system.rule.dsl.enums.RuleComponentType.PAR_SUBSUMSJON
+import no.nav.system.rule.dsl.enums.RuleComponentType.DOMENE_PREDIKAT_LISTE
+import no.nav.system.rule.dsl.enums.RuleComponentType.DOMENE_PREDIKAT_PAR
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
 /**
- * The application of a [function] on [Faktum].
+ * The application of a [function] that returns the boolean.
  */
-abstract class AbstractSubsumtion(
+abstract class DomainPredicate(
     open val comparator: Comparator,
     override val function: () -> Boolean,
 ) : Predicate(function = function) {
 
     /**
      * Evaluates the predicate function.
-     * Sumsumtions never terminates callers evaluation chain ([terminateEvaluation] )
+     * DomainPredicate never terminates callers evaluation chain ([terminateEvaluation] )
      *
      * @return boolean result of function.
      */
@@ -31,19 +31,19 @@ abstract class AbstractSubsumtion(
 /**
  * Compares [verdi1] with [verdi2]
  */
-class PairSubsumtion(
+class PairDomainPredicate(
     override val comparator: PairComparator,
     private val verdi1: Verdi<*>,
     private val verdi2: Verdi<*>,
     override val function: () -> Boolean,
-) : AbstractSubsumtion(comparator = comparator, function = function) {
+) : DomainPredicate(comparator = comparator, function = function) {
 
     init {
 //        if (verdi1.name != verdi1.value) this.children.add(verdi1)
 //        if (verdi2.name != verdi2.value) this.children.add(verdi2)
     }
 
-    override fun type(): RuleComponentType = PAR_SUBSUMSJON
+    override fun type(): RuleComponentType = DOMENE_PREDIKAT_PAR
 
     override fun toString(): String {
         val komparatorText = if (fired) comparator.text else comparator.negated()
@@ -52,23 +52,23 @@ class PairSubsumtion(
 }
 
 /**
- * Compares [faktum] relationship with items [verdiList]
+ * Compares [verdi] relationship with items [verdiList]
  */
-class ListSubsumtion(
+class ListDomainPredicate(
     override val comparator: ListComparator,
-    private val faktum: Verdi<*>,
+    private val verdi: Verdi<*>,
     val verdiList: List<Verdi<*>>,
-    override val function: () -> Boolean,
-) : AbstractSubsumtion(comparator = comparator, function = function) {
+    override val function: () -> Boolean
+) : DomainPredicate(comparator = comparator, function = function) {
 
     init {
 //        this.children.addAll(abstractRuleComponentList)
     }
 
-    override fun type(): RuleComponentType = LISTE_SUBSUMSJON
+    override fun type(): RuleComponentType = DOMENE_PREDIKAT_LISTE
 
     override fun toString(): String {
         val komparatorText = if (fired) comparator.text else comparator.negated()
-        return "${fired.svarord()} $faktum$komparatorText$verdiList"
+        return "${fired.svarord()} $verdi$komparatorText$verdiList"
     }
 }

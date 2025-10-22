@@ -4,8 +4,7 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.AbstractRuleflow
 import no.nav.system.rule.dsl.Predicate
 import no.nav.system.rule.dsl.Rule
-import no.nav.system.rule.dsl.rettsregel.AbstractSubsumtion
-import no.nav.system.rule.dsl.rettsregel.helper.isLeafFaktum
+import no.nav.system.rule.dsl.rettsregel.DomainPredicate
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -20,7 +19,7 @@ fun AbstractRuleComponent.xmlDebug(): String {
 private fun inspect(arc: AbstractRuleComponent, debugString: StringBuilder, level: Int) {
     debugString.append(" ".repeat(level * 2))
     var tagName = arc.name()
-    val relevantChildren = arc.children.filterNot { it.isLeafFaktum() }
+    val relevantChildren = arc.children
     var leafElement = relevantChildren.isEmpty()
 
     when (arc) {
@@ -43,7 +42,7 @@ private fun inspect(arc: AbstractRuleComponent, debugString: StringBuilder, leve
             }
         }
 
-        is AbstractSubsumtion -> {
+        is DomainPredicate -> {
             leafElement = true
             openAndCloseContentTag(debugString, arc.type().toString(), arc.toString(), " fired=\"${arc.fired()}\"")
         }

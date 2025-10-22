@@ -7,7 +7,7 @@ import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.ListSubsumtion
+import no.nav.system.rule.dsl.rettsregel.ListDomainPredicate
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -165,11 +165,11 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
         return maxSequence + 100
     }
 
-    protected fun String.minstEnHarTruffet(): ListSubsumtion {
+    protected fun String.minstEnHarTruffet(): ListDomainPredicate {
         val list = findRulesByNameStartsWith(this)
-        return ListSubsumtion(
+        return ListDomainPredicate(
             comparator = ListComparator.MINST_EN_AV,
-            faktum = Faktum("Regelreferanse", this),
+            verdi = Faktum("Regelreferanse", this),
             function = { list.any { it.fired() } },
             verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) },
         )
@@ -182,21 +182,21 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
      *          "JA AngittFlyktning_r2"
      *          "JA AngittFlyktning_r3"
      */
-    protected fun String.alleHarTruffet(): ListSubsumtion {
+    protected fun String.alleHarTruffet(): ListDomainPredicate {
         val list = findRulesByNameStartsWith(this)
-        return ListSubsumtion(
+        return ListDomainPredicate(
             comparator = ListComparator.ALLE,
-            faktum = Faktum("Regelreferanse", this),
+            verdi = Faktum("Regelreferanse", this),
             function = { list.all { it.fired() } },
             verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) }
         )
     }
 
-    protected fun String.ingenHarTruffet(): ListSubsumtion {
+    protected fun String.ingenHarTruffet(): ListDomainPredicate {
         val list = findRulesByNameStartsWith(this)
-        return ListSubsumtion(
+        return ListDomainPredicate(
             comparator = ListComparator.INGEN,
-            faktum = Faktum("Regelreferanse", this),
+            verdi = Faktum("Regelreferanse", this),
             function = { list.none { it.fired() } },
             verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) }
         )
