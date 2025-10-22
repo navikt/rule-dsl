@@ -13,7 +13,7 @@ class FormelExtensionsTest {
         
         assertEquals("newName", renamed.emne)
         assertEquals("original", original.emne)
-        assertEquals(100, renamed.resultat())
+        assertEquals(100, renamed.value)
         assertNotSame(original, renamed)
     }
 
@@ -24,7 +24,7 @@ class FormelExtensionsTest {
         
         assertTrue(locked.locked)
         assertFalse(unlocked.locked)
-        assertEquals(50, locked.resultat())
+        assertEquals(50, locked.value)
         assertNotSame(unlocked, locked)
     }
 
@@ -35,7 +35,7 @@ class FormelExtensionsTest {
         
         assertFalse(unlocked.locked)
         assertTrue(locked.locked)
-        assertEquals(75, unlocked.resultat())
+        assertEquals(75, unlocked.value)
         assertNotSame(locked, unlocked)
     }
 
@@ -46,7 +46,7 @@ class FormelExtensionsTest {
         
         assertEquals("TP", withPrefix.prefix)
         assertEquals("", original.prefix)
-        assertEquals(200, withPrefix.resultat())
+        assertEquals(200, withPrefix.value)
         assertNotSame(original, withPrefix)
     }
 
@@ -57,7 +57,7 @@ class FormelExtensionsTest {
         
         assertEquals("brutto", withPostfix.postfix)
         assertEquals("", original.postfix)
-        assertEquals(300, withPostfix.resultat())
+        assertEquals(300, withPostfix.value)
         assertNotSame(original, withPostfix)
     }
 
@@ -118,7 +118,7 @@ class FormelExtensionsTest {
         assertEquals("TP", chained.prefix)
         assertEquals("brutto", chained.postfix)
         assertTrue(chained.locked)
-        assertEquals(123, chained.resultat())
+        assertEquals(123, chained.value)
         
         // Original should remain unchanged
         assertEquals("original", original.emne)
@@ -137,7 +137,7 @@ class FormelExtensionsTest {
         
         assertEquals("newInt", renamedInt.emne)
         assertEquals("newDouble", renamedDouble.emne)
-        assertEquals(42, renamedInt.resultat())
-        assertEquals(42.5, renamedDouble.resultat())
+        assertEquals(42, renamedInt.value)
+        assertEquals(42.5, renamedDouble.value)
     }
 }

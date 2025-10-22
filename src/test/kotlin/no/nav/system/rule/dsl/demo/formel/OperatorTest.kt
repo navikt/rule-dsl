@@ -28,20 +28,20 @@ class OperatorTest {
         val dblFormelPlusDblFormel: Formel<Double> = dblFormel + dblFormel
 
         // Assertions
-        assertEquals(12, intPlusIntFormel.resultat())
-        assertEquals(12, intFormelPlusInt.resultat())
-        assertEquals(24.4, dblPlusDblFormel.resultat())
-        assertEquals(24.4, dblFormelPlusDbl.resultat())
+        assertEquals(12, intPlusIntFormel.value)
+        assertEquals(12, intFormelPlusInt.value)
+        assertEquals(24.4, dblPlusDblFormel.value)
+        assertEquals(24.4, dblFormelPlusDbl.value)
 
-        assertEquals(23.2, intPlusDblFormel.resultat())
-        assertEquals(23.2, dblFormelPlusInt.resultat())
-        assertEquals(13.2, dblPlusIntFormel.resultat())
-        assertEquals(13.2, intFormelPlusDbl.resultat())
+        assertEquals(23.2, intPlusDblFormel.value)
+        assertEquals(23.2, dblFormelPlusInt.value)
+        assertEquals(13.2, dblPlusIntFormel.value)
+        assertEquals(13.2, intFormelPlusDbl.value)
 
-        assertEquals(22, intFormelPlusIntFormel.resultat())
-        assertEquals(33.2, intFormelPlusDblFormel.resultat())
-        assertEquals(33.2, dblFormelPlusIntFormel.resultat())
-        assertEquals(44.4, dblFormelPlusDblFormel.resultat())
+        assertEquals(22, intFormelPlusIntFormel.value)
+        assertEquals(33.2, intFormelPlusDblFormel.value)
+        assertEquals(33.2, dblFormelPlusIntFormel.value)
+        assertEquals(44.4, dblFormelPlusDblFormel.value)
     }
 
     @Test
@@ -63,20 +63,20 @@ class OperatorTest {
         val dslDblFormelPlusDblFormel = formula<Double> { expression(dblFormel + dblFormel) }
 
         // Assertions
-        assertEquals(12, dslIntPlusIntFormel.resultat())
-        assertEquals(12, dslIntFormelPlusInt.resultat())
-        assertEquals(24.4, dslDblPlusDblFormel.resultat())
-        assertEquals(24.4, dslDblFormelPlusDbl.resultat())
+        assertEquals(12, dslIntPlusIntFormel.value)
+        assertEquals(12, dslIntFormelPlusInt.value)
+        assertEquals(24.4, dslDblPlusDblFormel.value)
+        assertEquals(24.4, dslDblFormelPlusDbl.value)
 
-        assertEquals(23.2, dslIntPlusDblFormel.resultat())
-        assertEquals(23.2, dslDblFormelPlusInt.resultat())
-        assertEquals(13.2, dslDblPlusIntFormel.resultat())
-        assertEquals(13.2, dslIntFormelPlusDbl.resultat())
+        assertEquals(23.2, dslIntPlusDblFormel.value)
+        assertEquals(23.2, dslDblFormelPlusInt.value)
+        assertEquals(13.2, dslDblPlusIntFormel.value)
+        assertEquals(13.2, dslIntFormelPlusDbl.value)
 
-        assertEquals(22, dslIntFormelPlusIntFormel.resultat())
-        assertEquals(33.2, dslIntFormelPlusDblFormel.resultat())
-        assertEquals(33.2, dslDblFormelPlusIntFormel.resultat())
-        assertEquals(44.4, dslDblFormelPlusDblFormel.resultat())
+        assertEquals(22, dslIntFormelPlusIntFormel.value)
+        assertEquals(33.2, dslIntFormelPlusDblFormel.value)
+        assertEquals(33.2, dslDblFormelPlusIntFormel.value)
+        assertEquals(44.4, dslDblFormelPlusDblFormel.value)
     }
 
     @Test
@@ -134,20 +134,20 @@ class OperatorTest {
             .build()
 
         // Assertions
-        assertEquals(12, builderIntPlusIntFormel.resultat())
-        assertEquals(12, builderIntFormelPlusInt.resultat())
-        assertEquals(24.4, builderDblPlusDblFormel.resultat())
-        assertEquals(24.4, builderDblFormelPlusDbl.resultat())
+        assertEquals(12, builderIntPlusIntFormel.value)
+        assertEquals(12, builderIntFormelPlusInt.value)
+        assertEquals(24.4, builderDblPlusDblFormel.value)
+        assertEquals(24.4, builderDblFormelPlusDbl.value)
 
-        assertEquals(23.2, builderIntPlusDblFormel.resultat())
-        assertEquals(23.2, builderDblFormelPlusInt.resultat())
-        assertEquals(13.2, builderDblPlusIntFormel.resultat())
-        assertEquals(13.2, builderIntFormelPlusDbl.resultat())
+        assertEquals(23.2, builderIntPlusDblFormel.value)
+        assertEquals(23.2, builderDblFormelPlusInt.value)
+        assertEquals(13.2, builderDblPlusIntFormel.value)
+        assertEquals(13.2, builderIntFormelPlusDbl.value)
 
-        assertEquals(22, builderIntFormelPlusIntFormel.resultat())
-        assertEquals(33.2, builderIntFormelPlusDblFormel.resultat())
-        assertEquals(33.2, builderDblFormelPlusIntFormel.resultat())
-        assertEquals(44.4, builderDblFormelPlusDblFormel.resultat())
+        assertEquals(22, builderIntFormelPlusIntFormel.value)
+        assertEquals(33.2, builderIntFormelPlusDblFormel.value)
+        assertEquals(33.2, builderDblFormelPlusIntFormel.value)
+        assertEquals(44.4, builderDblFormelPlusDblFormel.value)
     }
 
     @Test
@@ -169,20 +169,20 @@ class OperatorTest {
         val dblFormelMinusDblFormel: Formel<Double> = dblFormel - dblFormel
 
         // Assertions
-        assertEquals(-10, intMinusIntFormel.resultat())
-        assertEquals(10, intFormelMinusInt.resultat())
-        assertEquals(-20.0, dblMinusDblFormel.resultat())
-        assertEquals(20.0, dblFormelMinusDbl.resultat())
+        assertEquals(-10, intMinusIntFormel.value)
+        assertEquals(10, intFormelMinusInt.value)
+        assertEquals(-20.0, dblMinusDblFormel.value)
+        assertEquals(20.0, dblFormelMinusDbl.value)
 
-        assertEquals(-21.2, intMinusDblFormel.resultat())
-        assertEquals(21.2, dblFormelMinusInt.resultat())
-        assertEquals(-8.8, dblMinusIntFormel.resultat())
-        assertEquals(8.8, intFormelMinusDbl.resultat())
+        assertEquals(-21.2, intMinusDblFormel.value)
+        assertEquals(21.2, dblFormelMinusInt.value)
+        assertEquals(-8.8, dblMinusIntFormel.value)
+        assertEquals(8.8, intFormelMinusDbl.value)
 
-        assertEquals(0, intFormelMinusIntFormel.resultat())
-        assertEquals(-11.2, intFormelMinusDblFormel.resultat())
-        assertEquals(11.2, dblFormelMinusIntFormel.resultat())
-        assertEquals(0.0, dblFormelMinusDblFormel.resultat())
+        assertEquals(0, intFormelMinusIntFormel.value)
+        assertEquals(-11.2, intFormelMinusDblFormel.value)
+        assertEquals(11.2, dblFormelMinusIntFormel.value)
+        assertEquals(0.0, dblFormelMinusDblFormel.value)
     }
 
     @Test
@@ -204,20 +204,20 @@ class OperatorTest {
         val dslDblFormelMinusDblFormel = formula<Double> { expression(dblFormel - dblFormel) }
 
         // Assertions
-        assertEquals(-10, dslIntMinusIntFormel.resultat())
-        assertEquals(10, dslIntFormelMinusInt.resultat())
-        assertEquals(-20.0, dslDblMinusDblFormel.resultat())
-        assertEquals(20.0, dslDblFormelMinusDbl.resultat())
+        assertEquals(-10, dslIntMinusIntFormel.value)
+        assertEquals(10, dslIntFormelMinusInt.value)
+        assertEquals(-20.0, dslDblMinusDblFormel.value)
+        assertEquals(20.0, dslDblFormelMinusDbl.value)
 
-        assertEquals(-21.2, dslIntMinusDblFormel.resultat())
-        assertEquals(21.2, dslDblFormelMinusInt.resultat())
-        assertEquals(-8.8, dslDblMinusIntFormel.resultat())
-        assertEquals(8.8, dslIntFormelMinusDbl.resultat())
+        assertEquals(-21.2, dslIntMinusDblFormel.value)
+        assertEquals(21.2, dslDblFormelMinusInt.value)
+        assertEquals(-8.8, dslDblMinusIntFormel.value)
+        assertEquals(8.8, dslIntFormelMinusDbl.value)
 
-        assertEquals(0, dslIntFormelMinusIntFormel.resultat())
-        assertEquals(-11.2, dslIntFormelMinusDblFormel.resultat())
-        assertEquals(11.2, dslDblFormelMinusIntFormel.resultat())
-        assertEquals(0.0, dslDblFormelMinusDblFormel.resultat())
+        assertEquals(0, dslIntFormelMinusIntFormel.value)
+        assertEquals(-11.2, dslIntFormelMinusDblFormel.value)
+        assertEquals(11.2, dslDblFormelMinusIntFormel.value)
+        assertEquals(0.0, dslDblFormelMinusDblFormel.value)
     }
 
     @Test
@@ -275,20 +275,20 @@ class OperatorTest {
             .build()
 
         // Assertions
-        assertEquals(-10, builderIntMinusIntFormel.resultat())
-        assertEquals(10, builderIntFormelMinusInt.resultat())
-        assertEquals(-20.0, builderDblMinusDblFormel.resultat())
-        assertEquals(20.0, builderDblFormelMinusDbl.resultat())
+        assertEquals(-10, builderIntMinusIntFormel.value)
+        assertEquals(10, builderIntFormelMinusInt.value)
+        assertEquals(-20.0, builderDblMinusDblFormel.value)
+        assertEquals(20.0, builderDblFormelMinusDbl.value)
 
-        assertEquals(-21.2, builderIntMinusDblFormel.resultat())
-        assertEquals(21.2, builderDblFormelMinusInt.resultat())
-        assertEquals(-8.8, builderDblMinusIntFormel.resultat())
-        assertEquals(8.8, builderIntFormelMinusDbl.resultat())
+        assertEquals(-21.2, builderIntMinusDblFormel.value)
+        assertEquals(21.2, builderDblFormelMinusInt.value)
+        assertEquals(-8.8, builderDblMinusIntFormel.value)
+        assertEquals(8.8, builderIntFormelMinusDbl.value)
 
-        assertEquals(0, builderIntFormelMinusIntFormel.resultat())
-        assertEquals(-11.2, builderIntFormelMinusDblFormel.resultat())
-        assertEquals(11.2, builderDblFormelMinusIntFormel.resultat())
-        assertEquals(0.0, builderDblFormelMinusDblFormel.resultat())
+        assertEquals(0, builderIntFormelMinusIntFormel.value)
+        assertEquals(-11.2, builderIntFormelMinusDblFormel.value)
+        assertEquals(11.2, builderDblFormelMinusIntFormel.value)
+        assertEquals(0.0, builderDblFormelMinusDblFormel.value)
     }
 
     @Test
@@ -310,20 +310,20 @@ class OperatorTest {
         val dblFormelTimesDblFormel: Formel<Double> = dblFormel * dblFormel
 
         // Assertions
-        assertEquals(22, intTimesIntFormel.resultat())
-        assertEquals(22, intFormelTimesInt.resultat())
-        assertEquals(48.84, dblTimesDblFormel.resultat())
-        assertEquals(48.84, dblFormelTimesDbl.resultat())
+        assertEquals(22, intTimesIntFormel.value)
+        assertEquals(22, intFormelTimesInt.value)
+        assertEquals(48.84, dblTimesDblFormel.value)
+        assertEquals(48.84, dblFormelTimesDbl.value)
 
-        assertEquals(44.4, intTimesDblFormel.resultat())
-        assertEquals(44.4, dblFormelTimesInt.resultat())
-        assertEquals(24.20, dblTimesIntFormel.resultat(), 0.01)
-        assertEquals(24.20, intFormelTimesDbl.resultat(), 0.01)
+        assertEquals(44.4, intTimesDblFormel.value)
+        assertEquals(44.4, dblFormelTimesInt.value)
+        assertEquals(24.20, dblTimesIntFormel.value, 0.01)
+        assertEquals(24.20, intFormelTimesDbl.value, 0.01)
 
-        assertEquals(121, intFormelTimesIntFormel.resultat())
-        assertEquals(244.2, intFormelTimesDblFormel.resultat())
-        assertEquals(244.2, dblFormelTimesIntFormel.resultat())
-        assertEquals(492.84, dblFormelTimesDblFormel.resultat())
+        assertEquals(121, intFormelTimesIntFormel.value)
+        assertEquals(244.2, intFormelTimesDblFormel.value)
+        assertEquals(244.2, dblFormelTimesIntFormel.value)
+        assertEquals(492.84, dblFormelTimesDblFormel.value)
     }
 
     @Test
@@ -345,20 +345,20 @@ class OperatorTest {
         val dslDblFormelTimesDblFormel = formula<Double> { expression(dblFormel * dblFormel) }
 
         // Assertions
-        assertEquals(22, dslIntTimesIntFormel.resultat())
-        assertEquals(22, dslIntFormelTimesInt.resultat())
-        assertEquals(48.84, dslDblTimesDblFormel.resultat())
-        assertEquals(48.84, dslDblFormelTimesDbl.resultat())
+        assertEquals(22, dslIntTimesIntFormel.value)
+        assertEquals(22, dslIntFormelTimesInt.value)
+        assertEquals(48.84, dslDblTimesDblFormel.value)
+        assertEquals(48.84, dslDblFormelTimesDbl.value)
 
-        assertEquals(44.4, dslIntTimesDblFormel.resultat())
-        assertEquals(44.4, dslDblFormelTimesInt.resultat())
-        assertEquals(24.20, dslDblTimesIntFormel.resultat(), 0.0001)
-        assertEquals(24.20, dslIntFormelTimesDbl.resultat(), 0.0001)
+        assertEquals(44.4, dslIntTimesDblFormel.value)
+        assertEquals(44.4, dslDblFormelTimesInt.value)
+        assertEquals(24.20, dslDblTimesIntFormel.value, 0.0001)
+        assertEquals(24.20, dslIntFormelTimesDbl.value, 0.0001)
 
-        assertEquals(121, dslIntFormelTimesIntFormel.resultat())
-        assertEquals(244.2, dslIntFormelTimesDblFormel.resultat())
-        assertEquals(244.2, dslDblFormelTimesIntFormel.resultat())
-        assertEquals(492.84, dslDblFormelTimesDblFormel.resultat())
+        assertEquals(121, dslIntFormelTimesIntFormel.value)
+        assertEquals(244.2, dslIntFormelTimesDblFormel.value)
+        assertEquals(244.2, dslDblFormelTimesIntFormel.value)
+        assertEquals(492.84, dslDblFormelTimesDblFormel.value)
     }
 
     @Test
@@ -416,20 +416,20 @@ class OperatorTest {
             .build()
 
         // Assertions
-        assertEquals(22, builderIntTimesIntFormel.resultat())
-        assertEquals(22, builderIntFormelTimesInt.resultat())
-        assertEquals(48.84, builderDblTimesDblFormel.resultat())
-        assertEquals(48.84, builderDblFormelTimesDbl.resultat())
+        assertEquals(22, builderIntTimesIntFormel.value)
+        assertEquals(22, builderIntFormelTimesInt.value)
+        assertEquals(48.84, builderDblTimesDblFormel.value)
+        assertEquals(48.84, builderDblFormelTimesDbl.value)
 
-        assertEquals(44.4, builderIntTimesDblFormel.resultat())
-        assertEquals(44.4, builderDblFormelTimesInt.resultat())
-        assertEquals(24.20, builderDblTimesIntFormel.resultat(), 0.0001)
-        assertEquals(24.20, builderIntFormelTimesDbl.resultat(), 0.0001)
+        assertEquals(44.4, builderIntTimesDblFormel.value)
+        assertEquals(44.4, builderDblFormelTimesInt.value)
+        assertEquals(24.20, builderDblTimesIntFormel.value, 0.0001)
+        assertEquals(24.20, builderIntFormelTimesDbl.value, 0.0001)
 
-        assertEquals(121, builderIntFormelTimesIntFormel.resultat())
-        assertEquals(244.2, builderIntFormelTimesDblFormel.resultat())
-        assertEquals(244.2, builderDblFormelTimesIntFormel.resultat())
-        assertEquals(492.84, builderDblFormelTimesDblFormel.resultat())
+        assertEquals(121, builderIntFormelTimesIntFormel.value)
+        assertEquals(244.2, builderIntFormelTimesDblFormel.value)
+        assertEquals(244.2, builderDblFormelTimesIntFormel.value)
+        assertEquals(492.84, builderDblFormelTimesDblFormel.value)
     }
 
     @Test
@@ -451,20 +451,20 @@ class OperatorTest {
         val dblFormelDividedByDblFormel: Formel<Double> = dblFormel / dblFormel
 
         // Assertions
-        assertEquals(1.8181, intDividedByIntFormel.resultat(), 0.0001)
-        assertEquals(5.5, intFormelDividedByInt.resultat())
-        assertEquals(2.1801, dblDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(10.0909, dblFormelDividedByDbl.resultat(), 0.0001)
+        assertEquals(1.8181, intDividedByIntFormel.value, 0.0001)
+        assertEquals(5.5, intFormelDividedByInt.value)
+        assertEquals(2.1801, dblDividedByDblFormel.value, 0.0001)
+        assertEquals(10.0909, dblFormelDividedByDbl.value, 0.0001)
 
-        assertEquals(0.9909, intDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(11.1, dblFormelDividedByInt.resultat())
-        assertEquals(4.0, dblDividedByIntFormel.resultat())
-        assertEquals(5.0, intFormelDividedByDbl.resultat())
+        assertEquals(0.9909, intDividedByDblFormel.value, 0.0001)
+        assertEquals(11.1, dblFormelDividedByInt.value)
+        assertEquals(4.0, dblDividedByIntFormel.value)
+        assertEquals(5.0, intFormelDividedByDbl.value)
 
-        assertEquals(1.0, intFormelDividedByIntFormel.resultat())
-        assertEquals(0.4954, intFormelDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(2.0181, dblFormelDividedByIntFormel.resultat(), 0.0001)
-        assertEquals(1.0, dblFormelDividedByDblFormel.resultat())
+        assertEquals(1.0, intFormelDividedByIntFormel.value)
+        assertEquals(0.4954, intFormelDividedByDblFormel.value, 0.0001)
+        assertEquals(2.0181, dblFormelDividedByIntFormel.value, 0.0001)
+        assertEquals(1.0, dblFormelDividedByDblFormel.value)
     }
 
     @Test
@@ -486,20 +486,20 @@ class OperatorTest {
         val dslDblFormelDividedByDblFormel = formula<Double> { expression(dblFormel / dblFormel) }
 
         // Assertions
-        assertEquals(1.8181, dslIntDividedByIntFormel.resultat(), 0.0001)
-        assertEquals(5.5, dslIntFormelDividedByInt.resultat())
-        assertEquals(2.1801, dslDblDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(10.0909, dslDblFormelDividedByDbl.resultat(), 0.0001)
+        assertEquals(1.8181, dslIntDividedByIntFormel.value, 0.0001)
+        assertEquals(5.5, dslIntFormelDividedByInt.value)
+        assertEquals(2.1801, dslDblDividedByDblFormel.value, 0.0001)
+        assertEquals(10.0909, dslDblFormelDividedByDbl.value, 0.0001)
 
-        assertEquals(0.9909, dslIntDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(11.1, dslDblFormelDividedByInt.resultat())
-        assertEquals(4.0, dslDblDividedByIntFormel.resultat())
-        assertEquals(5.0, dslIntFormelDividedByDbl.resultat())
+        assertEquals(0.9909, dslIntDividedByDblFormel.value, 0.0001)
+        assertEquals(11.1, dslDblFormelDividedByInt.value)
+        assertEquals(4.0, dslDblDividedByIntFormel.value)
+        assertEquals(5.0, dslIntFormelDividedByDbl.value)
 
-        assertEquals(1.0, dslIntFormelDividedByIntFormel.resultat())
-        assertEquals(0.4954, dslIntFormelDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(2.0181, dslDblFormelDividedByIntFormel.resultat(), 0.0001)
-        assertEquals(1.0, dslDblFormelDividedByDblFormel.resultat())
+        assertEquals(1.0, dslIntFormelDividedByIntFormel.value)
+        assertEquals(0.4954, dslIntFormelDividedByDblFormel.value, 0.0001)
+        assertEquals(2.0181, dslDblFormelDividedByIntFormel.value, 0.0001)
+        assertEquals(1.0, dslDblFormelDividedByDblFormel.value)
     }
 
     @Test
@@ -557,20 +557,20 @@ class OperatorTest {
             .build()
 
         // Assertions
-        assertEquals(1.8181, builderIntDividedByIntFormel.resultat(), 0.0001)
-        assertEquals(5.5, builderIntFormelDividedByInt.resultat())
-        assertEquals(2.1801, builderDblDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(10.0909, builderDblFormelDividedByDbl.resultat(), 0.0001)
+        assertEquals(1.8181, builderIntDividedByIntFormel.value, 0.0001)
+        assertEquals(5.5, builderIntFormelDividedByInt.value)
+        assertEquals(2.1801, builderDblDividedByDblFormel.value, 0.0001)
+        assertEquals(10.0909, builderDblFormelDividedByDbl.value, 0.0001)
 
-        assertEquals(0.9909, builderIntDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(11.1, builderDblFormelDividedByInt.resultat())
-        assertEquals(4.0, builderDblDividedByIntFormel.resultat())
-        assertEquals(5.0, builderIntFormelDividedByDbl.resultat())
+        assertEquals(0.9909, builderIntDividedByDblFormel.value, 0.0001)
+        assertEquals(11.1, builderDblFormelDividedByInt.value)
+        assertEquals(4.0, builderDblDividedByIntFormel.value)
+        assertEquals(5.0, builderIntFormelDividedByDbl.value)
 
-        assertEquals(1.0, builderIntFormelDividedByIntFormel.resultat())
-        assertEquals(0.4954, builderIntFormelDividedByDblFormel.resultat(), 0.0001)
-        assertEquals(2.0181, builderDblFormelDividedByIntFormel.resultat(), 0.0001)
-        assertEquals(1.0, builderDblFormelDividedByDblFormel.resultat())
+        assertEquals(1.0, builderIntFormelDividedByIntFormel.value)
+        assertEquals(0.4954, builderIntFormelDividedByDblFormel.value, 0.0001)
+        assertEquals(2.0181, builderDblFormelDividedByIntFormel.value, 0.0001)
+        assertEquals(1.0, builderDblFormelDividedByDblFormel.value)
     }
 
 
