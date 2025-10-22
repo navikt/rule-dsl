@@ -52,6 +52,7 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
          *      justeringsFaktor = (MND_36 - antallMånederEtterNedreAldersgrense) / MND_36
          *      justeringsFaktor = (36 - 24)  / 36
          *      justeringsFaktor = 0.33
+         *
          *      FORDI
          *          antallMånederEtterNedreAldersgrense er mindre enn MND_36
          *          24 er mindre enn 36
@@ -59,12 +60,15 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
          *          FORDI
          *              antallMånederEtterNedreAldersgrense = 24
          *
+         *      HVORDAN
+         *          antallMånederEtterNedreAldersgrense = 24
+         *
          */
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
             HVIS { antallMånederEtterNedreAldersgrense erMindreEnn MND_36 }
             SÅ {
                 justeringsFaktor = FormelBuilder.create<Double>()
-                    .name("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT")
+                    .name("justeringsFaktor")
                     .expression((MND_36 - antallMånederEtterNedreAldersgrense) / MND_36)
                     .build()
             }
