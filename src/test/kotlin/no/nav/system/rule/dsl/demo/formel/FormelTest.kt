@@ -19,7 +19,7 @@ class FormelTest {
 
         assertEquals("1000 + Grunnbeløp", grunnbeløpPlussTusen.notasjon)
         assertEquals("1000 + 5000", grunnbeløpPlussTusen.innhold)
-        val res = grunnbeløpPlussTusen.resultat()
+        val res = grunnbeløpPlussTusen.value
         assertEquals(6000, res)
     }
 
@@ -30,7 +30,7 @@ class FormelTest {
 
         assertEquals("fem / 2", toOgEnHalv.notasjon)
         assertEquals("5 / 2", toOgEnHalv.innhold)
-        assertEquals(2.5, toOgEnHalv.resultat())
+        assertEquals(2.5, toOgEnHalv.value)
     }
 
     @Test
@@ -41,10 +41,10 @@ class FormelTest {
         val brutto: Formel<Double> = G * SPT
 
         val plus200: Formel<Double> = brutto + 200
-        assertEquals(2200.0, plus200.resultat())
+        assertEquals(2200.0, plus200.value)
 
         val minus200: Formel<Double> = brutto - 200
-        assertEquals(1800.0, minus200.resultat())
+        assertEquals(1800.0, minus200.value)
     }
 
     @Test
@@ -56,8 +56,8 @@ class FormelTest {
             .expression(avrund(desimal))
             .build()
 
-        assertEquals(10, heltall.resultat())
-        assertEquals(10.2, desimal.resultat())
+        assertEquals(10, heltall.value)
+        assertEquals(10.2, desimal.value)
     }
 
     @Test
@@ -65,13 +65,13 @@ class FormelTest {
         val brutto = Formel.constant(2000)
         var netto = brutto
 
-        assertEquals(2000, brutto.resultat())
-        assertEquals(2000, netto.resultat())
+        assertEquals(2000, brutto.value)
+        assertEquals(2000, netto.value)
 
         netto = brutto - 500
 
-        assertEquals(2000, brutto.resultat())
-        assertEquals(1500, netto.resultat())
+        assertEquals(2000, brutto.value)
+        assertEquals(1500, netto.value)
     }
 
     @Test
@@ -79,9 +79,9 @@ class FormelTest {
         val a = Formel.variable("a", 1)
         val b = Formel.variable("b", 4)
 
-        assertEquals(0.25, (a / b).resultat())
-        assertEquals(0.25, (a / 4).resultat())
-        assertEquals(0.25, (1 / b).resultat())
+        assertEquals(0.25, (a / b).value)
+        assertEquals(0.25, (a / 4).value)
+        assertEquals(0.25, (1 / b).value)
     }
 
     @Test
@@ -94,7 +94,7 @@ class FormelTest {
             .name("f1")
             .expression((SPT - OPT) * PÅ)
             .build()
-        assertEquals(40.0, formel1.resultat())
+        assertEquals(40.0, formel1.value)
         assertEquals("(SPT - OPT) * PÅ", formel1.notasjon)
         assertEquals("(4.3 - 2.3) * 20", formel1.innhold)
 
@@ -102,7 +102,7 @@ class FormelTest {
             .name("f2")
             .expression(PÅ * (SPT - OPT))
             .build()
-        assertEquals(40.0, formel2.resultat())
+        assertEquals(40.0, formel2.value)
         assertEquals("PÅ * (SPT - OPT)", formel2.notasjon)
         assertEquals("20 * (4.3 - 2.3)", formel2.innhold)
     }
@@ -117,7 +117,7 @@ class FormelTest {
             .name("f1")
             .expression((SPT - OPT) * (PÅ) * PÅ)
             .build()
-        assertEquals(800.0, formel1.resultat())
+        assertEquals(800.0, formel1.value)
         assertEquals("(SPT - OPT) * PÅ * PÅ", formel1.notasjon)
         assertEquals("(4.3 - 2.3) * 20 * 20", formel1.innhold)
     }
@@ -131,7 +131,7 @@ class FormelTest {
             .expression(4 - (a + b))
             .build()
 
-        assertEquals(5, f.resultat())
+        assertEquals(5, f.value)
         assertEquals("4 - (a + b)", f.notasjon)
         assertEquals("4 - (-2 + 1)", f.innhold)
     }
@@ -145,7 +145,7 @@ class FormelTest {
             .expression(-4 - (a - b))
             .build()
 
-        assertEquals(-1, f.resultat())
+        assertEquals(-1, f.value)
         assertEquals("-4 - (a - b)", f.notasjon)
         assertEquals("-4 - (-2 - 1)", f.innhold)
     }
@@ -159,7 +159,7 @@ class FormelTest {
             .expression(4 - (a + b))
             .build()
 
-        assertEquals(1, f.resultat())
+        assertEquals(1, f.value)
         assertEquals("4 - (a + b)", f.notasjon)
         assertEquals("4 - (2 + 1)", f.innhold)
     }
@@ -173,7 +173,7 @@ class FormelTest {
             .expression((a + b) - 4)
             .build()
 
-        assertEquals(-5, f.resultat())
+        assertEquals(-5, f.value)
         assertEquals("a + b - 4", f.notasjon)
         assertEquals("-2 + 1 - 4", f.innhold)
     }
@@ -187,7 +187,7 @@ class FormelTest {
             .expression(4 - (a + b))
             .build()
 
-        assertEquals(1, f.resultat())
+        assertEquals(1, f.value)
         assertEquals("4 - (a + b)", f.notasjon)
         assertEquals("4 - (2 + 1)", f.innhold)
     }
@@ -200,7 +200,7 @@ class FormelTest {
             .name("avrund YPT")
             .expression(avrund(YPT))
             .build()
-        assertEquals(7, formel1.resultat())
+        assertEquals(7, formel1.value)
         assertEquals("avrund( YPT )", formel1.notasjon)
         assertEquals("avrund( 7.33 )", formel1.innhold)
 
@@ -210,7 +210,7 @@ class FormelTest {
             .name("avrund SPT")
             .expression(avrund(avrund(SPT) * 0.4))
             .build()
-        assertEquals(2, formel2.resultat())
+        assertEquals(2, formel2.value)
         assertEquals("avrund( avrund( SPT ) * 0.4 )", formel2.notasjon)
         assertEquals("avrund( avrund( 4.4 ) * 0.4 )", formel2.innhold)
     }
@@ -238,7 +238,7 @@ class FormelTest {
             .expression(tp + 1)
             .build()
 
-        assertEquals(300001.0, tpPlus.resultat())
+        assertEquals(300001.0, tpPlus.value)
         assertEquals("tp + 1", tpPlus.notasjon)
         assertEquals("300000.0 + 1", tpPlus.innhold)
         assertEquals(1, tpPlus.subFormelList.size)
@@ -456,7 +456,7 @@ class FormelTest {
 
         assertEquals(
             (0.45 * 95000 * 4.23 * 25 / 40).roundToInt() + (0.45 * 95000 * 4.23 * 15 / 40).roundToInt(),
-            sum.resultat()
+            sum.value
         )
         assertEquals("tp_f92 + tp_e91", sum.notasjon)
         assertEquals("113020 + 67812", sum.innhold)
@@ -520,7 +520,7 @@ class FormelTest {
             .name("bruker_utenPT")
             .expression(avrund(0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * 1 / 12))
             .build()
-        assertEquals(5870, tpBrukerUtenPTBrutto.resultat())
+        assertEquals(5870, tpBrukerUtenPTBrutto.value)
         assertEquals(
             "avrund( 0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * 1 / 12 )",
             tpBrukerUtenPTBrutto.notasjon
@@ -541,7 +541,7 @@ class FormelTest {
             .name("avdød")
             .expression(avrund(0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * UFG / 100 * 1 / 12 * tpPst))
             .build()
-        assertEquals(7263, tpAvdodBrutto.resultat())
+        assertEquals(7263, tpAvdodBrutto.value)
         assertEquals(
             "avrund( 0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * UFG / 100 * 1 / 12 * tp_pst )",
             tpAvdodBrutto.notasjon
@@ -556,7 +556,7 @@ class FormelTest {
             .expression(avrund(tpBrukerUtenPTBrutto * 0.55 + tpAvdodBrutto))
             .build()
 
-        assertEquals(10492, tpSammenstillBrutto.resultat())
+        assertEquals(10492, tpSammenstillBrutto.value)
         assertEquals("avrund( bruker_utenPT * 0.55 + avdød )", tpSammenstillBrutto.notasjon)
         assertEquals("avrund( 5870 * 0.55 + 7263 )", tpSammenstillBrutto.innhold)
 
@@ -639,18 +639,18 @@ class FormelTest {
             .expression(Formel.variable("bpa", 100.0))
             .build()
 
-        assertEquals(100.0, orginal.resultat())
+        assertEquals(100.0, orginal.value)
 
         val tohundreOgTjue = FormelBuilder.create<Double>()
             .name("tohundreOgTjue")
             .expression(orginal + 120)
             .build()
 
-        assertEquals(220.0, tohundreOgTjue.resultat())
+        assertEquals(220.0, tohundreOgTjue.value)
 
-        orginal.resultat() // kall til orginal resultat skal ikke overskrive resultatet i feltet (ja dette har skjedd).
+        orginal.value // kall til orginal resultat skal ikke overskrive resultatet i feltet (ja dette har skjedd).
 
-        assertEquals(220.0, tohundreOgTjue.resultat())
+        assertEquals(220.0, tohundreOgTjue.value)
     }
 
     @Test
@@ -681,7 +681,7 @@ class FormelTest {
             .name("uføre")
             .expression(avrund((f92 + e91) * 1 / 12))
             .build()
-        assertEquals(1260, uføreTpSumBrutto.resultat())
+        assertEquals(1260, uføreTpSumBrutto.value)
         assertEquals(2, uføreTpSumBrutto.subFormelList.size)
         assertEquals("avrund( (f92 + e91) * 1 / 12 )", uføreTpSumBrutto.notasjon)
         assertEquals("avrund( (0.0 + 15120.0) * 1 / 12 )", uføreTpSumBrutto.innhold)
@@ -717,7 +717,7 @@ class FormelTest {
             .name("ysk")
             .expression(avrund((ypF92 + ypE91) * 1 / 12) + avrund((upF92 + upE91) * 1 / 12))
             .build()
-        assertEquals(4001, yrkeBerTpSumBrutto.resultat())
+        assertEquals(4001, yrkeBerTpSumBrutto.value)
         assertEquals(4, yrkeBerTpSumBrutto.subFormelList.size)
         assertEquals(
             "avrund( (yp_f92 + yp_e91) * 1 / 12 ) + avrund( (up_f92 + up_e91) * 1 / 12 )",
@@ -770,8 +770,8 @@ class FormelTest {
             .expression(afpAvrundNetto(bpa, Formel.variable("utbetalingsprosent", 57)) * 12.0)
             .build()
 
-        assertEquals(80064.0, bpaUtb.resultat())
-        assertEquals(140452.77285, bpa.resultat())
+        assertEquals(80064.0, bpaUtb.value)
+        assertEquals(140452.77285, bpa.value)
     }
 
     @Test
@@ -780,7 +780,7 @@ class FormelTest {
         val f = 100 + G
 
         val kMax = max(G, f)
-        assertEquals(2100, kMax.resultat())
+        assertEquals(2100, kMax.value)
     }
 
     @Test
@@ -788,7 +788,7 @@ class FormelTest {
         val G = Formel.variable("G", 2000)
 
         val kMax = max(3000, G)
-        assertEquals(3000, kMax.resultat())
+        assertEquals(3000, kMax.value)
     }
 
     @Test
@@ -797,7 +797,7 @@ class FormelTest {
         val f = 100 + G
 
         val kMax = min(G, f)
-        assertEquals(2000, kMax.resultat())
+        assertEquals(2000, kMax.value)
     }
 
     @Test
@@ -805,7 +805,7 @@ class FormelTest {
         val G = Formel.variable("G", 2000)
 
         val kMax = min(3000, G)
-        assertEquals(2000, kMax.resultat())
+        assertEquals(2000, kMax.value)
     }
 
     @Test
@@ -817,7 +817,7 @@ class FormelTest {
 
         sum += Formel.variable("Minstenivåtillegg", 500)
 
-        assertEquals(1000, sum.resultat())
+        assertEquals(1000, sum.value)
     }
 
     @Test
@@ -860,8 +860,8 @@ class FormelTest {
             .expression(avrund((tp.apKap19MedGJR - tp.apKap19UtenGJR) * 100 / uttaksgrad))
             .build()
 
-        assertEquals(34000, tp.apKap19MedGJR.resultat())
-        assertEquals(28000, tp.apKap19UtenGJR.resultat())
-        assertEquals(12000, tp.referansebelop.resultat())
+        assertEquals(34000, tp.apKap19MedGJR.value)
+        assertEquals(28000, tp.apKap19UtenGJR.value)
+        assertEquals(12000, tp.referansebelop.value)
     }
 }

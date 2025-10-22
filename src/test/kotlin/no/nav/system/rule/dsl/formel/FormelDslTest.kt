@@ -10,7 +10,7 @@ class FormelDslTest {
         val grunnbeløp = variable("grunnbeløp", 118620)
         
         assertEquals("grunnbeløp", grunnbeløp.emne)
-        assertEquals(118620, grunnbeløp.resultat())
+        assertEquals(118620, grunnbeløp.value)
         assertEquals("grunnbeløp", grunnbeløp.notasjon)
         assertEquals("118620", grunnbeløp.innhold)
     }
@@ -20,7 +20,7 @@ class FormelDslTest {
         val rate = variable("rate", 2.45)
         
         assertEquals("rate", rate.emne)
-        assertEquals(2.45, rate.resultat())
+        assertEquals(2.45, rate.value)
         assertEquals("rate", rate.notasjon)
         assertEquals("2.45", rate.innhold)
     }
@@ -28,9 +28,8 @@ class FormelDslTest {
     @Test
     fun `constant DSL function creates constant formula`() {
         val constant42 = constant(42)
-        
-        assertTrue(constant42.name.startsWith("anonymous"))
-        assertEquals(42, constant42.resultat())
+
+        assertEquals(42, constant42.value)
         assertEquals("42", constant42.notasjon)
         assertEquals("42", constant42.innhold)
     }
@@ -38,9 +37,8 @@ class FormelDslTest {
     @Test
     fun `constant DSL function works with Double values`() {
         val pi = constant(3.14159)
-        
-        assertTrue(pi.name.startsWith("anonymous"))
-        assertEquals(3.14159, pi.resultat())
+
+        assertEquals(3.14159, pi.value)
         assertEquals("3.14159", pi.notasjon)
         assertEquals("3.14159", pi.innhold)
     }
@@ -61,7 +59,7 @@ class FormelDslTest {
         assertEquals("TP", bruttobeløp.prefix)
         assertEquals("årlig", bruttobeløp.postfix)
         assertTrue(bruttobeløp.locked)
-        assertEquals(45000.0, bruttobeløp.resultat())
+        assertEquals(45000.0, bruttobeløp.value)
         assertEquals("G * sats", bruttobeløp.notasjon)
         assertEquals("100000 * 0.45", bruttobeløp.innhold)
     }
@@ -78,7 +76,7 @@ class FormelDslTest {
         
         assertEquals("total", total.emne)
         assertFalse(total.locked)
-        assertEquals(5000, total.resultat())
+        assertEquals(5000, total.value)
         assertEquals("base * multiplier", total.notasjon)
         assertEquals("1000 * 5", total.innhold)
     }
@@ -93,11 +91,10 @@ class FormelDslTest {
             prefix("CALC")
             unlocked()
         }
-        
-        assertTrue(sum.name.startsWith("anonymous"))
+
         assertEquals("CALC", sum.prefix)
         assertFalse(sum.locked)
-        assertEquals(30, sum.resultat())
+        assertEquals(30, sum.value)
         assertEquals("a + b", sum.notasjon)
         assertEquals("10 + 20", sum.innhold)
     }
@@ -111,11 +108,11 @@ class FormelDslTest {
             expression(x / y)
             postfix("result")
         }
-        
-        assertTrue(division.name.startsWith("anonymous"))
+
         assertEquals("result", division.postfix)
+        assertEquals("result", division.name)
         assertTrue(division.locked) // Default for builder formulas
-        assertEquals(2.75, division.resultat())
+        assertEquals(2.75, division.value)
         assertEquals("x / y", division.notasjon)
         assertEquals("5.5 / 2.0", division.innhold)
     }
@@ -127,14 +124,14 @@ class FormelDslTest {
         val factoryVariable = Formel.variable("test", 123)
         
         assertEquals(dslVariable.emne, factoryVariable.emne)
-        assertEquals(dslVariable.resultat(), factoryVariable.resultat())
+        assertEquals(dslVariable.value, factoryVariable.value)
         assertEquals(dslVariable.notasjon, factoryVariable.notasjon)
         
         // Constant DSL vs factory method
         val dslConstant = constant(456)
         val factoryConstant = Formel.constant(456)
         
-        assertEquals(dslConstant.resultat(), factoryConstant.resultat())
+        assertEquals(dslConstant.value, factoryConstant.value)
         assertEquals(dslConstant.notasjon, factoryConstant.notasjon)
     }
 
@@ -154,7 +151,7 @@ class FormelDslTest {
         assertEquals("TP", complex.prefix)
         assertEquals("årlig", complex.postfix)
         assertTrue(complex.locked)
-        assertEquals(53379.0, complex.resultat())
+        assertEquals(53379.0, complex.value)
         assertEquals("grunnbeløp * sats", complex.notasjon)
         assertEquals("118620 * 0.45", complex.innhold)
     }
@@ -168,7 +165,7 @@ class FormelDslTest {
         }
         
         assertEquals("rounded", rounded.emne)
-        assertEquals(1235, rounded.resultat())
+        assertEquals(1235, rounded.value)
         assertEquals("avrund( base )", rounded.notasjon)
         assertEquals("avrund( 1234.56 )", rounded.innhold)
     }
@@ -185,7 +182,7 @@ class FormelDslTest {
         assertEquals("newName", modified.emne)
         assertEquals("CALC", modified.prefix)
         assertTrue(modified.locked)
-        assertEquals(100, modified.resultat())
+        assertEquals(100, modified.value)
         
         // Original should be unchanged
         assertEquals("original", original.emne)

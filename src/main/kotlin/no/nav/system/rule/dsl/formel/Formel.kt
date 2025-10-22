@@ -123,8 +123,6 @@ class Formel<T : Number> internal constructor(
             .joinToString(separator = "_")
             .ifBlank { "anonymous#${this.hashCode()}" }
 
-    fun resultat(): T = lazyResultat
-
     override val value: T get() = lazyResultat
 
     @Suppress("UNCHECKED_CAST")
@@ -219,8 +217,8 @@ class Formel<T : Number> internal constructor(
         right: Formel<*>
     ): Map<String, Number> {
         // Check for formula name conflicts first
-        if (left.name == right.name && left.resultat() != right.resultat()) {
-            throw IllegalArgumentException("Formula conflict: '${left.name}' with value ${left.resultat()} would be reassigned to value ${right.resultat()}")
+        if (left.name == right.name && left.value != right.value) {
+            throw IllegalArgumentException("Formula conflict: '${left.name}' with value ${left.value} would be reassigned to value ${right.value}")
         }
         
         // Build merged variable map with conflict detection
@@ -253,8 +251,8 @@ class Formel<T : Number> internal constructor(
         right: Formel<*>
     ) {
         // Check for formula name conflicts
-        if (left.name == right.name && left.resultat() != right.resultat()) {
-            throw IllegalArgumentException("Formula conflict: '${left.name}' with value ${left.resultat()} would be reassigned to value ${right.resultat()}")
+        if (left.name == right.name && left.value != right.value) {
+            throw IllegalArgumentException("Formula conflict: '${left.name}' with value ${left.value} would be reassigned to value ${right.value}")
         }
         
         // Check for variable conflicts if both formulas are unlocked
@@ -433,7 +431,7 @@ class Formel<T : Number> internal constructor(
      * Gjelder også [innhold]
      */
     private fun finalNotasjon(): String = if (locked) name else notasjon
-    private fun finalInnhold(): String = if (locked) resultat().toString() else innhold
+    private fun finalInnhold(): String = if (locked) value.toString() else innhold
 
     override fun toString(): String = toTreeString(0, Int.MAX_VALUE)
 

@@ -6,12 +6,12 @@ import kotlin.reflect.KFunction1
 fun Formel<*>.toTreeString(level: Int, maxLevel: Int): String {
     val s = StringBuilder()
     s.append(" ".repeat(level * 2)).append("Formelnavn: ").append(name).append("  level: ")
-        .append(level).append("  resultat: ").append(resultat()).append("  locked: ").append(locked)
+        .append(level).append("  resultat: ").append(value).append("  locked: ").append(locked)
         .append("  ant.subFormler: ").append(subFormelList.size).append("  hash: ").append(this.hashCode())
         .append("\n")
     s.append(" ".repeat(level * 2)).append("    notasjon:\t\t").append(notasjon).append("\n")
     s.append(" ".repeat(level * 2)).append("    innhold: \t\t").append(innhold)
-        .append(" = ${resultat()}").append("\n")
+        .append(" = $value").append("\n")
     s.append(" ".repeat(level * 2)).append("    namedVarMap:  \t").append(namedVarMap.toString())
         .append("\n")
     s.append(" ".repeat(level * 2)).append("    subFormelList:\t")
@@ -39,14 +39,14 @@ private fun Formel<*>.toTreeHTML(level: Int, maxLevel: Int): String {
     val sb = StringBuilder()
 
     sb.append(" ".repeat(level * 2)).append("<formel navn='").append(name).append("'")
-    sb.append(" level='").append(level).append("'").append(" resultat='").append(resultat()).append("'")
+    sb.append(" level='").append(level).append("'").append(" resultat='").append(value).append("'")
         .append(" locked='").append(locked).append("'").append(" antSubFormler='").append(subFormelList.size)
         .append("'>\n")
     sb.append(" ".repeat(level * 2 + 2)).append("<fl>").append(emne).append(" = ").append(notasjon)
         .append("</fl>\n")
     sb.append(" ".repeat(level * 2 + 2)).append("<fl>").append(emne).append(" = ").append(innhold)
         .append("</fl>\n")
-    sb.append(" ".repeat(level * 2 + 2)).append("<fl>").append(emne).append(" = ").append(resultat())
+    sb.append(" ".repeat(level * 2 + 2)).append("<fl>").append(emne).append(" = ").append(value)
         .append("</fl>\n")
 
     if (level < maxLevel) {
