@@ -57,7 +57,7 @@ class PairSubsumtion(
 class ListSubsumtion(
     override val comparator: ListComparator,
     private val faktum: Verdi<*>,
-    private val verdiList: List<Verdi<*>>,
+    val verdiList: List<Verdi<*>>,
     override val function: () -> Boolean,
 ) : AbstractSubsumtion(comparator = comparator, function = function) {
 
