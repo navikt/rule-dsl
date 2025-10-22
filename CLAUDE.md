@@ -47,9 +47,9 @@ AbstractRuleService (top level)
       └── AbstractRuleset (groups related rules)
           └── Rule (individual functional decisions)
               └── Predicate (technical boolean expressions)
-              └── AbstractSubsumtion (functional expressions)
-                  ├── PairSubsumtion (compares two Faktum)
-                  └── ListSubsumtion (list relationships)
+              └── DomainPredicate (functional expressions)
+                  ├── PairDomainPredicate (compares two Verdi)
+                  └── ListDomainPredicate (list relationships)
 ```
 
 **Key classes:**
@@ -57,9 +57,10 @@ AbstractRuleService (top level)
 - `AbstractRuleflow` - Organizes flow logic using DSL: `forgrening`, `gren`, `betingelse`, `flyt`
 - `AbstractRuleset` - Contains a set of rules on a single topic, defines rules using `regel()`
 - `Rule` - Individual rule with predicates using DSL: `HVIS`, `OG`, `SÅ`, `ELLERS`, `RETURNER`
-- `Faktum` - Name-value pair representing a fact used in subsumtion
+- `Verdi` - Interface for values (implemented by `Faktum` and `Formel`)
+- `Faktum` - Name-value pair representing a fact used in domain predicates
 - `Predicate` - Technical boolean expressions (null checks, technical validations)
-- `AbstractSubsumtion` - Functional/domain expressions for business logic
+- `DomainPredicate` - Functional/domain expressions for business logic
 
 ### Resource Management
 
@@ -124,7 +125,7 @@ forgrening("Decision name") {
 ```kotlin
 regel("RuleName") {
     HVIS { /* technical predicate */ }
-    OG { /* functional subsumtion */ }
+    OG { /* functional domain predicate */ }
     SÅ {
         /* action statement if all predicates true */
     }
@@ -142,15 +143,25 @@ regel("RuleWithReturn") {
 }
 ```
 
-### Subsumtion Operators (in `rettsregel/Operators.kt`)
+### Domain Predicate Operators (in `rettsregel/Operators.kt`)
 
-Custom infix operators for functional expressions:
+Custom infix operators for functional expressions that create `DomainPredicate` instances:
+
+**Pair operators** (compare two values):
 - `erLik` - equals
+- `erUlik` - not equals
 - `erMindreEnn` - less than
 - `erStørreEnn` - greater than
-- etc.
+- `erMindreEllerLik` - less than or equal
+- `erStørreEllerLik` - greater than or equal
+- `erFør` / `erEtter` - date comparisons
+- `erFørEllerLik` / `erEtterEllerLik` - date comparisons with equality
 
-Example: `trygdetid erMindreEnn 40`
+**List operators** (compare value with list):
+- `erBlant` - value is in list
+- `erIkkeBlant` - value is not in list
+
+Example: `trygdetid erMindreEnn 40` creates a `PairDomainPredicate`
 
 ## Formel System (Mathematical Expressions)
 
@@ -197,4 +208,4 @@ Use `test()` method on rulesets/ruleflows for standalone testing without a paren
   - `inspections/` - Debug and inspection utilities
   - `pattern/` - Pattern system for list-based rules
   - `resource/` - Resource management
-  - `rettsregel/` - Legal rule components (Faktum, Subsumtion, Operators)
+  - `rettsregel/` - Legal rule components (Verdi, Faktum, DomainPredicate, Operators)
