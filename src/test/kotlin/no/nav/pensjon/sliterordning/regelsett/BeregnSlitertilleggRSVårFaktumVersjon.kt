@@ -37,7 +37,7 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
         .expression(faktiskTrygdetid / FULL_TRYGDETID)
         .build()
 
-    private val antallMånederEtterNedreAldersgrense = Formel.variable<Int>(
+    private val antallMånederEtterNedreAldersgrense = Formel.variable(
         "antallMånederEtterNedreAldersgrense",
         ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), uttakstidspunkt).toInt()
     )
@@ -47,6 +47,19 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
     @OptIn(DslDomainPredicate::class)
     override fun create() {
 
+        /**
+         * Forklaring:
+         *      justeringsFaktor = (MND_36 - antallMånederEtterNedreAldersgrense) / MND_36
+         *      justeringsFaktor = (36 - 24)  / 36
+         *      justeringsFaktor = 0.33
+         *      FORDI
+         *          antallMånederEtterNedreAldersgrense er mindre enn MND_36
+         *          24 er mindre enn 36
+         *
+         *          FORDI
+         *              antallMånederEtterNedreAldersgrense = 24
+         *
+         */
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
             HVIS { antallMånederEtterNedreAldersgrense erMindreEnn MND_36 }
             SÅ {
@@ -57,11 +70,49 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
             }
         }
 
-        SlitertilleggFaktum(
-            slitertilleggBeregnet = FormelBuilder.create<Double>()
-                .name("SLITERTILEGG-BEREGNET")
-                .expression(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
-                .build()
-        )
+        /**
+         * Forklaring:
+         *      slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
+         *      slitertillegg = 2292 * 0.33 * 0.5
+         *      slitertillegg = 378
+         *
+         *      REFERANSE
+         *          SLITERTILEGG-BEREGNET
+         *
+         *      FORDI
+         *          this.trace()..... INNVILGET = JA... FORDI PGIsnitt > 4000
+         *              HVORDAN ... HVORDAN FORDI ....
+         *
+         *      HVORDAN
+         *          fulltSlitertillegg = 0.25 * G / 12
+         *          fulltSlitertillegg = 0.25 * 110000 / 12
+         *
+         *          justeringsFaktor = (MND_36 - antallMånederEtterNedreAldersgrense) / MND_36
+         *          justeringsFaktor = (36 - 24)  / 36
+         *          justeringsFaktor = 0.33
+         *          FORDI
+         *              antallMånederEtterNedreAldersgrense er mindre enn MND_36
+         *              24 er mindre enn 36
+         *
+         *              FORDI
+         *                  antallMånederEtterNedreAldersgrense = 24
+         *
+         *          trygdetidFaktor = faktiskTrygdetid / FULL_TRYGDETID
+         *          trygdetidFaktor = 20 / 40
+         *          trygdetidFaktor = 0.5
+         */
+        regel("BeregnSlitertillegg") {
+            HVIS { true }
+            SÅ {
+                RETURNER(
+                    SlitertilleggFaktum(
+                        slitertilleggBeregnet = formula("slitertillegg") {
+                            expression(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
+                        }
+                    )
+                )
+            }
+//            REFERANSE("SLITERTILEGG-BEREGNET")
+        }
     }
 }

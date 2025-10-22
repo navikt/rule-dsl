@@ -145,7 +145,7 @@ open class Rule<T : Any>(
      */
     fun RETURNER(returnValue: T) {
         this.returnValue = returnValue
-        if (returnValue is Faktum<*>) returnValue.children.add(this)
+//        if (returnValue is Faktum<*>) returnValue.children.add(this)
         returnRule = true
     }
 

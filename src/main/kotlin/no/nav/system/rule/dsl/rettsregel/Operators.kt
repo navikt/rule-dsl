@@ -26,33 +26,35 @@ infix fun Faktum<LocalDate>.erEtter(other: Faktum<LocalDate>) =
 /**
  * Tall
  */
-infix fun Faktum<out Number>.erMindreEllerLik(other: Faktum<out Number>) =
+infix fun Verdi<out Number>.erMindreEllerLik(other: Verdi<out Number>) =
     PairSubsumtion(MINDRE_ELLER_LIK, this, other) { value.toDouble() <= other.value.toDouble() }
 
-infix fun Faktum<out Number>.erMindreEnn(other: Faktum<out Number>) =
+infix fun Verdi<out Number>.erMindreEnn(other: Verdi<out Number>) =
     PairSubsumtion(MINDRE, this, other) { value.toDouble() < other.value.toDouble() }
 
-infix fun Faktum<out Number>.erStørreEllerLik(other: Faktum<out Number>) =
+infix fun Verdi<out Number>.erStørreEllerLik(other: Verdi<out Number>) =
     PairSubsumtion(STØRRE_ELLER_LIK, this, other) { value.toDouble() >= other.value.toDouble() }
 
-infix fun Faktum<out Number>.erStørre(other: Faktum<out Number>) =
+infix fun Verdi<out Number>.erStørre(other: Verdi<out Number>) =
     PairSubsumtion(STØRRE, this, other) { value.toDouble() > other.value.toDouble() }
 
-infix fun Faktum<out Number>.erMindreEllerLik(other: Number) =
+infix fun Verdi<out Number>.erMindreEllerLik(other: Number) =
     PairSubsumtion(MINDRE_ELLER_LIK, this, Faktum(other)) { value.toDouble() <= other.toDouble() }
 
-infix fun Faktum<out Number>.erMindreEnn(other: Number) =
+infix fun Verdi<out Number>.erMindreEnn(other: Number) =
     PairSubsumtion(MINDRE, this, Faktum(other)) { value.toDouble() < other.toDouble() }
 
-infix fun Faktum<out Number>.erStørreEllerLik(other: Number) =
+infix fun Verdi<out Number>.erStørreEllerLik(other: Number) =
     PairSubsumtion(STØRRE_ELLER_LIK, this, Faktum(other)) { value.toDouble() >= other.toDouble() }
 
-infix fun Faktum<out Number>.erStørre(other: Number) =
+infix fun Verdi<out Number>.erStørre(other: Number) =
     PairSubsumtion(STØRRE, this, Faktum(other)) { value.toDouble() > other.toDouble() }
 
 /**
  * Dato > Tall
  */
+// TODO: Disse ser upresise ut. Vurder behov og evt fjern. Dersom de skal beholdes,
+// TODO: burde de trolig hete erÅrTidligereEllerLik, erÅrTidligereEnn, senere osv.
 infix fun Faktum<out LocalDate>.erMindreEllerLik(other: Int) = PairSubsumtion(
     MINDRE_ELLER_LIK, this, Faktum(other)
 ) { value.year <= other }
@@ -72,30 +74,30 @@ infix fun Faktum<out LocalDate>.erStørreEnn(other: Int) = PairSubsumtion(
 /**
  * Faktum
  */
-infix fun <T : Any> Faktum<T>.erLik(ap: T) = PairSubsumtion(
+infix fun <T : Any> Verdi<T>.erLik(ap: T) = PairSubsumtion(
     LIK, this, Faktum(ap)
 ) { this.value == ap }
 
-infix fun <T : Any> Faktum<T>.erLik(ap: Faktum<T>) = PairSubsumtion(
+infix fun <T : Any> Verdi<T>.erLik(ap: Verdi<T>) = PairSubsumtion(
     LIK, this, ap
 ) { this.value == ap.value }
 
-infix fun <T : Any> Faktum<T>.erUlik(ap: T) = PairSubsumtion(
+infix fun <T : Any> Verdi<T>.erUlik(ap: T) = PairSubsumtion(
     ULIK, this, Faktum(ap)
 ) { this.value != ap }
 
-infix fun <T : Any> Faktum<T>.erUlik(ap: Faktum<T>) = PairSubsumtion(
+infix fun <T : Any> Verdi<T>.erUlik(ap: Verdi<T>) = PairSubsumtion(
     ULIK, this, ap
 ) { this.value != ap.value }
 
-infix fun <T : Any> Faktum<T>.erBlant(others: List<T>) = ListSubsumtion(
+infix fun <T : Any> Verdi<T>.erBlant(others: List<T>) = ListSubsumtion(
     ER_BLANDT,
-    Faktum(navn = this.name, verdi = this.value.toString()),
+    Faktum(name = this.name, value = this.value.toString()),
     others.map { Faktum(it) }
 ) { this.value in others }
 
-infix fun <T : Any> Faktum<T>.erIkkeBlant(others: List<T>) = ListSubsumtion(
+infix fun <T : Any> Verdi<T>.erIkkeBlant(others: List<T>) = ListSubsumtion(
     ER_IKKE_BLANDT,
-    Faktum(navn = this.name, verdi = this.value.toString()),
+    Faktum(name = this.name, value = this.value.toString()),
     others.map { Faktum(it) }
 ) { this.value !in others }

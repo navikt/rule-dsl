@@ -21,7 +21,7 @@ class BeregnFaktiskTrygdetidRSTest {
     fun `test fagregel 'Redusert fremtidig trygdetid' har truffet`() {
         val result = BeregnFaktiskTrygdetidRS(
             fødselsdato = Faktum("Fødselsdato", localDate(1990, 1, 1)),
-            virkningstidspunkt = Faktum(navn = "virkningstidspunkt", localDate(2000, 1, 1)),
+            virkningstidspunkt = Faktum(name = "virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2018, 12, 31), LandEnum.NOR)
             ),
@@ -36,7 +36,7 @@ class BeregnFaktiskTrygdetidRSTest {
         assertTrue(redFttRegel.evaluated)
         assertTrue(redFttRegel.fired())
         Assertions.assertEquals(
-            "JA 'virkningstidspunkt' (2000-01-01) er etter eller lik '1991-01-01'", redFttRegel.children[0].toString()
+            "JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)", redFttRegel.children[0].toString()
         )
         Assertions.assertEquals(
             "JA 'faktisk trygdetid i måneder' (155) er mindre enn 'firefemtedelskrav' (480)",
@@ -65,7 +65,7 @@ class BeregnFaktiskTrygdetidRSTest {
         assertTrue(regelSkalHaRedusertFremtidigTrygdetid.evaluated)
         Assertions.assertFalse(regelSkalHaRedusertFremtidigTrygdetid.fired())
         Assertions.assertEquals(
-            "JA 'virkningstidspunkt' (2000-01-01) er etter eller lik '1991-01-01'",
+            "JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)",
             regelSkalHaRedusertFremtidigTrygdetid.children[0].toString()
         )
         Assertions.assertEquals(

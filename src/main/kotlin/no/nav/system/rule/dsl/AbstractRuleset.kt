@@ -171,7 +171,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
             comparator = ListComparator.MINST_EN_AV,
             faktum = Faktum("Regelreferanse", this),
             function = { list.any { it.fired() } },
-            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
+            verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) },
         )
     }
 
@@ -188,7 +188,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
             comparator = ListComparator.ALLE,
             faktum = Faktum("Regelreferanse", this),
             function = { list.all { it.fired() } },
-            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
+            verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) }
         )
     }
 
@@ -198,7 +198,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
             comparator = ListComparator.INGEN,
             faktum = Faktum("Regelreferanse", this),
             function = { list.none { it.fired() } },
-            abstractRuleComponentList = list.filter { it.children.isNotEmpty() }
+            verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) }
         )
     }
 

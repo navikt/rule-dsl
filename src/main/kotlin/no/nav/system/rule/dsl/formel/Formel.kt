@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.formel
 
 import no.nav.system.rule.dsl.formel.OperatorEnum.*
-import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.Verdi
 import redempt.crunch.Crunch.compileExpression
 import java.io.Serializable
 
@@ -67,8 +67,7 @@ class Formel<T : Number> internal constructor(
      */
     val locked: Boolean,
     internal val shouldBeDouble: Boolean
-) : Faktum<T>(), Serializable {
-
+) : Verdi<T>, Serializable {
     /**
      * Copy constructor for creating modified versions
      */
@@ -118,15 +117,15 @@ class Formel<T : Number> internal constructor(
         shouldBeDouble = num is Double
     )
 
-
-    fun navn(): String {
-        return listOf(prefix, emne, postfix)
+    override val name: String
+        get() = listOf(prefix, emne, postfix)
             .filter { it.isNotEmpty() }
             .joinToString(separator = "_")
             .ifBlank { "anonymous#${this.hashCode()}" }
-    }
 
     fun resultat(): T = lazyResultat
+
+    override val value: T get() = lazyResultat
 
     @Suppress("UNCHECKED_CAST")
     private val lazyResultat: T by lazy {
@@ -148,7 +147,7 @@ class Formel<T : Number> internal constructor(
                 result.toInt() as T
             }
         } catch (e: Exception) {
-            throw ArithmeticException("Error evaluating formula '${navn()}': ${e.message}").initCause(e)
+            throw ArithmeticException("Error evaluating formula '$name': ${e.message}").initCause(e)
         }
     }
     
@@ -158,12 +157,12 @@ class Formel<T : Number> internal constructor(
     private fun validateExpression() {
         // Check for division by zero patterns
         if (innhold.contains("/ 0") || innhold.contains("/0")) {
-            throw ArithmeticException("Division by zero detected in formula '${navn()}': $innhold")
+            throw ArithmeticException("Division by zero detected in formula '$name': $innhold")
         }
         
         // Check for obvious invalid expressions
         if (innhold.isBlank()) {
-            throw IllegalStateException("Formula '${navn()}' has empty content")
+            throw IllegalStateException("Formula '$name' has empty content")
         }
     }
 
@@ -220,8 +219,8 @@ class Formel<T : Number> internal constructor(
         right: Formel<*>
     ): Map<String, Number> {
         // Check for formula name conflicts first
-        if (left.navn() == right.navn() && left.resultat() != right.resultat()) {
-            throw IllegalArgumentException("Formula conflict: '${left.navn()}' with value ${left.resultat()} would be reassigned to value ${right.resultat()}")
+        if (left.name == right.name && left.resultat() != right.resultat()) {
+            throw IllegalArgumentException("Formula conflict: '${left.name}' with value ${left.resultat()} would be reassigned to value ${right.resultat()}")
         }
         
         // Build merged variable map with conflict detection
@@ -254,8 +253,8 @@ class Formel<T : Number> internal constructor(
         right: Formel<*>
     ) {
         // Check for formula name conflicts
-        if (left.navn() == right.navn() && left.resultat() != right.resultat()) {
-            throw IllegalArgumentException("Formula conflict: '${left.navn()}' with value ${left.resultat()} would be reassigned to value ${right.resultat()}")
+        if (left.name == right.name && left.resultat() != right.resultat()) {
+            throw IllegalArgumentException("Formula conflict: '${left.name}' with value ${left.resultat()} would be reassigned to value ${right.resultat()}")
         }
         
         // Check for variable conflicts if both formulas are unlocked
@@ -433,7 +432,7 @@ class Formel<T : Number> internal constructor(
      * TODO Kanskje denne implementasjonen skal erstatte [notasjon] feltet. Det er forvirrende at det finnes to måter å hente ut notasjonen på.
      * Gjelder også [innhold]
      */
-    private fun finalNotasjon(): String = if (locked) navn() else notasjon
+    private fun finalNotasjon(): String = if (locked) name else notasjon
     private fun finalInnhold(): String = if (locked) resultat().toString() else innhold
 
     override fun toString(): String = toTreeString(0, Int.MAX_VALUE)

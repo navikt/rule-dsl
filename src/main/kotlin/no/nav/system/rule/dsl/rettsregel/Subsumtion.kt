@@ -1,6 +1,5 @@
 package no.nav.system.rule.dsl.rettsregel
 
-import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.Predicate
 import no.nav.system.rule.dsl.enums.Comparator
 import no.nav.system.rule.dsl.enums.ListComparator
@@ -30,46 +29,46 @@ abstract class AbstractSubsumtion(
 }
 
 /**
- * Compares [faktum1] with [faktum2]
+ * Compares [verdi1] with [verdi2]
  */
 class PairSubsumtion(
     override val comparator: PairComparator,
-    private val faktum1: Faktum<*>,
-    private val faktum2: Faktum<*>,
+    private val verdi1: Verdi<*>,
+    private val verdi2: Verdi<*>,
     override val function: () -> Boolean,
 ) : AbstractSubsumtion(comparator = comparator, function = function) {
 
     init {
-        if (!faktum1.anonymous) this.children.add(faktum1)
-        if (!faktum2.anonymous) this.children.add(faktum2)
+//        if (verdi1.name != verdi1.value) this.children.add(verdi1)
+//        if (verdi2.name != verdi2.value) this.children.add(verdi2)
     }
 
     override fun type(): RuleComponentType = PAR_SUBSUMSJON
 
     override fun toString(): String {
         val komparatorText = if (fired) comparator.text else comparator.negated()
-        return "${fired.svarord()} $faktum1$komparatorText$faktum2"
+        return "${fired.svarord()} $verdi1$komparatorText$verdi2"
     }
 }
 
 /**
- * Compares [faktum] relationship with items [abstractRuleComponentList]
+ * Compares [faktum] relationship with items [verdiList]
  */
 class ListSubsumtion(
     override val comparator: ListComparator,
-    private val faktum: Faktum<*>,
-    private val abstractRuleComponentList: List<AbstractRuleComponent>,
+    private val faktum: Verdi<*>,
+    private val verdiList: List<Verdi<*>>,
     override val function: () -> Boolean,
 ) : AbstractSubsumtion(comparator = comparator, function = function) {
 
     init {
-        this.children.addAll(abstractRuleComponentList)
+//        this.children.addAll(abstractRuleComponentList)
     }
 
     override fun type(): RuleComponentType = LISTE_SUBSUMSJON
 
     override fun toString(): String {
         val komparatorText = if (fired) comparator.text else comparator.negated()
-        return "${fired.svarord()} $faktum$komparatorText${abstractRuleComponentList}"
+        return "${fired.svarord()} $faktum$komparatorText$verdiList"
     }
 }

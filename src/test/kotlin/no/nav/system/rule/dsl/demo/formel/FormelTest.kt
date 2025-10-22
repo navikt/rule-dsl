@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl.demo.formel
 
 import no.nav.system.rule.dsl.demo.domain.Tilleggspensjon
 import no.nav.system.rule.dsl.formel.*
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -502,7 +503,7 @@ class FormelTest {
             FormelBuilder.create<Int>()
                 .expression(Formel.variable("a", 1))
                 .build().also {
-                    assertTrue(it.navn().startsWith("anonymous"))
+                    assertTrue(it.name.startsWith("anonymous"))
                 }
         }
     }

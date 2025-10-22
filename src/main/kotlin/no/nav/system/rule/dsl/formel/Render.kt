@@ -5,7 +5,7 @@ import kotlin.reflect.KFunction1
 
 fun Formel<*>.toTreeString(level: Int, maxLevel: Int): String {
     val s = StringBuilder()
-    s.append(" ".repeat(level * 2)).append("Formelnavn: ").append(navn()).append("  level: ")
+    s.append(" ".repeat(level * 2)).append("Formelnavn: ").append(name).append("  level: ")
         .append(level).append("  resultat: ").append(resultat()).append("  locked: ").append(locked)
         .append("  ant.subFormler: ").append(subFormelList.size).append("  hash: ").append(this.hashCode())
         .append("\n")
@@ -38,7 +38,7 @@ fun <T : Number> Formel<T>.logUsing(kFunction1: KFunction1<String?, Unit>): Form
 private fun Formel<*>.toTreeHTML(level: Int, maxLevel: Int): String {
     val sb = StringBuilder()
 
-    sb.append(" ".repeat(level * 2)).append("<formel navn='").append(navn()).append("'")
+    sb.append(" ".repeat(level * 2)).append("<formel navn='").append(name).append("'")
     sb.append(" level='").append(level).append("'").append(" resultat='").append(resultat()).append("'")
         .append(" locked='").append(locked).append("'").append(" antSubFormler='").append(subFormelList.size)
         .append("'>\n")
