@@ -98,6 +98,9 @@ private fun <T : Number> Uttrykk<T>.finnNavngitteUttrykk(
         is Div -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                 this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
 
+        is Min -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+
         is Neg -> this.uttrykk.finnNavngitteUttrykk(nivå, maxDybde)
 
         else -> emptyList()
@@ -186,6 +189,12 @@ fun <T : Number> Uttrykk<T>.treVisning(nivå: Int = 0): String {
             appendLine(venstre.treVisning(nivå + 1))
             append(høyre.treVisning(nivå + 1).replace("├─", "└─"))
         }
+
+        is Min -> buildString {
+            appendLine("${indent}${prefix}Min")
+            appendLine(venstre.treVisning(nivå + 1))
+            append(høyre.treVisning(nivå + 1).replace("├─", "└─"))
+        }
         is Neg -> buildString {
             appendLine("${indent}${prefix}Neg")
             append(uttrykk.treVisning(nivå + 1))
@@ -220,6 +229,7 @@ fun <T : Number, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R
         is Sub -> venstre.visit(transform) + høyre.visit(transform)
         is Mul -> venstre.visit(transform) + høyre.visit(transform)
         is Div -> venstre.visit(transform) + høyre.visit(transform)
+        is Min -> venstre.visit(transform) + høyre.visit(transform)
         is Neg -> uttrykk.visit(transform)
         is Navngitt -> uttrykk.visit(transform)
         else -> emptyList()
@@ -278,6 +288,16 @@ fun <T : Number> Uttrykk<T>.forenkel(): Uttrykk<T> {
             }
         }
 
+        is Min -> {
+            val v = venstre.forenkel()
+            val h = høyre.forenkel()
+            if (v is Const && h is Const) {
+                Const(evaluer()) as Uttrykk<T>
+            } else {
+                Min(v, h) as Uttrykk<T>
+            }
+        }
+
         is Neg -> {
             val u = uttrykk.forenkel()
             if (u is Const) {
@@ -310,6 +330,7 @@ fun <T : Number> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out
         is Sub -> Sub<T>(venstre.erstatt(variabelNavn, med), høyre.erstatt(variabelNavn, med))
         is Mul -> Mul<T>(venstre.erstatt(variabelNavn, med), høyre.erstatt(variabelNavn, med))
         is Div -> Div(venstre.erstatt(variabelNavn, med), høyre.erstatt(variabelNavn, med)) as Uttrykk<T>
+        is Min -> Min(venstre.erstatt(variabelNavn, med), høyre.erstatt(variabelNavn, med)) as Uttrykk<T>
         is Neg -> Neg(uttrykk.erstatt(variabelNavn, med))
         is Navngitt -> Navngitt(navn, uttrykk.erstatt(variabelNavn, med))
     }
