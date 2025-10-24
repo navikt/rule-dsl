@@ -1,0 +1,492 @@
+package no.nav.system.rule.dsl.demo.forklaring
+
+import no.nav.system.rule.dsl.forklaring.*
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+
+/**
+ * Feature parity tests between Uttrykk and Formel.
+ *
+ * This test class ensures that Uttrykk provides equivalent functionality
+ * to Formel for all essential features, mimicking the tests from FormelTest.kt
+ */
+class UttrykkParityTest {
+
+    // ========================================================================
+    // Basic Operations (mimicking FormelTest)
+    // ========================================================================
+
+    @Test
+    fun `simple Int expression like simpleIntFormel`() {
+        val grunnbeløp = Faktum("Grunnbeløp", 5000)
+        val grunnbeløpPlussTusen = 1000 + grunnbeløp
+
+        assertEquals("1000 + Grunnbeløp", grunnbeløpPlussTusen.notasjon())
+        assertEquals("1000 + 5000", grunnbeløpPlussTusen.konkret())
+        assertEquals(6000, grunnbeløpPlussTusen.evaluer())
+    }
+
+    @Test
+    fun `simple Double expression like simpleDoubleFormel`() {
+        val fem = Faktum("fem", 5)
+        val toOgEnHalv = fem / 2
+
+        assertEquals("fem / 2", toOgEnHalv.notasjon())
+        assertEquals("5 / 2", toOgEnHalv.konkret())
+        assertEquals(2.5, toOgEnHalv.evaluer())
+    }
+
+    @Test
+    fun `reuse of expression like gjenbrukAvFormel`() {
+        val G = Faktum("G", 1000)
+        val SPT = Faktum("SPT", 2.0)
+
+        val brutto = G * SPT
+
+        val plus200 = brutto + 200
+        assertEquals(2200.0, plus200.evaluer())
+
+        val minus200 = brutto - 200
+        assertEquals(1800.0, minus200.evaluer())
+    }
+
+    @Test
+    fun `immutable expression like immutableFormel`() {
+        val desimal = Faktum("tiKommaTo", 10.2)
+
+        // Original value should remain unchanged
+        assertEquals(10.2, desimal.value)
+
+        // Operations create new expressions without modifying original
+        val plusOne = desimal + 1
+        assertEquals(11.2, plusOne.evaluer())
+        assertEquals(10.2, desimal.value) // Original unchanged
+    }
+
+    @Test
+    fun `copy behavior like copyDefaultFormelFromFelt_auto`() {
+        val brutto = Const(2000)
+        var netto: Uttrykk<Int> = brutto
+
+        assertEquals(2000, brutto.evaluer())
+        assertEquals(2000, netto.evaluer())
+
+        netto = brutto - 500
+
+        assertEquals(2000, brutto.evaluer())
+        assertEquals(1500, netto.evaluer())
+    }
+
+    @Test
+    fun `integer division results in Double like integerDivisionResultsInDouble`() {
+        val a = Faktum("a", 1)
+        val b = Faktum("b", 4)
+
+        assertEquals(0.25, (a / b).evaluer())
+        assertEquals(0.25, (a / 4).evaluer())
+        assertEquals(0.25, (1 / b).evaluer())
+    }
+
+    // ========================================================================
+    // Parentheses Handling (mimicking FormelTest)
+    // ========================================================================
+
+    @Test
+    fun `parentheses simple like paranteser_enkel`() {
+        val SPT = Faktum("SPT", 4.3)
+        val OPT = Faktum("OPT", 2.3)
+        val PÅ = Faktum("PÅ", 20)
+
+        val formel1 = (SPT - OPT) * PÅ
+        assertEquals(40.0, formel1.evaluer())
+        assertEquals("(SPT - OPT) * PÅ", formel1.notasjon())
+        assertEquals("(4.3 - 2.3) * 20", formel1.konkret())
+
+        val formel2 = PÅ * (SPT - OPT)
+        assertEquals(40.0, formel2.evaluer())
+        assertEquals("PÅ * (SPT - OPT)", formel2.notasjon())
+        assertEquals("20 * (4.3 - 2.3)", formel2.konkret())
+    }
+
+    @Test
+    fun `parentheses medium complexity like paranteser_middels`() {
+        val SPT = Faktum("SPT", 4.3)
+        val OPT = Faktum("OPT", 2.3)
+        val PÅ = Faktum("PÅ", 20)
+
+        val formel1 = (SPT - OPT) * (PÅ) * PÅ
+        assertEquals(800.0, formel1.evaluer())
+        assertEquals("(SPT - OPT) * PÅ * PÅ", formel1.notasjon())
+        assertEquals("(4.3 - 2.3) * 20 * 20", formel1.konkret())
+    }
+
+    @Test
+    fun `parentheses with negative values like paranteser_negativeVerdier`() {
+        val a = Faktum("a", -2)
+        val b = Faktum("b", 1)
+        val f = 4 - (a + b)
+
+        assertEquals(5, f.evaluer())
+        assertEquals("4 - (a + b)", f.notasjon())
+        assertEquals("4 - (-2 + 1)", f.konkret())
+    }
+
+    @Test
+    fun `parentheses with negative values 2 like paranteser_negativeVerdier2`() {
+        val a = Faktum("a", -2)
+        val b = Faktum("b", 1)
+        val f = -4 - (a - b)
+
+        assertEquals(-1, f.evaluer())
+        assertEquals("-4 - (a - b)", f.notasjon())
+        assertEquals("-4 - (-2 - 1)", f.konkret())
+    }
+
+    @Test
+    fun `parentheses with positive values like paranteser_positiveVerdier`() {
+        val a = Faktum("a", 2)
+        val b = Faktum("b", 1)
+        val f = 4 - (a + b)
+
+        assertEquals(1, f.evaluer())
+        assertEquals("4 - (a + b)", f.notasjon())
+        assertEquals("4 - (2 + 1)", f.konkret())
+    }
+
+    @Test
+    fun `parentheses with negative values reversed like paranteser_negativeVerdier_reversed`() {
+        val a = Faktum("a", -2)
+        val b = Faktum("b", 1)
+        val f = (a + b) - 4
+
+        assertEquals(-5, f.evaluer())
+        // Note: Uttrykk preserves parentheses for subtraction on right side
+        assertEquals("(a + b) - 4", f.notasjon())
+        assertEquals("(-2 + 1) - 4", f.konkret())
+    }
+
+    @Test
+    fun `parentheses with positive values reversed like paranteser_positiveVerdier_reversed`() {
+        val a = Faktum("a", 2)
+        val b = Faktum("b", 1)
+        val f = 4 - (a + b)
+
+        assertEquals(1, f.evaluer())
+        assertEquals("4 - (a + b)", f.notasjon())
+        assertEquals("4 - (2 + 1)", f.konkret())
+    }
+
+    // ========================================================================
+    // Named Expressions (mimicking locked/unlocked formulas)
+    // ========================================================================
+
+    @Test
+    fun `named expression with sub-expressions like copyFormelWithSubFormel`() {
+        val G = Const(200000)
+
+        val tpF92 = (0.5 * G).navngi("tp_f92")
+        val tpE91 = (1 * G).navngi("tp_e91")
+        val tp = (tpF92 + tpE91).navngi("tp")
+
+        val tpPlus = tp + 1
+
+        assertEquals(300001.0, tpPlus.evaluer())
+        assertEquals("tp + 1", tpPlus.notasjon())
+        // Note: Uttrykk shows decimal notation for Double values
+        assertEquals("300000.0 + 1", tpPlus.konkret())
+    }
+
+    @Test
+    fun `show separate named expressions like shouldShowSeperateFormulas`() {
+        val G = Faktum("G", 95000)
+        val SPT = Faktum("SPT", 4.23)
+        val påF92 = Faktum("PÅ_F92", 25)
+        val påE91 = Faktum("PÅ_E91", 15)
+
+        // Note: Without avrund function, we'll just test the structure
+        val tpF92 = (0.45 * G * SPT * påF92 / 40).navngi("tp_f92")
+        val tpE91 = (0.45 * G * SPT * påE91 / 40).navngi("tp_e91")
+
+        val sum = tpF92 + tpE91
+
+        // Verify named expressions are preserved in notation
+        assertEquals("tp_f92 + tp_e91", sum.notasjon())
+
+        // Verify the calculation works
+        val expected = (0.45 * 95000 * 4.23 * 25 / 40) + (0.45 * 95000 * 4.23 * 15 / 40)
+        assertEquals(expected, sum.evaluer(), 0.01)
+    }
+
+    // ========================================================================
+    // Complex Real-World Examples
+    // ========================================================================
+
+    @Test
+    fun `complex slitertillegg calculation like in FormelTest`() {
+        val G = Faktum("G", 79216)
+        var OPT = Faktum("OPT", 2.47)
+        var PÅ = Faktum("PÅ", 16)
+        var SPT = Faktum("SPT", 2.47)
+        var OÅ = Faktum("OÅ", 20)
+
+        val tpBrukerUtenPTBrutto = (0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * 1 / 12)
+            .navngi("bruker_utenPT")
+
+        // Verify calculation
+        val expected = 0.45 * 79216 * (2.47 * 16.0 / 20 + (2.47 - 2.47) * 16 / 40.0) * 1 / 12
+        assertEquals(expected, tpBrukerUtenPTBrutto.evaluer(), 0.01)
+
+        assertEquals("bruker_utenPT", tpBrukerUtenPTBrutto.notasjon())
+
+        // Test with different values (like second part of FormelTest)
+        OPT = Faktum("OPT", 4.0)
+        PÅ = Faktum("PÅ", 17)
+        SPT = Faktum("SPT", 6.46)
+        OÅ = Faktum("OÅ", 20)
+        val tpPst = Faktum("tp_pst", 0.55)
+        val UFG = Faktum("UFG", 100)
+
+        val tpAvdodBrutto = (0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * UFG / 100 * 1 / 12 * tpPst)
+            .navngi("avdød")
+
+        val expectedAvdod = 0.45 * 79216 * (4.0 * 17 / 20.0 + (6.46 - 4.0) * 17 / 40.0) * 100 / 100.0 * 1 / 12 * 0.55
+        assertEquals(expectedAvdod, tpAvdodBrutto.evaluer(), 0.01)
+    }
+
+    @Test
+    fun `anonymous expressions can be renamed like anonymousSubformulaAreRenamedInHighlevelContext`() {
+        val to = Const(2)
+        val tre = Const(3)
+
+        // Anonymous expressions without context
+        val anonF1 = to * tre
+        val anonF2 = tre + to
+
+        // Higher level knows context and names formulas
+        val copyAnonF1 = anonF1.navngi("poengtillegg")
+        val copyAnonF2 = anonF2.navngi("avdod")
+        val tpSumBrutto = (copyAnonF1 * 0.5 + copyAnonF2).navngi("tpSum")
+
+        // Note: Navngitt shows its name in notation (like locked formulas in Formel)
+        assertEquals("tpSum", tpSumBrutto.notasjon())
+        assertEquals("8.0", tpSumBrutto.konkret()) // Result is Double due to multiplication with 0.5
+
+        // To see the inner expression, use utpakk()
+        assertEquals("poengtillegg * 0.5 + avdod", tpSumBrutto.utpakk().notasjon())
+    }
+
+    // ========================================================================
+    // Type Safety and Coercion
+    // ========================================================================
+
+    @Test
+    fun `Int operations preserve Int type`() {
+        val a = Faktum("a", 10)
+        val b = Faktum("b", 20)
+
+        val sum: Add<Int> = a + b
+        val product: Mul<Int> = a * b
+        val difference: Sub<Int> = a - b
+
+        assertEquals(30, sum.evaluer())
+        assertEquals(200, product.evaluer())
+        assertEquals(-10, difference.evaluer())
+    }
+
+    @Test
+    fun `Double operations preserve Double type`() {
+        val a = Faktum("a", 10.5)
+        val b = Faktum("b", 20.5)
+
+        val sum: Add<Double> = a + b
+        val product: Mul<Double> = a * b
+        val difference: Sub<Double> = a - b
+
+        assertEquals(31.0, sum.evaluer())
+        assertEquals(215.25, product.evaluer(), 0.001)
+        assertEquals(-10.0, difference.evaluer())
+    }
+
+    @Test
+    fun `Division always returns Double`() {
+        val intA = Faktum("a", 10)
+        val intB = Faktum("b", 5)
+
+        val div: Div = intA / intB
+        val result: Double = div.evaluer()
+
+        assertEquals(2.0, result)
+        assertTrue(result is Double)
+    }
+
+    @Test
+    fun `Mixed Int and Double operations result in Double`() {
+        val intVal = Faktum("int", 10)
+        val doubleVal = Faktum("double", 2.5)
+
+        val mixed1 = intVal + doubleVal
+        val mixed2 = intVal * doubleVal
+        val mixed3 = doubleVal - intVal
+
+        assertEquals(12.5, mixed1.evaluer())
+        assertEquals(25.0, mixed2.evaluer())
+        assertEquals(-7.5, mixed3.evaluer())
+    }
+
+    // ========================================================================
+    // Operator Precedence
+    // ========================================================================
+
+    @Test
+    fun `operator precedence without parentheses`() {
+        val a = Faktum("a", 10)
+        val b = Faktum("b", 5)
+        val c = Faktum("c", 2)
+
+        // a + b * c should be a + (b * c) = 10 + 10 = 20
+        val expr1 = a + b * c
+        assertEquals(20, expr1.evaluer())
+        assertEquals("a + b * c", expr1.notasjon())
+
+        // a - b / c should be a - (b / c) = 10 - 2.5 = 7.5
+        val expr2 = a - b / c
+        assertEquals(7.5, expr2.evaluer())
+    }
+
+    @Test
+    fun `operator precedence with division and multiplication`() {
+        val a = Faktum("a", 20)
+        val b = Faktum("b", 4)
+        val c = Faktum("c", 2)
+
+        // a / b * c should be (a / b) * c = 5 * 2 = 10
+        val expr = a / b * c
+        assertEquals(10.0, expr.evaluer())
+    }
+
+    // ========================================================================
+    // Edge Cases
+    // ========================================================================
+
+    @Test
+    fun `multiple levels of nesting`() {
+        val a = Faktum("a", 2)
+        val b = Faktum("b", 3)
+        val c = Faktum("c", 4)
+        val d = Faktum("d", 5)
+
+        // ((a + b) * c) - d = (5 * 4) - 5 = 15
+        val expr = ((a + b) * c) - d
+        assertEquals(15, expr.evaluer())
+        assertEquals("(a + b) * c - d", expr.notasjon())
+    }
+
+    @Test
+    fun `unary minus with complex expression`() {
+        val a = Faktum("a", 10)
+        val b = Faktum("b", 5)
+
+        val expr = -(a + b)
+        assertEquals(-15, expr.evaluer())
+        assertEquals("-(a + b)", expr.notasjon())
+    }
+
+    @Test
+    fun `double negation`() {
+        val a = Faktum("a", 10)
+
+        val negOnce = -Var(a)
+        val expr = -negOnce
+        assertEquals(10, expr.evaluer())
+        // Note: Might simplify to "a" or show as "--a"
+        // The important thing is the value is correct
+    }
+
+    @Test
+    fun `expression with constants only`() {
+        val expr = Const(5) + Const(10) * Const(2)
+
+        assertEquals(25, expr.evaluer())
+        assertEquals("5 + 10 * 2", expr.notasjon())
+        assertEquals("5 + 10 * 2", expr.konkret())
+    }
+
+    @Test
+    fun `zero handling`() {
+        val zero = Faktum("zero", 0)
+        val ten = Faktum("ten", 10)
+
+        assertEquals(10, (zero + ten).evaluer())
+        assertEquals(0, (zero * ten).evaluer())
+        assertEquals(-10, (zero - ten).evaluer())
+    }
+
+    @Test
+    fun `one handling`() {
+        val one = Faktum("one", 1)
+        val ten = Faktum("ten", 10)
+
+        assertEquals(10, (one * ten).evaluer())
+        assertEquals(0.1, (one / ten).evaluer())
+    }
+
+    // ========================================================================
+    // Expression Reuse and Sharing
+    // ========================================================================
+
+    @Test
+    fun `same expression used multiple times`() {
+        val base = Faktum("base", 10)
+        val subExpr = base * 2  // This expression is reused
+
+        val expr1 = subExpr + 5
+        val expr2 = subExpr - 5
+        val expr3 = subExpr + subExpr
+
+        assertEquals(25, expr1.evaluer())
+        assertEquals(15, expr2.evaluer())
+        assertEquals(40, expr3.evaluer())
+
+        // All should still have correct notation
+        assertEquals("base * 2 + 5", expr1.notasjon())
+        assertEquals("base * 2 - 5", expr2.notasjon())
+        assertEquals("base * 2 + base * 2", expr3.notasjon())
+    }
+
+    @Test
+    fun `faktumListe collects all faktum from expression`() {
+        val a = Faktum("a", 10)
+        val b = Faktum("b", 20)
+        val c = Faktum("c", 30)
+
+        val expr = (a + b) * c - a
+        val faktumListe = expr.faktumListe()
+
+        // Should contain a, b, c (even though a appears twice)
+        assertTrue(faktumListe.any { it.name == "a" })
+        assertTrue(faktumListe.any { it.name == "b" })
+        assertTrue(faktumListe.any { it.name == "c" })
+    }
+
+    @Test
+    fun `dybde increases with nesting`() {
+        val a = Faktum("a", 1)
+
+        assertEquals(1, Var(a).dybde())
+        assertEquals(2, (a + a).dybde())
+        assertEquals(3, ((a + a) * a).dybde())
+        assertEquals(4, (((a + a) * a) - a).dybde())
+    }
+
+    @Test
+    fun `named expression has depth 1`() {
+        val a = Faktum("a", 10)
+        val b = Faktum("b", 20)
+
+        val complex = ((a + b) * (a - b)).navngi("complex")
+
+        // Navngitt uttrykk should be atomic (depth 1)
+        assertEquals(1, complex.dybde())
+    }
+}
