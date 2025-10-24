@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl.forklaring
 
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import java.io.Serializable
+import kotlin.math.min
 
 /**
  * Rekursiv uttrykksstruktur for matematiske beregninger.
@@ -246,6 +247,32 @@ data class Div(
         val v = venstre.konkret().medParentesVedBehov(venstre)
         val h = høyre.konkret().medParentesVedBehov(høyre, true)
         return "$v / $h"
+    }
+
+    override fun faktumListe(): List<Faktum<out Number>> =
+        venstre.faktumListe() + høyre.faktumListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+data class Min(
+    val venstre: Uttrykk<out Number>,
+    val høyre: Uttrykk<out Number>
+) : Uttrykk<Double> {
+    override fun evaluer(): Double =
+        min(venstre.evaluer().toDouble(), høyre.evaluer().toDouble())
+
+
+    override fun notasjon(): String {
+        val v = venstre.notasjon().medParentesVedBehov(venstre)
+        val h = høyre.notasjon().medParentesVedBehov(høyre,true)
+        return "min($v,$h)"
+    }
+
+    override fun konkret(): String {
+        val v = venstre.konkret().medParentesVedBehov(venstre)
+        val h = høyre.konkret().medParentesVedBehov(høyre, true)
+        return "min($v,$h)"
     }
 
     override fun faktumListe(): List<Faktum<out Number>> =

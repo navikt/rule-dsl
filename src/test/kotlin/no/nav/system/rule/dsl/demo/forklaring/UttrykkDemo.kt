@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl.demo.forklaring
 
 import no.nav.system.rule.dsl.forklaring.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
+import kotlin.math.min
 
 /**
  * Demonstrasjon av rekursiv Uttrykk-struktur for regelsporing.
@@ -121,7 +122,7 @@ fun uttrykkNavngitteUttrykk() {
     // Subberegninger med direkte Faktum-bruk (mye renere!)
     val fulltSlitertillegg = (0.25 * G / 12).navngi("fulltSlitertillegg")
     val trygdetidFaktor = (faktiskTrygdetid / fullTrygdetid).navngi("trygdetidFaktor")
-    val justeringsFaktor = ((MND_36 - antallMåneder) / MND_36).navngi("justeringsFaktor")
+    val justeringsFaktor = ((MND_36 - Min(antallMåneder.tilUttrykk(), MND_36.tilUttrykk())) / MND_36).navngi("justeringsFaktor")
 
     // Hovedberegning
     val slitertillegg = (fulltSlitertillegg * justeringsFaktor * trygdetidFaktor).navngi("slitertillegg")
