@@ -42,7 +42,7 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
         ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), uttakstidspunkt).toInt()
     )
 
-    private var justeringsFaktor: Formel<Double> = Formel.variable("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", 0.0)
+    private var justeringsFaktor: Formel<Double> = Formel.variable("justeringsFaktor", 0.0)
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
