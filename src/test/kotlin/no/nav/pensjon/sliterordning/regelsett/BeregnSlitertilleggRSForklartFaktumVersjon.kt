@@ -3,11 +3,11 @@ package no.nav.pensjon.sliterordning.regelsett
 import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
 import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.pensjon.sliterordning.grunnlag.Person
-import no.nav.pensjon.sliterordning.resultat.SlitertilleggFaktum
 import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
 import no.nav.system.rule.dsl.formel.*
 import no.nav.system.rule.dsl.rettsregel.erMindreEnn
+import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -16,15 +16,13 @@ import java.time.temporal.ChronoUnit
  *
  * https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering#
  *
- *
- *
  */
-class BeregnSlitertilleggRSVårFaktumVersjon(
+class BeregnSlitertilleggRSForklartFaktumVersjon(
     val uttakstidspunkt: YearMonth,
     val virkningstidspunkt: YearMonth,
     val person: Person,
     val grunnbeløp: Int
-) : AbstractDemoRuleset<SlitertilleggFaktum>() {
+) : AbstractDemoRuleset<ForklartFaktum<Double>>() {
     private val G = Formel.variable("G", grunnbeløp)
     private val fulltSlitertillegg: Formel<Double> = FormelBuilder.create<Double>()
         .name("SLITERTILLEGG-BEREGNING-UAVKORTET")
@@ -42,7 +40,7 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
         ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), uttakstidspunkt).toInt()
     )
 
-    private var justeringsFaktor: Formel<Double> = Formel.variable("justeringsFaktor", 0.0)
+    private var justeringsFaktor: Formel<Double> = Formel.variable("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", 0.0)
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
@@ -68,7 +66,7 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
             HVIS { antallMånederEtterNedreAldersgrense erMindreEnn MND_36 }
             SÅ {
                 justeringsFaktor = FormelBuilder.create<Double>()
-                    .name("justeringsFaktor")
+                    .name("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT")
                     .expression((MND_36 - antallMånederEtterNedreAldersgrense) / MND_36)
                     .build()
             }
@@ -76,7 +74,6 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
 
         /**
          * Forklaring:
-         *      HVA
          *      slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
          *      slitertillegg = 2292 * 0.33 * 0.5
          *      slitertillegg = 378
@@ -84,9 +81,14 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
          *      REFERANSE
          *          SLITERTILEGG-BEREGNET
          *
-         *      FORDI / HVORFOR
-         *          this.trace()..... INNVILGET = JA... FORDI PGIsnitt > 4000
-         *              HVORDAN ... HVORDAN FORDI ....
+         *      FORDI
+         *          BeregnSlitertilleggForklartFaktumService
+         *              BehandleSliterordningForklartFaktumFlyt
+         *                  forgrening: innvilget?
+         *                      BetingelseNavn: JA
+         *                        BeregnSlitertilleggRSForklartFaktumVersjon
+         *                              BeregnSlitertillegg <---- HER ER VI. VI LAGER FAKTUM.
+         *                                  predikat: JA ..
          *
          *      HVORDAN
          *          fulltSlitertillegg = 0.25 * G / 12
@@ -110,8 +112,8 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
             HVIS { true }
             SÅ {
                 RETURNER(
-                    SlitertilleggFaktum(
-                        slitertilleggBeregnet = formula("slitertillegg") {
+                    faktum(
+                        formula("slitertillegg") {
                             expression(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
                         }
                     )

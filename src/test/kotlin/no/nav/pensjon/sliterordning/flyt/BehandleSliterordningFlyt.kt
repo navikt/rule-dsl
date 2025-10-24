@@ -5,6 +5,7 @@ import no.nav.pensjon.sliterordning.regelsett.BeregnSlitertilleggRS
 import no.nav.pensjon.sliterordning.regelsett.VilkårsprøvSlitertilleggRS
 import no.nav.system.rule.dsl.AbstractRuleflow
 import no.nav.system.rule.dsl.demo.domain.Response
+import no.nav.system.rule.dsl.demo.domain.Response.Sliterordning.*
 import java.time.YearMonth
 
 class BehandleSliterordningFlyt(
@@ -21,18 +22,16 @@ class BehandleSliterordningFlyt(
             gren {
                 betingelse("JA") { innvilget }
                 flyt {
-                    sliterordning = Response
-                        .Sliterordning
-                        .Innvilget(
-                            BeregnSlitertilleggRS(uttakstidspunkt, virkningstidspunkt, person).run(this)
-                        )
+                    sliterordning = Innvilget(
+                        BeregnSlitertilleggRS(uttakstidspunkt, virkningstidspunkt, person).run(this)
+                    )
                 }
             }
 
             gren {
                 betingelse("NEI") { !innvilget }
                 flyt {
-                    sliterordning = Response.Sliterordning.Avslag("avslag")
+                    sliterordning = Avslag("avslag")
                 }
             }
         }

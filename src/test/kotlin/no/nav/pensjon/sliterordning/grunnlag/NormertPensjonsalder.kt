@@ -20,4 +20,11 @@ class NormertPensjonsalder(
         .plusYears(offsetÅr.toLong())
         .plusMonths(offsetMnd.toLong() + 1)
 
+    companion object {
+        fun default() = NormertPensjonsalder(
+            øvreÅr = 75, øvreMnd = 0,
+            normertÅr = 67, normertMnd = 0,
+            nedreÅr = 62, nedreMnd = 0
+        )
+    }
 }

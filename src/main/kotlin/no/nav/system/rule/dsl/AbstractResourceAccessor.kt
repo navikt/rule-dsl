@@ -1,7 +1,11 @@
 package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.error.ResourceAccessException
+import no.nav.system.rule.dsl.formel.Formel
+import no.nav.system.rule.dsl.inspections.traceTo
 import no.nav.system.rule.dsl.resource.Root
+import no.nav.system.rule.dsl.resource.root
+import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
 import kotlin.reflect.KClass
 
 abstract class AbstractResourceAccessor : AbstractRuleComponent() {
@@ -27,4 +31,17 @@ abstract class AbstractResourceAccessor : AbstractRuleComponent() {
 
         return resourceMap[key] as T
     }
+
+    /**
+     * Produserer ForklartFaktum med sporing og angitt Formel.
+     */
+    fun <T : Number> faktum(formel: Formel<T>): ForklartFaktum<T> {
+        return ForklartFaktum(
+            formel.name,
+            formel.value,
+            this.root().traceTo(target = this@AbstractResourceAccessor),
+            hvordan = formel
+        )
+    }
+
 }

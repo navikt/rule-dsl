@@ -11,6 +11,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.inspections.find
 import no.nav.system.rule.dsl.inspections.trace
+import no.nav.system.rule.dsl.inspections.traceType
 import no.nav.system.rule.dsl.inspections.xmlDebug
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -271,7 +272,7 @@ regeltjeneste: BeregnAlderspensjonService
                 regelsett: PersonenErFlyktningRS
                 regelsett: BeregnFaktiskTrygdetidRS
                 regelsett: BeregnGrunnpensjonRS
-            """.trimIndent(), service.trace(targetType = REGELSETT)
+            """.trimIndent(), service.traceType(targetType = REGELSETT)
         )
     }
 }

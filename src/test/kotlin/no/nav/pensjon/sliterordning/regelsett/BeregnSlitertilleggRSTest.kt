@@ -14,7 +14,7 @@ import java.time.YearMonth
 class BeregnSlitertilleggRSTest {
 
     private fun person(fodselsdato: YearMonth, trygdetidÅr: Int): Person =
-        Person(fodselsdato, Trygdetid(trygdetidÅr), NormertPensjonsalder(0,0,0,0,62,0))
+        Person(fodselsdato, Trygdetid(trygdetidÅr), NormertPensjonsalder.default())
 
     @Test
     fun `beregning ved uttak på nedre aldersgrense - justeringsfaktor 1 og trygdetid 50pct`() {

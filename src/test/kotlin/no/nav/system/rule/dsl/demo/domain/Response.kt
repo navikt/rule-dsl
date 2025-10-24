@@ -1,6 +1,7 @@
 package no.nav.system.rule.dsl.demo.domain
 
 import no.nav.pensjon.sliterordning.resultat.Slitertillegg
+import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
 
 sealed class Response {
 
@@ -8,5 +9,10 @@ sealed class Response {
     sealed class Sliterordning() : Response() {
         data class Innvilget(val slitertillegg: Slitertillegg) : Sliterordning()
         data class Avslag(val årsak: String) : Sliterordning()
+    }
+
+    sealed class SliterordningForklartFaktum() : Response() {
+        data class Innvilget(val slitertillegg: ForklartFaktum<Double>) : SliterordningForklartFaktum()
+        data class Avslag(val årsak: String) : SliterordningForklartFaktum()
     }
 }

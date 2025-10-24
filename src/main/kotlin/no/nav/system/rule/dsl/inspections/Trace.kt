@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl.inspections
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
+import org.jetbrains.kotlin.builtins.StandardNames.FqNames.target
 
 /**
  * Searches the ruleComponent tree for target [AbstractRuleComponent]s matching [target].
@@ -10,10 +11,21 @@ import no.nav.system.rule.dsl.enums.RuleComponentType
  * @param qualifier A ruleComponent that resolves [qualifier] expression as true is eligible for search.
  * @param target A ruleComponent that matches [target] expression is added to [result]
  */
-fun AbstractRuleComponent.trace(targetType: RuleComponentType): String {
+fun AbstractRuleComponent.traceType(targetType: RuleComponentType): String {
     return trace(target = { arc -> arc.type() == targetType })
 }
 
+fun AbstractRuleComponent.traceTo(
+    includeLeafFaktum: Boolean = false,
+    qualifier: (AbstractRuleComponent) -> Boolean = { true },
+    target: AbstractRuleComponent
+): String {
+    val rootTraceNode = TraceNode(parent = null, arc = this).apply {
+        inspect(this, includeLeafFaktum, qualifier, target = { arc -> arc == target })
+    }
+
+    return rootTraceNode.toString()
+}
 
 fun AbstractRuleComponent.trace(
     includeLeafFaktum: Boolean = false,
@@ -36,6 +48,16 @@ private fun inspect(
     parent.arc.children
         .filter(qualifier)
         .forEach { child ->
+            // Detect cycles: check if child is already in ancestor chain
+            var ancestor: TraceNode? = parent
+            while (ancestor != null) {
+                if (ancestor.arc === child) {
+                    // Cycle detected, skip this child
+                    return@forEach
+                }
+                ancestor = ancestor.parent
+            }
+
             TraceNode(
                 parent = parent,
                 arc = child
@@ -44,6 +66,8 @@ private fun inspect(
                 if (target.invoke(child)) {
                     this.verify()
                 }
+//                if (this == target)
+//                    val x = 0
                 inspect(this, includeLeafFaktum, qualifier, target)
             }
         }

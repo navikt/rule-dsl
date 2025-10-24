@@ -1,6 +1,11 @@
 package no.nav.system.rule.dsl.rettsregel
 
+import no.nav.system.rule.dsl.forklaring.Forklaring
+import no.nav.system.rule.dsl.forklaring.KomplettForklaring
+import no.nav.system.rule.dsl.forklaring.SubsumsjonForklaring
 import java.io.Serializable
+import kotlin.collections.forEach
+
 //// Common interface for values used in rules
 //interface RuleValue<T : Any> {
 //    val value: T
