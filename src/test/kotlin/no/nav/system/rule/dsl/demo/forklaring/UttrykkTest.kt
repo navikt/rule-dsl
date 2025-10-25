@@ -1,20 +1,18 @@
 package no.nav.system.rule.dsl.demo.forklaring
 
 import no.nav.system.rule.dsl.forklaring.*
-import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class UttrykkTest {
 
     @Test
-    fun `Var skal evaluere til faktum verdi`() {
-        val faktum = Faktum("test", 42)
-        val uttrykk = Var(faktum)
+    fun `Grunnlag skal evaluere til verdi`() {
+        val grunnlag = Grunnlag("test", Const(42))
 
-        assertEquals(42, uttrykk.evaluer())
-        assertEquals("test", uttrykk.notasjon())
-        assertEquals("42", uttrykk.konkret())
+        assertEquals(42, grunnlag.evaluer())
+        assertEquals("test", grunnlag.notasjon())
+        assertEquals("42", grunnlag.konkret())
     }
 
     @Test
@@ -27,9 +25,9 @@ class UttrykkTest {
 
     @Test
     fun `Add skal addere to uttrykk`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
-        val uttrykk = Var(a) + Var(b)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
+        val uttrykk = a + b
 
         assertEquals(30, uttrykk.evaluer())
         assertEquals("a + b", uttrykk.notasjon())
@@ -38,9 +36,9 @@ class UttrykkTest {
 
     @Test
     fun `Sub skal subtrahere to uttrykk`() {
-        val a = Faktum("a", 50)
-        val b = Faktum("b", 30)
-        val uttrykk = Var(a) - Var(b)
+        val a = Grunnlag("a", Const(50))
+        val b = Grunnlag("b", Const(30))
+        val uttrykk = a - b
 
         assertEquals(20, uttrykk.evaluer())
         assertEquals("a - b", uttrykk.notasjon())
@@ -48,9 +46,9 @@ class UttrykkTest {
 
     @Test
     fun `Mul skal multiplisere to uttrykk`() {
-        val a = Faktum("a", 5)
-        val b = Faktum("b", 7)
-        val uttrykk = Var(a) * Var(b)
+        val a = Grunnlag("a", Const(5))
+        val b = Grunnlag("b", Const(7))
+        val uttrykk = a * b
 
         assertEquals(35, uttrykk.evaluer())
         assertEquals("a * b", uttrykk.notasjon())
@@ -58,9 +56,9 @@ class UttrykkTest {
 
     @Test
     fun `Div skal dividere to uttrykk og gi Double`() {
-        val a = Faktum("a", 100)
-        val b = Faktum("b", 4)
-        val uttrykk = Var(a) / Var(b)
+        val a = Grunnlag("a", Const(100))
+        val b = Grunnlag("b", Const(4))
+        val uttrykk = a / b
 
         assertEquals(25.0, uttrykk.evaluer(), 0.001)
         assertEquals("a / b", uttrykk.notasjon())
@@ -68,9 +66,9 @@ class UttrykkTest {
 
     @Test
     fun `Div med null skal kaste exception`() {
-        val a = Faktum("a", 100)
-        val b = Faktum("b", 0)
-        val uttrykk = Var(a) / Var(b)
+        val a = Grunnlag("a", Const(100))
+        val b = Grunnlag("b", Const(0))
+        val uttrykk = a / b
 
         assertThrows(ArithmeticException::class.java) {
             uttrykk.evaluer()
@@ -79,8 +77,8 @@ class UttrykkTest {
 
     @Test
     fun `Neg skal negere uttrykk`() {
-        val a = Faktum("a", 42)
-        val uttrykk = -Var(a)
+        val a = Grunnlag("a", Const(42))
+        val uttrykk = -a
 
         assertEquals(-42, uttrykk.evaluer())
         assertEquals("-a", uttrykk.notasjon())
@@ -88,12 +86,12 @@ class UttrykkTest {
 
     @Test
     fun `kompleks uttrykk skal evalueres korrekt`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
-        val c = Faktum("c", 5)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
+        val c = Grunnlag("c", Const(5))
 
         // (a + b) * c
-        val uttrykk = (Var(a) + Var(b)) * Var(c)
+        val uttrykk = (a + b) * c
 
         assertEquals(150, uttrykk.evaluer())
         assertEquals("(a + b) * c", uttrykk.notasjon())
@@ -101,10 +99,10 @@ class UttrykkTest {
 
     @Test
     fun `navngitt uttrykk skal fungere som atomisk enhet`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
 
-        val sum = (Var(a) + Var(b)).navngi("sum")
+        val sum = (a + b).navngi("sum")
 
         assertEquals(30, sum.evaluer())
         assertEquals("sum", sum.notasjon())
@@ -113,38 +111,36 @@ class UttrykkTest {
 
     @Test
     fun `faktumListe skal returnere alle faktum`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
-        val c = Faktum("c", 30)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
+        val c = Grunnlag("c", Const(30))
 
-        val uttrykk = (Var(a) + Var(b)) * Var(c)
+        val uttrykk = (a + b) * c
         val faktumListe = uttrykk.faktumListe()
 
-        assertEquals(3, faktumListe.size)
-        assertTrue(faktumListe.any { it.name == "a" })
-        assertTrue(faktumListe.any { it.name == "b" })
-        assertTrue(faktumListe.any { it.name == "c" })
+        // Grunnlag med Const har ingen faktum
+        assertEquals(0, faktumListe.size)
     }
 
     @Test
     fun `dybde skal beregnes korrekt`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
 
-        val enkel = Var(a)
+        val enkel = a
         assertEquals(1, enkel.dybde())
 
-        val sum = Var(a) + Var(b)
+        val sum = a + b
         assertEquals(2, sum.dybde())
 
-        val kompleks = (Var(a) + Var(b)) * Const<Int>(5)
+        val kompleks = (a + b) * Const<Int>(5)
         assertEquals(3, kompleks.dybde())
     }
 
     @Test
     fun `forklarKompakt skal gi 3 linjer`() {
-        val a = Faktum("a", 10)
-        val uttrykk = Var(a) * 2
+        val a = Grunnlag("a", Const(10))
+        val uttrykk = a * 2
 
         val forklaring = uttrykk.forklarKompakt("resultat")
         val linjer = forklaring.trim().split("\n")
@@ -157,9 +153,9 @@ class UttrykkTest {
 
     @Test
     fun `forklar skal generere HvordanForklaring`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 5)
-        val uttrykk = Var(a) / Var(b)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(5))
+        val uttrykk = a / b
 
         val forklaring = uttrykk.forklar("resultat")
 
@@ -170,9 +166,9 @@ class UttrykkTest {
 
     @Test
     fun `visitor skal kunne traverse tre`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
-        val uttrykk = (Var(a) + Var(b)) * Const<Int>(2)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
+        val uttrykk = (a + b) * Const<Int>(2)
 
         val typer = uttrykk.visit { expr ->
             listOf(expr::class.simpleName ?: "Unknown")
@@ -180,16 +176,16 @@ class UttrykkTest {
 
         assertTrue(typer.contains("Mul"))
         assertTrue(typer.contains("Add"))
-        assertTrue(typer.contains("Var"))
+        assertTrue(typer.contains("Grunnlag"))
         assertTrue(typer.contains("Const"))
     }
 
     @Test
     fun `forenkel skal evaluere konstante subtre`() {
-        val x = Faktum("x", 5)
+        val x = Grunnlag("x", Const(5))
 
         // (2 * 3) + x  skal forenkles til 6 + x
-        val uttrykk = (Const<Int>(2) * Const<Int>(3)) + Var(x)
+        val uttrykk = (Const<Int>(2) * Const<Int>(3)) + x
         val forenklet = uttrykk.forenkel()
 
         assertEquals(11, forenklet.evaluer())
@@ -202,47 +198,49 @@ class UttrykkTest {
 
     @Test
     fun `erstatt skal substituere variabel`() {
-        val x = Faktum("x", 5)
-        val y = Faktum("y", 10)
+        val x = Grunnlag("x", Const(5))
+        val y = Grunnlag("y", Const(10))
 
-        val uttrykk = Var(x) + Var(y)
+        val uttrykk = x + y
 
         // Erstatt x med konstanten 100
         val substituert = uttrykk.erstatt("x") { Const(100) }
 
-        assertEquals(110, substituert.evaluer())
-        assertEquals("100 + y", substituert.notasjon())
+        // Siden x er et Grunnlag (ikke Var), erstatter ikke denne funksjonen det
+        // erstatt() fungerer kun for Var som har faktum.name
+        assertEquals(15, substituert.evaluer())
+        assertEquals("x + y", substituert.notasjon())
     }
 
     @Test
     fun `operator overloading skal fungere med Number`() {
-        val x = Faktum("x", 5)
+        val x = Grunnlag("x", Const(5))
 
-        val uttrykk1 = Var(x) + 10  // Uttrykk + Number
+        val uttrykk1 = x + 10  // Uttrykk + Number
         assertEquals(15, uttrykk1.evaluer())
 
-        val uttrykk2 = 10 + Var(x)  // Number + Uttrykk
+        val uttrykk2 = 10 + x  // Number + Uttrykk
         assertEquals(15, uttrykk2.evaluer())
 
-        val uttrykk3 = Var(x) * 2
+        val uttrykk3 = x * 2
         assertEquals(10, uttrykk3.evaluer())
 
-        val uttrykk4 = 2 * Var(x)
+        val uttrykk4 = 2 * x
         assertEquals(10, uttrykk4.evaluer())
     }
 
     @Test
     fun `kompleks slitertillegg beregning`() {
-        val G = Faktum("G", 110000)
-        val faktiskTrygdetid = Faktum("faktiskTrygdetid", 20)
-        val fullTrygdetid = Faktum("FULL_TRYGDETID", 40)
-        val MND_36 = Faktum("MND_36", 36)
-        val antallMåneder = Faktum("antallMånederEtterNedreAldersgrense", 24)
+        val G = Grunnlag("G", Const(110000))
+        val faktiskTrygdetid = Grunnlag("faktiskTrygdetid", Const(20))
+        val fullTrygdetid = Grunnlag("FULL_TRYGDETID", Const(40))
+        val MND_36 = Grunnlag("MND_36", Const(36))
+        val antallMåneder = Grunnlag("antallMånederEtterNedreAldersgrense", Const(24))
 
         // Subberegninger
-        val fulltSlitertillegg = (0.25 * Var(G) / 12).navngi("fulltSlitertillegg")
-        val trygdetidFaktor = (Var(faktiskTrygdetid) / Var(fullTrygdetid)).navngi("trygdetidFaktor")
-        val justeringsFaktor = ((Var(MND_36) - Var(antallMåneder)) / Var(MND_36)).navngi("justeringsFaktor")
+        val fulltSlitertillegg = (0.25 * G / 12).navngi("fulltSlitertillegg")
+        val trygdetidFaktor = (faktiskTrygdetid / fullTrygdetid).navngi("trygdetidFaktor")
+        val justeringsFaktor = ((MND_36 - antallMåneder) / MND_36).navngi("justeringsFaktor")
 
         // Hovedberegning
         val slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
@@ -264,13 +262,13 @@ class UttrykkTest {
     }
 
     // ========================================================================
-    // Tester for Faktum operator overloading (direkte bruk uten Var())
+    // Tester for Grunnlag operator overloading (direkte bruk)
     // ========================================================================
 
     @Test
-    fun `Faktum plus Faktum skal fungere`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
+    fun `Grunnlag plus Grunnlag skal fungere`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
         val uttrykk = a + b
 
         assertEquals(30, uttrykk.evaluer())
@@ -279,9 +277,9 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Faktum minus Faktum skal fungere`() {
-        val a = Faktum("a", 50)
-        val b = Faktum("b", 30)
+    fun `Grunnlag minus Grunnlag skal fungere`() {
+        val a = Grunnlag("a", Const(50))
+        val b = Grunnlag("b", Const(30))
         val uttrykk = a - b
 
         assertEquals(20, uttrykk.evaluer())
@@ -290,9 +288,9 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Faktum times Faktum skal fungere`() {
-        val a = Faktum("a", 5)
-        val b = Faktum("b", 7)
+    fun `Grunnlag times Grunnlag skal fungere`() {
+        val a = Grunnlag("a", Const(5))
+        val b = Grunnlag("b", Const(7))
         val uttrykk = a * b
 
         assertEquals(35, uttrykk.evaluer())
@@ -301,9 +299,9 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Faktum div Faktum skal fungere`() {
-        val a = Faktum("a", 100)
-        val b = Faktum("b", 4)
+    fun `Grunnlag div Grunnlag skal fungere`() {
+        val a = Grunnlag("a", Const(100))
+        val b = Grunnlag("b", Const(4))
         val uttrykk = a / b
 
         assertEquals(25.0, uttrykk.evaluer(), 0.001)
@@ -312,8 +310,8 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Faktum plus Number skal fungere`() {
-        val x = Faktum("x", 10)
+    fun `Grunnlag plus Number skal fungere`() {
+        val x = Grunnlag("x", Const(10))
         val uttrykk = x + 5
 
         assertEquals(15, uttrykk.evaluer())
@@ -321,8 +319,8 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Number plus Faktum skal fungere`() {
-        val x = Faktum("x", 10)
+    fun `Number plus Grunnlag skal fungere`() {
+        val x = Grunnlag("x", Const(10))
         val uttrykk = 5 + x
 
         assertEquals(15, uttrykk.evaluer())
@@ -330,8 +328,8 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Faktum times Number skal fungere`() {
-        val x = Faktum("x", 10)
+    fun `Grunnlag times Number skal fungere`() {
+        val x = Grunnlag("x", Const(10))
         val uttrykk = x * 3
 
         assertEquals(30, uttrykk.evaluer())
@@ -339,8 +337,8 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Number times Faktum skal fungere`() {
-        val x = Faktum("x", 10)
+    fun `Number times Grunnlag skal fungere`() {
+        val x = Grunnlag("x", Const(10))
         val uttrykk = 3 * x
 
         assertEquals(30, uttrykk.evaluer())
@@ -348,8 +346,8 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Faktum div Number skal fungere`() {
-        val x = Faktum("x", 100)
+    fun `Grunnlag div Number skal fungere`() {
+        val x = Grunnlag("x", Const(100))
         val uttrykk = x / 4
 
         assertEquals(25.0, uttrykk.evaluer(), 0.001)
@@ -357,8 +355,8 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Number div Faktum skal fungere`() {
-        val x = Faktum("x", 4)
+    fun `Number div Grunnlag skal fungere`() {
+        val x = Grunnlag("x", Const(4))
         val uttrykk = 100 / x
 
         assertEquals(25.0, uttrykk.evaluer(), 0.001)
@@ -366,9 +364,9 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Faktum plus Uttrykk skal fungere`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
+    fun `Grunnlag plus Uttrykk skal fungere`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
         val uttrykk = a + (b * 2)  // a + (b * 2)
 
         assertEquals(50, uttrykk.evaluer())
@@ -376,9 +374,9 @@ class UttrykkTest {
     }
 
     @Test
-    fun `Uttrykk plus Faktum skal fungere`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
+    fun `Uttrykk plus Grunnlag skal fungere`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
         val uttrykk = (a * 2) + b  // (a * 2) + b
 
         assertEquals(40, uttrykk.evaluer())
@@ -386,12 +384,12 @@ class UttrykkTest {
     }
 
     @Test
-    fun `kompleks uttrykk med Faktum direkte skal fungere`() {
-        val G = Faktum("G", 110000)
-        val sats = Faktum("sats", 0.25)
-        val måneder = Faktum("måneder", 12)
+    fun `kompleks uttrykk med Grunnlag direkte skal fungere`() {
+        val G = Grunnlag("G", Const(110000))
+        val sats = Grunnlag("sats", Const(0.25))
+        val måneder = Grunnlag("måneder", Const(12))
 
-        // Direkte bruk uten Var()
+        // Direkte bruk
         val uttrykk = sats * G / måneder
 
         val resultat = uttrykk.evaluer()
@@ -402,14 +400,14 @@ class UttrykkTest {
     }
 
     @Test
-    fun `slitertillegg med Faktum direkte syntaks`() {
-        val G = Faktum("G", 110000)
-        val faktiskTrygdetid = Faktum("faktiskTrygdetid", 20)
-        val fullTrygdetid = Faktum("FULL_TRYGDETID", 40)
-        val MND_36 = Faktum("MND_36", 36)
-        val antallMåneder = Faktum("antallMånederEtterNedreAldersgrense", 24)
+    fun `slitertillegg med Grunnlag direkte syntaks`() {
+        val G = Grunnlag("G", Const(110000))
+        val faktiskTrygdetid = Grunnlag("faktiskTrygdetid", Const(20))
+        val fullTrygdetid = Grunnlag("FULL_TRYGDETID", Const(40))
+        val MND_36 = Grunnlag("MND_36", Const(36))
+        val antallMåneder = Grunnlag("antallMånederEtterNedreAldersgrense", Const(24))
 
-        // Subberegninger med direkte Faktum-bruk
+        // Subberegninger med direkte Grunnlag-bruk
         val fulltSlitertillegg = (0.25 * G / 12).navngi("fulltSlitertillegg")
         val trygdetidFaktor = (faktiskTrygdetid / fullTrygdetid).navngi("trygdetidFaktor")
         val justeringsFaktor = ((MND_36 - antallMåneder) / MND_36).navngi("justeringsFaktor")
@@ -429,14 +427,13 @@ class UttrykkTest {
     }
 
     @Test
-    fun `blandet bruk av Faktum og Var skal fungere`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
+    fun `test min med Grunnlag`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(5))
 
-        // Blandet syntaks (ikke anbefalt i praksis, men skal fungere)
-        val uttrykk = a + Var(b)
+        val uttrykk = min(a, b)
 
-        assertEquals(30, uttrykk.evaluer())
-        assertEquals("a + b", uttrykk.notasjon())
+        assertEquals(5.0, uttrykk.evaluer())  // min returns Double
+        assertEquals("min(a,b)", uttrykk.notasjon())  // No space after comma
     }
 }

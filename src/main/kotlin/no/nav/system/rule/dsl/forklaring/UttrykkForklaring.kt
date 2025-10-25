@@ -31,15 +31,18 @@ package no.nav.system.rule.dsl.forklaring
  * @param maxDybde maksimal dybde for subformel-ekspansjon
  */
 fun <T : Number> Uttrykk<T>.forklar(navn: String, maxDybde: Int = 3): HvordanForklaring {
+    // Hvis dette er et Grunnlag uttrykk, bruk det underliggende for notasjon og konkret
+    val uttrykkForVisning = if (this is Grunnlag) this.utpakk() else this
+
     val hva = HvaForklaring(
         navn = navn,
-        symbolskUttrykk = this.notasjon(),
-        konkretUttrykk = this.konkret(),
+        symbolskUttrykk = uttrykkForVisning.notasjon(),
+        konkretUttrykk = uttrykkForVisning.konkret(),
         resultat = this.evaluer()
     )
 
     // For navngitte underuttrykk, lag subforklaringer
-    val subforklaringer = this.finnNavngitteUttrykk(0, maxDybde)
+    val subforklaringer = uttrykkForVisning.finnNavngitteUttrykk(0, maxDybde)
 
     return HvordanForklaring(
         hvaForklaring = hva,
@@ -71,9 +74,17 @@ private fun <T : Number> Uttrykk<T>.finnNavngitteUttrykk(
     if (nivå >= maxDybde) return emptyList()
 
     return when (this) {
-        is Navngitt -> {
+        is Grunnlag -> {
+            // Hvis Grunnlag bare inneholder en Const, er det en konstant - ikke en formel
+            // Hopp over forklaring for rene konstanter
+            if (this.utpakk() is Const) {
+                return emptyList()
+            }
+
             // Dette er en navngitt subformel - lag forklaring for den
             val hva = this.utpakk().forklarHva(this.navn)
+
+            // Fortsett å søke etter flere navngitte uttrykk i de underliggende operatorene
             val subSub = this.utpakk().finnNavngitteUttrykk(nivå + 1, maxDybde)
 
             listOf(
@@ -83,7 +94,21 @@ private fun <T : Number> Uttrykk<T>.finnNavngitteUttrykk(
                     hvorfor = null,
                     nivå = nivå
                 )
-            )
+            ) + when (val unpacked = this.utpakk()) {
+                // Søk også gjennom operatorene for å finne andre navngitte uttrykk på samme nivå
+                is Add -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+                is Sub -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+                is Mul -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+                is Div -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+                is Min -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+                is Neg -> unpacked.uttrykk.finnNavngitteUttrykk(nivå, maxDybde)
+                else -> emptyList()
+            }
         }
 
         is Add -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
@@ -119,19 +144,63 @@ fun <T : Number> Uttrykk<T>.forklarKompakt(navn: String): String {
 }
 
 /**
- * Genererer detaljert forklaring med alle faktum.
+ * Finner alle konstante Grunnlag-verdier i uttrykkstre.
  */
-fun <T : Number> Uttrykk<T>.forklarDetaljert(navn: String, maxDybde: Int = 3): String {
+private fun <T : Number> Uttrykk<T>.finnKonstanteGrunnlag(): List<Pair<String, Number>> {
+    return when (this) {
+        is Grunnlag -> {
+            if (this.utpakk() is Const) {
+                // Dette er en konstant verdi
+                listOf(this.navn to this.evaluer())
+            } else {
+                // Søk videre i det underliggende uttrykket
+                this.utpakk().finnKonstanteGrunnlag()
+            }
+        }
+        is Add -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
+        is Sub -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
+        is Mul -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
+        is Div -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
+        is Neg -> uttrykk.finnKonstanteGrunnlag()
+        is Min -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
+        else -> emptyList()
+    }
+}
+
+/**
+ * Genererer detaljert forklaring med alle faktum.
+ * Kan valgfritt inkludere rvsId for hvert uttrykk.
+ */
+fun <T : Number> Uttrykk<T>.forklarDetaljert(navn: String, maxDybde: Int = 3, inkluderRvsId: Boolean = true): String {
     val forklaring = this.forklar(navn, maxDybde)
+
+    // Hent rvsId fra hoveduttrykket hvis det er Grunnlag
+    val hovedRvsId = if (inkluderRvsId && this is Grunnlag) this.rvsId else null
+
     return buildString {
         appendLine("HVORDAN")
-        appendLine("    $navn = ${notasjon()}")
-        appendLine("    $navn = ${konkret()}")
-        appendLine("    $navn = ${evaluer()}")
+
+        // Vis rvsId hvis det finnes
+        if (hovedRvsId != null) {
+            appendLine("    $hovedRvsId")
+        }
+
+        appendLine("    ${forklaring.hvaForklaring.navn} = ${forklaring.hvaForklaring.symbolskUttrykk}")
+        appendLine("    ${forklaring.hvaForklaring.navn} = ${forklaring.hvaForklaring.konkretUttrykk}")
+        appendLine("    ${forklaring.hvaForklaring.navn} = ${forklaring.hvaForklaring.resultat}")
 
         // Legg til navngitte subforklaringer
         forklaring.subformler.forEach { sub ->
             appendLine()
+
+            // Finn rvsId for dette subuttryket hvis det eksisterer
+            if (inkluderRvsId) {
+                val subRvsId = this@forklarDetaljert.finnRvsIdFor(sub.hvaForklaring.navn)
+                if (subRvsId != null) {
+                    appendLine("    $subRvsId")
+                }
+            }
+
             appendLine("    ${sub.hvaForklaring.navn} = ${sub.hvaForklaring.symbolskUttrykk}")
             appendLine("    ${sub.hvaForklaring.navn} = ${sub.hvaForklaring.konkretUttrykk}")
             appendLine("    ${sub.hvaForklaring.navn} = ${sub.hvaForklaring.resultat}")
@@ -141,10 +210,20 @@ fun <T : Number> Uttrykk<T>.forklarDetaljert(navn: String, maxDybde: Int = 3): S
         val faktum = this@forklarDetaljert.faktumListe()
         if (faktum.isNotEmpty()) {
             appendLine()
-            faktum.forEach { f ->
+            faktum.toSet().forEach { f ->
                 if (!f.anonymous) {
                     appendLine("    ${f.name} = ${f.value}")
                 }
+            }
+        }
+
+        // Legg til konstante Grunnlag-verdier
+        val konstanteGrunnlag = this@forklarDetaljert.finnKonstanteGrunnlag()
+            .distinctBy { it.first }  // Unike navn
+        if (konstanteGrunnlag.isNotEmpty()) {
+            appendLine()
+            konstanteGrunnlag.forEach { (navn, verdi) ->
+                appendLine("    $navn = $verdi")
             }
         }
     }
@@ -167,7 +246,7 @@ fun <T : Number> Uttrykk<T>.treVisning(nivå: Int = 0): String {
     val prefix = if (nivå == 0) "" else "├─ "
 
     return when (this) {
-        is Var -> "$indent$prefix Var(${faktum.name})"
+        // is Var -> "$indent$prefix Var(${faktum.name})"
         is Const -> "$indent$prefix Const($verdi)"
         is Add -> buildString {
             appendLine("${indent}${prefix}Add")
@@ -199,8 +278,8 @@ fun <T : Number> Uttrykk<T>.treVisning(nivå: Int = 0): String {
             appendLine("${indent}${prefix}Neg")
             append(uttrykk.treVisning(nivå + 1))
         }
-        is Navngitt -> buildString {
-            appendLine("${indent}${prefix}Navngitt($navn)")
+        is Grunnlag -> buildString {
+            appendLine("${indent}${prefix}Grunnlag($navn)")
             append(uttrykk.treVisning(nivå + 1))
         }
     }
@@ -231,7 +310,7 @@ fun <T : Number, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R
         is Div -> venstre.visit(transform) + høyre.visit(transform)
         is Min -> venstre.visit(transform) + høyre.visit(transform)
         is Neg -> uttrykk.visit(transform)
-        is Navngitt -> uttrykk.visit(transform)
+        is Grunnlag -> uttrykk.visit(transform)
         else -> emptyList()
     }
 
@@ -246,7 +325,8 @@ fun <T : Number, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R
 fun <T : Number> Uttrykk<T>.forenkel(): Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     return when (this) {
-        is Var, is Const -> this
+        // is Var,
+        is Const -> this
 
         is Add -> {
             val v = venstre.forenkel()
@@ -307,7 +387,7 @@ fun <T : Number> Uttrykk<T>.forenkel(): Uttrykk<T> {
             }
         }
 
-        is Navngitt -> Navngitt(navn, uttrykk.forenkel())
+        is Grunnlag -> Grunnlag(navn, uttrykk.forenkel())
     }
 }
 
@@ -324,7 +404,7 @@ fun <T : Number> Uttrykk<T>.forenkel(): Uttrykk<T> {
 fun <T : Number> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out Number>): Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     return when (this) {
-        is Var -> if (faktum.name == variabelNavn) med() as Uttrykk<T> else this
+        // is Var -> if (faktum.name == variabelNavn) med() as Uttrykk<T> else this
         is Const -> this
         is Add -> Add<T>(venstre.erstatt(variabelNavn, med), høyre.erstatt(variabelNavn, med))
         is Sub -> Sub<T>(venstre.erstatt(variabelNavn, med), høyre.erstatt(variabelNavn, med))
@@ -332,6 +412,29 @@ fun <T : Number> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out
         is Div -> Div(venstre.erstatt(variabelNavn, med), høyre.erstatt(variabelNavn, med)) as Uttrykk<T>
         is Min -> Min(venstre.erstatt(variabelNavn, med), høyre.erstatt(variabelNavn, med)) as Uttrykk<T>
         is Neg -> Neg(uttrykk.erstatt(variabelNavn, med))
-        is Navngitt -> Navngitt(navn, uttrykk.erstatt(variabelNavn, med))
+        is Grunnlag -> Grunnlag(navn, uttrykk.erstatt(variabelNavn, med))
+    }
+}
+
+/**
+ * Finner rvsId for et navngitt uttrykk med gitt navn.
+ * Traverserer uttrykkstre og returnerer rvsId til første Grunnlag med matchende navn.
+ */
+fun <T : Number> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
+    return when (this) {
+        is Grunnlag -> {
+            if (this.navn == uttrykkNavn) {
+                this.rvsId
+            } else {
+                this.uttrykk.finnRvsIdFor(uttrykkNavn)
+            }
+        }
+        is Add -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
+        is Sub -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
+        is Mul -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
+        is Div -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
+        is Min -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
+        is Neg -> uttrykk.finnRvsIdFor(uttrykkNavn)
+        else -> null
     }
 }

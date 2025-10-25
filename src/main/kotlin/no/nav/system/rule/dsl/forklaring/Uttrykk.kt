@@ -67,25 +67,6 @@ sealed interface Uttrykk<out T : Number> : Serializable {
 }
 
 /**
- * Variabel - referanse til et Faktum.
- */
-data class Var<T : Number>(
-    val faktum: Faktum<T>
-) : Uttrykk<T> {
-    override fun evaluer(): T = faktum.value
-
-    override fun notasjon(): String = faktum.name
-
-    override fun konkret(): String = faktum.value.toString()
-
-    override fun faktumListe(): List<Faktum<out Number>> = listOf(faktum)
-
-    override fun dybde(): Int = 1
-
-    override fun toString(): String = notasjon()
-}
-
-/**
  * Konstant verdi.
  */
 data class Const<T : Number>(
@@ -309,12 +290,13 @@ data class Neg<T : Number>(
 }
 
 /**
- * Navngitt uttrykk - gir et navn til et kompleks uttrykk.
+ * Grunnlag uttrykk - gir et navn til et kompleks uttrykk.
  * Tilsvarer "locked" formler i dagens Formel-implementasjon.
  */
-data class Navngitt<T : Number>(
+data class Grunnlag<T : Number>(
     val navn: String,
-    val uttrykk: Uttrykk<T>
+    val uttrykk: Uttrykk<T>,
+    val rvsId: String? = null
 ) : Uttrykk<T> {
     override fun evaluer(): T = uttrykk.evaluer()
 
@@ -324,7 +306,7 @@ data class Navngitt<T : Number>(
 
     override fun faktumListe(): List<Faktum<out Number>> = uttrykk.faktumListe()
 
-    override fun dybde(): Int = 1  // Navngitte uttrykk teller som atomisk
+    override fun dybde(): Int = 1  // Grunnlag uttrykk teller som atomisk
 
     /**
      * Returnerer det underliggende uttrykket.
@@ -368,53 +350,18 @@ operator fun <T : Number> Uttrykk<T>.unaryMinus(): Neg<T> = Neg(this)
 /**
  * Builder function for navngitte uttrykk.
  */
-fun <T : Number> Uttrykk<T>.navngi(navn: String): Navngitt<T> = Navngitt(navn, this)
+fun <T : Number> Uttrykk<T>.navngi(navn: String): Grunnlag<T> = Grunnlag(navn, this)
 
 /**
- * Operator overloading for Faktum - tillater direkte bruk uten Var().
- *
- * Dette gjør det mulig å skrive:
- * ```kotlin
- * val G = Faktum("G", 110000)
- * val sats = Faktum("sats", 0.25)
- * val uttrykk = sats * G / 12  // Direkte uten Var()
- * ```
- *
- * Istedenfor:
- * ```kotlin
- * val uttrykk = Var(sats) * Var(G) / Const(12)
- * ```
+ * Setter rvsId på et navngitt uttrykk.
  */
-
-// Addisjon
-operator fun <T : Number> Faktum<T>.plus(other: Uttrykk<out Number>): Add<T> = Add(Var(this), other)
-operator fun <T : Number> Faktum<T>.plus(other: Faktum<out Number>): Add<T> = Add(Var(this), Var(other))
-operator fun <T : Number> Faktum<T>.plus(other: Number): Add<T> = Add(Var(this), Const(other))
-operator fun <T : Number> Uttrykk<T>.plus(other: Faktum<out Number>): Add<T> = Add(this, Var(other))
-operator fun <T : Number> Number.plus(other: Faktum<T>): Add<T> = Add(Const(this), Var(other))
-
-// Subtraksjon
-operator fun <T : Number> Faktum<T>.minus(other: Uttrykk<out Number>): Sub<T> = Sub(Var(this), other)
-operator fun <T : Number> Faktum<T>.minus(other: Faktum<out Number>): Sub<T> = Sub(Var(this), Var(other))
-operator fun <T : Number> Faktum<T>.minus(other: Number): Sub<T> = Sub(Var(this), Const(other))
-operator fun <T : Number> Uttrykk<T>.minus(other: Faktum<out Number>): Sub<T> = Sub(this, Var(other))
-operator fun <T : Number> Number.minus(other: Faktum<T>): Sub<T> = Sub(Const(this), Var(other))
-
-// Multiplikasjon
-operator fun <T : Number> Faktum<T>.times(other: Uttrykk<out Number>): Mul<T> = Mul(Var(this), other)
-operator fun <T : Number> Faktum<T>.times(other: Faktum<out Number>): Mul<T> = Mul(Var(this), Var(other))
-operator fun <T : Number> Faktum<T>.times(other: Number): Mul<T> = Mul(Var(this), Const(other))
-operator fun <T : Number> Uttrykk<T>.times(other: Faktum<out Number>): Mul<T> = Mul(this, Var(other))
-operator fun <T : Number> Number.times(other: Faktum<T>): Mul<T> = Mul(Const(this), Var(other))
-
-// Divisjon
-operator fun Faktum<out Number>.div(other: Uttrykk<out Number>): Div = Div(Var(this), other)
-operator fun Faktum<out Number>.div(other: Faktum<out Number>): Div = Div(Var(this), Var(other))
-operator fun Faktum<out Number>.div(other: Number): Div = Div(Var(this), Const(other))
-operator fun Uttrykk<out Number>.div(other: Faktum<out Number>): Div = Div(this, Var(other))
-operator fun Number.div(other: Faktum<out Number>): Div = Div(Const(this), Var(other))
+fun <T : Number> Grunnlag<T>.id(rvsId: String): Grunnlag<T> = this.copy(rvsId = rvsId)
 
 /**
- * Konverterer Faktum til Var-uttrykk for eksplisitt bruk når nødvendig.
+ * Min-funksjon for Grunnlag.
  */
-fun <T : Number> Faktum<T>.tilUttrykk(): Var<T> = Var(this)
+fun <T : Number> min(venstre: Grunnlag<T>, høyre: Grunnlag<out Number>): Min = Min(venstre, høyre)
+fun <T : Number> min(venstre: Grunnlag<T>, høyre: Uttrykk<out Number>): Min = Min(venstre, høyre)
+fun <T : Number> min(venstre: Uttrykk<out Number>, høyre: Grunnlag<T>): Min = Min(venstre, høyre)
+fun <T : Number> min(venstre: Grunnlag<T>, høyre: Number): Min = Min(venstre, Const(høyre))
+fun <T : Number> min(venstre: Number, høyre: Grunnlag<T>): Min = Min(Const(venstre), høyre)
