@@ -513,15 +513,60 @@ data class Hvis<T : Any>(
     override fun evaluer(): T =
         if (betingelse.evaluer()) såUttrykk.evaluer() else ellersUttrykk.evaluer()
 
-    override fun notasjon(): String =
-        "HVIS ${betingelse.notasjon()} SÅ ${såUttrykk.notasjon()} ELLERS ${ellersUttrykk.notasjon()}"
+    override fun notasjon(): String = notasjonMedInnrykk(0)
 
-    override fun konkret(): String {
-        // Vis kun den grenen som faktisk ble valgt
-        return if (betingelse.evaluer()) {
-            "HVIS ${betingelse.konkret()} SÅ ${såUttrykk.konkret()}"
+    /**
+     * Formaterer hvis-uttrykk med linjeskift og innrykk ved nøsting.
+     */
+    private fun notasjonMedInnrykk(nivå: Int): String {
+        val indent = "  ".repeat(nivå)
+        val nextIndent = "  ".repeat(nivå + 1)
+
+        // Sjekk om ellers-grenen er et nøstet Hvis-uttrykk
+        return if (ellersUttrykk is Hvis<*>) {
+            buildString {
+                append("HVIS ${betingelse.notasjon()}\n")
+                append("${nextIndent}SÅ ${såUttrykk.notasjon()}\n")
+                append("${nextIndent}ELLERS ")
+                append(ellersUttrykk.notasjonMedInnrykk(nivå + 1))
+            }
         } else {
-            "HVIS ${betingelse.konkret()} ELLERS ${ellersUttrykk.konkret()}"
+            // Ikke nøstet - skriv på en linje
+            "HVIS ${betingelse.notasjon()} SÅ ${såUttrykk.notasjon()} ELLERS ${ellersUttrykk.notasjon()}"
+        }
+    }
+
+    override fun konkret(): String = konkretMedInnrykk(0)
+
+    /**
+     * Formaterer konkret hvis-uttrykk med linjeskift og innrykk ved nøsting.
+     * Viser kun den grenen som faktisk ble valgt.
+     */
+    private fun konkretMedInnrykk(nivå: Int): String {
+        val nextIndent = "  ".repeat(nivå + 1)
+
+        return if (betingelse.evaluer()) {
+            // SÅ-grenen ble valgt
+            if (ellersUttrykk is Hvis<*>) {
+                // Nøstet struktur - vis med formatering selv om vi ikke går inn i ellers-grenen
+                buildString {
+                    append("HVIS ${betingelse.konkret()}\n")
+                    append("${nextIndent}SÅ ${såUttrykk.konkret()}")
+                }
+            } else {
+                "HVIS ${betingelse.konkret()} SÅ ${såUttrykk.konkret()}"
+            }
+        } else {
+            // ELLERS-grenen ble valgt
+            if (ellersUttrykk is Hvis<*>) {
+                buildString {
+                    append("HVIS ${betingelse.konkret()}\n")
+                    append("${nextIndent}ELLERS ")
+                    append(ellersUttrykk.konkretMedInnrykk(nivå + 1))
+                }
+            } else {
+                "HVIS ${betingelse.konkret()} ELLERS ${ellersUttrykk.konkret()}"
+            }
         }
     }
 

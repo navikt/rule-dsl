@@ -42,7 +42,9 @@ fun <T : Any> Uttrykk<T>.forklar(navn: String, maxDybde: Int = 3): HvordanForkla
     )
 
     // For navngitte underuttrykk, lag subforklaringer
+    // Dedupliser basert på navn for å unngå gjentakelser
     val subforklaringer = uttrykkForVisning.finnNavngitteUttrykk(0, maxDybde)
+        .distinctBy { it.hvaForklaring.navn }
 
     return HvordanForklaring(
         hvaForklaring = hva,
@@ -245,8 +247,20 @@ fun <T : Any> Uttrykk<T>.forklarDetaljert(navn: String, maxDybde: Int = 3, inklu
             appendLine("    $hovedRvsId")
         }
 
-        appendLine("    ${forklaring.hvaForklaring.navn} = ${forklaring.hvaForklaring.symbolskUttrykk}")
-        appendLine("    ${forklaring.hvaForklaring.navn} = ${forklaring.hvaForklaring.konkretUttrykk}")
+        // Symbolsk uttrykk - med innrykk for hver linje
+        val symbolskLinjer = forklaring.hvaForklaring.symbolskUttrykk.lines()
+        appendLine("    ${forklaring.hvaForklaring.navn} = ${symbolskLinjer.first()}")
+        symbolskLinjer.drop(1).forEach { linje ->
+            appendLine("    $linje")
+        }
+
+        // Konkret uttrykk - med innrykk for hver linje
+        val konkretLinjer = forklaring.hvaForklaring.konkretUttrykk.lines()
+        appendLine("    ${forklaring.hvaForklaring.navn} = ${konkretLinjer.first()}")
+        konkretLinjer.drop(1).forEach { linje ->
+            appendLine("    $linje")
+        }
+
         appendLine("    ${forklaring.hvaForklaring.navn} = ${forklaring.hvaForklaring.resultat}")
 
         // Legg til navngitte subforklaringer
@@ -261,8 +275,20 @@ fun <T : Any> Uttrykk<T>.forklarDetaljert(navn: String, maxDybde: Int = 3, inklu
                 }
             }
 
-            appendLine("    ${sub.hvaForklaring.navn} = ${sub.hvaForklaring.symbolskUttrykk}")
-            appendLine("    ${sub.hvaForklaring.navn} = ${sub.hvaForklaring.konkretUttrykk}")
+            // Symbolsk uttrykk for subformel - med innrykk for hver linje
+            val subSymbolskLinjer = sub.hvaForklaring.symbolskUttrykk.lines()
+            appendLine("    ${sub.hvaForklaring.navn} = ${subSymbolskLinjer.first()}")
+            subSymbolskLinjer.drop(1).forEach { linje ->
+                appendLine("    $linje")
+            }
+
+            // Konkret uttrykk for subformel - med innrykk for hver linje
+            val subKonkretLinjer = sub.hvaForklaring.konkretUttrykk.lines()
+            appendLine("    ${sub.hvaForklaring.navn} = ${subKonkretLinjer.first()}")
+            subKonkretLinjer.drop(1).forEach { linje ->
+                appendLine("    $linje")
+            }
+
             appendLine("    ${sub.hvaForklaring.navn} = ${sub.hvaForklaring.resultat}")
         }
 

@@ -294,18 +294,21 @@ fun booleanSlitertilleggEksempel() {
         .navngi("slitertillegg")
         .id("SLITERTILLEGG-BEREGNET")
 
+    val ingenJusteringsfaktor = antallMåneder erLik 0
+    val harJusteringsfaktor = antallMåneder erStørreEnn 0
+
+    val ingenTrygdetidFaktor = faktiskTrygdetid erLik fullTrygdetid
+    val harTrygdetidFaktor = faktiskTrygdetid erMindreEnn fullTrygdetid
+
     // Samme beregning med ny fluent syntax (.så .ellers)
     val slitertillegg2: Grunnlag<Double> =
-        ((faktiskTrygdetid erMindreEnn fullTrygdetid)
-                    og (antallMåneder erStørreEnn 0))
+        (harTrygdetidFaktor og harJusteringsfaktor)
             .så { fulltSlitertillegg * justeringsFaktorUttak * trygdetidFaktor }
             .ellers {
-                ((faktiskTrygdetid erMindreEnn  fullTrygdetid)
-                            og (antallMåneder erLik 0))
+                (harTrygdetidFaktor og ingenJusteringsfaktor)
                     .så { fulltSlitertillegg * trygdetidFaktor }
                     .ellers {
-                        ((faktiskTrygdetid erLik fullTrygdetid)
-                                og (antallMåneder erStørreEnn 0))
+                        (ingenTrygdetidFaktor og harJusteringsfaktor)
                             .så { fulltSlitertillegg * justeringsFaktorUttak }
                             .ellers { fulltSlitertillegg }
                     }
