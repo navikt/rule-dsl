@@ -39,9 +39,9 @@ import kotlin.math.min
  * )
  * ```
  */
-sealed interface Uttrykk<out T : Number> : Serializable {
+sealed interface Uttrykk<out T : Any> : Serializable {
     /**
-     * Evaluerer uttrykket til en numerisk verdi.
+     * Evaluerer uttrykket til en verdi.
      */
     fun evaluer(): T
 
@@ -56,9 +56,9 @@ sealed interface Uttrykk<out T : Number> : Serializable {
     fun konkret(): String
 
     /**
-     * Returnerer liste av alle faktum brukt i uttrykket.
+     * Returnerer liste av alle grunnlag brukt i uttrykket.
      */
-    fun faktumListe(): List<Faktum<out Number>>
+    fun grunnlagListe(): List<Grunnlag<out Any>>
 
     /**
      * Returnerer dybde av uttrykkstre.
@@ -69,7 +69,7 @@ sealed interface Uttrykk<out T : Number> : Serializable {
 /**
  * Konstant verdi.
  */
-data class Const<T : Number>(
+data class Const<T : Any>(
     val verdi: T
 ) : Uttrykk<T> {
     override fun evaluer(): T = verdi
@@ -78,7 +78,7 @@ data class Const<T : Number>(
 
     override fun konkret(): String = verdi.toString()
 
-    override fun faktumListe(): List<Faktum<out Number>> = emptyList()
+    override fun grunnlagListe(): List<Grunnlag<out Any>> = emptyList()
 
     override fun dybde(): Int = 1
 
@@ -118,8 +118,8 @@ data class Add<T : Number>(
         return "$v + $h"
     }
 
-    override fun faktumListe(): List<Faktum<out Number>> =
-        venstre.faktumListe() + høyre.faktumListe()
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
 }
@@ -156,8 +156,8 @@ data class Sub<T : Number>(
         return "$v - $h"
     }
 
-    override fun faktumListe(): List<Faktum<out Number>> =
-        venstre.faktumListe() + høyre.faktumListe()
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
 }
@@ -194,8 +194,8 @@ data class Mul<T : Number>(
         return "$v * $h"
     }
 
-    override fun faktumListe(): List<Faktum<out Number>> =
-        venstre.faktumListe() + høyre.faktumListe()
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
 }
@@ -230,8 +230,8 @@ data class Div(
         return "$v / $h"
     }
 
-    override fun faktumListe(): List<Faktum<out Number>> =
-        venstre.faktumListe() + høyre.faktumListe()
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
 }
@@ -256,8 +256,8 @@ data class Min(
         return "min($v,$h)"
     }
 
-    override fun faktumListe(): List<Faktum<out Number>> =
-        venstre.faktumListe() + høyre.faktumListe()
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
 }
@@ -284,7 +284,7 @@ data class Neg<T : Number>(
 
     override fun konkret(): String = "-${uttrykk.konkret().medParentesVedBehov(uttrykk)}"
 
-    override fun faktumListe(): List<Faktum<out Number>> = uttrykk.faktumListe()
+    override fun grunnlagListe(): List<Grunnlag<out Any>> = uttrykk.grunnlagListe()
 
     override fun dybde(): Int = 1 + uttrykk.dybde()
 }
@@ -293,7 +293,7 @@ data class Neg<T : Number>(
  * Grunnlag uttrykk - gir et navn til et kompleks uttrykk.
  * Tilsvarer "locked" formler i dagens Formel-implementasjon.
  */
-data class Grunnlag<T : Number>(
+data class Grunnlag<T : Any>(
     val navn: String,
     val uttrykk: Uttrykk<T>,
     val rvsId: String? = null
@@ -304,7 +304,7 @@ data class Grunnlag<T : Number>(
 
     override fun konkret(): String = evaluer().toString()
 
-    override fun faktumListe(): List<Faktum<out Number>> = uttrykk.faktumListe()
+    override fun grunnlagListe(): List<Grunnlag<out Any>> = listOf(this)
 
     override fun dybde(): Int = 1  // Grunnlag uttrykk teller som atomisk
 
@@ -315,11 +315,231 @@ data class Grunnlag<T : Number>(
 }
 
 /**
+ * Logisk OG-operator.
+ */
+data class Og(
+    val venstre: Uttrykk<Boolean>,
+    val høyre: Uttrykk<Boolean>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = venstre.evaluer() && høyre.evaluer()
+
+    override fun notasjon(): String {
+        val v = venstre.notasjon().medParentesVedBehov(venstre)
+        val h = høyre.notasjon().medParentesVedBehov(høyre)
+        return "$v OG $h"
+    }
+
+    override fun konkret(): String {
+        val v = venstre.konkret().medParentesVedBehov(venstre)
+        val h = høyre.konkret().medParentesVedBehov(høyre)
+        return "$v OG $h"
+    }
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+/**
+ * Logisk ELLER-operator.
+ */
+data class Eller(
+    val venstre: Uttrykk<Boolean>,
+    val høyre: Uttrykk<Boolean>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = venstre.evaluer() || høyre.evaluer()
+
+    override fun notasjon(): String {
+        val v = venstre.notasjon().medParentesVedBehov(venstre)
+        val h = høyre.notasjon().medParentesVedBehov(høyre)
+        return "$v ELLER $h"
+    }
+
+    override fun konkret(): String {
+        val v = venstre.konkret().medParentesVedBehov(venstre)
+        val h = høyre.konkret().medParentesVedBehov(høyre)
+        return "$v ELLER $h"
+    }
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+/**
+ * Logisk IKKE-operator (negasjon).
+ */
+data class Ikke(
+    val uttrykk: Uttrykk<Boolean>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = !uttrykk.evaluer()
+
+    override fun notasjon(): String = "IKKE ${uttrykk.notasjon().medParentesVedBehov(uttrykk)}"
+
+    override fun konkret(): String = "IKKE ${uttrykk.konkret().medParentesVedBehov(uttrykk)}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> = uttrykk.grunnlagListe()
+
+    override fun dybde(): Int = 1 + uttrykk.dybde()
+}
+
+/**
+ * Sammenligning: Lik (==).
+ */
+data class Lik<T : Comparable<T>>(
+    val venstre: Uttrykk<T>,
+    val høyre: Uttrykk<T>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = venstre.evaluer() == høyre.evaluer()
+
+    override fun notasjon(): String = "${venstre.notasjon()} = ${høyre.notasjon()}"
+
+    override fun konkret(): String = "${venstre.konkret()} = ${høyre.konkret()}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+/**
+ * Sammenligning: Ulik (!=).
+ */
+data class Ulik<T : Comparable<T>>(
+    val venstre: Uttrykk<T>,
+    val høyre: Uttrykk<T>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = venstre.evaluer() != høyre.evaluer()
+
+    override fun notasjon(): String = "${venstre.notasjon()} ≠ ${høyre.notasjon()}"
+
+    override fun konkret(): String = "${venstre.konkret()} ≠ ${høyre.konkret()}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+/**
+ * Sammenligning: Større enn (>).
+ */
+data class StørreEnn<T : Comparable<T>>(
+    val venstre: Uttrykk<T>,
+    val høyre: Uttrykk<T>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = venstre.evaluer() > høyre.evaluer()
+
+    override fun notasjon(): String = "${venstre.notasjon()} > ${høyre.notasjon()}"
+
+    override fun konkret(): String = "${venstre.konkret()} > ${høyre.konkret()}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+/**
+ * Sammenligning: Mindre enn (<).
+ */
+data class MindreEnn<T : Comparable<T>>(
+    val venstre: Uttrykk<T>,
+    val høyre: Uttrykk<T>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = venstre.evaluer() < høyre.evaluer()
+
+    override fun notasjon(): String = "${venstre.notasjon()} < ${høyre.notasjon()}"
+
+    override fun konkret(): String = "${venstre.konkret()} < ${høyre.konkret()}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+/**
+ * Sammenligning: Større eller lik (>=).
+ */
+data class StørreEllerLik<T : Comparable<T>>(
+    val venstre: Uttrykk<T>,
+    val høyre: Uttrykk<T>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = venstre.evaluer() >= høyre.evaluer()
+
+    override fun notasjon(): String = "${venstre.notasjon()} ≥ ${høyre.notasjon()}"
+
+    override fun konkret(): String = "${venstre.konkret()} ≥ ${høyre.konkret()}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+/**
+ * Sammenligning: Mindre eller lik (<=).
+ */
+data class MindreEllerLik<T : Comparable<T>>(
+    val venstre: Uttrykk<T>,
+    val høyre: Uttrykk<T>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = venstre.evaluer() <= høyre.evaluer()
+
+    override fun notasjon(): String = "${venstre.notasjon()} ≤ ${høyre.notasjon()}"
+
+    override fun konkret(): String = "${venstre.konkret()} ≤ ${høyre.konkret()}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+/**
+ * Betinget uttrykk som velger mellom to verdier basert på en Boolean-betingelse.
+ *
+ * Både SÅ og ELLERS må returnere verdier av samme type T.
+ * Hvis-uttrykket kan navngis som et Grunnlag for sporbarhet.
+ */
+data class Hvis<T : Any>(
+    val betingelse: Uttrykk<Boolean>,
+    val såUttrykk: Uttrykk<T>,
+    val ellersUttrykk: Uttrykk<T>
+) : Uttrykk<T> {
+    override fun evaluer(): T =
+        if (betingelse.evaluer()) såUttrykk.evaluer() else ellersUttrykk.evaluer()
+
+    override fun notasjon(): String =
+        "HVIS ${betingelse.notasjon()} SÅ ${såUttrykk.notasjon()} ELLERS ${ellersUttrykk.notasjon()}"
+
+    override fun konkret(): String {
+        // Vis kun den grenen som faktisk ble valgt
+        return if (betingelse.evaluer()) {
+            "HVIS ${betingelse.konkret()} SÅ ${såUttrykk.konkret()}"
+        } else {
+            "HVIS ${betingelse.konkret()} ELLERS ${ellersUttrykk.konkret()}"
+        }
+    }
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        betingelse.grunnlagListe() + såUttrykk.grunnlagListe() + ellersUttrykk.grunnlagListe()
+
+    override fun dybde(): Int =
+        1 + maxOf(betingelse.dybde(), såUttrykk.dybde(), ellersUttrykk.dybde())
+}
+
+/**
  * Hjelpefunksjon for å legge til parenteser ved behov.
  */
 private fun String.medParentesVedBehov(uttrykk: Uttrykk<*>, høyreSide: Boolean = false): String {
     val trengerParentes = when (uttrykk) {
         is Add, is Sub -> true
+        is Og -> true  // OG trenger parenteser når brukt i ELLER
+        is Eller -> true  // ELLER har lavere presedens enn OG
         else -> false
     }
 
@@ -350,12 +570,12 @@ operator fun <T : Number> Uttrykk<T>.unaryMinus(): Neg<T> = Neg(this)
 /**
  * Builder function for navngitte uttrykk.
  */
-fun <T : Number> Uttrykk<T>.navngi(navn: String): Grunnlag<T> = Grunnlag(navn, this)
+fun <T : Any> Uttrykk<T>.navngi(navn: String): Grunnlag<T> = Grunnlag(navn, this)
 
 /**
  * Setter rvsId på et navngitt uttrykk.
  */
-fun <T : Number> Grunnlag<T>.id(rvsId: String): Grunnlag<T> = this.copy(rvsId = rvsId)
+fun <T : Any> Grunnlag<T>.id(rvsId: String): Grunnlag<T> = this.copy(rvsId = rvsId)
 
 /**
  * Min-funksjon for Grunnlag.
@@ -365,3 +585,79 @@ fun <T : Number> min(venstre: Grunnlag<T>, høyre: Uttrykk<out Number>): Min = M
 fun <T : Number> min(venstre: Uttrykk<out Number>, høyre: Grunnlag<T>): Min = Min(venstre, høyre)
 fun <T : Number> min(venstre: Grunnlag<T>, høyre: Number): Min = Min(venstre, Const(høyre))
 fun <T : Number> min(venstre: Number, høyre: Grunnlag<T>): Min = Min(Const(venstre), høyre)
+
+/**
+ * Boolean operator overloading (norske navn).
+ */
+infix fun Uttrykk<Boolean>.og(other: Uttrykk<Boolean>): Og = Og(this, other)
+infix fun Uttrykk<Boolean>.eller(other: Uttrykk<Boolean>): Eller = Eller(this, other)
+fun ikke(uttrykk: Uttrykk<Boolean>): Ikke = Ikke(uttrykk)
+
+/**
+ * Sammenlignings-operatorer (norske navn, infix).
+ */
+infix fun <T : Comparable<T>> Uttrykk<T>.erLik(other: Uttrykk<T>): Lik<T> = Lik(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erLik(other: T): Lik<T> = Lik(this, Const(other))
+infix fun <T : Comparable<T>> T.erLik(other: Uttrykk<T>): Lik<T> = Lik(Const(this), other)
+
+infix fun <T : Comparable<T>> Uttrykk<T>.erUlik(other: Uttrykk<T>): Ulik<T> = Ulik(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erUlik(other: T): Ulik<T> = Ulik(this, Const(other))
+infix fun <T : Comparable<T>> T.erUlik(other: Uttrykk<T>): Ulik<T> = Ulik(Const(this), other)
+
+infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEnn(other: Uttrykk<T>): StørreEnn<T> = StørreEnn(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEnn(other: T): StørreEnn<T> = StørreEnn(this, Const(other))
+infix fun <T : Comparable<T>> T.erStørreEnn(other: Uttrykk<T>): StørreEnn<T> = StørreEnn(Const(this), other)
+
+infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEnn(other: Uttrykk<T>): MindreEnn<T> = MindreEnn(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEnn(other: T): MindreEnn<T> = MindreEnn(this, Const(other))
+infix fun <T : Comparable<T>> T.erMindreEnn(other: Uttrykk<T>): MindreEnn<T> = MindreEnn(Const(this), other)
+
+infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEllerLik(other: Uttrykk<T>): StørreEllerLik<T> = StørreEllerLik(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEllerLik(other: T): StørreEllerLik<T> = StørreEllerLik(this, Const(other))
+infix fun <T : Comparable<T>> T.erStørreEllerLik(other: Uttrykk<T>): StørreEllerLik<T> = StørreEllerLik(Const(this), other)
+
+infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEllerLik(other: Uttrykk<T>): MindreEllerLik<T> = MindreEllerLik(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEllerLik(other: T): MindreEllerLik<T> = MindreEllerLik(this, Const(other))
+infix fun <T : Comparable<T>> T.erMindreEllerLik(other: Uttrykk<T>): MindreEllerLik<T> = MindreEllerLik(Const(this), other)
+
+/**
+ * Hvis DSL-funksjon (funksjonell stil).
+ */
+fun <T : Any> hvis(
+    betingelse: Uttrykk<Boolean>,
+    så: () -> Uttrykk<T>,
+    ellers: () -> Uttrykk<T>
+): Hvis<T> = Hvis(betingelse, så(), ellers())
+
+/**
+ * Builder class for betingede uttrykk med fluent API.
+ *
+ * Brukes av `.så {...}.ellers {...}` syntaksen.
+ */
+data class BetingetBuilder<T : Any>(
+    val betingelse: Uttrykk<Boolean>,
+    val såUttrykk: Uttrykk<T>
+)
+
+/**
+ * Extension function for å starte et betinget uttrykk med fluent syntax.
+ *
+ * Eksempel:
+ * ```kotlin
+ * val resultat = (alder erStørreEllerLik 67)
+ *     .så { Const(300000) }
+ *     .ellers { Const(0) }
+ * ```
+ */
+infix fun <T : Any> Uttrykk<Boolean>.så(såBlock: () -> Uttrykk<T>): BetingetBuilder<T> {
+    return BetingetBuilder(this, såBlock())
+}
+
+/**
+ * Extension function for å fullføre et betinget uttrykk med ellers-gren.
+ *
+ * Må brukes sammen med `.så` for å konstruere et komplett Hvis-uttrykk.
+ */
+infix fun <T : Any> BetingetBuilder<T>.ellers(ellersBlock: () -> Uttrykk<T>): Hvis<T> {
+    return Hvis(betingelse, såUttrykk, ellersBlock())
+}

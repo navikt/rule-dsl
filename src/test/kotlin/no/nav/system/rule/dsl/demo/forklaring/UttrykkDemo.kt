@@ -186,5 +186,5 @@ fun uttrykkTransformasjoner() {
 
     // Dybde av uttrykkstre
     println("Dybde av uttrykkstre: ${uttrykk.dybde()}")
-    println("Antall faktum: ${uttrykk.faktumListe().size}")
+    println("Antall grunnlag: ${uttrykk.grunnlagListe().size}")
 }

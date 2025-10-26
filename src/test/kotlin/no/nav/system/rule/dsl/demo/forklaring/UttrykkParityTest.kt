@@ -455,16 +455,16 @@ class UttrykkParityTest {
     }
 
     @Test
-    fun `faktumListe collects all faktum from expression`() {
+    fun `grunnlagListe collects all grunnlag from expression`() {
         val a = Grunnlag("a", Const(10))
         val b = Grunnlag("b", Const(20))
         val c = Grunnlag("c", Const(30))
 
         val expr = (a + b) * c - a
-        val faktumListe = expr.faktumListe()
+        val grunnlagListe = expr.grunnlagListe()
 
-        // Grunnlag with Const has no faktum, only Var has faktum
-        assertEquals(0, faktumListe.size)
+        // Grunnlag in expression: a appears twice, b once, c once = 4 total (with duplicates)
+        assertEquals(4, grunnlagListe.size)
     }
 
     @Test

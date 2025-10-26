@@ -110,16 +110,16 @@ class UttrykkTest {
     }
 
     @Test
-    fun `faktumListe skal returnere alle faktum`() {
+    fun `grunnlagListe skal returnere alle grunnlag`() {
         val a = Grunnlag("a", Const(10))
         val b = Grunnlag("b", Const(20))
         val c = Grunnlag("c", Const(30))
 
         val uttrykk = (a + b) * c
-        val faktumListe = uttrykk.faktumListe()
+        val grunnlagListe = uttrykk.grunnlagListe()
 
-        // Grunnlag med Const har ingen faktum
-        assertEquals(0, faktumListe.size)
+        // Grunnlag i uttrykket: a, b, c, og det komplekse uttrykket (a + b) * c
+        assertEquals(3, grunnlagListe.size)
     }
 
     @Test
