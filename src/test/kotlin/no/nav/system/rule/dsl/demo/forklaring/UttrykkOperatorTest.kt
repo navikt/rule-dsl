@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.demo.forklaring
 
 import no.nav.system.rule.dsl.forklaring.*
-import no.nav.system.rule.dsl.rettsregel.Faktum
+
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test
  */
 class UttrykkOperatorTest {
 
-    private val intFaktum: Faktum<Int> = Faktum("int", 11)
-    private val dblFaktum: Faktum<Double> = Faktum("dbl", 22.2)
+    private val intFaktum: Grunnlag<Int> = Grunnlag("int", Const(11))
+    private val dblFaktum: Grunnlag<Double> = Grunnlag("dbl", Const(22.2))
 
     // ========================================================================
     // Plus Operators
@@ -31,8 +31,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `plus operators with Uttrykk`() {
-        val intUttrykk = Var(intFaktum)
-        val dblUttrykk = Var(dblFaktum)
+        val intUttrykk = intFaktum
+        val dblUttrykk = dblFaktum
 
         // Uttrykk + Number
         val intUttrykkPlusInt: Add<Int> = intUttrykk + 1
@@ -120,8 +120,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `plus operators mixed Faktum and Uttrykk`() {
-        val intUttrykk = Var(intFaktum)
-        val dblUttrykk = Var(dblFaktum)
+        val intUttrykk = intFaktum
+        val dblUttrykk = dblFaktum
 
         // Faktum + Uttrykk
         val intFaktumPlusIntUttrykk: Add<Int> = intFaktum + intUttrykk
@@ -144,8 +144,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `minus operators with Uttrykk`() {
-        val intUttrykk = Var(intFaktum)
-        val dblUttrykk = Var(dblFaktum)
+        val intUttrykk = intFaktum
+        val dblUttrykk = dblFaktum
 
         // Uttrykk - Number
         val intUttrykkMinusInt: Sub<Int> = intUttrykk - 1
@@ -237,8 +237,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `times operators with Uttrykk`() {
-        val intUttrykk = Var(intFaktum)
-        val dblUttrykk = Var(dblFaktum)
+        val intUttrykk = intFaktum
+        val dblUttrykk = dblFaktum
 
         // Uttrykk * Number
         val intUttrykkTimesInt: Mul<Int> = intUttrykk * 2
@@ -330,8 +330,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `division operators with Uttrykk`() {
-        val intUttrykk = Var(intFaktum)
-        val dblUttrykk = Var(dblFaktum)
+        val intUttrykk = intFaktum
+        val dblUttrykk = dblFaktum
 
         // Uttrykk / Number
         val intUttrykkDivInt: Div = intUttrykk / 2
@@ -423,8 +423,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `unary minus with Uttrykk`() {
-        val intUttrykk = Var(intFaktum)
-        val dblUttrykk = Var(dblFaktum)
+        val intUttrykk = intFaktum
+        val dblUttrykk = dblFaktum
 
         val negInt: Neg<Int> = -intUttrykk
         assertEquals(-11, negInt.evaluer())
@@ -437,8 +437,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `unary minus with complex expression`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 5)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(5))
 
         val negSum = -(a + b)
         assertEquals(-15, negSum.evaluer())
@@ -456,8 +456,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `notation shows variable names`() {
-        val a = Faktum("alpha", 10)
-        val b = Faktum("beta", 20)
+        val a = Grunnlag("alpha", Const(10))
+        val b = Grunnlag("beta", Const(20))
 
         assertEquals("alpha + beta", (a + b).notasjon())
         assertEquals("alpha - beta", (a - b).notasjon())
@@ -467,8 +467,8 @@ class UttrykkOperatorTest {
 
     @Test
     fun `konkret shows values`() {
-        val a = Faktum("alpha", 10)
-        val b = Faktum("beta", 20)
+        val a = Grunnlag("alpha", Const(10))
+        val b = Grunnlag("beta", Const(20))
 
         assertEquals("10 + 20", (a + b).konkret())
         assertEquals("10 - 20", (a - b).konkret())
@@ -478,7 +478,7 @@ class UttrykkOperatorTest {
 
     @Test
     fun `notation with constants shows values`() {
-        val a = Faktum("alpha", 10)
+        val a = Grunnlag("alpha", Const(10))
 
         assertEquals("alpha + 5", (a + 5).notasjon())
         assertEquals("5 + alpha", (5 + a).notasjon())
@@ -488,9 +488,9 @@ class UttrykkOperatorTest {
 
     @Test
     fun `complex expression notation`() {
-        val G = Faktum("G", 100000)
-        val sats = Faktum("sats", 0.45)
-        val måneder = Faktum("måneder", 12)
+        val G = Grunnlag("G", Const(100000))
+        val sats = Grunnlag("sats", Const(0.45))
+        val måneder = Grunnlag("måneder", Const(12))
 
         val expr = sats * G / måneder
 

@@ -1,7 +1,7 @@
 package no.nav.system.rule.dsl.demo.forklaring
 
 import no.nav.system.rule.dsl.forklaring.*
-import no.nav.system.rule.dsl.rettsregel.Faktum
+
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -19,7 +19,7 @@ class UttrykkParityTest {
 
     @Test
     fun `simple Int expression like simpleIntFormel`() {
-        val grunnbeløp = Faktum("Grunnbeløp", 5000)
+        val grunnbeløp = Grunnlag("Grunnbeløp", Const(5000))
         val grunnbeløpPlussTusen = 1000 + grunnbeløp
 
         assertEquals("1000 + Grunnbeløp", grunnbeløpPlussTusen.notasjon())
@@ -29,7 +29,7 @@ class UttrykkParityTest {
 
     @Test
     fun `simple Double expression like simpleDoubleFormel`() {
-        val fem = Faktum("fem", 5)
+        val fem = Grunnlag("fem", Const(5))
         val toOgEnHalv = fem / 2
 
         assertEquals("fem / 2", toOgEnHalv.notasjon())
@@ -39,8 +39,8 @@ class UttrykkParityTest {
 
     @Test
     fun `reuse of expression like gjenbrukAvFormel`() {
-        val G = Faktum("G", 1000)
-        val SPT = Faktum("SPT", 2.0)
+        val G = Grunnlag("G", Const(1000))
+        val SPT = Grunnlag("SPT", Const(2.0))
 
         val brutto = G * SPT
 
@@ -53,15 +53,15 @@ class UttrykkParityTest {
 
     @Test
     fun `immutable expression like immutableFormel`() {
-        val desimal = Faktum("tiKommaTo", 10.2)
+        val desimal = Grunnlag("tiKommaTo", Const(10.2))
 
         // Original value should remain unchanged
-        assertEquals(10.2, desimal.value)
+        assertEquals(10.2, desimal.evaluer())
 
         // Operations create new expressions without modifying original
         val plusOne = desimal + 1
         assertEquals(11.2, plusOne.evaluer())
-        assertEquals(10.2, desimal.value) // Original unchanged
+        assertEquals(10.2, desimal.evaluer()) // Original unchanged
     }
 
     @Test
@@ -80,8 +80,8 @@ class UttrykkParityTest {
 
     @Test
     fun `integer division results in Double like integerDivisionResultsInDouble`() {
-        val a = Faktum("a", 1)
-        val b = Faktum("b", 4)
+        val a = Grunnlag("a", Const(1))
+        val b = Grunnlag("b", Const(4))
 
         assertEquals(0.25, (a / b).evaluer())
         assertEquals(0.25, (a / 4).evaluer())
@@ -94,9 +94,9 @@ class UttrykkParityTest {
 
     @Test
     fun `parentheses simple like paranteser_enkel`() {
-        val SPT = Faktum("SPT", 4.3)
-        val OPT = Faktum("OPT", 2.3)
-        val PÅ = Faktum("PÅ", 20)
+        val SPT = Grunnlag("SPT", Const(4.3))
+        val OPT = Grunnlag("OPT", Const(2.3))
+        val PÅ = Grunnlag("PÅ", Const(20))
 
         val formel1 = (SPT - OPT) * PÅ
         assertEquals(40.0, formel1.evaluer())
@@ -111,9 +111,9 @@ class UttrykkParityTest {
 
     @Test
     fun `parentheses medium complexity like paranteser_middels`() {
-        val SPT = Faktum("SPT", 4.3)
-        val OPT = Faktum("OPT", 2.3)
-        val PÅ = Faktum("PÅ", 20)
+        val SPT = Grunnlag("SPT", Const(4.3))
+        val OPT = Grunnlag("OPT", Const(2.3))
+        val PÅ = Grunnlag("PÅ", Const(20))
 
         val formel1 = (SPT - OPT) * (PÅ) * PÅ
         assertEquals(800.0, formel1.evaluer())
@@ -123,8 +123,8 @@ class UttrykkParityTest {
 
     @Test
     fun `parentheses with negative values like paranteser_negativeVerdier`() {
-        val a = Faktum("a", -2)
-        val b = Faktum("b", 1)
+        val a = Grunnlag("a", Const(-2))
+        val b = Grunnlag("b", Const(1))
         val f = 4 - (a + b)
 
         assertEquals(5, f.evaluer())
@@ -134,8 +134,8 @@ class UttrykkParityTest {
 
     @Test
     fun `parentheses with negative values 2 like paranteser_negativeVerdier2`() {
-        val a = Faktum("a", -2)
-        val b = Faktum("b", 1)
+        val a = Grunnlag("a", Const(-2))
+        val b = Grunnlag("b", Const(1))
         val f = -4 - (a - b)
 
         assertEquals(-1, f.evaluer())
@@ -145,8 +145,8 @@ class UttrykkParityTest {
 
     @Test
     fun `parentheses with positive values like paranteser_positiveVerdier`() {
-        val a = Faktum("a", 2)
-        val b = Faktum("b", 1)
+        val a = Grunnlag("a", Const(2))
+        val b = Grunnlag("b", Const(1))
         val f = 4 - (a + b)
 
         assertEquals(1, f.evaluer())
@@ -156,8 +156,8 @@ class UttrykkParityTest {
 
     @Test
     fun `parentheses with negative values reversed like paranteser_negativeVerdier_reversed`() {
-        val a = Faktum("a", -2)
-        val b = Faktum("b", 1)
+        val a = Grunnlag("a", Const(-2))
+        val b = Grunnlag("b", Const(1))
         val f = (a + b) - 4
 
         assertEquals(-5, f.evaluer())
@@ -168,8 +168,8 @@ class UttrykkParityTest {
 
     @Test
     fun `parentheses with positive values reversed like paranteser_positiveVerdier_reversed`() {
-        val a = Faktum("a", 2)
-        val b = Faktum("b", 1)
+        val a = Grunnlag("a", Const(2))
+        val b = Grunnlag("b", Const(1))
         val f = 4 - (a + b)
 
         assertEquals(1, f.evaluer())
@@ -199,10 +199,10 @@ class UttrykkParityTest {
 
     @Test
     fun `show separate named expressions like shouldShowSeperateFormulas`() {
-        val G = Faktum("G", 95000)
-        val SPT = Faktum("SPT", 4.23)
-        val påF92 = Faktum("PÅ_F92", 25)
-        val påE91 = Faktum("PÅ_E91", 15)
+        val G = Grunnlag("G", Const(95000))
+        val SPT = Grunnlag("SPT", Const(4.23))
+        val påF92 = Grunnlag("PÅ_F92", Const(25))
+        val påE91 = Grunnlag("PÅ_E91", Const(15))
 
         // Note: Without avrund function, we'll just test the structure
         val tpF92 = (0.45 * G * SPT * påF92 / 40).navngi("tp_f92")
@@ -224,11 +224,11 @@ class UttrykkParityTest {
 
     @Test
     fun `complex slitertillegg calculation like in FormelTest`() {
-        val G = Faktum("G", 79216)
-        var OPT = Faktum("OPT", 2.47)
-        var PÅ = Faktum("PÅ", 16)
-        var SPT = Faktum("SPT", 2.47)
-        var OÅ = Faktum("OÅ", 20)
+        val G = Grunnlag("G", Const(79216))
+        var OPT = Grunnlag("OPT", Const(2.47))
+        var PÅ = Grunnlag("PÅ", Const(16))
+        var SPT = Grunnlag("SPT", Const(2.47))
+        var OÅ = Grunnlag("OÅ", Const(20))
 
         val tpBrukerUtenPTBrutto = (0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * 1 / 12)
             .navngi("bruker_utenPT")
@@ -240,12 +240,12 @@ class UttrykkParityTest {
         assertEquals("bruker_utenPT", tpBrukerUtenPTBrutto.notasjon())
 
         // Test with different values (like second part of FormelTest)
-        OPT = Faktum("OPT", 4.0)
-        PÅ = Faktum("PÅ", 17)
-        SPT = Faktum("SPT", 6.46)
-        OÅ = Faktum("OÅ", 20)
-        val tpPst = Faktum("tp_pst", 0.55)
-        val UFG = Faktum("UFG", 100)
+        OPT = Grunnlag("OPT", Const(4.0))
+        PÅ = Grunnlag("PÅ", Const(17))
+        SPT = Grunnlag("SPT", Const(6.46))
+        OÅ = Grunnlag("OÅ", Const(20))
+        val tpPst = Grunnlag("tp_pst", Const(0.55))
+        val UFG = Grunnlag("UFG", Const(100))
 
         val tpAvdodBrutto = (0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * UFG / 100 * 1 / 12 * tpPst)
             .navngi("avdød")
@@ -268,7 +268,7 @@ class UttrykkParityTest {
         val copyAnonF2 = anonF2.navngi("avdod")
         val tpSumBrutto = (copyAnonF1 * 0.5 + copyAnonF2).navngi("tpSum")
 
-        // Note: Navngitt shows its name in notation (like locked formulas in Formel)
+        // Note: Grunnlag shows its name in notation (like locked formulas in Formel)
         assertEquals("tpSum", tpSumBrutto.notasjon())
         assertEquals("8.0", tpSumBrutto.konkret()) // Result is Double due to multiplication with 0.5
 
@@ -282,8 +282,8 @@ class UttrykkParityTest {
 
     @Test
     fun `Int operations preserve Int type`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
 
         val sum: Add<Int> = a + b
         val product: Mul<Int> = a * b
@@ -296,8 +296,8 @@ class UttrykkParityTest {
 
     @Test
     fun `Double operations preserve Double type`() {
-        val a = Faktum("a", 10.5)
-        val b = Faktum("b", 20.5)
+        val a = Grunnlag("a", Const(10.5))
+        val b = Grunnlag("b", Const(20.5))
 
         val sum: Add<Double> = a + b
         val product: Mul<Double> = a * b
@@ -310,8 +310,8 @@ class UttrykkParityTest {
 
     @Test
     fun `Division always returns Double`() {
-        val intA = Faktum("a", 10)
-        val intB = Faktum("b", 5)
+        val intA = Grunnlag("a", Const(10))
+        val intB = Grunnlag("b", Const(5))
 
         val div: Div = intA / intB
         val result: Double = div.evaluer()
@@ -322,8 +322,8 @@ class UttrykkParityTest {
 
     @Test
     fun `Mixed Int and Double operations result in Double`() {
-        val intVal = Faktum("int", 10)
-        val doubleVal = Faktum("double", 2.5)
+        val intVal = Grunnlag("int", Const(10))
+        val doubleVal = Grunnlag("double", Const(2.5))
 
         val mixed1 = intVal + doubleVal
         val mixed2 = intVal * doubleVal
@@ -340,9 +340,9 @@ class UttrykkParityTest {
 
     @Test
     fun `operator precedence without parentheses`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 5)
-        val c = Faktum("c", 2)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(5))
+        val c = Grunnlag("c", Const(2))
 
         // a + b * c should be a + (b * c) = 10 + 10 = 20
         val expr1 = a + b * c
@@ -356,9 +356,9 @@ class UttrykkParityTest {
 
     @Test
     fun `operator precedence with division and multiplication`() {
-        val a = Faktum("a", 20)
-        val b = Faktum("b", 4)
-        val c = Faktum("c", 2)
+        val a = Grunnlag("a", Const(20))
+        val b = Grunnlag("b", Const(4))
+        val c = Grunnlag("c", Const(2))
 
         // a / b * c should be (a / b) * c = 5 * 2 = 10
         val expr = a / b * c
@@ -371,10 +371,10 @@ class UttrykkParityTest {
 
     @Test
     fun `multiple levels of nesting`() {
-        val a = Faktum("a", 2)
-        val b = Faktum("b", 3)
-        val c = Faktum("c", 4)
-        val d = Faktum("d", 5)
+        val a = Grunnlag("a", Const(2))
+        val b = Grunnlag("b", Const(3))
+        val c = Grunnlag("c", Const(4))
+        val d = Grunnlag("d", Const(5))
 
         // ((a + b) * c) - d = (5 * 4) - 5 = 15
         val expr = ((a + b) * c) - d
@@ -384,8 +384,8 @@ class UttrykkParityTest {
 
     @Test
     fun `unary minus with complex expression`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 5)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(5))
 
         val expr = -(a + b)
         assertEquals(-15, expr.evaluer())
@@ -394,9 +394,9 @@ class UttrykkParityTest {
 
     @Test
     fun `double negation`() {
-        val a = Faktum("a", 10)
+        val a = Grunnlag("a", Const(10))
 
-        val negOnce = -Var(a)
+        val negOnce = -a
         val expr = -negOnce
         assertEquals(10, expr.evaluer())
         // Note: Might simplify to "a" or show as "--a"
@@ -414,8 +414,8 @@ class UttrykkParityTest {
 
     @Test
     fun `zero handling`() {
-        val zero = Faktum("zero", 0)
-        val ten = Faktum("ten", 10)
+        val zero = Grunnlag("zero", Const(0))
+        val ten = Grunnlag("ten", Const(10))
 
         assertEquals(10, (zero + ten).evaluer())
         assertEquals(0, (zero * ten).evaluer())
@@ -424,8 +424,8 @@ class UttrykkParityTest {
 
     @Test
     fun `one handling`() {
-        val one = Faktum("one", 1)
-        val ten = Faktum("ten", 10)
+        val one = Grunnlag("one", Const(1))
+        val ten = Grunnlag("ten", Const(10))
 
         assertEquals(10, (one * ten).evaluer())
         assertEquals(0.1, (one / ten).evaluer())
@@ -437,7 +437,7 @@ class UttrykkParityTest {
 
     @Test
     fun `same expression used multiple times`() {
-        val base = Faktum("base", 10)
+        val base = Grunnlag("base", Const(10))
         val subExpr = base * 2  // This expression is reused
 
         val expr1 = subExpr + 5
@@ -455,25 +455,23 @@ class UttrykkParityTest {
     }
 
     @Test
-    fun `faktumListe collects all faktum from expression`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
-        val c = Faktum("c", 30)
+    fun `grunnlagListe collects all grunnlag from expression`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
+        val c = Grunnlag("c", Const(30))
 
         val expr = (a + b) * c - a
-        val faktumListe = expr.faktumListe()
+        val grunnlagListe = expr.grunnlagListe()
 
-        // Should contain a, b, c (even though a appears twice)
-        assertTrue(faktumListe.any { it.name == "a" })
-        assertTrue(faktumListe.any { it.name == "b" })
-        assertTrue(faktumListe.any { it.name == "c" })
+        // Grunnlag in expression: a appears twice, b once, c once = 4 total (with duplicates)
+        assertEquals(4, grunnlagListe.size)
     }
 
     @Test
     fun `dybde increases with nesting`() {
-        val a = Faktum("a", 1)
+        val a = Grunnlag("a", Const(1))
 
-        assertEquals(1, Var(a).dybde())
+        assertEquals(1, a.dybde())
         assertEquals(2, (a + a).dybde())
         assertEquals(3, ((a + a) * a).dybde())
         assertEquals(4, (((a + a) * a) - a).dybde())
@@ -481,8 +479,8 @@ class UttrykkParityTest {
 
     @Test
     fun `named expression has depth 1`() {
-        val a = Faktum("a", 10)
-        val b = Faktum("b", 20)
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(20))
 
         val complex = ((a + b) * (a - b)).navngi("complex")
 
