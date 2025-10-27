@@ -197,7 +197,7 @@ fun personErFlyktning(
     // Beslutningslogikk
     // ========================================================================
 
-    val utfallstype = ikke(angittFlyktning)
+    return ikke(angittFlyktning)
         .så { Const(IKKE_RELEVANT) }
         .ellers {
             (angittFlyktning og ikke(kravlinjeFremsattDatoFom2021))
@@ -207,10 +207,7 @@ fun personErFlyktning(
                         .så { Const(IKKE_OPPFYLT) }
                         .ellers { Const(OPPFYLT) }
                 }
-        }.navngi("utfallstype")
-        .id("Utfallstype")
-
-    return Grunnlag("erFlyktning", utfallstype)
+        }.navngi("erFlyktning")
         .id("ErFlyktning")
 }
 
