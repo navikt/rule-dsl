@@ -8,18 +8,19 @@
     Ta også stilling til om vi skal bruke FORDI eller HVORDAN.
 
 4. Vurder om all sporing skal skrues av og på. Vi bør ikke levere ut en stor forklaring dersom vi kjører i
-   ytelseskritisk batch kontekst. Bare spor ved forspørsel.
+   ytelseskritisk batch kontekst. Bare spor ved forspørsel. Og granulering: ikke spor betyr lag sporing men ikke lever den ut, eller hva? Er det dyrt å bygge sporingen underveis selv om vi ikke skal levere den? 
 
-5. Kombiner Faktum og Formel. Dvs Faktum<T : Number> fungerer som Formel<Number>.
-6. Uttrykk må få støtte for custom uttrykk som "min, "max", "avrund", "avrundMedToDesimal".
-7. Uttrykk bør ha lazy eval på resultatet. Eller cachet resultat. 
-8. Bør gjøre en overhaling av AbstractResourceAccessor. Denne blir nødvendig for å støtte trace mekanismen og burde integreres med AbstractRuleComponent slik at alle ARC har tilgang til root().
+5. Kombiner Faktum og Formel. Dvs Faktum<T : Number> fungerer som Formel<Number>. Interface Verdi utgår. 
+6. Uttrykk bør erstatte Formelrammeverket, men med følgende utvidelser: a) Uttrykk må få støtte for custom uttrykk som "min, "max", "avrund", "avrundMedToDesimal". Og kanskje b) Uttrykk bør ha lazy eval på resultatet. Eller cachet resultat. Rekursiv evaluering må ved enhver operasjon "høres dyrt ut".
+8. DONE: Bør gjøre en overhaling av AbstractResourceAccessor. Denne blir nødvendig for å støtte trace mekanismen og burde integreres med AbstractRuleComponent slik at alle ARC har tilgang til root().
 
-9. Neste "crux" er å få etablert en god måte å (hardanger-)sømløst produsere Faktum i SÅ delen av regel uten å måtte
+9. LØST?: Neste "crux" er å få etablert en god måte å (hardanger-)sømløst produsere Faktum i SÅ delen av regel uten å måtte
    kalle opp sporingsmekanismer i konstruktøren av Faktum.
 
 * Mulige løsninger: nå FAG()-metode som har nødvendig context i input: FAG(init: (fordi: ?) -> Unit). Slik at det det blir "lett" (men ikke helautomatisk) å levere et ferdig faktum.
 Se faktum-trace-options.md.
+
+10. Dersom vi skal gjøre større endringer på hvordan regelsett og regler fungerer, vurder om vi kan løse de to store svakhetene med dagens løsning: 1) en not null sjekk i et predikat er opplyser ikke påfølgende predikater, eller SÅ-blokken. 2) regel-chaining er i dag gjort med string. Dette kunne vært bedre med val regelNavn = regel(..). 3) Dagens løsning har ingen muligheter til å skrive ut en "passivt" regelgraf (må ha data for å kjøre). Det hadde vært interessant å se om vi kunne fått ut en statisk tilstandstre av regler/flyter etc.
 
   
 
