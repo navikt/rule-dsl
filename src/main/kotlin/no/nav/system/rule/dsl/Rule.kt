@@ -24,7 +24,7 @@ import kotlin.experimental.ExperimentalTypeInference
 open class Rule<T : Any>(
     private val name: String,
     private val sequence: Int,
-) : Comparable<Rule<T>>, AbstractResourceAccessor() {
+) : Comparable<Rule<T>>, AbstractRuleComponent() {
 
     /**
      * Functional description of the rule

@@ -10,7 +10,7 @@ import java.util.*
  * Common ruleflow behaviour used by all ruleflow implementations.
  * Defines branching logic DSL (decision, branch, condition, flow).
  */
-abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
+abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
     /**
      * Tracks the full name of nested branches.
      */
@@ -30,9 +30,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
      * Runs the ruleflow
      */
     open fun run(parent: AbstractRuleComponent): T {
-        if (parent is AbstractResourceAccessor) {
-            this.resourceMap = parent.resourceMap
-        }
+        this.resourceMap = parent.resourceMap
         parent.children.add(this)
 
         branchNameStack.push(this.javaClass.simpleName)
@@ -66,7 +64,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
      */
     class Decision(
         private val name: String,
-    ) : AbstractResourceAccessor() {
+    ) : AbstractRuleComponent() {
 
         private var branchList = mutableListOf<Branch>()
 
@@ -103,7 +101,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractResourceAccessor() {
 
         class Branch(
             defaultName: String,
-        ) : AbstractResourceAccessor() {
+        ) : AbstractRuleComponent() {
             lateinit var condition: () -> Boolean
             lateinit var flowFunction: () -> Unit
             private var betingelseName: String = defaultName
