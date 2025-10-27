@@ -16,7 +16,7 @@ import org.jetbrains.annotations.TestOnly
  * @param T the return type of the ruleset
  *
  */
-abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
+abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
 
     /**
      * Ruleset name
@@ -117,7 +117,7 @@ abstract class AbstractRuleset<T : Any> : AbstractResourceAccessor() {
      * @return value T wrapped in Optional
      */
     fun run(parent: AbstractRuleComponent): T {
-        if (parent is AbstractResourceAccessor) this.resourceMap = parent.resourceMap
+        this.resourceMap = parent.resourceMap
         parent.children.add(this)
 
         return internalRun()

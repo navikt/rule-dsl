@@ -6,7 +6,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.REGELTJENESTE
 /**
  * Top level ruleComponent encapusaltes a complete ruleservice.
  */
-abstract class AbstractRuleService<out T> : AbstractResourceAccessor() {
+abstract class AbstractRuleService<out T> : AbstractRuleComponent() {
     protected abstract val ruleService: () -> T
 
     /**
