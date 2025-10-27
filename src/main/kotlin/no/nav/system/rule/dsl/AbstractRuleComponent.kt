@@ -3,7 +3,7 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
 import no.nav.system.rule.dsl.formel.Formel
-import no.nav.system.rule.dsl.inspections.traceTo
+import no.nav.system.rule.dsl.inspections.hvorfor
 import no.nav.system.rule.dsl.resource.Root
 import no.nav.system.rule.dsl.resource.root
 import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
@@ -64,7 +64,11 @@ abstract class AbstractRuleComponent : Serializable {
         return ForklartFaktum(
             formel.name,
             formel.value,
-            this.root().traceTo(target = this@AbstractRuleComponent),
+            /**
+             * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
+             * Resultatet formes av "hvorfor-renderer".
+             */
+            this.root().hvorfor(target = this@AbstractRuleComponent),
             hvordan = formel
         )
     }

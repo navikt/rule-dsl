@@ -2,6 +2,8 @@ package no.nav.system.rule.dsl.inspections
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.rettsregel.DomainPredicate
+import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import org.jetbrains.kotlin.builtins.StandardNames.FqNames.target
 
 /**
@@ -15,33 +17,30 @@ fun AbstractRuleComponent.traceType(targetType: RuleComponentType): String {
     return trace(target = { arc -> arc.type() == targetType })
 }
 
-fun AbstractRuleComponent.traceTo(
-    includeLeafFaktum: Boolean = false,
+fun AbstractRuleComponent.hvorfor(
     qualifier: (AbstractRuleComponent) -> Boolean = { true },
     target: AbstractRuleComponent
 ): String {
     val rootTraceNode = TraceNode(parent = null, arc = this).apply {
-        inspect(this, includeLeafFaktum, qualifier, target = { arc -> arc == target })
+        inspect(this, qualifier, target = { arc -> arc === target })
     }
 
-    return rootTraceNode.toString()
+    return rootTraceNode.renderUsing(hvorforForklaringRenderer())
 }
 
 fun AbstractRuleComponent.trace(
-    includeLeafFaktum: Boolean = false,
     qualifier: (AbstractRuleComponent) -> Boolean = { true },
     target: (AbstractRuleComponent) -> Boolean
 ): String {
     val rootTraceNode = TraceNode(parent = null, arc = this).apply {
-        inspect(this, includeLeafFaktum, qualifier, target)
+        inspect(this, qualifier, target)
     }
 
-    return rootTraceNode.toString()
+    return rootTraceNode.toString().trim()
 }
 
 private fun inspect(
     parent: TraceNode,
-    includeLeafFaktum: Boolean = false,
     qualifier: (AbstractRuleComponent) -> Boolean,
     target: (AbstractRuleComponent) -> Boolean
 ) {
@@ -66,15 +65,12 @@ private fun inspect(
                 if (target.invoke(child)) {
                     this.verify()
                 }
-//                if (this == target)
-//                    val x = 0
-                inspect(this, includeLeafFaktum, qualifier, target)
+                inspect(this, qualifier, target)
             }
         }
 }
 
-
-private class TraceNode(
+class TraceNode(
     var parent: TraceNode? = null,
     val children: MutableList<TraceNode> = mutableListOf(),
     val arc: AbstractRuleComponent,
@@ -85,14 +81,82 @@ private class TraceNode(
         parent?.verify()
     }
 
-    override fun toString(): String = toTreeString(0).trim()
+    override fun toString(): String = renderUsing(defaultTreeRenderer())
 
-    private fun toTreeString(level: Int): String {
-        return StringBuilder().apply {
-            append(" ".repeat(level * 2)).append(arc.toString()).append("\n")
-            children.filter { it.partOfResult }.forEach {
-                append(it.toTreeString(level + 1))
-            }
-        }.toString()
+    fun renderUsing(renderer: (TraceNode, Int) -> String): String {
+        return renderer.invoke(this, 0)
     }
+
 }
+
+private fun defaultTreeRenderer(): (TraceNode, Int) -> String {
+    // Rekursiv funksjon for å bygge trestrukturen
+    fun render(node: TraceNode, level: Int): String {
+        return buildString {
+            append(" ".repeat(level * 2)).append(node.arc.toString()).append("\n")
+            node.children.filter { it.partOfResult }.forEach { child ->
+                append(render(child, level + 1))  // Recursive call
+            }
+        }
+    }
+    return ::render
+}
+
+/**
+ * Egen funksjon som omsetter TraceNodene i treet til tekst. Spesialbehandling for å gi egnet visning for Hvorfor-forklaringen.
+ */
+private fun hvorforForklaringRenderer(): (TraceNode, Int) -> String {
+    // Rekursiv funksjon for å bygge trestrukturen
+    fun render(node: TraceNode, level: Int): String {
+        return buildString {
+            when (node.arc.type()) {
+                /**
+                 * Egen rendering for REGEL slik at vi kan liste predikatene under regelen.
+                 * (Trace i en regel går IKKE via predikatene)
+                 */
+                RuleComponentType.REGEL -> {
+                    append(" ".repeat(level * 2)).append(node.arc.toString()).append("\n")
+                    node.arc.children
+                        .filterIsInstance<DomainPredicate>()
+                        .map { it.toString() }
+                        .forEach {
+                            append(" ".repeat((level + 1) * 2)).append(it).append("\n")
+                        }
+                }
+
+                /**
+                 * Egen rendering for FORGRENING slik at vi kan liste ut valgt gren på samme linje som forgreningen.
+                 */
+                RuleComponentType.FORGRENING -> {
+                    append(" ".repeat(level * 2)).append(node.arc.toString())
+
+                    val gren = node.children.firstOrNull { it.partOfResult && it.arc.type() == RuleComponentType.GREN }
+
+                    if (gren != null) {
+                        append(" ").append(gren.arc.fired().svarord()).append("\n")
+                        gren.children.filter { it.partOfResult }.forEach { child ->
+                            append(render(child, level + 1))  // Recursive call
+                        }
+                    } else {
+                        append("\n")
+                        node.children.filter { it.partOfResult }.forEach { child ->
+                            append(render(child, level + 1))  // Recursive call
+                        }
+                    }
+                }
+
+                /**
+                 * Vanlig visning av andre noder.
+                 */
+                else -> {
+                    append(" ".repeat(level * 2)).append(node.arc.toString()).append("\n")
+                    node.children.filter { it.partOfResult }.forEach { child ->
+                        append(render(child, level + 1))  // Recursive call
+                    }
+                }
+            }
+        }
+    }
+    return ::render
+}
+
