@@ -227,10 +227,12 @@ fun personErFlyktning(
  * Kombinerer flere nullable Boolean-uttrykk med ELLER.
  * Returnerer false hvis alle er null.
  */
-private fun kombinerMedEller(vararg uttrykk: Uttrykk<Boolean>?): Uttrykk<Boolean> =
-    uttrykk.filterNotNull()
-        .reduceOrNull { acc, expr -> acc.eller(expr) }
+private fun kombinerMedEller(vararg uttrykk: Uttrykk<Boolean>?): Uttrykk<Boolean> {
+    // Konverter null til Const(false) for å bevare struktur og gjøre forklaring eksplisitt
+    val alleUttrykk = uttrykk.map { it ?: Const(false) }
+    return alleUttrykk.reduceOrNull { acc, expr -> acc.eller(expr) }
         ?: Const(false)
+}
 
 /**
  * Sjekker om en person har en gitt kravlinjetype før 2021.

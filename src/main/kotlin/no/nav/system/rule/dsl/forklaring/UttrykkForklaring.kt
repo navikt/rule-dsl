@@ -66,6 +66,24 @@ fun <T : Any> Uttrykk<T>.forklarHva(navn: String): HvaForklaring {
 }
 
 /**
+ * Sjekker om et uttrykk er en triviell konstant som ikke skal vises i forklaring.
+ *
+ * En triviell konstant er:
+ * - En Const direkte
+ * - Et Grunnlag som DIREKTE inneholder Const (ikke rekursivt)
+ *
+ * Dette betyr at Grunnlag som peker til andre Grunnlag (selv om de til slutt
+ * ender i Const) fortsatt skal vises fordi de kan være viktige mellomsteg.
+ */
+private fun Uttrykk<*>.erTrivielKonstant(): Boolean {
+    return when (this) {
+        is Const -> true
+        is Grunnlag -> this.utpakk() is Const  // Kun ett nivå, ikke rekursivt
+        else -> false
+    }
+}
+
+/**
  * Traverser uttrykkstre og finn alle navngitte underuttrykk.
  * Dette tilsvarer "locked" subformler i dagens Formel-implementasjon.
  */
@@ -77,9 +95,8 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
 
     return when (this) {
         is Grunnlag -> {
-            // Hvis Grunnlag bare inneholder en Const, er det en konstant - ikke en formel
-            // Hopp over forklaring for rene konstanter
-            if (this.utpakk() is Const) {
+            // Hvis Grunnlag bare inneholder konstanter (rekursivt), hopp over
+            if (this.erTrivielKonstant()) {
                 return emptyList()
             }
 
