@@ -1,0 +1,214 @@
+package no.nav.pensjon.sliterordning.regelsett
+
+import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_36
+import no.nav.pensjon.sliterordning.grunnlag.Person
+import no.nav.system.rule.dsl.DslDomainPredicate
+import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
+import no.nav.system.rule.dsl.formel.*
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.erFør
+import no.nav.system.rule.dsl.rettsregel.erLik
+import no.nav.system.rule.dsl.rettsregel.erMindreEnn
+import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
+import java.time.YearMonth
+import java.time.temporal.ChronoUnit
+
+/**
+ * Regelsett for beregning av slitertillegg
+ *
+ * Denne versjonen legger mer vekt på Domenepredikatene, dvs reglene er spisset mot den aktuelle formel.
+ *
+ * https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering#
+ *
+ */
+class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
+    innUttakstidspunkt: YearMonth,
+    innPerson: Person,
+    innGrunnbeløp: Int
+) : AbstractDemoRuleset<ForklartFaktum<Double>>() {
+    /**
+     * Faktum
+     */
+    private val faktiskTrygdetid = Formel.variable("faktiskTrygdetid", innPerson.trygdetid.faktiskTrygdetid)
+    private val uttakstidspunkt = Faktum("uttakstidspunkt", innUttakstidspunkt)
+    private val nedrePensjonsDato = Faktum("nedrePensjonsDato", innPerson.nedrePensjonsDato())
+    private val fullTrygdetid = Faktum("fullTrygdetid", 40)
+
+    /**
+     * Formler
+     */
+    private val antallMånederEtterNedrePensjonsDato = Formel.variable(
+        "antallMånederEtterNedrePensjonsDato",
+        ChronoUnit.MONTHS.between(nedrePensjonsDato.value, uttakstidspunkt.value).toInt().coerceAtMost(MND_36)
+    )
+    private val G = Formel.variable("G", innGrunnbeløp)
+    private val fulltSlitertillegg: Formel<Double> = formula("fulltSlitertillegg") { expression(0.25 * G / 12) }
+    private val justeringsFaktor: Formel<Double> = formula("justeringsFaktor") { expression((MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36) }
+    private val trygdetidFaktor: Formel<Double> = formula("trygdetidFaktor") { expression(faktiskTrygdetid / fullTrygdetid.value) }
+
+    @OptIn(DslDomainPredicate::class)
+    override fun create() {
+
+        /**
+         * Forklaring:
+         *      HVA
+         *          slitertillegg = 2291.67
+         *
+         *      REFERANSE
+         *          SLITERTILLEGG-BEREGNING-UAVKORTET
+         *
+         *      FORDI
+         *          nedrePensjonsDato er lik uttakstidspunkt
+         *          2024-01 er lik 2024-01
+         *
+         *          OG
+         *
+         *          faktiskTrygdetid er lik fullTrygdetid
+         *          40 er lik 40
+         *
+         *      HVORDAN
+         *          slitertillegg = 0.25 * G / 12
+         *          slitertillegg = 0.25 * 110000 / 12
+         */
+        regel("SLITERTILLEGG-BEREGNING-UAVKORTET") {
+            HVIS { nedrePensjonsDato erLik uttakstidspunkt } // evt antallMånederEtterNedrePensjonsDato erLik 0
+            OG { faktiskTrygdetid erLik fullTrygdetid }
+            SÅ {
+                RETURNER(
+                    faktum(
+                        formula("slitertillegg") {
+                            expression(fulltSlitertillegg)
+                        }
+                    )
+                )
+            }
+        }
+
+        /**
+         * Forklaring:
+         *      HVA
+         *          slitertillegg = 1718.75
+         *
+         *      REFERANSE
+         *          SLITERTILLEGG-AVKORTING-TRYGDETID
+         *
+         *      FORDI
+         *          nedrePensjonsDato er lik uttakstidspunkt
+         *          2024-01 er lik 2024-01
+         *
+         *          OG
+         *
+         *          faktiskTrygdetid er mindre enn fullTrygdetid
+         *          30 er mindre enn 40
+         *
+         *      HVORDAN
+         *          slitertillegg = fulltSlitertillegg * trygdetidFaktor
+         *          slitertillegg = 5 * 5
+         *
+         *          fulltSlitertillegg = 0.25 * G / 12
+         *          fulltSlitertillegg = 0.25 * 110000 / 12
+         *
+         *          trygdetidFaktor = faktiskTrygdetid / fullTrygdetid
+         *          trygdetidFaktor = 30 / 40
+         */
+        regel("SLITERTILLEGG-AVKORTING-TRYGDETID") {
+            HVIS { nedrePensjonsDato erLik uttakstidspunkt } // evt antallMånederEtterNedrePensjonsDato erLik 0
+            OG { faktiskTrygdetid erMindreEnn fullTrygdetid }
+            SÅ {
+                RETURNER(
+                    faktum(
+                        formula("slitertillegg") {
+                            expression(fulltSlitertillegg * trygdetidFaktor)
+                        }
+                    )
+                )
+            }
+        }
+
+        /**
+         * Forklaring:
+         *      HVA
+         *          slitertillegg = 1273.15
+         *
+         *      REFERANSE
+         *          SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT
+         *
+         *      FORDI
+         *          nedrePensjonsDato er før uttakstidspunkt
+         *          2022-09 er før 2024-01
+         *
+         *          OG
+         *
+         *          faktiskTrygdetid er lik fullTrygdetid
+         *          40 er lik 40
+         *
+         *      HVORDAN
+         *          slitertillegg = fulltSlitertillegg * justeringsFaktor
+         *          slitertillegg = 5 * 5
+         *
+         *          fulltSlitertillegg = 0.25 * G / 12
+         *          fulltSlitertillegg = 0.25 * 110000 / 12
+         *
+         *          justeringsFaktor = MND_36 - antallMånederEtterNedreAldersgrense) / MND_36
+         *          justeringsFaktor = (36 - 16) / 36
+         */
+        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
+            HVIS { nedrePensjonsDato erFør uttakstidspunkt } // evt antallMånederEtterNedrePensjonsDato erLik 0
+            OG { faktiskTrygdetid erLik fullTrygdetid }
+            SÅ {
+                RETURNER(
+                    faktum(
+                        formula("slitertillegg") {
+                            expression(fulltSlitertillegg * justeringsFaktor)
+                        }
+                    )
+                )
+            }
+        }
+
+        /**
+         * Forklaring:
+         *      HVA
+         *          slitertillegg = 954.86
+         *
+         *      REFERANSE
+         *          SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID
+         *
+         *      FORDI
+         *          nedrePensjonsDato er før uttakstidspunkt
+         *          2022-09 er før 2024-01
+         *
+         *          OG
+         *
+         *          faktiskTrygdetid er mindre enn fullTrygdetid
+         *          30 er mindre enn 40
+         *
+         *      HVORDAN
+         *          slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
+         *          slitertillegg = 5 * 5 * 5
+         *
+         *          fulltSlitertillegg = 0.25 * G / 12
+         *          fulltSlitertillegg = 0.25 * 110000 / 12
+         *
+         *          justeringsFaktor = MND_36 - antallMånederEtterNedreAldersgrense) / MND_36
+         *          justeringsFaktor = (36 - 16) / 36
+         *
+         *          trygdetidFaktor = faktiskTrygdetid / fullTrygdetid
+         *          trygdetidFaktor = 30 / 40
+         */
+        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID") {
+            HVIS { nedrePensjonsDato erFør uttakstidspunkt } // evt antallMånederEtterNedrePensjonsDato erLik 0
+            OG { faktiskTrygdetid erMindreEnn fullTrygdetid }
+            SÅ {
+                RETURNER(
+                    faktum(
+                        formula("slitertillegg") {
+                            expression(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
+                        }
+                    )
+                )
+            }
+        }
+
+    }
+}
