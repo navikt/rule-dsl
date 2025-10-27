@@ -194,26 +194,28 @@ fun personErFlyktning(
         .id("MinstEnOvergangsRegler")
 
     // ========================================================================
-    // Beslutningslogikk
+    // Beslutningslogikk (Beslutningstabell)
     // ========================================================================
 
-    return ikke(angittFlyktning)
-        .så { Const(IKKE_RELEVANT) }
-        .ellers {
-            (angittFlyktning og ikke(kravlinjeFremsattDatoFom2021))
-                .så { Const(OPPFYLT) }
-                .ellers {
-                    (angittFlyktning og kravlinjeFremsattDatoFom2021 og ikke(overgangsRegler))
-                        .så { Const(IKKE_OPPFYLT) }
-                        .ellers {
-                            (angittFlyktning og kravlinjeFremsattDatoFom2021 og overgangsRegler)
-                                .så { Const(OPPFYLT) }
-                                .ellers {
-                                    feilUttrykk("Ugyldig tilstand i flyktningvurdering")
-                                }
-                        }
-                }
-        }.navngi("erFlyktning")
+    return tabell<UtfallType>("flyktningVurdering") {
+        regel {
+            når { ikke(angittFlyktning) }
+            resultat { Const(IKKE_RELEVANT) }
+        }
+        regel {
+            når { angittFlyktning og ikke(kravlinjeFremsattDatoFom2021) }
+            resultat { Const(OPPFYLT) }
+        }
+        regel {
+            når { angittFlyktning og kravlinjeFremsattDatoFom2021 og ikke(overgangsRegler) }
+            resultat { Const(IKKE_OPPFYLT) }
+        }
+        regel {
+            når { angittFlyktning og kravlinjeFremsattDatoFom2021 og overgangsRegler }
+            resultat { Const(OPPFYLT) }
+        }
+        ellers { feilUttrykk("Ugyldig tilstand i flyktningvurdering") }
+    }.navngi("erFlyktning")
         .id("ErFlyktning")
 }
 

@@ -9,6 +9,7 @@ import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.forklaring.Const
 import no.nav.system.rule.dsl.forklaring.Grunnlag
+import no.nav.system.rule.dsl.forklaring.forklarDetaljert
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -310,5 +311,7 @@ class PersonErFlyktningTest {
 
         // Skal bruke K20 trygdetid (25) og dermed oppfylle overgangsregel
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
     }
 }

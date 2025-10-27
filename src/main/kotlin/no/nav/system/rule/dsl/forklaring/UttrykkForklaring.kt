@@ -134,6 +134,10 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                         unpacked.såUttrykk.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.ellersUttrykk.finnNavngitteUttrykk(nivå, maxDybde)
                 is Feil<*> -> emptyList()
+                is Tabell<*> -> unpacked.regler.flatMap { regel ->
+                        regel.betingelse.finnNavngitteUttrykk(nivå, maxDybde) +
+                        regel.resultat.finnNavngitteUttrykk(nivå, maxDybde)
+                    } + (unpacked.ellersUttrykk?.finnNavngitteUttrykk(nivå, maxDybde) ?: emptyList())
                 else -> emptyList()
             }
         }
@@ -193,6 +197,11 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
 
         is Feil<*> -> emptyList()
 
+        is Tabell<*> -> this.regler.flatMap { regel ->
+                regel.betingelse.finnNavngitteUttrykk(nivå, maxDybde) +
+                regel.resultat.finnNavngitteUttrykk(nivå, maxDybde)
+            } + (this.ellersUttrykk?.finnNavngitteUttrykk(nivå, maxDybde) ?: emptyList())
+
         else -> emptyList()
     }
 }
@@ -241,6 +250,9 @@ private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<Pair<String, Any>
         is ErIkkeBlant<*> -> verdi.finnKonstanteGrunnlag() + liste.finnKonstanteGrunnlag()
         is Hvis<*> -> betingelse.finnKonstanteGrunnlag() + såUttrykk.finnKonstanteGrunnlag() + ellersUttrykk.finnKonstanteGrunnlag()
         is Feil<*> -> emptyList()
+        is Tabell<*> -> regler.flatMap { regel ->
+                regel.betingelse.finnKonstanteGrunnlag() + regel.resultat.finnKonstanteGrunnlag()
+            } + (ellersUttrykk?.finnKonstanteGrunnlag() ?: emptyList())
         else -> emptyList()
     }
 }
@@ -437,6 +449,22 @@ fun <T : Any> Uttrykk<T>.treVisning(nivå: Int = 0): String {
             append(uttrykk.treVisning(nivå + 1))
         }
         is Feil<*> -> "$indent$prefix Feil($melding)"
+        is Tabell<*> -> buildString {
+            appendLine("${indent}${prefix}Tabell${if (navn != null) "($navn)" else ""}")
+            regler.forEachIndexed { index, regel ->
+                appendLine("${indent}│  ├─ Regel ${index + 1}:")
+                appendLine("${indent}│  │  ├─ Når:")
+                appendLine(regel.betingelse.treVisning(nivå + 3))
+                appendLine("${indent}│  │  └─ Resultat:")
+                append(regel.resultat.treVisning(nivå + 3))
+                if (index < regler.size - 1) appendLine()
+            }
+            ellersUttrykk?.let {
+                appendLine()
+                appendLine("${indent}│  └─ Ellers:")
+                append(it.treVisning(nivå + 2))
+            }
+        }
     }
 }
 
@@ -479,6 +507,9 @@ fun <T : Any, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R> {
         is Hvis<*> -> betingelse.visit(transform) + såUttrykk.visit(transform) + ellersUttrykk.visit(transform)
         is Grunnlag -> uttrykk.visit(transform)
         is Feil<*> -> emptyList()
+        is Tabell<*> -> regler.flatMap { regel ->
+                regel.betingelse.visit(transform) + regel.resultat.visit(transform)
+            } + (ellersUttrykk?.visit(transform) ?: emptyList())
         else -> emptyList()
     }
 
@@ -678,6 +709,17 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
         is Grunnlag -> Grunnlag(navn, uttrykk.forenkel(), rvsId)
 
         is Feil<*> -> this
+
+        is Tabell<*> -> {
+            val forenkledeRegler = regler.map { regel ->
+                TabellRegel(
+                    betingelse = regel.betingelse.forenkel() as Uttrykk<Boolean>,
+                    resultat = regel.resultat.forenkel()
+                )
+            }
+            val forenkletEllers = ellersUttrykk?.forenkel()
+            Tabell(navn, forenkledeRegler, forenkletEllers) as Uttrykk<T>
+        }
     }
 }
 
@@ -786,6 +828,16 @@ fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out An
         }
         is Grunnlag -> Grunnlag(navn, uttrykk.erstatt(variabelNavn, med), rvsId)
         is Feil<*> -> this
+        is Tabell<*> -> {
+            val erstattedeRegler = regler.map { regel ->
+                TabellRegel(
+                    betingelse = regel.betingelse.erstatt(variabelNavn, med) as Uttrykk<Boolean>,
+                    resultat = regel.resultat.erstatt(variabelNavn, med)
+                )
+            }
+            val erstattetEllers = ellersUttrykk?.erstatt(variabelNavn, med)
+            Tabell(navn, erstattedeRegler, erstattetEllers) as Uttrykk<T>
+        }
     }
 }
 
@@ -821,6 +873,14 @@ fun <T : Any> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
         is ErIkkeBlant<*> -> verdi.finnRvsIdFor(uttrykkNavn) ?: liste.finnRvsIdFor(uttrykkNavn)
         is Hvis<*> -> betingelse.finnRvsIdFor(uttrykkNavn) ?: såUttrykk.finnRvsIdFor(uttrykkNavn) ?: ellersUttrykk.finnRvsIdFor(uttrykkNavn)
         is Feil<*> -> null
+        is Tabell<*> -> {
+            regler.asSequence()
+                .mapNotNull { regel ->
+                    regel.betingelse.finnRvsIdFor(uttrykkNavn) ?: regel.resultat.finnRvsIdFor(uttrykkNavn)
+                }
+                .firstOrNull()
+                ?: ellersUttrykk?.finnRvsIdFor(uttrykkNavn)
+        }
         else -> null
     }
 }
