@@ -800,3 +800,13 @@ infix fun <T : Any> Uttrykk<Boolean>.så(såBlock: () -> Uttrykk<T>): BetingetBu
 infix fun <T : Any> BetingetBuilder<T>.ellers(ellersBlock: () -> Uttrykk<T>): Hvis<T> {
     return Hvis(betingelse, såUttrykk, ellersBlock())
 }
+
+data class Feil<T : Any>(val melding: String) : Uttrykk<T> {
+    override fun evaluer(): T = throw IllegalStateException(melding)
+    override fun notasjon(): String = "FEIL($melding)"
+    override fun konkret(): String = melding
+    override fun grunnlagListe() = emptyList<Grunnlag<out Any>>()
+    override fun dybde(): Int = 1
+}
+
+fun <T : Any> feilUttrykk(melding: String): Uttrykk<T> = Feil(melding)

@@ -133,6 +133,7 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                 is Hvis<*> -> unpacked.betingelse.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.såUttrykk.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.ellersUttrykk.finnNavngitteUttrykk(nivå, maxDybde)
+                is Feil<*> -> emptyList()
                 else -> emptyList()
             }
         }
@@ -190,6 +191,8 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                 this.såUttrykk.finnNavngitteUttrykk(nivå, maxDybde) +
                 this.ellersUttrykk.finnNavngitteUttrykk(nivå, maxDybde)
 
+        is Feil<*> -> emptyList()
+
         else -> emptyList()
     }
 }
@@ -237,6 +240,7 @@ private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<Pair<String, Any>
         is ErBlant<*> -> verdi.finnKonstanteGrunnlag() + liste.finnKonstanteGrunnlag()
         is ErIkkeBlant<*> -> verdi.finnKonstanteGrunnlag() + liste.finnKonstanteGrunnlag()
         is Hvis<*> -> betingelse.finnKonstanteGrunnlag() + såUttrykk.finnKonstanteGrunnlag() + ellersUttrykk.finnKonstanteGrunnlag()
+        is Feil<*> -> emptyList()
         else -> emptyList()
     }
 }
@@ -432,6 +436,7 @@ fun <T : Any> Uttrykk<T>.treVisning(nivå: Int = 0): String {
             appendLine("${indent}${prefix}Grunnlag($navn)")
             append(uttrykk.treVisning(nivå + 1))
         }
+        is Feil<*> -> "$indent$prefix Feil($melding)"
     }
 }
 
@@ -473,6 +478,7 @@ fun <T : Any, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R> {
         is ErIkkeBlant<*> -> verdi.visit(transform) + liste.visit(transform)
         is Hvis<*> -> betingelse.visit(transform) + såUttrykk.visit(transform) + ellersUttrykk.visit(transform)
         is Grunnlag -> uttrykk.visit(transform)
+        is Feil<*> -> emptyList()
         else -> emptyList()
     }
 
@@ -670,6 +676,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
         }
 
         is Grunnlag -> Grunnlag(navn, uttrykk.forenkel(), rvsId)
+
+        is Feil<*> -> this
     }
 }
 
@@ -777,6 +785,7 @@ fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out An
             Hvis(bet as Uttrykk<Boolean>, so, els) as Uttrykk<T>
         }
         is Grunnlag -> Grunnlag(navn, uttrykk.erstatt(variabelNavn, med), rvsId)
+        is Feil<*> -> this
     }
 }
 
@@ -811,6 +820,7 @@ fun <T : Any> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
         is ErBlant<*> -> verdi.finnRvsIdFor(uttrykkNavn) ?: liste.finnRvsIdFor(uttrykkNavn)
         is ErIkkeBlant<*> -> verdi.finnRvsIdFor(uttrykkNavn) ?: liste.finnRvsIdFor(uttrykkNavn)
         is Hvis<*> -> betingelse.finnRvsIdFor(uttrykkNavn) ?: såUttrykk.finnRvsIdFor(uttrykkNavn) ?: ellersUttrykk.finnRvsIdFor(uttrykkNavn)
+        is Feil<*> -> null
         else -> null
     }
 }

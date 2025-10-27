@@ -190,8 +190,8 @@ fun personErFlyktning(
         overgangsregelAPTidligereGJP,
         overgangsregelGJRTidligereUTGJT,
         overgangsregelGJRtidligereGJR
-    ).navngi("overgangsRegler")
-        .id("OvergangsRegler")
+    ).navngi("minsEnOvergangsRegler")
+        .id("MinstEnOvergangsRegler")
 
     // ========================================================================
     // Beslutningslogikk
@@ -205,7 +205,13 @@ fun personErFlyktning(
                 .ellers {
                     (angittFlyktning og kravlinjeFremsattDatoFom2021 og ikke(overgangsRegler))
                         .så { Const(IKKE_OPPFYLT) }
-                        .ellers { Const(OPPFYLT) }
+                        .ellers {
+                            (angittFlyktning og kravlinjeFremsattDatoFom2021 og overgangsRegler)
+                                .så { Const(OPPFYLT) }
+                                .ellers {
+                                    feilUttrykk("Ugyldig tilstand i flyktningvurdering")
+                                }
+                        }
                 }
         }.navngi("erFlyktning")
         .id("ErFlyktning")
