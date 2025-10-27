@@ -433,6 +433,9 @@ class Formel<T : Number> internal constructor(
     private fun finalNotasjon(): String = if (locked) name else notasjon
     private fun finalInnhold(): String = if (locked) value.toString() else innhold
 
+    override fun hva(): String {
+        return "'$name' ($value)"
+    }
     override fun toString(): String = toTreeString(0, Int.MAX_VALUE)
 
 

@@ -29,6 +29,8 @@ import kotlin.collections.forEach
 interface Verdi<T : Any> {
     val value: T
     val name: String
+
+    fun hva() : String
 }
 
 open class Faktum<T : Any> internal constructor(
@@ -52,6 +54,14 @@ open class Faktum<T : Any> internal constructor(
 //    override fun type(): RuleComponentType = FAKTUM
 //    override fun fired(): Boolean = throw IllegalAccessError("Fired() should not be used on Faktum.")
     override fun toString(): String {
+        return if (anonymous) {
+            "'$value'"
+        } else {
+            "'$name' ($value)"
+        }
+    }
+
+    override fun hva(): String {
         return if (anonymous) {
             "'$value'"
         } else {

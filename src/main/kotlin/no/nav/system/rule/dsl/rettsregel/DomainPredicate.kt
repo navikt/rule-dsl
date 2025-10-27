@@ -47,7 +47,7 @@ class PairDomainPredicate(
 
     override fun toString(): String {
         val komparatorText = if (fired) comparator.text else comparator.negated()
-        return "${fired.svarord()} $verdi1$komparatorText$verdi2"
+        return "${fired.svarord()} ${verdi1.hva()}$komparatorText${verdi2.hva()}"
     }
 }
 
