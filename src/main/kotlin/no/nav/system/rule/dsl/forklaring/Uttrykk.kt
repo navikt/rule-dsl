@@ -500,6 +500,44 @@ data class MindreEllerLik<T : Comparable<T>>(
 }
 
 /**
+ * Sammenligning: Verdi er blant liste (in).
+ */
+data class ErBlant<T : Any>(
+    val verdi: Uttrykk<T>,
+    val liste: Uttrykk<List<T>>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = verdi.evaluer() in liste.evaluer()
+
+    override fun notasjon(): String = "${verdi.notasjon()} ER BLANT ${liste.notasjon()}"
+
+    override fun konkret(): String = "${verdi.konkret()} ER BLANT ${liste.konkret()}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        verdi.grunnlagListe() + liste.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(verdi.dybde(), liste.dybde())
+}
+
+/**
+ * Sammenligning: Verdi er ikke blant liste (not in).
+ */
+data class ErIkkeBlant<T : Any>(
+    val verdi: Uttrykk<T>,
+    val liste: Uttrykk<List<T>>
+) : Uttrykk<Boolean> {
+    override fun evaluer(): Boolean = verdi.evaluer() !in liste.evaluer()
+
+    override fun notasjon(): String = "${verdi.notasjon()} ER IKKE BLANT ${liste.notasjon()}"
+
+    override fun konkret(): String = "${verdi.konkret()} ER IKKE BLANT ${liste.konkret()}"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        verdi.grunnlagListe() + liste.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(verdi.dybde(), liste.dybde())
+}
+
+/**
  * Betinget uttrykk som velger mellom to verdier basert på en Boolean-betingelse.
  *
  * Både SÅ og ELLERS må returnere verdier av samme type T.
@@ -618,6 +656,19 @@ operator fun <T : Number> Uttrykk<T>.unaryMinus(): Neg<T> = Neg(this)
 fun <T : Any> Uttrykk<T>.navngi(navn: String): Grunnlag<T> = Grunnlag(navn, this)
 
 /**
+ * Konverterer et Faktum til et Grunnlag (Uttrykk).
+ * Dette gjør det enkelt å bruke Faktum-verdier i Uttrykk-systemet.
+ *
+ * Eksempel:
+ * ```kotlin
+ * val faktum = Faktum("alder", 67)
+ * val grunnlag = faktum.toGrunnlag()  // Grunnlag("alder", Const(67))
+ * ```
+ */
+fun <T : Any> no.nav.system.rule.dsl.rettsregel.Faktum<T>.toGrunnlag(): Grunnlag<T> =
+    Grunnlag(this.name, Const(this.value))
+
+/**
  * Setter rvsId på et navngitt uttrykk.
  */
 fun <T : Any> Grunnlag<T>.id(rvsId: String): Grunnlag<T> = this.copy(rvsId = rvsId)
@@ -664,6 +715,49 @@ infix fun <T : Comparable<T>> T.erStørreEllerLik(other: Uttrykk<T>): StørreEll
 infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEllerLik(other: Uttrykk<T>): MindreEllerLik<T> = MindreEllerLik(this, other)
 infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEllerLik(other: T): MindreEllerLik<T> = MindreEllerLik(this, Const(other))
 infix fun <T : Comparable<T>> T.erMindreEllerLik(other: Uttrykk<T>): MindreEllerLik<T> = MindreEllerLik(Const(this), other)
+
+/**
+ * Liste-sammenlignings-operatorer (norske navn, infix).
+ */
+infix fun <T : Any> Uttrykk<T>.erBlant(other: Uttrykk<List<T>>): ErBlant<T> = ErBlant(this, other)
+infix fun <T : Any> Uttrykk<T>.erBlant(other: List<T>): ErBlant<T> = ErBlant(this, Const(other))
+infix fun <T : Any> T.erBlant(other: Uttrykk<List<T>>): ErBlant<T> = ErBlant(Const(this), other)
+
+infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: Uttrykk<List<T>>): ErIkkeBlant<T> = ErIkkeBlant(this, other)
+infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: List<T>): ErIkkeBlant<T> = ErIkkeBlant(this, Const(other))
+infix fun <T : Any> T.erIkkeBlant(other: Uttrykk<List<T>>): ErIkkeBlant<T> = ErIkkeBlant(Const(this), other)
+
+/**
+ * Dato-sammenlignings-operatorer (norske navn, infix).
+ * Disse operatorene er spesifikke for LocalDate og gir mer naturlig språk enn > og <.
+ */
+infix fun Uttrykk<java.time.LocalDate>.erEtter(other: Uttrykk<java.time.LocalDate>): StørreEnn<java.time.LocalDate> =
+    StørreEnn(this, other)
+infix fun Uttrykk<java.time.LocalDate>.erEtter(other: java.time.LocalDate): StørreEnn<java.time.LocalDate> =
+    StørreEnn(this, Const(other))
+infix fun java.time.LocalDate.erEtter(other: Uttrykk<java.time.LocalDate>): StørreEnn<java.time.LocalDate> =
+    StørreEnn(Const(this), other)
+
+infix fun Uttrykk<java.time.LocalDate>.erEtterEllerLik(other: Uttrykk<java.time.LocalDate>): StørreEllerLik<java.time.LocalDate> =
+    StørreEllerLik(this, other)
+infix fun Uttrykk<java.time.LocalDate>.erEtterEllerLik(other: java.time.LocalDate): StørreEllerLik<java.time.LocalDate> =
+    StørreEllerLik(this, Const(other))
+infix fun java.time.LocalDate.erEtterEllerLik(other: Uttrykk<java.time.LocalDate>): StørreEllerLik<java.time.LocalDate> =
+    StørreEllerLik(Const(this), other)
+
+infix fun Uttrykk<java.time.LocalDate>.erFør(other: Uttrykk<java.time.LocalDate>): MindreEnn<java.time.LocalDate> =
+    MindreEnn(this, other)
+infix fun Uttrykk<java.time.LocalDate>.erFør(other: java.time.LocalDate): MindreEnn<java.time.LocalDate> =
+    MindreEnn(this, Const(other))
+infix fun java.time.LocalDate.erFør(other: Uttrykk<java.time.LocalDate>): MindreEnn<java.time.LocalDate> =
+    MindreEnn(Const(this), other)
+
+infix fun Uttrykk<java.time.LocalDate>.erFørEllerLik(other: Uttrykk<java.time.LocalDate>): MindreEllerLik<java.time.LocalDate> =
+    MindreEllerLik(this, other)
+infix fun Uttrykk<java.time.LocalDate>.erFørEllerLik(other: java.time.LocalDate): MindreEllerLik<java.time.LocalDate> =
+    MindreEllerLik(this, Const(other))
+infix fun java.time.LocalDate.erFørEllerLik(other: Uttrykk<java.time.LocalDate>): MindreEllerLik<java.time.LocalDate> =
+    MindreEllerLik(Const(this), other)
 
 /**
  * Hvis DSL-funksjon (funksjonell stil).

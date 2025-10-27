@@ -126,6 +126,10 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                         unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
                 is MindreEllerLik<*> -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+                is ErBlant<*> -> unpacked.verdi.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.liste.finnNavngitteUttrykk(nivå, maxDybde)
+                is ErIkkeBlant<*> -> unpacked.verdi.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.liste.finnNavngitteUttrykk(nivå, maxDybde)
                 is Hvis<*> -> unpacked.betingelse.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.såUttrykk.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.ellersUttrykk.finnNavngitteUttrykk(nivå, maxDybde)
@@ -176,6 +180,12 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
         is MindreEllerLik<*> -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                 this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
 
+        is ErBlant<*> -> this.verdi.finnNavngitteUttrykk(nivå, maxDybde) +
+                this.liste.finnNavngitteUttrykk(nivå, maxDybde)
+
+        is ErIkkeBlant<*> -> this.verdi.finnNavngitteUttrykk(nivå, maxDybde) +
+                this.liste.finnNavngitteUttrykk(nivå, maxDybde)
+
         is Hvis<*> -> this.betingelse.finnNavngitteUttrykk(nivå, maxDybde) +
                 this.såUttrykk.finnNavngitteUttrykk(nivå, maxDybde) +
                 this.ellersUttrykk.finnNavngitteUttrykk(nivå, maxDybde)
@@ -224,6 +234,8 @@ private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<Pair<String, Any>
         is MindreEnn<*> -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is StørreEllerLik<*> -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is MindreEllerLik<*> -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
+        is ErBlant<*> -> verdi.finnKonstanteGrunnlag() + liste.finnKonstanteGrunnlag()
+        is ErIkkeBlant<*> -> verdi.finnKonstanteGrunnlag() + liste.finnKonstanteGrunnlag()
         is Hvis<*> -> betingelse.finnKonstanteGrunnlag() + såUttrykk.finnKonstanteGrunnlag() + ellersUttrykk.finnKonstanteGrunnlag()
         else -> emptyList()
     }
@@ -397,6 +409,16 @@ fun <T : Any> Uttrykk<T>.treVisning(nivå: Int = 0): String {
             appendLine(venstre.treVisning(nivå + 1))
             append(høyre.treVisning(nivå + 1).replace("├─", "└─"))
         }
+        is ErBlant<*> -> buildString {
+            appendLine("${indent}${prefix}ErBlant")
+            appendLine(verdi.treVisning(nivå + 1))
+            append(liste.treVisning(nivå + 1).replace("├─", "└─"))
+        }
+        is ErIkkeBlant<*> -> buildString {
+            appendLine("${indent}${prefix}ErIkkeBlant")
+            appendLine(verdi.treVisning(nivå + 1))
+            append(liste.treVisning(nivå + 1).replace("├─", "└─"))
+        }
         is Hvis<*> -> buildString {
             appendLine("${indent}${prefix}Hvis")
             appendLine("${indent}│  ├─ Betingelse:")
@@ -447,6 +469,8 @@ fun <T : Any, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R> {
         is MindreEnn<*> -> venstre.visit(transform) + høyre.visit(transform)
         is StørreEllerLik<*> -> venstre.visit(transform) + høyre.visit(transform)
         is MindreEllerLik<*> -> venstre.visit(transform) + høyre.visit(transform)
+        is ErBlant<*> -> verdi.visit(transform) + liste.visit(transform)
+        is ErIkkeBlant<*> -> verdi.visit(transform) + liste.visit(transform)
         is Hvis<*> -> betingelse.visit(transform) + såUttrykk.visit(transform) + ellersUttrykk.visit(transform)
         is Grunnlag -> uttrykk.visit(transform)
         else -> emptyList()
@@ -613,6 +637,26 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             }
         }
 
+        is ErBlant<*> -> {
+            val v = verdi.forenkel()
+            val l = liste.forenkel()
+            if (v is Const && l is Const) {
+                Const(evaluer()) as Uttrykk<T>
+            } else {
+                ErBlant(v as Uttrykk<Any>, l as Uttrykk<List<Any>>) as Uttrykk<T>
+            }
+        }
+
+        is ErIkkeBlant<*> -> {
+            val v = verdi.forenkel()
+            val l = liste.forenkel()
+            if (v is Const && l is Const) {
+                Const(evaluer()) as Uttrykk<T>
+            } else {
+                ErIkkeBlant(v as Uttrykk<Any>, l as Uttrykk<List<Any>>) as Uttrykk<T>
+            }
+        }
+
         is Hvis<*> -> {
             val bet = betingelse.forenkel()
             val so = såUttrykk.forenkel()
@@ -716,6 +760,16 @@ fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out An
             val h = høyre.erstatt(variabelNavn, med)
             MindreEllerLik(v as Uttrykk<Comparable<Any>>, h as Uttrykk<Comparable<Any>>) as Uttrykk<T>
         }
+        is ErBlant<*> -> {
+            val v = verdi.erstatt(variabelNavn, med)
+            val l = liste.erstatt(variabelNavn, med)
+            ErBlant(v as Uttrykk<Any>, l as Uttrykk<List<Any>>) as Uttrykk<T>
+        }
+        is ErIkkeBlant<*> -> {
+            val v = verdi.erstatt(variabelNavn, med)
+            val l = liste.erstatt(variabelNavn, med)
+            ErIkkeBlant(v as Uttrykk<Any>, l as Uttrykk<List<Any>>) as Uttrykk<T>
+        }
         is Hvis<*> -> {
             val bet = betingelse.erstatt(variabelNavn, med)
             val so = såUttrykk.erstatt(variabelNavn, med)
@@ -754,6 +808,8 @@ fun <T : Any> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
         is MindreEnn<*> -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is StørreEllerLik<*> -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is MindreEllerLik<*> -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
+        is ErBlant<*> -> verdi.finnRvsIdFor(uttrykkNavn) ?: liste.finnRvsIdFor(uttrykkNavn)
+        is ErIkkeBlant<*> -> verdi.finnRvsIdFor(uttrykkNavn) ?: liste.finnRvsIdFor(uttrykkNavn)
         is Hvis<*> -> betingelse.finnRvsIdFor(uttrykkNavn) ?: såUttrykk.finnRvsIdFor(uttrykkNavn) ?: ellersUttrykk.finnRvsIdFor(uttrykkNavn)
         else -> null
     }
