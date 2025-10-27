@@ -10,6 +10,7 @@ import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.forklaring.Const
 import no.nav.system.rule.dsl.forklaring.Grunnlag
 import no.nav.system.rule.dsl.forklaring.forklarDetaljert
+import no.nav.system.rule.dsl.forklaring.treVisning
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -313,5 +314,7 @@ class PersonErFlyktningTest {
         assertEquals(OPPFYLT, resultat.evaluer())
 
         println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 }
