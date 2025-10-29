@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl.demo.forklaring
 
 import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
 import no.nav.system.rule.dsl.demo.domain.Person
+import no.nav.system.rule.dsl.demo.domain.Unntak
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
@@ -32,12 +33,6 @@ fun personErFlyktning(
         Const(persongrunnlag.fødselsdato.value.withDayOfMonth(1) + 67.år + 1.måneder)
     )
 
-    val unntakFraForutgaendeMedlemskap =
-        persongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap
-
-    val unntakFraForutgaendeTT =
-        persongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT
-
     val trygdetid = erKapittel20
         .så { Const(persongrunnlag.trygdetidK20) }
         .ellers { Const(persongrunnlag.trygdetidK19) }
@@ -45,32 +40,27 @@ fun personErFlyktning(
         .id("SettRelevantTrygdetid")
 
     // ========================================================================
-    // Flyktning-indikatorer
+    // AngittFlyktning
     // ========================================================================
 
-    val flyktningFlagg = persongrunnlag.flyktning
-        .toGrunnlag()
-        .navngi("flyktningFlagg")
-        .id("AngittFlyktning_FlyktningFlagg")
-
-    val unntakFraForutgaendeMedlemskapType: Uttrykk<Boolean>? =
-        unntakFraForutgaendeMedlemskap?.let { unntak ->
-            (unntak.unntak.toGrunnlag() og (unntak.unntakType.toGrunnlag() erBlant aktuelleUnntakstyper()))
-                .navngi("unntakFraForutgaendeMedlemskapType")
-                .id("AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning")
-        }
-
-    val unntakFraForutgaendeTTType: Uttrykk<Boolean>? =
-        unntakFraForutgaendeTT?.let { unntak ->
-            (unntak.unntak.toGrunnlag() og (unntak.unntakType.toGrunnlag() erBlant aktuelleUnntakstyper()))
-                .navngi("unntakFraForutgaendeTTType")
-                .id("AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning")
-        }
-
     val angittFlyktning = kombinerMedEller(
-        unntakFraForutgaendeMedlemskapType,
-        unntakFraForutgaendeTTType,
-        flyktningFlagg
+        unntakFraForutgaende(
+            persongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap
+        )
+            ?.navngi("unntakFraForutgaendeMedlemskapType")
+            ?.id("AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning"),
+
+        unntakFraForutgaende(
+            persongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT
+        )
+            ?.navngi("unntakFraForutgaendeTTType")
+            ?.id("AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning"),
+
+        persongrunnlag.flyktning
+            .toGrunnlag()
+            .navngi("flyktningFlagg")
+            .id("AngittFlyktning_FlyktningFlagg")
+
     ).navngi("angittFlyktning")
         .id("AngittFlyktning")
 
@@ -234,6 +224,15 @@ private fun kombinerMedEller(vararg uttrykk: Uttrykk<Boolean>?): Uttrykk<Boolean
         ?: Const(false)
 }
 
+private fun unntakFraForutgaende(unntak: Unntak?) = unntak?.let { unntak ->
+    (unntak.unntak.toGrunnlag() og (unntak.unntakType.toGrunnlag() erBlant aktuelleUnntakstyper()))
+}
+
+fun aktuelleUnntakstyper(): Grunnlag<List<UnntakEnum>> = Grunnlag(
+    "aktuelleUnntakstyper",
+    Const(listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP))
+)
+
 /**
  * Sjekker om en person har en gitt kravlinjetype før 2021.
  */
@@ -249,7 +248,5 @@ private fun harKravlinjeTypeFør2021(
     })
 )
 
-fun aktuelleUnntakstyper(): Grunnlag<List<UnntakEnum>> = Grunnlag(
-    "aktuelleUnntakstyper",
-    Const(listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP))
-)
+
+

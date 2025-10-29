@@ -37,6 +37,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(IKKE_RELEVANT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -55,6 +59,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -75,6 +83,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(IKKE_OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -94,6 +106,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -120,6 +136,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -138,6 +158,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -156,6 +180,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -175,6 +203,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -194,6 +226,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(IKKE_OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -213,6 +249,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(IKKE_OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -239,6 +279,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -265,6 +309,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
@@ -291,6 +339,10 @@ class PersonErFlyktningTest {
         )
 
         assertEquals(OPPFYLT, resultat.evaluer())
+
+        println(resultat.forklarDetaljert(resultat.navn))
+        println()
+        println(resultat.treVisning())
     }
 
     @Test
