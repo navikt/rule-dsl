@@ -20,7 +20,10 @@ fun trygdetidFaktor(faktiskTrygdetid: Grunnlag<Int>) =
 
 fun justeringsFaktorUttak(antallMåneder: Grunnlag<Int>) =
     Grunnlag("MND_36", Const(36)).let { MND_36 ->
-        ((MND_36 - min(antallMåneder, MND_36)) / MND_36)
+        (antallMåneder erMindreEnn MND_36)
+            .så { (MND_36 - antallMåneder) / MND_36 }
+            .ellers { Const(0.0) }
+        //((MND_36 - min(antallMåneder, MND_36)) / MND_36)
             .navngi("justeringsFaktorUttak")
             .id("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT")
     }
