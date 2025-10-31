@@ -219,6 +219,8 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                 regel.resultat.finnNavngitteUttrykk(nivå, maxDybde)
             } + (this.ellersUttrykk?.finnNavngitteUttrykk(nivå, maxDybde) ?: emptyList())
 
+        is Memo<*> -> this.uttrykk.finnNavngitteUttrykk(nivå, maxDybde)
+
         else -> emptyList()
     }
 }
@@ -270,6 +272,7 @@ private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<Pair<String, Any>
         is Tabell<*> -> regler.flatMap { regel ->
                 regel.betingelse.finnKonstanteGrunnlag() + regel.resultat.finnKonstanteGrunnlag()
             } + (ellersUttrykk?.finnKonstanteGrunnlag() ?: emptyList())
+        is Memo<*> -> uttrykk.finnKonstanteGrunnlag()
         else -> emptyList()
     }
 }
@@ -482,6 +485,10 @@ fun <T : Any> Uttrykk<T>.treVisning(nivå: Int = 0): String {
                 append(it.treVisning(nivå + 2))
             }
         }
+        is Memo<*> -> buildString {
+            appendLine("${indent}${prefix}Memo (cached)")
+            append(uttrykk.treVisning(nivå + 1))
+        }
     }
 }
 
@@ -527,6 +534,7 @@ fun <T : Any, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R> {
         is Tabell<*> -> regler.flatMap { regel ->
                 regel.betingelse.visit(transform) + regel.resultat.visit(transform)
             } + (ellersUttrykk?.visit(transform) ?: emptyList())
+        is Memo<*> -> uttrykk.visit(transform)
         else -> emptyList()
     }
 
@@ -737,6 +745,11 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             val forenkletEllers = ellersUttrykk?.forenkel()
             Tabell(navn, forenkledeRegler, forenkletEllers) as Uttrykk<T>
         }
+
+        is Memo<*> -> {
+            // Forenkle det underliggende uttrykket, men behold memoisering
+            Memo(uttrykk.forenkel()) as Uttrykk<T>
+        }
     }
 }
 
@@ -855,6 +868,10 @@ fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out An
             val erstattetEllers = ellersUttrykk?.erstatt(variabelNavn, med)
             Tabell(navn, erstattedeRegler, erstattetEllers) as Uttrykk<T>
         }
+        is Memo<*> -> {
+            // Erstatt i det underliggende uttrykket, men behold memoisering
+            Memo(uttrykk.erstatt(variabelNavn, med)) as Uttrykk<T>
+        }
     }
 }
 
@@ -898,6 +915,7 @@ fun <T : Any> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
                 .firstOrNull()
                 ?: ellersUttrykk?.finnRvsIdFor(uttrykkNavn)
         }
+        is Memo<*> -> uttrykk.finnRvsIdFor(uttrykkNavn)
         else -> null
     }
 }

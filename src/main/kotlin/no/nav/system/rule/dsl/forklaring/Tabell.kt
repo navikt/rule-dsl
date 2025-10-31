@@ -71,6 +71,7 @@ data class Tabell<T : Any>(
 
     override fun konkret(): String {
         // Finn matchende regel
+        // Lazy evaluering: stopper ved første match
         for ((index, regel) in regler.withIndex()) {
             if (regel.betingelse.evaluer()) {
                 return buildString {
@@ -97,16 +98,16 @@ data class Tabell<T : Any>(
     }
 
     override fun grunnlagListe(): List<Grunnlag<out Any>> {
-        val grunnlag = mutableListOf<Grunnlag<out Any>>()
-
+        // Lazy evaluering: kun samle grunnlag fra matchende regel
         for (regel in regler) {
-            grunnlag.addAll(regel.betingelse.grunnlagListe())
-            grunnlag.addAll(regel.resultat.grunnlagListe())
+            if (regel.betingelse.evaluer()) {
+                // Denne regelen matchet - returner kun dens grunnlag
+                return regel.betingelse.grunnlagListe() + regel.resultat.grunnlagListe()
+            }
         }
 
-        ellersUttrykk?.let { grunnlag.addAll(it.grunnlagListe()) }
-
-        return grunnlag
+        // Ingen regel matchet, bruk ellers
+        return ellersUttrykk?.grunnlagListe() ?: emptyList()
     }
 
     override fun dybde(): Int {

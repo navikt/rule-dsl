@@ -229,7 +229,7 @@ class TabellTest {
     }
 
     @Test
-    fun `tabell samler grunnlag fra alle regler`() {
+    fun `tabell samler grunnlag KUN fra matchende regel (lazy)`() {
         val a = Grunnlag("a", Const(true))
         val b = Grunnlag("b", Const(false))
         val c = Grunnlag("c", Const(true))
@@ -247,10 +247,11 @@ class TabellTest {
 
         val grunnlagListe = tabell.grunnlagListe()
 
-        assertEquals(3, grunnlagListe.size)
+        // Lazy evaluering: kun regel 1 matchet, så kun 'a' skal samles
+        assertEquals(1, grunnlagListe.size)
         assertTrue(grunnlagListe.any { it.navn == "a" })
-        assertTrue(grunnlagListe.any { it.navn == "b" })
-        assertTrue(grunnlagListe.any { it.navn == "c" })
+        assertFalse(grunnlagListe.any { it.navn == "b" })
+        assertFalse(grunnlagListe.any { it.navn == "c" })
     }
 
     @Test

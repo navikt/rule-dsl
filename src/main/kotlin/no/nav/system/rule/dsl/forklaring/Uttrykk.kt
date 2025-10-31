@@ -94,12 +94,15 @@ data class Add<T : Number>(
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
-        val v = venstre.evaluer().toDouble()
-        val h = høyre.evaluer().toDouble()
+        // Cache evalueringene for å unngå dobbel-evaluering
+        val vVerdi = venstre.evaluer()
+        val hVerdi = høyre.evaluer()
+        val v = vVerdi.toDouble()
+        val h = hVerdi.toDouble()
         val resultat = v + h
 
         // Returner riktig type basert på input
-        return if (venstre.evaluer() is Int && høyre.evaluer() is Int) {
+        return if (vVerdi is Int && hVerdi is Int) {
             resultat.toInt() as T
         } else {
             resultat as T
@@ -133,11 +136,14 @@ data class Sub<T : Number>(
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
-        val v = venstre.evaluer().toDouble()
-        val h = høyre.evaluer().toDouble()
+        // Cache evalueringene for å unngå dobbel-evaluering
+        val vVerdi = venstre.evaluer()
+        val hVerdi = høyre.evaluer()
+        val v = vVerdi.toDouble()
+        val h = hVerdi.toDouble()
         val resultat = v - h
 
-        return if (venstre.evaluer() is Int && høyre.evaluer() is Int) {
+        return if (vVerdi is Int && hVerdi is Int) {
             resultat.toInt() as T
         } else {
             resultat as T
@@ -171,11 +177,14 @@ data class Mul<T : Number>(
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
-        val v = venstre.evaluer().toDouble()
-        val h = høyre.evaluer().toDouble()
+        // Cache evalueringene for å unngå dobbel-evaluering
+        val vVerdi = venstre.evaluer()
+        val hVerdi = høyre.evaluer()
+        val v = vVerdi.toDouble()
+        val h = hVerdi.toDouble()
         val resultat = v * h
 
-        return if (venstre.evaluer() is Int && høyre.evaluer() is Int) {
+        return if (vVerdi is Int && hVerdi is Int) {
             resultat.toInt() as T
         } else {
             resultat as T
@@ -270,10 +279,12 @@ data class Neg<T : Number>(
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
-        val v = uttrykk.evaluer().toDouble()
+        // Cache evalueringen for å unngå dobbel-evaluering
+        val verdi = uttrykk.evaluer()
+        val v = verdi.toDouble()
         val resultat = -v
 
-        return if (uttrykk.evaluer() is Int) {
+        return if (verdi is Int) {
             resultat.toInt() as T
         } else {
             resultat as T
@@ -652,8 +663,34 @@ operator fun <T : Number> Uttrykk<T>.unaryMinus(): Neg<T> = Neg(this)
 
 /**
  * Builder function for navngitte uttrykk.
+ *
+ * @param navn navnet på grunnlaget
+ * @param memoise om resultatet skal caches (default: true for komplekse uttrykk)
+ *
+ * ## Eksempel
+ * ```kotlin
+ * val trygdetidFaktor = (faktiskTrygdetid / fullTrygdetid).navngi("trygdetidFaktor")
+ * // Samme som: Grunnlag("trygdetidFaktor", Memo(faktiskTrygdetid / fullTrygdetid))
+ * ```
+ *
+ * Memoisering er viktig når samme navngitte uttrykk brukes flere steder:
+ * ```kotlin
+ * val angittFlyktning = (betingelse1 eller betingelse2).navngi("angittFlyktning")
+ * tabell {
+ *     regel { når { angittFlyktning } ... }          // Evalueres én gang
+ *     regel { når { angittFlyktning og x } ... }     // Bruker cachet verdi
+ *     regel { når { angittFlyktning og y } ... }     // Bruker cachet verdi
+ * }
+ * ```
  */
-fun <T : Any> Uttrykk<T>.navngi(navn: String): Grunnlag<T> = Grunnlag(navn, this)
+fun <T : Any> Uttrykk<T>.navngi(navn: String, memoise: Boolean = true): Grunnlag<T> {
+    val uttrykk = if (memoise && this !is Const && this !is Grunnlag) {
+        this.memoise()
+    } else {
+        this
+    }
+    return Grunnlag(navn, uttrykk)
+}
 
 /**
  * Konverterer et Faktum til et Grunnlag (Uttrykk).
@@ -810,3 +847,69 @@ data class Feil<T : Any>(val melding: String) : Uttrykk<T> {
 }
 
 fun <T : Any> feilUttrykk(melding: String): Uttrykk<T> = Feil(melding)
+
+/**
+ * Memoiserings-node som cacher resultater fra et underliggende uttrykk.
+ *
+ * Denne noden løser to problemer:
+ * 1. **Repetert evaluering**: Samme uttrykk evaluert flere ganger caches kun én gang
+ * 2. **Dyre beregninger**: Komplekse uttrykk som gjenbrukes får bedre ytelse
+ *
+ * ## Når skal memoisering brukes?
+ * - Uttrykk som brukes flere steder i samme regeltre
+ * - Dyre beregninger som ikke endrer seg
+ * - Automatisk i `Grunnlag.navngi()` (valgfritt via parameter)
+ *
+ * ## Eksempel
+ * ```kotlin
+ * val dyrtUttrykk = (kompleksBeregning() * annenBeregning()).memoise()
+ * val resultat = tabell {
+ *     regel { når { dyrtUttrykk } ... }  // Evalueres kun én gang
+ *     regel { når { dyrtUttrykk og annen } ... }  // Bruker cachet verdi
+ * }
+ * ```
+ *
+ * ## Thread-safety
+ * Bruker Kotlin's `lazy` delegate som er thread-safe by default.
+ * Cachen er per Memo-instans, så samme Memo-objekt kan gjenbrukes trygt.
+ */
+data class Memo<T : Any>(
+    val uttrykk: Uttrykk<T>
+) : Uttrykk<T> {
+
+    // Lazy-cached fields - evalueres kun ved første tilgang
+    private val cachedEvaluer: Lazy<T> = lazy { uttrykk.evaluer() }
+    private val cachedNotasjon: Lazy<String> = lazy { uttrykk.notasjon() }
+    private val cachedKoncret: Lazy<String> = lazy { uttrykk.konkret() }
+    private val cachedGrunnlagListe: Lazy<List<Grunnlag<out Any>>> = lazy { uttrykk.grunnlagListe() }
+    private val cachedDybde: Lazy<Int> = lazy { uttrykk.dybde() }
+
+    override fun evaluer(): T = cachedEvaluer.value
+
+    override fun notasjon(): String = cachedNotasjon.value
+
+    override fun konkret(): String = cachedKoncret.value
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> = cachedGrunnlagListe.value
+
+    override fun dybde(): Int = cachedDybde.value
+
+    /**
+     * Returnerer det underliggende uttrykket.
+     * Nyttig for inspeksjon og debugging.
+     */
+    fun utpakk(): Uttrykk<T> = uttrykk
+
+    override fun toString(): String = "Memo($uttrykk)"
+}
+
+/**
+ * Extension function for å legge til memoisering på et uttrykk.
+ *
+ * ## Eksempel
+ * ```kotlin
+ * val cachetUttrykk = (a + b * c).memoise()
+ * ```
+ */
+fun <T : Any> Uttrykk<T>.memoise(): Memo<T> =
+    if (this is Memo) this else Memo(this)
