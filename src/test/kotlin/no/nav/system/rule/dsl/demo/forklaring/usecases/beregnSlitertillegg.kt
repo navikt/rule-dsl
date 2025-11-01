@@ -1,4 +1,4 @@
-package no.nav.system.rule.dsl.demo.forklaring
+package no.nav.system.rule.dsl.demo.forklaring.usecases
 
 import no.nav.system.rule.dsl.forklaring.*
 

@@ -1,5 +1,6 @@
 package no.nav.system.rule.dsl.demo.forklaring
 
+import no.nav.system.rule.dsl.demo.forklaring.usecases.beregnSlitertillegg
 import no.nav.system.rule.dsl.forklaring.*
 
 /**
