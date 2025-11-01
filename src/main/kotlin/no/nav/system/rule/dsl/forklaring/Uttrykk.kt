@@ -70,7 +70,8 @@ sealed interface Uttrykk<out T : Any> : Serializable {
  * Konstant verdi.
  */
 data class Const<T : Any>(
-    val verdi: T
+    val verdi: T,
+    var funksjon: String? = null
 ) : Uttrykk<T> {
     override fun evaluer(): T = verdi
 
@@ -307,7 +308,8 @@ internal data class Neg<T : Number>(
 data class Grunnlag<T : Any>(
     val navn: String,
     val uttrykk: Uttrykk<T>,
-    val rvsId: String? = null
+    val rvsId: String? = null,
+    var funksjon: String? = null
 ) : Uttrykk<T> {
     override fun evaluer(): T = uttrykk.evaluer()
 

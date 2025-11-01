@@ -81,6 +81,13 @@ inline fun <reified R : Uttrykk<*>> tracked(
         val result = block()
         // Sett returntype på riktig depth-nivå
         CallTracker.setReturnType(myDepth, classifyType(result))
+
+        // Sett funksjonsnavn på resultatet
+        when (result) {
+            is Grunnlag<*> -> result.funksjon = functionName
+            is Const<*> -> result.funksjon = functionName
+        }
+
         result
     } catch (e: Exception) {
         CallTracker.setReturnType(myDepth, "Exception: ${e::class.simpleName}")
