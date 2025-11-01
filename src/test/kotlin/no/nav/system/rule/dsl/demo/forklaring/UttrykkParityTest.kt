@@ -285,9 +285,9 @@ class UttrykkParityTest {
         val a = Grunnlag("a", Const(10))
         val b = Grunnlag("b", Const(20))
 
-        val sum: Add<Int> = a + b
-        val product: Mul<Int> = a * b
-        val difference: Sub<Int> = a - b
+        val sum: Uttrykk<Int> = a + b
+        val product: Uttrykk<Int> = a * b
+        val difference: Uttrykk<Int> = a - b
 
         assertEquals(30, sum.evaluer())
         assertEquals(200, product.evaluer())
@@ -299,9 +299,9 @@ class UttrykkParityTest {
         val a = Grunnlag("a", Const(10.5))
         val b = Grunnlag("b", Const(20.5))
 
-        val sum: Add<Double> = a + b
-        val product: Mul<Double> = a * b
-        val difference: Sub<Double> = a - b
+        val sum: Uttrykk<Double> = a + b
+        val product: Uttrykk<Double> = a * b
+        val difference: Uttrykk<Double> = a - b
 
         assertEquals(31.0, sum.evaluer())
         assertEquals(215.25, product.evaluer(), 0.001)
@@ -313,7 +313,7 @@ class UttrykkParityTest {
         val intA = Grunnlag("a", Const(10))
         val intB = Grunnlag("b", Const(5))
 
-        val div: Div = intA / intB
+        val div: Uttrykk<Double> = intA / intB
         val result: Double = div.evaluer()
 
         assertEquals(2.0, result)

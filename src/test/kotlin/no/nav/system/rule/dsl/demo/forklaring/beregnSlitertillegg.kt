@@ -1,11 +1,11 @@
-package no.nav.pensjon.sliterordning
+package no.nav.system.rule.dsl.demo.forklaring
 
 import no.nav.system.rule.dsl.forklaring.*
 
 fun beregnSlitertillegg(
     faktiskTrygdetid: Grunnlag<Int>,
     antallMåneder: Grunnlag<Int>,
-): Grunnlag<Double> =
+) =
     (fulltSlitertillegg() * justeringsFaktorUttak(antallMåneder) * trygdetidFaktor(faktiskTrygdetid))
         .navngi("slitertillegg")
         .id("SLITERTILEGG-BEREGNET")

@@ -1,6 +1,5 @@
 package no.nav.system.rule.dsl.demo.forklaring
 
-import no.nav.pensjon.sliterordning.beregnSlitertillegg
 import no.nav.system.rule.dsl.forklaring.*
 
 /**
