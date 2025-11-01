@@ -1,96 +1,89 @@
-import no.nav.system.rule.dsl.forklaring.Uttrykk
+package no.nav.system.rule.dsl.forklaring
 
-// CallTracker.kt
 object CallTracker {
     private val callStack = ThreadLocal<MutableList<CallInfo>>()
 
     data class CallInfo(
         val functionName: String,
-        val timestamp: Long = System.currentTimeMillis(),
-        val depth: Int
+        val depth: Int,
+        var returnType: String? = null
     )
 
     fun getCurrentStack(): List<CallInfo> = callStack.get() ?: emptyList()
 
     fun getDepth(): Int = callStack.get()?.size ?: 0
 
-    fun push(name: String) {
+    fun push(name: String): Int {
         val stack = callStack.get() ?: mutableListOf<CallInfo>().also { callStack.set(it) }
-        stack.add(CallInfo(name, depth = stack.size))
+        val depth = stack.size
+        stack.add(CallInfo(name, depth = depth))
+        return depth
     }
 
-    fun pop(): CallInfo? {
-        val stack = callStack.get() ?: return null
-        val info = stack.removeLastOrNull()
+    // FJERN pop() funksjonen helt!
+
+    fun setReturnType(depth: Int, returnType: String) {
+        callStack.get()?.getOrNull(depth)?.returnType = returnType
+    }
+
+    fun printTrace() {
+        val stack = getCurrentStack()
         if (stack.isEmpty()) {
-            callStack.remove()
+            println("\n=== CALL TRACE (empty) ===\n")
+            return
         }
-        return info
+
+        println("\n=== CALL TRACE ===")
+        stack.forEach { info ->
+            val indent = "  ".repeat(info.depth)
+            val typeInfo = info.returnType ?: "void"
+            println("$indent→ ${info.functionName} → $typeInfo")
+        }
+        println("==================\n")
     }
 
-    fun printCallTree() {
-        getCurrentStack().forEach { info ->
-            println("${"  ".repeat(info.depth)}→ ${info.functionName}")
-        }
+    fun clear() {
+        callStack.remove()
     }
 }
 
-// Hovedfunksjonen
-inline fun <reified T : Any> tracked(
+fun classifyType(result: Uttrykk<*>): String {
+    return when (result) {
+        is Grunnlag<*> -> "Grunnlag"
+        is Const<*> -> "Const"
+        else -> "Uttrykk"
+    }
+}
+
+inline fun <reified R : Uttrykk<*>> tracked(
     name: String = "",
-    noinline block: () -> Uttrykk<T>
-): Uttrykk<T> {
+    noinline block: () -> R
+): R {
     val functionName = name.ifEmpty {
-        // Hent faktisk funksjonsnavn fra stack trace
-        Thread.currentThread().stackTrace
-            .firstOrNull { it.methodName != "tracked" && !it.methodName.contains("$") }
-            ?.let { "${it.className.substringAfterLast('.')}.${it.methodName}" }
+        Throwable().stackTrace
+            .dropWhile { it.methodName == "tracked" }
+            .firstOrNull { frame ->
+                frame.methodName != "invoke" &&
+                        frame.methodName != "invokeWithArguments" &&
+                        !frame.className.startsWith("java.lang") &&
+                        !frame.className.contains("MethodHandle") &&
+                        frame.className.startsWith("no.nav.system")
+            }
+            ?.let { frame ->
+                "${frame.className.substringAfterLast('.').substringBefore('$')}.${frame.methodName}"
+            }
             ?: "unknown"
     }
 
-    val indent = "  ".repeat(CallTracker.getDepth())
-    println("${indent}→ $functionName")
-
-    CallTracker.push(functionName)
+    val myDepth = CallTracker.push(functionName)
 
     return try {
         val result = block()
-        val resultType = result::class.simpleName
-        println("${indent}← $functionName returned $resultType")
+        // Sett returntype på riktig depth-nivå
+        CallTracker.setReturnType(myDepth, classifyType(result))
         result
     } catch (e: Exception) {
-        println("${indent}✗ $functionName threw ${e::class.simpleName}")
+        CallTracker.setReturnType(myDepth, "Exception: ${e::class.simpleName}")
         throw e
-    } finally {
-        CallTracker.pop()
-    }
-}
-
-// Variant for å tracke uten å endre returtype (for void/Unit funksjoner)
-inline fun <T> trackedCall(
-    name: String = "",
-    block: () -> T
-): T {
-    val functionName = name.ifEmpty {
-        Thread.currentThread().stackTrace
-            .firstOrNull { it.methodName != "trackedCall" && !it.methodName.contains("$") }
-            ?.let { "${it.className.substringAfterLast('.')}.${it.methodName}" }
-            ?: "unknown"
-    }
-
-    val indent = "  ".repeat(CallTracker.getDepth())
-    println("${indent}→ $functionName")
-
-    CallTracker.push(functionName)
-
-    return try {
-        block().also {
-            println("${indent}← $functionName completed")
-        }
-    } catch (e: Exception) {
-        println("${indent}✗ $functionName threw ${e::class.simpleName}")
-        throw e
-    } finally {
-        CallTracker.pop()
     }
 }

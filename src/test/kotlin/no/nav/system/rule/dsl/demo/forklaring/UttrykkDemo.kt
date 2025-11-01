@@ -109,11 +109,11 @@ fun uttrykkNavngitteUttrykk() {
     val slitertillegg = beregnSlitertillegg(
         faktiskTrygdetid = Grunnlag("faktiskTrygdetid", Const(20)),
         antallMåneder = Grunnlag("antallMånederEtterNedreAldersgrense", Const(24))
-    )
-    println("4. NAVNGITTE UTTRYKK - ${slitertillegg.navn} med justeringer")
+    ) as Grunnlag<Double>
+    println("4. NAVNGITTE UTTRYKK - $slitertillegg med justeringer")
     println("-".repeat(80))
 
-    println("Resultat: ${slitertillegg.evaluer()}")
+    println("Resultat: ${slitertillegg.navn}")
     println()
     println("Detaljert forklaring:")
     println(slitertillegg.forklarDetaljert(slitertillegg.navn, maxDybde = 3))
