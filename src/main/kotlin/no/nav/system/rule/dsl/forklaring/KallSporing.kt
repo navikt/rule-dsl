@@ -86,6 +86,9 @@ inline fun <reified R : Uttrykk<*>> tracked(
         when (result) {
             is Grunnlag<*> -> result.funksjon = functionName
             is Const<*> -> result.funksjon = functionName
+            else -> {
+                throw IllegalStateException("Kallsporing: uventet resultat og kan ikke sette funksjonsnavn")
+            }
         }
 
         result
