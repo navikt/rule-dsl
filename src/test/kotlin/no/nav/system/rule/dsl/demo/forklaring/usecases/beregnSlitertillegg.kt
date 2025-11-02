@@ -53,24 +53,7 @@ fun beregnSlitertillegg(
     faktiskTrygdetid: Grunnlag<Int>,
     antallMåneder: Grunnlag<Int>,
 ) = tracked {
-    val fullTrygdetid = fullTrygdetid()
-    val mnd_36 = uttaksgrense()
-
-    tabell {
-        regel {
-            når { (faktiskTrygdetid erStørreEllerLik fullTrygdetid) og (antallMåneder erLik 0) }
-            resultat { fulltSlitertillegg() }
-        }
-        regel {
-            når { (faktiskTrygdetid erStørreEnn 0) og (antallMåneder erMindreEnn mnd_36) }
-            resultat { fulltSlitertillegg() * justeringsFaktorUttak(antallMåneder) * trygdetidFaktor(faktiskTrygdetid) }
-        }
-        regel {
-            når { (faktiskTrygdetid erLik 0) eller (antallMåneder erStørreEllerLik mnd_36) }
-            resultat { Const(0.0) }
-        }
-        ellers { feilUttrykk("ukjent faktiskTrygdetid | antallMåneder situasjon") }
-    }
+    (fulltSlitertillegg() * trygdetidFaktor(faktiskTrygdetid) * justeringsFaktorUttak(antallMåneder))
         .navngi("slitertillegg")
         .id("SLITERTILEGG-BEREGNET")
 }
