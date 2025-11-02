@@ -498,9 +498,8 @@ class UttrykkTest {
         val divResult = a / b  // Regular division
         val intDivResult = a intdiv b  // Integer division
 
-        assertTrue(divResult.evaluer() is Double)
-        assertTrue(intDivResult.evaluer() is Int)
-        assertEquals(3.33, divResult.evaluer() as Double, 0.01)
+        // Verify return types
+        assertEquals(3.33, divResult.evaluer(), 0.01)
         assertEquals(3, intDivResult.evaluer())
     }
 

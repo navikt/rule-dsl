@@ -90,8 +90,8 @@ data class Const<T : Any>(
  * Addisjon.
  */
 internal data class Add<T : Number>(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -132,8 +132,8 @@ internal data class Add<T : Number>(
  * Subtraksjon.
  */
 internal data class Sub<T : Number>(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -173,8 +173,8 @@ internal data class Sub<T : Number>(
  * Multiplikasjon.
  */
 internal data class Mul<T : Number>(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -214,8 +214,8 @@ internal data class Mul<T : Number>(
  * Divisjon (gir alltid Double).
  */
 internal data class Div(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<Double> {
     override fun evaluer(): Double {
         val v = venstre.evaluer().toDouble()
@@ -258,8 +258,8 @@ internal data class Div(
  * - -10 div 3 = -3 (truncate mot null)
  */
 internal data class IntDiv(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<Int> {
     override fun evaluer(): Int {
         val v = venstre.evaluer().toDouble()
@@ -291,8 +291,8 @@ internal data class IntDiv(
 }
 
 internal data class Min(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<Double> {
     override fun evaluer(): Double =
         min(venstre.evaluer().toDouble(), høyre.evaluer().toDouble())
@@ -320,7 +320,7 @@ internal data class Min(
  * Negasjon (unær minus).
  */
 internal data class Neg<T : Number>(
-    val uttrykk: Uttrykk<out Number>
+    val uttrykk: Uttrykk<Number>
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -689,20 +689,26 @@ private fun String.medParentesVedBehov(uttrykk: Uttrykk<*>, høyreSide: Boolean 
 /**
  * Operator overloading for naturlig syntaks.
  */
+@Suppress("REDUNDANT_PROJECTION")
 operator fun <T : Number> Uttrykk<T>.plus(other: Uttrykk<out Number>): Uttrykk<T> = Add(this, other)
 operator fun <T : Number> Uttrykk<T>.plus(other: Number): Uttrykk<T> = Add(this, Const(other))
 operator fun <T : Number> Number.plus(other: Uttrykk<T>): Uttrykk<T> = Add(Const(this), other)
 
+@Suppress("REDUNDANT_PROJECTION")
 operator fun <T : Number> Uttrykk<T>.minus(other: Uttrykk<out Number>): Uttrykk<T> = Sub(this, other)
 operator fun <T : Number> Uttrykk<T>.minus(other: Number): Uttrykk<T> = Sub(this, Const(other))
 operator fun <T : Number> Number.minus(other: Uttrykk<T>): Uttrykk<T> = Sub(Const(this), other)
 
+@Suppress("REDUNDANT_PROJECTION")
 operator fun <T : Number> Uttrykk<T>.times(other: Uttrykk<out Number>): Uttrykk<T> = Mul(this, other)
 operator fun <T : Number> Uttrykk<T>.times(other: Number): Uttrykk<T> = Mul(this, Const(other))
 operator fun <T : Number> Number.times(other: Uttrykk<T>): Uttrykk<T> = Mul(Const(this), other)
 
+@Suppress("REDUNDANT_PROJECTION")
 operator fun Uttrykk<out Number>.div(other: Uttrykk<out Number>): Uttrykk<Double> = Div(this, other)
+@Suppress("REDUNDANT_PROJECTION")
 operator fun Uttrykk<out Number>.div(other: Number): Uttrykk<Double> = Div(this, Const(other))
+@Suppress("REDUNDANT_PROJECTION")
 operator fun Number.div(other: Uttrykk<out Number>): Uttrykk<Double> = Div(Const(this), other)
 
 /**
@@ -719,8 +725,11 @@ operator fun Number.div(other: Uttrykk<out Number>): Uttrykk<Double> = Div(Const
  * resultat.notasjon()        // Returns "10 // 3"
  * ```
  */
+@Suppress("REDUNDANT_PROJECTION")
 infix fun Uttrykk<out Number>.intdiv(other: Uttrykk<out Number>): Uttrykk<Int> = IntDiv(this, other)
+@Suppress("REDUNDANT_PROJECTION")
 infix fun Uttrykk<out Number>.intdiv(other: Number): Uttrykk<Int> = IntDiv(this, Const(other))
+@Suppress("REDUNDANT_PROJECTION")
 infix fun Number.intdiv(other: Uttrykk<out Number>): Uttrykk<Int> = IntDiv(Const(this), other)
 
 operator fun <T : Number> Uttrykk<T>.unaryMinus(): Uttrykk<T> = Neg(this)
@@ -777,8 +786,11 @@ fun <T : Any> Grunnlag<T>.id(rvsId: String): Grunnlag<T> = this.copy(rvsId = rvs
 /**
  * Min-funksjon for Grunnlag.
  */
+@Suppress("REDUNDANT_PROJECTION")
 fun <T : Number> min(venstre: Grunnlag<T>, høyre: Grunnlag<out Number>): Uttrykk<Double> = Min(venstre, høyre)
+@Suppress("REDUNDANT_PROJECTION")
 fun <T : Number> min(venstre: Grunnlag<T>, høyre: Uttrykk<out Number>): Uttrykk<Double> = Min(venstre, høyre)
+@Suppress("REDUNDANT_PROJECTION")
 fun <T : Number> min(venstre: Uttrykk<out Number>, høyre: Grunnlag<T>): Uttrykk<Double> = Min(venstre, høyre)
 fun <T : Number> min(venstre: Grunnlag<T>, høyre: Number): Uttrykk<Double> = Min(venstre, Const(høyre))
 fun <T : Number> min(venstre: Number, høyre: Grunnlag<T>): Uttrykk<Double> = Min(Const(venstre), høyre)

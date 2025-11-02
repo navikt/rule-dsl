@@ -317,7 +317,6 @@ class UttrykkParityTest {
         val result: Double = div.evaluer()
 
         assertEquals(2.0, result)
-        assertTrue(result is Double)
     }
 
     @Test

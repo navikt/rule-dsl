@@ -2,8 +2,8 @@ package no.nav.system.rule.dsl.demo.forklaring.usecases
 
 import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
 import no.nav.system.rule.dsl.demo.domain.Person
+import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.Unntak
-import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
@@ -13,8 +13,44 @@ import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.helper.måneder
 import no.nav.system.rule.dsl.demo.helper.år
 import no.nav.system.rule.dsl.forklaring.*
+import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.jetbrains.kotlin.utils.addToStdlib.ifTrue
 import java.time.LocalDate
+
+
+fun main() {
+
+    val person = Person(
+        fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
+        flyktning = Faktum("Angitt flyktning", true),
+        trygdetidK19 = Trygdetid().apply { tt_fa_F2021.value = 20 }
+    )
+
+    personErFlyktning(
+        persongrunnlag = person,
+        ytelseType = Grunnlag("Ytelsestype", Const(AP)),
+        erKapittel20 = Grunnlag("Kapittel20", Const(false)),
+        virk = Grunnlag("Virkningstidspunkt", Const(localDate(2021, 1, 1))),
+        kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
+    ).let { resultat ->
+
+        println("Er flyktning demo ")
+        println("-".repeat(80))
+
+
+        println()
+        println("Detaljert forklaring: ${resultat.navn}")
+        println(resultat.forklarDetaljert(resultat.navn, maxDybde = 3))
+
+        println()
+        println("Strukturtre:")
+        println(resultat.treVisning())
+
+        // Print call trace på slutten
+        CallTracker.printTrace()
+    }
+
+}
 
 fun personErFlyktning(
     persongrunnlag: Person,
@@ -22,28 +58,40 @@ fun personErFlyktning(
     erKapittel20: Grunnlag<Boolean>,
     virk: Grunnlag<LocalDate>,
     kravlinjeFremsattDatoFom2021: Grunnlag<Boolean>
-): Grunnlag<UtfallType> {
+): Grunnlag<UtfallType> = tracked {
+    tabell<UtfallType>("flyktningVurdering") {
 
-    // ========================================================================
-    // Grunnlagsdata
-    // ========================================================================
+        val angittFlyktning = angittFlyktning(persongrunnlag)
+        val overgangsRegler = overgangsRegler(persongrunnlag, ytelseType, erKapittel20, virk)
 
-    val dato67m = Grunnlag(
-        "Fødselsdato67m",
-        Const(persongrunnlag.fødselsdato.value.withDayOfMonth(1) + 67.år + 1.måneder)
-    )
+        regel {
+            når { ikke(angittFlyktning) }
+            resultat { Const(IKKE_RELEVANT) }
+        }
+        regel {
+            når { angittFlyktning og ikke(kravlinjeFremsattDatoFom2021) }
+            resultat { Const(OPPFYLT) }
+        }
+        regel {
+            når { angittFlyktning og kravlinjeFremsattDatoFom2021 og ikke(overgangsRegler) }
+            resultat { Const(IKKE_OPPFYLT) }
+        }
+        regel {
+            når { angittFlyktning og kravlinjeFremsattDatoFom2021 og overgangsRegler }
+            resultat { Const(OPPFYLT) }
+        }
+        ellers { feilUttrykk("Ugyldig tilstand i flyktningvurdering") }
 
-    val trygdetid = erKapittel20
-        .så { Const(persongrunnlag.trygdetidK20) }
-        .ellers { Const(persongrunnlag.trygdetidK19) }
-        .navngi("trygdetid")
-        .id("SettRelevantTrygdetid")
+    }.navngi("erFlyktning")
+        .id("ErFlyktning")
+}
 
-    // ========================================================================
-    // AngittFlyktning
-    // ========================================================================
+// ========================================================================
+// Hjelpefunksjoner
+// ========================================================================
 
-    val angittFlyktning = kombinerMedEller(
+fun angittFlyktning(persongrunnlag: Person) = tracked {
+    kombinerMedEller(
         unntakFraForutgaende(
             persongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap
         )
@@ -61,8 +109,32 @@ fun personErFlyktning(
             .navngi("flyktningFlagg")
             .id("AngittFlyktning_FlyktningFlagg")
 
-    ).navngi("angittFlyktning")
+    )
+        .navngi("angittFlyktning")
         .id("AngittFlyktning")
+}
+
+fun overgangsRegler(
+    persongrunnlag: Person,
+    ytelseType: Grunnlag<YtelseEnum>,
+    erKapittel20: Grunnlag<Boolean>,
+    virk: Grunnlag<LocalDate>
+): Grunnlag<Boolean> = tracked {
+
+    // ========================================================================
+    // Grunnlagsdata
+    // ========================================================================
+
+    val dato67m = Grunnlag(
+        "Fødselsdato67m",
+        Const(persongrunnlag.fødselsdato.value.withDayOfMonth(1) + 67.år + 1.måneder)
+    )
+
+    val trygdetid = erKapittel20
+        .så { Const(persongrunnlag.trygdetidK20) }
+        .ellers { Const(persongrunnlag.trygdetidK19) }
+        .navngi("trygdetid")
+        .id("SettRelevantTrygdetid")
 
     // ========================================================================
     // Fellesbetingelser for overgangsregler
@@ -174,49 +246,22 @@ fun personErFlyktning(
     // Kombiner alle overgangsregler
     // ========================================================================
 
-    val overgangsRegler = kombinerMedEller(
+    kombinerMedEller(
         overgangsRegelAP,
         overgangsregelAPTidligereUT,
         overgangsregelAPTidligereGJP,
         overgangsregelGJRTidligereUTGJT,
         overgangsregelGJRtidligereGJR
-    ).navngi("minsEnOvergangsRegler")
+    )
+        .navngi("minsEnOvergangsRegler")
         .id("MinstEnOvergangsRegler")
-
-    // ========================================================================
-    // Beslutningslogikk (Beslutningstabell)
-    // ========================================================================
-
-    return tabell<UtfallType>("flyktningVurdering") {
-        regel {
-            når { ikke(angittFlyktning) }
-            resultat { Const(IKKE_RELEVANT) }
-        }
-        regel {
-            når { angittFlyktning og ikke(kravlinjeFremsattDatoFom2021) }
-            resultat { Const(OPPFYLT) }
-        }
-        regel {
-            når { angittFlyktning og kravlinjeFremsattDatoFom2021 og ikke(overgangsRegler) }
-            resultat { Const(IKKE_OPPFYLT) }
-        }
-        regel {
-            når { angittFlyktning og kravlinjeFremsattDatoFom2021 og overgangsRegler }
-            resultat { Const(OPPFYLT) }
-        }
-        ellers { feilUttrykk("Ugyldig tilstand i flyktningvurdering") }
-    }.navngi("erFlyktning")
-        .id("ErFlyktning")
 }
-
-// ========================================================================
-// Hjelpefunksjoner
-// ========================================================================
 
 /**
  * Kombinerer flere nullable Boolean-uttrykk med ELLER.
  * Returnerer false hvis alle er null.
  */
+
 private fun kombinerMedEller(vararg uttrykk: Uttrykk<Boolean>?): Uttrykk<Boolean> {
     // Konverter null til Const(false) for å bevare struktur og gjøre forklaring eksplisitt
     val alleUttrykk = uttrykk.map { it ?: Const(false) }
@@ -228,10 +273,12 @@ private fun unntakFraForutgaende(unntak: Unntak?) = unntak?.let { unntak ->
     (unntak.unntak.toGrunnlag() og (unntak.unntakType.toGrunnlag() erBlant aktuelleUnntakstyper()))
 }
 
-fun aktuelleUnntakstyper(): Grunnlag<List<UnntakEnum>> = Grunnlag(
-    "aktuelleUnntakstyper",
-    Const(listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP))
-)
+fun aktuelleUnntakstyper() = tracked {
+    Grunnlag(
+        "aktuelleUnntakstyper",
+        Const(listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP))
+    )
+}
 
 /**
  * Sjekker om en person har en gitt kravlinjetype før 2021.
@@ -240,13 +287,15 @@ private fun harKravlinjeTypeFør2021(
     liste: List<ForsteVirkningsdatoGrunnlag>,
     kravlinjeType: YtelseEnum,
     beskrivelse: String
-): Grunnlag<Boolean> = Grunnlag(
-    beskrivelse,
-    Const(liste.any {
-        it.kravlinjeType == kravlinjeType &&
-                it.virkningsdato < localDate(2021, 1, 1)
-    })
-)
+) = tracked {
+    Grunnlag(
+        beskrivelse,
+        Const(liste.any {
+            it.kravlinjeType == kravlinjeType &&
+                    it.virkningsdato < localDate(2021, 1, 1)
+        })
+    )
+}
 
 
 

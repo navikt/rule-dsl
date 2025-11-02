@@ -591,7 +591,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Add<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Add<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -601,7 +602,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Sub<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Sub<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -611,7 +613,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Mul<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Mul<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -621,7 +624,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Div(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Div(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -631,7 +635,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                IntDiv(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                IntDiv(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -641,7 +646,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Min(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Min(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -650,7 +656,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (u is Const) {
                 Const(-u.verdi.toDouble()) as Uttrykk<T>
             } else {
-                Neg<Number>(u as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Neg<Number>(u as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -768,8 +775,9 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             val so = såUttrykk.forenkel()
             val els = ellersUttrykk.forenkel()
             // Hvis betingelsen er konstant, velg riktig gren
-            if (bet is Const && bet.verdi is Boolean) {
-                if (bet.verdi) so as Uttrykk<T> else els as Uttrykk<T>
+            if (bet is Const) {
+                @Suppress("UNCHECKED_CAST")
+                if (bet.verdi as Boolean) so as Uttrykk<T> else els as Uttrykk<T>
             } else {
                 Hvis(bet as Uttrykk<Boolean>, so, els) as Uttrykk<T>
             }
@@ -807,43 +815,50 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
  * // Resultat: Add(Const(10), Var(y))
  * ```
  */
-fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out Any>): Uttrykk<T> {
+fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<Any>): Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     return when (this) {
         is Const -> this
         is Add<*> -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Add<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Add<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Sub<*> -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Sub<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Sub<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Mul<*> -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Mul<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Mul<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Div -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Div(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Div(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is IntDiv -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            IntDiv(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            IntDiv(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Min -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Min(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Min(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Neg<*> -> {
             val u = uttrykk.erstatt(variabelNavn, med)
-            Neg<Number>(u as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Neg<Number>(u as Uttrykk<Number>) as Uttrykk<T>
         }
         is Og -> {
             val v = venstre.erstatt(variabelNavn, med)
