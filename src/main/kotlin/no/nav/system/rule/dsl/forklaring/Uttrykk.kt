@@ -246,6 +246,50 @@ internal data class Div(
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
 }
 
+/**
+ * Heltallsdivisjon (integer division).
+ * Bruker truncate-avrunding (.toInt()).
+ *
+ * Syntaks: `teller div nevner`
+ * Notasjon: `teller // nevner`
+ *
+ * Eksempler:
+ * - 10 div 3 = 3
+ * - -10 div 3 = -3 (truncate mot null)
+ */
+internal data class IntDiv(
+    val venstre: Uttrykk<out Number>,
+    val høyre: Uttrykk<out Number>
+) : Uttrykk<Int> {
+    override fun evaluer(): Int {
+        val v = venstre.evaluer().toDouble()
+        val h = høyre.evaluer().toDouble()
+
+        if (h == 0.0) {
+            throw ArithmeticException("Heltallsdivisjon med null: $v // $h")
+        }
+
+        return (v / h).toInt()  // Truncate mot null
+    }
+
+    override fun notasjon(): String {
+        val v = venstre.notasjon().medParentesVedBehov(venstre)
+        val h = høyre.notasjon().medParentesVedBehov(høyre, true)
+        return "$v // $h"
+    }
+
+    override fun konkret(): String {
+        val v = venstre.konkret().medParentesVedBehov(venstre)
+        val h = høyre.konkret().medParentesVedBehov(høyre, true)
+        return "$v // $h"
+    }
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
 internal data class Min(
     val venstre: Uttrykk<out Number>,
     val høyre: Uttrykk<out Number>
@@ -660,6 +704,24 @@ operator fun <T : Number> Number.times(other: Uttrykk<T>): Uttrykk<T> = Mul(Cons
 operator fun Uttrykk<out Number>.div(other: Uttrykk<out Number>): Uttrykk<Double> = Div(this, other)
 operator fun Uttrykk<out Number>.div(other: Number): Uttrykk<Double> = Div(this, Const(other))
 operator fun Number.div(other: Uttrykk<out Number>): Uttrykk<Double> = Div(Const(this), other)
+
+/**
+ * Heltallsdivisjon (integer division) med infix syntaks.
+ *
+ * Syntaks: `teller intdiv nevner`
+ * Notasjon: `teller // nevner`
+ *
+ * Eksempler:
+ * ```
+ * val a = Const(10)
+ * val b = Const(3)
+ * val resultat = a intdiv b  // Returns Uttrykk<Int> with value 3
+ * resultat.notasjon()        // Returns "10 // 3"
+ * ```
+ */
+infix fun Uttrykk<out Number>.intdiv(other: Uttrykk<out Number>): Uttrykk<Int> = IntDiv(this, other)
+infix fun Uttrykk<out Number>.intdiv(other: Number): Uttrykk<Int> = IntDiv(this, Const(other))
+infix fun Number.intdiv(other: Uttrykk<out Number>): Uttrykk<Int> = IntDiv(Const(this), other)
 
 operator fun <T : Number> Uttrykk<T>.unaryMinus(): Uttrykk<T> = Neg(this)
 

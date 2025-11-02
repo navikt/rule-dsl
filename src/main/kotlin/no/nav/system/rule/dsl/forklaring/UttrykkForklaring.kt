@@ -123,6 +123,8 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                         unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
                 is Div -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+                is IntDiv -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
                 is Min -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
                 is Neg -> unpacked.uttrykk.finnNavngitteUttrykk(nivå, maxDybde)
@@ -169,6 +171,9 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                 this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
 
         is Div -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+
+        is IntDiv -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                 this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
 
         is Min -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
@@ -263,6 +268,7 @@ private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<KonstantGrunnlagI
         is Sub -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is Mul -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is Div -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
+        is IntDiv -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is Neg -> uttrykk.finnKonstanteGrunnlag()
         is Min -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is Og -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
@@ -413,6 +419,11 @@ fun <T : Any> Uttrykk<T>.treVisning(nivå: Int = 0): String {
             appendLine(venstre.treVisning(nivå + 1))
             append(høyre.treVisning(nivå + 1).replace("├─", "└─"))
         }
+        is IntDiv -> buildString {
+            appendLine("${indent}${prefix}IntDiv")
+            appendLine(venstre.treVisning(nivå + 1))
+            append(høyre.treVisning(nivå + 1).replace("├─", "└─"))
+        }
 
         is Min -> buildString {
             appendLine("${indent}${prefix}Min")
@@ -537,6 +548,7 @@ fun <T : Any, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R> {
         is Sub -> venstre.visit(transform) + høyre.visit(transform)
         is Mul -> venstre.visit(transform) + høyre.visit(transform)
         is Div -> venstre.visit(transform) + høyre.visit(transform)
+        is IntDiv -> venstre.visit(transform) + høyre.visit(transform)
         is Min -> venstre.visit(transform) + høyre.visit(transform)
         is Neg -> uttrykk.visit(transform)
         is Og -> venstre.visit(transform) + høyre.visit(transform)
@@ -610,6 +622,16 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
                 Const(evaluer()) as Uttrykk<T>
             } else {
                 Div(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            }
+        }
+
+        is IntDiv -> {
+            val v = venstre.forenkel()
+            val h = høyre.forenkel()
+            if (v is Const && h is Const) {
+                Const(evaluer()) as Uttrykk<T>
+            } else {
+                IntDiv(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
             }
         }
 
@@ -809,6 +831,11 @@ fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out An
             val h = høyre.erstatt(variabelNavn, med)
             Div(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
         }
+        is IntDiv -> {
+            val v = venstre.erstatt(variabelNavn, med)
+            val h = høyre.erstatt(variabelNavn, med)
+            IntDiv(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+        }
         is Min -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
@@ -914,6 +941,7 @@ fun <T : Any> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
         is Sub -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is Mul -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is Div -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
+        is IntDiv -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is Min -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is Neg -> uttrykk.finnRvsIdFor(uttrykkNavn)
         is Og -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
@@ -959,6 +987,7 @@ fun <T : Any> Uttrykk<T>.finnFunksjonFor(uttrykkNavn: String): String? {
         is Sub -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
         is Mul -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
         is Div -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is IntDiv -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
         is Min -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
         is Neg -> uttrykk.finnFunksjonFor(uttrykkNavn)
         is Og -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)

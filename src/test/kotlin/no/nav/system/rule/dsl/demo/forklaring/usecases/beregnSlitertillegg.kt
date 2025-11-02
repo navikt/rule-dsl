@@ -3,51 +3,93 @@ package no.nav.system.rule.dsl.demo.forklaring.usecases
 import no.nav.system.rule.dsl.forklaring.*
 
 fun main() {
-    val slitertillegg = beregnSlitertillegg(
-        faktiskTrygdetid = Grunnlag("faktiskTrygdetid", Const(20)),
-        antallMåneder = Grunnlag("antallMånederEtterNedreAldersgrense", Const(24))
-    )
 
-    println("4. NAVNGITTE UTTRYKK - ${slitertillegg.navn} med justeringer")
+
+    println("Slitertillegg demo ")
     println("-".repeat(80))
 
-    println("Resultat: ${slitertillegg.navn}")
-    println()
-    println("Detaljert forklaring:")
-    println(slitertillegg.forklarDetaljert(slitertillegg.navn, maxDybde = 3))
+    listOf(
+        Pair(
+            fullTrygdetid().navngi("faktiskTrygdetid"),
+            Grunnlag("antallMånederEtterNedreAldersgrense", Const(0))
+        ),
 
-    println()
-    println("Strukturtre:")
-    println(slitertillegg.treVisning())
+        Pair(
+            (fullTrygdetid() intdiv 2).navngi("faktiskTrygdetid"),
+            (uttaksgrense() intdiv 2).navngi("antallMånederEtterNedreAldersgrense")
+        ),
+        Pair(
+            Grunnlag("faktiskTrygdetid", Const(0)),
+            (uttaksgrense() intdiv 2).navngi("antallMånederEtterNedreAldersgrense")
 
-    // Print call trace på slutten
-    CallTracker.printTrace()
+        ),
+        Pair(
+            (fullTrygdetid() intdiv 2).navngi("faktiskTrygdetid"),
+            uttaksgrense().navngi("antallMånederEtterNedreAldersgrense")
+        ),
+    )
+        .forEach { par ->
+            println()
+            println("Grunnlag:\n${par.first.navn} = ${par.first.evaluer()}\n${par.second.navn} = ${par.second.evaluer()}")
+            beregnSlitertillegg(
+                faktiskTrygdetid = par.first,
+                antallMåneder = par.second
+            ).also { slitertillegg ->
+                println()
+                println("Detaljert forklaring: ${slitertillegg.navn}")
+                println(slitertillegg.forklarDetaljert(slitertillegg.navn, maxDybde = 3))
+
+                //    println()
+                //    println("Strukturtre:")
+                //    println(slitertillegg.treVisning())
+                //
+                //    // Print call trace på slutten
+                //    CallTracker.printTrace()
+            }
+        }
 }
 
 fun beregnSlitertillegg(
     faktiskTrygdetid: Grunnlag<Int>,
     antallMåneder: Grunnlag<Int>,
 ) = tracked {
-    (fulltSlitertillegg() * justeringsFaktorUttak(antallMåneder) * trygdetidFaktor(faktiskTrygdetid))
+    val fullTrygdetid = fullTrygdetid()
+    val mnd_36 = uttaksgrense()
+
+    tabell {
+        regel {
+            når { (faktiskTrygdetid erStørreEllerLik fullTrygdetid) og (antallMåneder erLik 0) }
+            resultat { fulltSlitertillegg() }
+        }
+        regel {
+            når { (faktiskTrygdetid erStørreEnn 0) og (antallMåneder erMindreEnn mnd_36) }
+            resultat { fulltSlitertillegg() * justeringsFaktorUttak(antallMåneder) * trygdetidFaktor(faktiskTrygdetid) }
+        }
+        regel {
+            når { (faktiskTrygdetid erLik 0) eller (antallMåneder erStørreEllerLik mnd_36) }
+            resultat { Const(0.0) }
+        }
+        ellers { feilUttrykk("ukjent faktiskTrygdetid | antallMåneder situasjon") }
+    }
         .navngi("slitertillegg")
         .id("SLITERTILEGG-BEREGNET")
 }
 
-fun G() = tracked {  Grunnlag("G", Const(110000)) }
-fun fullTrygdetid() = tracked {Grunnlag("FULL_TRYGDETID", Const(40)) }
+fun G() = tracked { Grunnlag("G", Const(110000)) }
+fun fullTrygdetid() = tracked { Grunnlag("FULL_TRYGDETID", Const(40)) }
+fun uttaksgrense() = tracked { Grunnlag("UTTAKSGRENSE_MND", Const(36)) }
 
 fun trygdetidFaktor(faktiskTrygdetid: Grunnlag<Int>) = tracked {
-    (faktiskTrygdetid / fullTrygdetid())
-        .navngi("trygdetidFaktor")
-        .id("SLITERTILLEGG-AVKORTING-TRYGDETID")
+    fullTrygdetid().let { fullTrygdetid ->
+        (min(faktiskTrygdetid, fullTrygdetid) / fullTrygdetid)
+            .navngi("trygdetidFaktor")
+            .id("SLITERTILLEGG-AVKORTING-TRYGDETID")
+    }
 }
 
 fun justeringsFaktorUttak(antallMåneder: Grunnlag<Int>) = tracked {
-    Grunnlag("MND_36", Const(36)).let { MND_36 ->
-        (antallMåneder erMindreEnn MND_36)
-            .så { (MND_36 - antallMåneder) / MND_36 }
-            .ellers { Const(0.0) }
-            //((MND_36 - min(antallMåneder, MND_36)) / MND_36)
+    uttaksgrense().let { mnd_36 ->
+        ((mnd_36 - min(antallMåneder,mnd_36)) / mnd_36)
             .navngi("justeringsFaktorUttak")
             .id("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT")
     }

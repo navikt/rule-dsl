@@ -37,10 +37,6 @@ class PersonErFlyktningTest {
         )
 
         Assertions.assertEquals(UtfallType.IKKE_RELEVANT, resultat.evaluer())
-
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -60,9 +56,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -84,9 +77,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.IKKE_OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -107,9 +97,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -137,9 +124,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -159,9 +143,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -181,9 +162,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -204,9 +182,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -227,9 +202,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.IKKE_OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -250,9 +222,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.IKKE_OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -280,9 +249,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -310,9 +276,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -340,9 +303,6 @@ class PersonErFlyktningTest {
 
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -365,8 +325,5 @@ class PersonErFlyktningTest {
         // Skal bruke K20 trygdetid (25) og dermed oppfylle overgangsregel
         Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 }
