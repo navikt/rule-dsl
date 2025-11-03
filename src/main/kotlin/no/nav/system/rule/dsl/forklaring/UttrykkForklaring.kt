@@ -123,6 +123,8 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                         unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
                 is Div -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+                is IntDiv -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                        unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
                 is Min -> unpacked.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                         unpacked.høyre.finnNavngitteUttrykk(nivå, maxDybde)
                 is Neg -> unpacked.uttrykk.finnNavngitteUttrykk(nivå, maxDybde)
@@ -169,6 +171,9 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                 this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
 
         is Div -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
+                this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
+
+        is IntDiv -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
                 this.høyre.finnNavngitteUttrykk(nivå, maxDybde)
 
         is Min -> this.venstre.finnNavngitteUttrykk(nivå, maxDybde) +
@@ -237,14 +242,23 @@ fun <T : Any> Uttrykk<T>.forklarKompakt(navn: String): String {
 }
 
 /**
+ * Informasjon om et konstant grunnlag.
+ */
+private data class KonstantGrunnlagInfo(
+    val navn: String,
+    val verdi: Any,
+    val funksjon: String? = null
+)
+
+/**
  * Finner alle konstante Grunnlag-verdier i uttrykkstre.
  */
-private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<Pair<String, Any>> {
+private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<KonstantGrunnlagInfo> {
     return when (this) {
         is Grunnlag -> {
             if (this.utpakk() is Const) {
                 // Dette er en konstant verdi
-                listOf(this.navn to this.evaluer())
+                listOf(KonstantGrunnlagInfo(this.navn, this.evaluer(), this.funksjon))
             } else {
                 // Søk videre i det underliggende uttrykket
                 this.utpakk().finnKonstanteGrunnlag()
@@ -254,6 +268,7 @@ private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<Pair<String, Any>
         is Sub -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is Mul -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is Div -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
+        is IntDiv -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is Neg -> uttrykk.finnKonstanteGrunnlag()
         is Min -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
         is Og -> venstre.finnKonstanteGrunnlag() + høyre.finnKonstanteGrunnlag()
@@ -284,15 +299,20 @@ private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<Pair<String, Any>
 fun <T : Any> Uttrykk<T>.forklarDetaljert(navn: String, maxDybde: Int = 3, inkluderRvsId: Boolean = true): String {
     val forklaring = this.forklar(navn, maxDybde)
 
-    // Hent rvsId fra hoveduttrykket hvis det er Grunnlag
+    // Hent rvsId og funksjon fra hoveduttrykket hvis det er Grunnlag
     val hovedRvsId = if (inkluderRvsId && this is Grunnlag) this.rvsId else null
+    val hovedFunksjon = if (this is Grunnlag) this.funksjon else if (this is Const) this.funksjon else null
 
     return buildString {
         appendLine("HVORDAN")
 
-        // Vis rvsId hvis det finnes
-        if (hovedRvsId != null) {
+        // Vis rvsId og funksjon hvis de finnes
+        if (hovedRvsId != null && hovedFunksjon != null) {
+            appendLine("    $hovedRvsId ($hovedFunksjon)")
+        } else if (hovedRvsId != null) {
             appendLine("    $hovedRvsId")
+        } else if (hovedFunksjon != null) {
+            appendLine("    ($hovedFunksjon)")
         }
 
         // Symbolsk uttrykk - med innrykk for hver linje
@@ -315,12 +335,16 @@ fun <T : Any> Uttrykk<T>.forklarDetaljert(navn: String, maxDybde: Int = 3, inklu
         forklaring.subformler.forEach { sub ->
             appendLine()
 
-            // Finn rvsId for dette subuttryket hvis det eksisterer
-            if (inkluderRvsId) {
-                val subRvsId = this@forklarDetaljert.finnRvsIdFor(sub.hvaForklaring.navn)
-                if (subRvsId != null) {
-                    appendLine("    $subRvsId")
-                }
+            // Finn rvsId og funksjon for dette subuttryket hvis de eksisterer
+            val subRvsId = if (inkluderRvsId) this@forklarDetaljert.finnRvsIdFor(sub.hvaForklaring.navn) else null
+            val subFunksjon = this@forklarDetaljert.finnFunksjonFor(sub.hvaForklaring.navn)
+
+            if (subRvsId != null && subFunksjon != null) {
+                appendLine("    $subRvsId ($subFunksjon)")
+            } else if (subRvsId != null) {
+                appendLine("    $subRvsId")
+            } else if (subFunksjon != null) {
+                appendLine("    ($subFunksjon)")
             }
 
             // Symbolsk uttrykk for subformel - med innrykk for hver linje
@@ -342,11 +366,15 @@ fun <T : Any> Uttrykk<T>.forklarDetaljert(navn: String, maxDybde: Int = 3, inklu
 
         // Legg til konstante Grunnlag-verdier
         val konstanteGrunnlag = this@forklarDetaljert.finnKonstanteGrunnlag()
-            .distinctBy { it.first }  // Unike navn
+            .distinctBy { it.navn }  // Unike navn
         if (konstanteGrunnlag.isNotEmpty()) {
             appendLine()
-            konstanteGrunnlag.forEach { (navn, verdi) ->
-                appendLine("    $navn = $verdi")
+            konstanteGrunnlag.forEach { info ->
+                if (info.funksjon != null) {
+                    appendLine("    ${info.navn} = ${info.verdi} (${info.funksjon})")
+                } else {
+                    appendLine("    ${info.navn} = ${info.verdi}")
+                }
             }
         }
     }
@@ -388,6 +416,11 @@ fun <T : Any> Uttrykk<T>.treVisning(nivå: Int = 0): String {
         }
         is Div -> buildString {
             appendLine("${indent}${prefix}Div")
+            appendLine(venstre.treVisning(nivå + 1))
+            append(høyre.treVisning(nivå + 1).replace("├─", "└─"))
+        }
+        is IntDiv -> buildString {
+            appendLine("${indent}${prefix}IntDiv")
             appendLine(venstre.treVisning(nivå + 1))
             append(høyre.treVisning(nivå + 1).replace("├─", "└─"))
         }
@@ -515,6 +548,7 @@ fun <T : Any, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R> {
         is Sub -> venstre.visit(transform) + høyre.visit(transform)
         is Mul -> venstre.visit(transform) + høyre.visit(transform)
         is Div -> venstre.visit(transform) + høyre.visit(transform)
+        is IntDiv -> venstre.visit(transform) + høyre.visit(transform)
         is Min -> venstre.visit(transform) + høyre.visit(transform)
         is Neg -> uttrykk.visit(transform)
         is Og -> venstre.visit(transform) + høyre.visit(transform)
@@ -557,7 +591,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Add<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Add<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -567,7 +602,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Sub<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Sub<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -577,7 +613,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Mul<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Mul<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -587,7 +624,19 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Div(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Div(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
+            }
+        }
+
+        is IntDiv -> {
+            val v = venstre.forenkel()
+            val h = høyre.forenkel()
+            if (v is Const && h is Const) {
+                Const(evaluer()) as Uttrykk<T>
+            } else {
+                @Suppress("UNCHECKED_CAST")
+                IntDiv(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -597,7 +646,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (v is Const && h is Const) {
                 Const(evaluer()) as Uttrykk<T>
             } else {
-                Min(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Min(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -606,7 +656,8 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             if (u is Const) {
                 Const(-u.verdi.toDouble()) as Uttrykk<T>
             } else {
-                Neg<Number>(u as Uttrykk<out Number>) as Uttrykk<T>
+                @Suppress("UNCHECKED_CAST")
+                Neg<Number>(u as Uttrykk<Number>) as Uttrykk<T>
             }
         }
 
@@ -724,8 +775,9 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             val so = såUttrykk.forenkel()
             val els = ellersUttrykk.forenkel()
             // Hvis betingelsen er konstant, velg riktig gren
-            if (bet is Const && bet.verdi is Boolean) {
-                if (bet.verdi) so as Uttrykk<T> else els as Uttrykk<T>
+            if (bet is Const) {
+                @Suppress("UNCHECKED_CAST")
+                if (bet.verdi as Boolean) so as Uttrykk<T> else els as Uttrykk<T>
             } else {
                 Hvis(bet as Uttrykk<Boolean>, so, els) as Uttrykk<T>
             }
@@ -763,38 +815,50 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
  * // Resultat: Add(Const(10), Var(y))
  * ```
  */
-fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<out Any>): Uttrykk<T> {
+fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<Any>): Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     return when (this) {
         is Const -> this
         is Add<*> -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Add<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Add<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Sub<*> -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Sub<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Sub<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Mul<*> -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Mul<Number>(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Mul<Number>(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Div -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Div(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Div(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
+        }
+        is IntDiv -> {
+            val v = venstre.erstatt(variabelNavn, med)
+            val h = høyre.erstatt(variabelNavn, med)
+            @Suppress("UNCHECKED_CAST")
+            IntDiv(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Min -> {
             val v = venstre.erstatt(variabelNavn, med)
             val h = høyre.erstatt(variabelNavn, med)
-            Min(v as Uttrykk<out Number>, h as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Min(v as Uttrykk<Number>, h as Uttrykk<Number>) as Uttrykk<T>
         }
         is Neg<*> -> {
             val u = uttrykk.erstatt(variabelNavn, med)
-            Neg<Number>(u as Uttrykk<out Number>) as Uttrykk<T>
+            @Suppress("UNCHECKED_CAST")
+            Neg<Number>(u as Uttrykk<Number>) as Uttrykk<T>
         }
         is Og -> {
             val v = venstre.erstatt(variabelNavn, med)
@@ -892,6 +956,7 @@ fun <T : Any> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
         is Sub -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is Mul -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is Div -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
+        is IntDiv -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is Min -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
         is Neg -> uttrykk.finnRvsIdFor(uttrykkNavn)
         is Og -> venstre.finnRvsIdFor(uttrykkNavn) ?: høyre.finnRvsIdFor(uttrykkNavn)
@@ -916,6 +981,53 @@ fun <T : Any> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
                 ?: ellersUttrykk?.finnRvsIdFor(uttrykkNavn)
         }
         is Memo<*> -> uttrykk.finnRvsIdFor(uttrykkNavn)
+        else -> null
+    }
+}
+
+/**
+ * Finner funksjonsnavn for et navngitt uttrykk med gitt navn.
+ * Traverserer uttrykkstre og returnerer funksjon til første Grunnlag med matchende navn.
+ */
+fun <T : Any> Uttrykk<T>.finnFunksjonFor(uttrykkNavn: String): String? {
+    return when (this) {
+        is Grunnlag -> {
+            if (this.navn == uttrykkNavn) {
+                this.funksjon
+            } else {
+                this.uttrykk.finnFunksjonFor(uttrykkNavn)
+            }
+        }
+        is Add -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is Sub -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is Mul -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is Div -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is IntDiv -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is Min -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is Neg -> uttrykk.finnFunksjonFor(uttrykkNavn)
+        is Og -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is Eller -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is Ikke -> uttrykk.finnFunksjonFor(uttrykkNavn)
+        is Lik<*> -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is Ulik<*> -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is StørreEnn<*> -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is MindreEnn<*> -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is StørreEllerLik<*> -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is MindreEllerLik<*> -> venstre.finnFunksjonFor(uttrykkNavn) ?: høyre.finnFunksjonFor(uttrykkNavn)
+        is ErBlant<*> -> verdi.finnFunksjonFor(uttrykkNavn) ?: liste.finnFunksjonFor(uttrykkNavn)
+        is ErIkkeBlant<*> -> verdi.finnFunksjonFor(uttrykkNavn) ?: liste.finnFunksjonFor(uttrykkNavn)
+        is Hvis<*> -> betingelse.finnFunksjonFor(uttrykkNavn) ?: såUttrykk.finnFunksjonFor(uttrykkNavn) ?: ellersUttrykk.finnFunksjonFor(uttrykkNavn)
+        is Feil<*> -> null
+        is Tabell<*> -> {
+            regler.asSequence()
+                .mapNotNull { regel ->
+                    regel.betingelse.finnFunksjonFor(uttrykkNavn) ?: regel.resultat.finnFunksjonFor(uttrykkNavn)
+                }
+                .firstOrNull()
+                ?: ellersUttrykk?.finnFunksjonFor(uttrykkNavn)
+        }
+        is Memo<*> -> uttrykk.finnFunksjonFor(uttrykkNavn)
+        is Const -> this.funksjon
         else -> null
     }
 }

@@ -1,10 +1,6 @@
 package no.nav.system.rule.dsl.rettsregel
 
-import no.nav.system.rule.dsl.forklaring.Forklaring
-import no.nav.system.rule.dsl.forklaring.KomplettForklaring
-import no.nav.system.rule.dsl.forklaring.SubsumsjonForklaring
 import java.io.Serializable
-import kotlin.collections.forEach
 
 //// Common interface for values used in rules
 //interface RuleValue<T : Any> {
@@ -30,12 +26,12 @@ interface Verdi<T : Any> {
     val value: T
     val name: String
 
-    fun hva() : String
+    fun hva(): String
 }
 
 open class Faktum<T : Any> internal constructor(
     override val name: String,
-    override var value : T,
+    override var value: T,
     internal var anonymous: Boolean = false
 ) : Verdi<T>, Serializable {
 //    lateinit var value: T
@@ -50,7 +46,7 @@ open class Faktum<T : Any> internal constructor(
 
     constructor(verdi: T) : this(verdi.toString(), verdi, anonymous = true)
 
-//    override fun name(): String = name
+    //    override fun name(): String = name
 //    override fun type(): RuleComponentType = FAKTUM
 //    override fun fired(): Boolean = throw IllegalAccessError("Fired() should not be used on Faktum.")
     override fun toString(): String {

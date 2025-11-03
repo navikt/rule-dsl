@@ -35,86 +35,86 @@ class UttrykkOperatorTest {
         val dblUttrykk = dblFaktum
 
         // Uttrykk + Number
-        val intUttrykkPlusInt: Add<Int> = intUttrykk + 1
+        val intUttrykkPlusInt: Uttrykk<Int> = intUttrykk + 1
         assertEquals(12, intUttrykkPlusInt.evaluer())
 
-        val dblUttrykkPlusDbl: Add<Double> = dblUttrykk + 2.2
+        val dblUttrykkPlusDbl: Uttrykk<Double> = dblUttrykk + 2.2
         assertEquals(24.4, dblUttrykkPlusDbl.evaluer())
 
         // Number + Uttrykk
-        val intPlusIntUttrykk: Add<Int> = 1 + intUttrykk
+        val intPlusIntUttrykk: Uttrykk<Int> = 1 + intUttrykk
         assertEquals(12, intPlusIntUttrykk.evaluer())
 
-        val dblPlusDblUttrykk: Add<Double> = 2.2 + dblUttrykk
+        val dblPlusDblUttrykk: Uttrykk<Double> = 2.2 + dblUttrykk
         assertEquals(24.4, dblPlusDblUttrykk.evaluer())
 
         // Mixed types
-        val intUttrykkPlusDbl: Add<Int> = intUttrykk + 2.2
+        val intUttrykkPlusDbl: Uttrykk<Int> = intUttrykk + 2.2
         assertEquals(13.2, intUttrykkPlusDbl.evaluer())
 
-        val dblUttrykkPlusInt: Add<Double> = dblUttrykk + 1
+        val dblUttrykkPlusInt: Uttrykk<Double> = dblUttrykk + 1
         assertEquals(23.2, dblUttrykkPlusInt.evaluer())
 
-        val intPlusDblUttrykk: Add<Double> = 1 + dblUttrykk
+        val intPlusDblUttrykk: Uttrykk<Double> = 1 + dblUttrykk
         assertEquals(23.2, intPlusDblUttrykk.evaluer())
 
-        val dblPlusIntUttrykk: Add<Int> = 2.2 + intUttrykk
+        val dblPlusIntUttrykk: Uttrykk<Int> = 2.2 + intUttrykk
         assertEquals(13.2, dblPlusIntUttrykk.evaluer())
 
         // Uttrykk + Uttrykk
-        val intUttrykkPlusIntUttrykk: Add<Int> = intUttrykk + intUttrykk
+        val intUttrykkPlusIntUttrykk: Uttrykk<Int> = intUttrykk + intUttrykk
         assertEquals(22, intUttrykkPlusIntUttrykk.evaluer())
 
-        val dblUttrykkPlusDblUttrykk: Add<Double> = dblUttrykk + dblUttrykk
+        val dblUttrykkPlusDblUttrykk: Uttrykk<Double> = dblUttrykk + dblUttrykk
         assertEquals(44.4, dblUttrykkPlusDblUttrykk.evaluer())
 
-        val intUttrykkPlusDblUttrykk: Add<Int> = intUttrykk + dblUttrykk
+        val intUttrykkPlusDblUttrykk: Uttrykk<Int> = intUttrykk + dblUttrykk
         assertEquals(33.2, intUttrykkPlusDblUttrykk.evaluer())
 
-        val dblUttrykkPlusIntUttrykk: Add<Double> = dblUttrykk + intUttrykk
+        val dblUttrykkPlusIntUttrykk: Uttrykk<Double> = dblUttrykk + intUttrykk
         assertEquals(33.2, dblUttrykkPlusIntUttrykk.evaluer())
     }
 
     @Test
     fun `plus operators with Faktum`() {
         // Faktum + Number
-        val intFaktumPlusInt: Add<Int> = intFaktum + 1
+        val intFaktumPlusInt: Uttrykk<Int> = intFaktum + 1
         assertEquals(12, intFaktumPlusInt.evaluer())
 
-        val dblFaktumPlusDbl: Add<Double> = dblFaktum + 2.2
+        val dblFaktumPlusDbl: Uttrykk<Double> = dblFaktum + 2.2
         assertEquals(24.4, dblFaktumPlusDbl.evaluer())
 
         // Number + Faktum
-        val intPlusIntFaktum: Add<Int> = 1 + intFaktum
+        val intPlusIntFaktum: Uttrykk<Int> = 1 + intFaktum
         assertEquals(12, intPlusIntFaktum.evaluer())
 
-        val dblPlusDblFaktum: Add<Double> = 2.2 + dblFaktum
+        val dblPlusDblFaktum: Uttrykk<Double> = 2.2 + dblFaktum
         assertEquals(24.4, dblPlusDblFaktum.evaluer())
 
         // Mixed types
-        val intFaktumPlusDbl: Add<Int> = intFaktum + 2.2
+        val intFaktumPlusDbl: Uttrykk<Int> = intFaktum + 2.2
         assertEquals(13.2, intFaktumPlusDbl.evaluer())
 
-        val dblFaktumPlusInt: Add<Double> = dblFaktum + 1
+        val dblFaktumPlusInt: Uttrykk<Double> = dblFaktum + 1
         assertEquals(23.2, dblFaktumPlusInt.evaluer())
 
-        val intPlusDblFaktum: Add<Double> = 1 + dblFaktum
+        val intPlusDblFaktum: Uttrykk<Double> = 1 + dblFaktum
         assertEquals(23.2, intPlusDblFaktum.evaluer())
 
-        val dblPlusIntFaktum: Add<Int> = 2.2 + intFaktum
+        val dblPlusIntFaktum: Uttrykk<Int> = 2.2 + intFaktum
         assertEquals(13.2, dblPlusIntFaktum.evaluer())
 
         // Faktum + Faktum
-        val intFaktumPlusIntFaktum: Add<Int> = intFaktum + intFaktum
+        val intFaktumPlusIntFaktum: Uttrykk<Int> = intFaktum + intFaktum
         assertEquals(22, intFaktumPlusIntFaktum.evaluer())
 
-        val dblFaktumPlusDblFaktum: Add<Double> = dblFaktum + dblFaktum
+        val dblFaktumPlusDblFaktum: Uttrykk<Double> = dblFaktum + dblFaktum
         assertEquals(44.4, dblFaktumPlusDblFaktum.evaluer())
 
-        val intFaktumPlusDblFaktum: Add<Int> = intFaktum + dblFaktum
+        val intFaktumPlusDblFaktum: Uttrykk<Int> = intFaktum + dblFaktum
         assertEquals(33.2, intFaktumPlusDblFaktum.evaluer())
 
-        val dblFaktumPlusIntFaktum: Add<Double> = dblFaktum + intFaktum
+        val dblFaktumPlusIntFaktum: Uttrykk<Double> = dblFaktum + intFaktum
         assertEquals(33.2, dblFaktumPlusIntFaktum.evaluer())
     }
 
@@ -124,17 +124,17 @@ class UttrykkOperatorTest {
         val dblUttrykk = dblFaktum
 
         // Faktum + Uttrykk
-        val intFaktumPlusIntUttrykk: Add<Int> = intFaktum + intUttrykk
+        val intFaktumPlusIntUttrykk: Uttrykk<Int> = intFaktum + intUttrykk
         assertEquals(22, intFaktumPlusIntUttrykk.evaluer())
 
-        val dblFaktumPlusDblUttrykk: Add<Double> = dblFaktum + dblUttrykk
+        val dblFaktumPlusDblUttrykk: Uttrykk<Double> = dblFaktum + dblUttrykk
         assertEquals(44.4, dblFaktumPlusDblUttrykk.evaluer())
 
         // Uttrykk + Faktum
-        val intUttrykkPlusIntFaktum: Add<Int> = intUttrykk + intFaktum
+        val intUttrykkPlusIntFaktum: Uttrykk<Int> = intUttrykk + intFaktum
         assertEquals(22, intUttrykkPlusIntFaktum.evaluer())
 
-        val dblUttrykkPlusDblFaktum: Add<Double> = dblUttrykk + dblFaktum
+        val dblUttrykkPlusDblFaktum: Uttrykk<Double> = dblUttrykk + dblFaktum
         assertEquals(44.4, dblUttrykkPlusDblFaktum.evaluer())
     }
 
@@ -148,86 +148,86 @@ class UttrykkOperatorTest {
         val dblUttrykk = dblFaktum
 
         // Uttrykk - Number
-        val intUttrykkMinusInt: Sub<Int> = intUttrykk - 1
+        val intUttrykkMinusInt: Uttrykk<Int> = intUttrykk - 1
         assertEquals(10, intUttrykkMinusInt.evaluer())
 
-        val dblUttrykkMinusDbl: Sub<Double> = dblUttrykk - 2.2
+        val dblUttrykkMinusDbl: Uttrykk<Double> = dblUttrykk - 2.2
         assertEquals(20.0, dblUttrykkMinusDbl.evaluer())
 
         // Number - Uttrykk
-        val intMinusIntUttrykk: Sub<Int> = 1 - intUttrykk
+        val intMinusIntUttrykk: Uttrykk<Int> = 1 - intUttrykk
         assertEquals(-10, intMinusIntUttrykk.evaluer())
 
-        val dblMinusDblUttrykk: Sub<Double> = 2.2 - dblUttrykk
+        val dblMinusDblUttrykk: Uttrykk<Double> = 2.2 - dblUttrykk
         assertEquals(-20.0, dblMinusDblUttrykk.evaluer())
 
         // Mixed types
-        val intUttrykkMinusDbl: Sub<Int> = intUttrykk - 2.2
+        val intUttrykkMinusDbl: Uttrykk<Int> = intUttrykk - 2.2
         assertEquals(8.8, intUttrykkMinusDbl.evaluer())
 
-        val dblUttrykkMinusInt: Sub<Double> = dblUttrykk - 1
+        val dblUttrykkMinusInt: Uttrykk<Double> = dblUttrykk - 1
         assertEquals(21.2, dblUttrykkMinusInt.evaluer())
 
-        val intMinusDblUttrykk: Sub<Double> = 1 - dblUttrykk
+        val intMinusDblUttrykk: Uttrykk<Double> = 1 - dblUttrykk
         assertEquals(-21.2, intMinusDblUttrykk.evaluer())
 
-        val dblMinusIntUttrykk: Sub<Int> = 2.2 - intUttrykk
+        val dblMinusIntUttrykk: Uttrykk<Int> = 2.2 - intUttrykk
         assertEquals(-8.8, dblMinusIntUttrykk.evaluer())
 
         // Uttrykk - Uttrykk
-        val intUttrykkMinusIntUttrykk: Sub<Int> = intUttrykk - intUttrykk
+        val intUttrykkMinusIntUttrykk: Uttrykk<Int> = intUttrykk - intUttrykk
         assertEquals(0, intUttrykkMinusIntUttrykk.evaluer())
 
-        val dblUttrykkMinusDblUttrykk: Sub<Double> = dblUttrykk - dblUttrykk
+        val dblUttrykkMinusDblUttrykk: Uttrykk<Double> = dblUttrykk - dblUttrykk
         assertEquals(0.0, dblUttrykkMinusDblUttrykk.evaluer())
 
-        val intUttrykkMinusDblUttrykk: Sub<Int> = intUttrykk - dblUttrykk
+        val intUttrykkMinusDblUttrykk: Uttrykk<Int> = intUttrykk - dblUttrykk
         assertEquals(-11.2, intUttrykkMinusDblUttrykk.evaluer())
 
-        val dblUttrykkMinusIntUttrykk: Sub<Double> = dblUttrykk - intUttrykk
+        val dblUttrykkMinusIntUttrykk: Uttrykk<Double> = dblUttrykk - intUttrykk
         assertEquals(11.2, dblUttrykkMinusIntUttrykk.evaluer())
     }
 
     @Test
     fun `minus operators with Faktum`() {
         // Faktum - Number
-        val intFaktumMinusInt: Sub<Int> = intFaktum - 1
+        val intFaktumMinusInt: Uttrykk<Int> = intFaktum - 1
         assertEquals(10, intFaktumMinusInt.evaluer())
 
-        val dblFaktumMinusDbl: Sub<Double> = dblFaktum - 2.2
+        val dblFaktumMinusDbl: Uttrykk<Double> = dblFaktum - 2.2
         assertEquals(20.0, dblFaktumMinusDbl.evaluer())
 
         // Number - Faktum
-        val intMinusIntFaktum: Sub<Int> = 1 - intFaktum
+        val intMinusIntFaktum: Uttrykk<Int> = 1 - intFaktum
         assertEquals(-10, intMinusIntFaktum.evaluer())
 
-        val dblMinusDblFaktum: Sub<Double> = 2.2 - dblFaktum
+        val dblMinusDblFaktum: Uttrykk<Double> = 2.2 - dblFaktum
         assertEquals(-20.0, dblMinusDblFaktum.evaluer())
 
         // Mixed types
-        val intFaktumMinusDbl: Sub<Int> = intFaktum - 2.2
+        val intFaktumMinusDbl: Uttrykk<Int> = intFaktum - 2.2
         assertEquals(8.8, intFaktumMinusDbl.evaluer())
 
-        val dblFaktumMinusInt: Sub<Double> = dblFaktum - 1
+        val dblFaktumMinusInt: Uttrykk<Double> = dblFaktum - 1
         assertEquals(21.2, dblFaktumMinusInt.evaluer())
 
-        val intMinusDblFaktum: Sub<Double> = 1 - dblFaktum
+        val intMinusDblFaktum: Uttrykk<Double> = 1 - dblFaktum
         assertEquals(-21.2, intMinusDblFaktum.evaluer())
 
-        val dblMinusIntFaktum: Sub<Int> = 2.2 - intFaktum
+        val dblMinusIntFaktum: Uttrykk<Int> = 2.2 - intFaktum
         assertEquals(-8.8, dblMinusIntFaktum.evaluer())
 
         // Faktum - Faktum
-        val intFaktumMinusIntFaktum: Sub<Int> = intFaktum - intFaktum
+        val intFaktumMinusIntFaktum: Uttrykk<Int> = intFaktum - intFaktum
         assertEquals(0, intFaktumMinusIntFaktum.evaluer())
 
-        val dblFaktumMinusDblFaktum: Sub<Double> = dblFaktum - dblFaktum
+        val dblFaktumMinusDblFaktum: Uttrykk<Double> = dblFaktum - dblFaktum
         assertEquals(0.0, dblFaktumMinusDblFaktum.evaluer())
 
-        val intFaktumMinusDblFaktum: Sub<Int> = intFaktum - dblFaktum
+        val intFaktumMinusDblFaktum: Uttrykk<Int> = intFaktum - dblFaktum
         assertEquals(-11.2, intFaktumMinusDblFaktum.evaluer())
 
-        val dblFaktumMinusIntFaktum: Sub<Double> = dblFaktum - intFaktum
+        val dblFaktumMinusIntFaktum: Uttrykk<Double> = dblFaktum - intFaktum
         assertEquals(11.2, dblFaktumMinusIntFaktum.evaluer())
     }
 
@@ -241,86 +241,86 @@ class UttrykkOperatorTest {
         val dblUttrykk = dblFaktum
 
         // Uttrykk * Number
-        val intUttrykkTimesInt: Mul<Int> = intUttrykk * 2
+        val intUttrykkTimesInt: Uttrykk<Int> = intUttrykk * 2
         assertEquals(22, intUttrykkTimesInt.evaluer())
 
-        val dblUttrykkTimesDbl: Mul<Double> = dblUttrykk * 2.2
+        val dblUttrykkTimesDbl: Uttrykk<Double> = dblUttrykk * 2.2
         assertEquals(48.84, dblUttrykkTimesDbl.evaluer())
 
         // Number * Uttrykk
-        val intTimesIntUttrykk: Mul<Int> = 2 * intUttrykk
+        val intTimesIntUttrykk: Uttrykk<Int> = 2 * intUttrykk
         assertEquals(22, intTimesIntUttrykk.evaluer())
 
-        val dblTimesDblUttrykk: Mul<Double> = 2.2 * dblUttrykk
+        val dblTimesDblUttrykk: Uttrykk<Double> = 2.2 * dblUttrykk
         assertEquals(48.84, dblTimesDblUttrykk.evaluer())
 
         // Mixed types (Int * Double coerced to Int truncates to 24)
-        val intUttrykkTimesDbl: Mul<Int> = intUttrykk * 2.2
+        val intUttrykkTimesDbl: Uttrykk<Int> = intUttrykk * 2.2
         assertEquals(24, intUttrykkTimesDbl.evaluer()) // 11 * 2.2 = 24.2, truncated to 24
 
-        val dblUttrykkTimesInt: Mul<Double> = dblUttrykk * 2
+        val dblUttrykkTimesInt: Uttrykk<Double> = dblUttrykk * 2
         assertEquals(44.4, dblUttrykkTimesInt.evaluer())
 
-        val intTimesDblUttrykk: Mul<Double> = 2 * dblUttrykk
+        val intTimesDblUttrykk: Uttrykk<Double> = 2 * dblUttrykk
         assertEquals(44.4, intTimesDblUttrykk.evaluer())
 
-        val dblTimesIntUttrykk: Mul<Int> = 2.2 * intUttrykk
+        val dblTimesIntUttrykk: Uttrykk<Int> = 2.2 * intUttrykk
         assertEquals(24, dblTimesIntUttrykk.evaluer()) // 2.2 * 11 = 24.2, truncated to 24
 
         // Uttrykk * Uttrykk
-        val intUttrykkTimesIntUttrykk: Mul<Int> = intUttrykk * intUttrykk
+        val intUttrykkTimesIntUttrykk: Uttrykk<Int> = intUttrykk * intUttrykk
         assertEquals(121, intUttrykkTimesIntUttrykk.evaluer())
 
-        val dblUttrykkTimesDblUttrykk: Mul<Double> = dblUttrykk * dblUttrykk
+        val dblUttrykkTimesDblUttrykk: Uttrykk<Double> = dblUttrykk * dblUttrykk
         assertEquals(492.84, dblUttrykkTimesDblUttrykk.evaluer())
 
-        val intUttrykkTimesDblUttrykk: Mul<Int> = intUttrykk * dblUttrykk
+        val intUttrykkTimesDblUttrykk: Uttrykk<Int> = intUttrykk * dblUttrykk
         assertEquals(244.2, intUttrykkTimesDblUttrykk.evaluer())
 
-        val dblUttrykkTimesIntUttrykk: Mul<Double> = dblUttrykk * intUttrykk
+        val dblUttrykkTimesIntUttrykk: Uttrykk<Double> = dblUttrykk * intUttrykk
         assertEquals(244.2, dblUttrykkTimesIntUttrykk.evaluer())
     }
 
     @Test
     fun `times operators with Faktum`() {
         // Faktum * Number
-        val intFaktumTimesInt: Mul<Int> = intFaktum * 2
+        val intFaktumTimesInt: Uttrykk<Int> = intFaktum * 2
         assertEquals(22, intFaktumTimesInt.evaluer())
 
-        val dblFaktumTimesDbl: Mul<Double> = dblFaktum * 2.2
+        val dblFaktumTimesDbl: Uttrykk<Double> = dblFaktum * 2.2
         assertEquals(48.84, dblFaktumTimesDbl.evaluer())
 
         // Number * Faktum
-        val intTimesIntFaktum: Mul<Int> = 2 * intFaktum
+        val intTimesIntFaktum: Uttrykk<Int> = 2 * intFaktum
         assertEquals(22, intTimesIntFaktum.evaluer())
 
-        val dblTimesDblFaktum: Mul<Double> = 2.2 * dblFaktum
+        val dblTimesDblFaktum: Uttrykk<Double> = 2.2 * dblFaktum
         assertEquals(48.84, dblTimesDblFaktum.evaluer())
 
         // Mixed types (Int * Double coerced to Int truncates to 24)
-        val intFaktumTimesDbl: Mul<Int> = intFaktum * 2.2
+        val intFaktumTimesDbl: Uttrykk<Int> = intFaktum * 2.2
         assertEquals(24, intFaktumTimesDbl.evaluer()) // 11 * 2.2 = 24.2, truncated to 24
 
-        val dblFaktumTimesInt: Mul<Double> = dblFaktum * 2
+        val dblFaktumTimesInt: Uttrykk<Double> = dblFaktum * 2
         assertEquals(44.4, dblFaktumTimesInt.evaluer())
 
-        val intTimesDblFaktum: Mul<Double> = 2 * dblFaktum
+        val intTimesDblFaktum: Uttrykk<Double> = 2 * dblFaktum
         assertEquals(44.4, intTimesDblFaktum.evaluer())
 
-        val dblTimesIntFaktum: Mul<Int> = 2.2 * intFaktum
+        val dblTimesIntFaktum: Uttrykk<Int> = 2.2 * intFaktum
         assertEquals(24, dblTimesIntFaktum.evaluer()) // 2.2 * 11 = 24.2, truncated to 24
 
         // Faktum * Faktum
-        val intFaktumTimesIntFaktum: Mul<Int> = intFaktum * intFaktum
+        val intFaktumTimesIntFaktum: Uttrykk<Int> = intFaktum * intFaktum
         assertEquals(121, intFaktumTimesIntFaktum.evaluer())
 
-        val dblFaktumTimesDblFaktum: Mul<Double> = dblFaktum * dblFaktum
+        val dblFaktumTimesDblFaktum: Uttrykk<Double> = dblFaktum * dblFaktum
         assertEquals(492.84, dblFaktumTimesDblFaktum.evaluer())
 
-        val intFaktumTimesDblFaktum: Mul<Int> = intFaktum * dblFaktum
+        val intFaktumTimesDblFaktum: Uttrykk<Int> = intFaktum * dblFaktum
         assertEquals(244.2, intFaktumTimesDblFaktum.evaluer())
 
-        val dblFaktumTimesIntFaktum: Mul<Double> = dblFaktum * intFaktum
+        val dblFaktumTimesIntFaktum: Uttrykk<Double> = dblFaktum * intFaktum
         assertEquals(244.2, dblFaktumTimesIntFaktum.evaluer())
     }
 
@@ -334,86 +334,86 @@ class UttrykkOperatorTest {
         val dblUttrykk = dblFaktum
 
         // Uttrykk / Number
-        val intUttrykkDivInt: Div = intUttrykk / 2
+        val intUttrykkDivInt: Uttrykk<Double> = intUttrykk / 2
         assertEquals(5.5, intUttrykkDivInt.evaluer())
 
-        val dblUttrykkDivDbl: Div = dblUttrykk / 2.2
+        val dblUttrykkDivDbl: Uttrykk<Double> = dblUttrykk / 2.2
         assertEquals(10.0909, dblUttrykkDivDbl.evaluer(), 0.0001)
 
         // Number / Uttrykk
-        val intDivIntUttrykk: Div = 20 / intUttrykk
+        val intDivIntUttrykk: Uttrykk<Double> = 20 / intUttrykk
         assertEquals(1.8181, intDivIntUttrykk.evaluer(), 0.0001)
 
-        val dblDivDblUttrykk: Div = 48.4 / dblUttrykk
+        val dblDivDblUttrykk: Uttrykk<Double> = 48.4 / dblUttrykk
         assertEquals(2.1801, dblDivDblUttrykk.evaluer(), 0.0001)
 
         // Mixed types
-        val intUttrykkDivDbl: Div = intUttrykk / 2.2
+        val intUttrykkDivDbl: Uttrykk<Double> = intUttrykk / 2.2
         assertEquals(5.0, intUttrykkDivDbl.evaluer())
 
-        val dblUttrykkDivInt: Div = dblUttrykk / 2
+        val dblUttrykkDivInt: Uttrykk<Double> = dblUttrykk / 2
         assertEquals(11.1, dblUttrykkDivInt.evaluer())
 
-        val intDivDblUttrykk: Div = 22 / dblUttrykk
+        val intDivDblUttrykk: Uttrykk<Double> = 22 / dblUttrykk
         assertEquals(0.9909, intDivDblUttrykk.evaluer(), 0.0001)
 
-        val dblDivIntUttrykk: Div = 44.0 / intUttrykk
+        val dblDivIntUttrykk: Uttrykk<Double> = 44.0 / intUttrykk
         assertEquals(4.0, dblDivIntUttrykk.evaluer())
 
         // Uttrykk / Uttrykk
-        val intUttrykkDivIntUttrykk: Div = intUttrykk / intUttrykk
+        val intUttrykkDivIntUttrykk: Uttrykk<Double> = intUttrykk / intUttrykk
         assertEquals(1.0, intUttrykkDivIntUttrykk.evaluer())
 
-        val dblUttrykkDivDblUttrykk: Div = dblUttrykk / dblUttrykk
+        val dblUttrykkDivDblUttrykk: Uttrykk<Double> = dblUttrykk / dblUttrykk
         assertEquals(1.0, dblUttrykkDivDblUttrykk.evaluer())
 
-        val intUttrykkDivDblUttrykk: Div = intUttrykk / dblUttrykk
+        val intUttrykkDivDblUttrykk: Uttrykk<Double> = intUttrykk / dblUttrykk
         assertEquals(0.4954, intUttrykkDivDblUttrykk.evaluer(), 0.0001)
 
-        val dblUttrykkDivIntUttrykk: Div = dblUttrykk / intUttrykk
+        val dblUttrykkDivIntUttrykk: Uttrykk<Double> = dblUttrykk / intUttrykk
         assertEquals(2.0181, dblUttrykkDivIntUttrykk.evaluer(), 0.0001)
     }
 
     @Test
     fun `division operators with Faktum`() {
         // Faktum / Number
-        val intFaktumDivInt: Div = intFaktum / 2
+        val intFaktumDivInt: Uttrykk<Double> = intFaktum / 2
         assertEquals(5.5, intFaktumDivInt.evaluer())
 
-        val dblFaktumDivDbl: Div = dblFaktum / 2.2
+        val dblFaktumDivDbl: Uttrykk<Double> = dblFaktum / 2.2
         assertEquals(10.0909, dblFaktumDivDbl.evaluer(), 0.0001)
 
         // Number / Faktum
-        val intDivIntFaktum: Div = 20 / intFaktum
+        val intDivIntFaktum: Uttrykk<Double> = 20 / intFaktum
         assertEquals(1.8181, intDivIntFaktum.evaluer(), 0.0001)
 
-        val dblDivDblFaktum: Div = 48.4 / dblFaktum
+        val dblDivDblFaktum: Uttrykk<Double> = 48.4 / dblFaktum
         assertEquals(2.1801, dblDivDblFaktum.evaluer(), 0.0001)
 
         // Mixed types
-        val intFaktumDivDbl: Div = intFaktum / 2.2
+        val intFaktumDivDbl: Uttrykk<Double> = intFaktum / 2.2
         assertEquals(5.0, intFaktumDivDbl.evaluer())
 
-        val dblFaktumDivInt: Div = dblFaktum / 2
+        val dblFaktumDivInt: Uttrykk<Double> = dblFaktum / 2
         assertEquals(11.1, dblFaktumDivInt.evaluer())
 
-        val intDivDblFaktum: Div = 22 / dblFaktum
+        val intDivDblFaktum: Uttrykk<Double> = 22 / dblFaktum
         assertEquals(0.9909, intDivDblFaktum.evaluer(), 0.0001)
 
-        val dblDivIntFaktum: Div = 44.0 / intFaktum
+        val dblDivIntFaktum: Uttrykk<Double> = 44.0 / intFaktum
         assertEquals(4.0, dblDivIntFaktum.evaluer())
 
         // Faktum / Faktum
-        val intFaktumDivIntFaktum: Div = intFaktum / intFaktum
+        val intFaktumDivIntFaktum: Uttrykk<Double> = intFaktum / intFaktum
         assertEquals(1.0, intFaktumDivIntFaktum.evaluer())
 
-        val dblFaktumDivDblFaktum: Div = dblFaktum / dblFaktum
+        val dblFaktumDivDblFaktum: Uttrykk<Double> = dblFaktum / dblFaktum
         assertEquals(1.0, dblFaktumDivDblFaktum.evaluer())
 
-        val intFaktumDivDblFaktum: Div = intFaktum / dblFaktum
+        val intFaktumDivDblFaktum: Uttrykk<Double> = intFaktum / dblFaktum
         assertEquals(0.4954, intFaktumDivDblFaktum.evaluer(), 0.0001)
 
-        val dblFaktumDivIntFaktum: Div = dblFaktum / intFaktum
+        val dblFaktumDivIntFaktum: Uttrykk<Double> = dblFaktum / intFaktum
         assertEquals(2.0181, dblFaktumDivIntFaktum.evaluer(), 0.0001)
     }
 
@@ -426,11 +426,11 @@ class UttrykkOperatorTest {
         val intUttrykk = intFaktum
         val dblUttrykk = dblFaktum
 
-        val negInt: Neg<Int> = -intUttrykk
+        val negInt: Uttrykk<Int> = -intUttrykk
         assertEquals(-11, negInt.evaluer())
         assertEquals("-int", negInt.notasjon())
 
-        val negDbl: Neg<Double> = -dblUttrykk
+        val negDbl: Uttrykk<Double> = -dblUttrykk
         assertEquals(-22.2, negDbl.evaluer())
         assertEquals("-dbl", negDbl.notasjon())
     }

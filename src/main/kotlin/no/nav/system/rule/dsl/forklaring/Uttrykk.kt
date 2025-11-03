@@ -70,7 +70,8 @@ sealed interface Uttrykk<out T : Any> : Serializable {
  * Konstant verdi.
  */
 data class Const<T : Any>(
-    val verdi: T
+    val verdi: T,
+    var funksjon: String? = null
 ) : Uttrykk<T> {
     override fun evaluer(): T = verdi
 
@@ -88,9 +89,9 @@ data class Const<T : Any>(
 /**
  * Addisjon.
  */
-data class Add<T : Number>(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+internal data class Add<T : Number>(
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -130,9 +131,9 @@ data class Add<T : Number>(
 /**
  * Subtraksjon.
  */
-data class Sub<T : Number>(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+internal data class Sub<T : Number>(
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -171,9 +172,9 @@ data class Sub<T : Number>(
 /**
  * Multiplikasjon.
  */
-data class Mul<T : Number>(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+internal data class Mul<T : Number>(
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -212,9 +213,9 @@ data class Mul<T : Number>(
 /**
  * Divisjon (gir alltid Double).
  */
-data class Div(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+internal data class Div(
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<Double> {
     override fun evaluer(): Double {
         val v = venstre.evaluer().toDouble()
@@ -245,9 +246,53 @@ data class Div(
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
 }
 
-data class Min(
-    val venstre: Uttrykk<out Number>,
-    val høyre: Uttrykk<out Number>
+/**
+ * Heltallsdivisjon (integer division).
+ * Bruker truncate-avrunding (.toInt()).
+ *
+ * Syntaks: `teller div nevner`
+ * Notasjon: `teller // nevner`
+ *
+ * Eksempler:
+ * - 10 div 3 = 3
+ * - -10 div 3 = -3 (truncate mot null)
+ */
+internal data class IntDiv(
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
+) : Uttrykk<Int> {
+    override fun evaluer(): Int {
+        val v = venstre.evaluer().toDouble()
+        val h = høyre.evaluer().toDouble()
+
+        if (h == 0.0) {
+            throw ArithmeticException("Heltallsdivisjon med null: $v // $h")
+        }
+
+        return (v / h).toInt()  // Truncate mot null
+    }
+
+    override fun notasjon(): String {
+        val v = venstre.notasjon().medParentesVedBehov(venstre)
+        val h = høyre.notasjon().medParentesVedBehov(høyre, true)
+        return "$v // $h"
+    }
+
+    override fun konkret(): String {
+        val v = venstre.konkret().medParentesVedBehov(venstre)
+        val h = høyre.konkret().medParentesVedBehov(høyre, true)
+        return "$v // $h"
+    }
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+}
+
+internal data class Min(
+    val venstre: Uttrykk<Number>,
+    val høyre: Uttrykk<Number>
 ) : Uttrykk<Double> {
     override fun evaluer(): Double =
         min(venstre.evaluer().toDouble(), høyre.evaluer().toDouble())
@@ -274,8 +319,8 @@ data class Min(
 /**
  * Negasjon (unær minus).
  */
-data class Neg<T : Number>(
-    val uttrykk: Uttrykk<out Number>
+internal data class Neg<T : Number>(
+    val uttrykk: Uttrykk<Number>
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -307,7 +352,8 @@ data class Neg<T : Number>(
 data class Grunnlag<T : Any>(
     val navn: String,
     val uttrykk: Uttrykk<T>,
-    val rvsId: String? = null
+    val rvsId: String? = null,
+    var funksjon: String? = null
 ) : Uttrykk<T> {
     override fun evaluer(): T = uttrykk.evaluer()
 
@@ -328,7 +374,7 @@ data class Grunnlag<T : Any>(
 /**
  * Logisk OG-operator.
  */
-data class Og(
+internal data class Og(
     val venstre: Uttrykk<Boolean>,
     val høyre: Uttrykk<Boolean>
 ) : Uttrykk<Boolean> {
@@ -355,7 +401,7 @@ data class Og(
 /**
  * Logisk ELLER-operator.
  */
-data class Eller(
+internal data class Eller(
     val venstre: Uttrykk<Boolean>,
     val høyre: Uttrykk<Boolean>
 ) : Uttrykk<Boolean> {
@@ -382,7 +428,7 @@ data class Eller(
 /**
  * Logisk IKKE-operator (negasjon).
  */
-data class Ikke(
+internal data class Ikke(
     val uttrykk: Uttrykk<Boolean>
 ) : Uttrykk<Boolean> {
     override fun evaluer(): Boolean = !uttrykk.evaluer()
@@ -399,7 +445,7 @@ data class Ikke(
 /**
  * Sammenligning: Lik (==).
  */
-data class Lik<T : Comparable<T>>(
+internal data class Lik<T : Comparable<T>>(
     val venstre: Uttrykk<T>,
     val høyre: Uttrykk<T>
 ) : Uttrykk<Boolean> {
@@ -418,7 +464,7 @@ data class Lik<T : Comparable<T>>(
 /**
  * Sammenligning: Ulik (!=).
  */
-data class Ulik<T : Comparable<T>>(
+internal data class Ulik<T : Comparable<T>>(
     val venstre: Uttrykk<T>,
     val høyre: Uttrykk<T>
 ) : Uttrykk<Boolean> {
@@ -437,7 +483,7 @@ data class Ulik<T : Comparable<T>>(
 /**
  * Sammenligning: Større enn (>).
  */
-data class StørreEnn<T : Comparable<T>>(
+internal data class StørreEnn<T : Comparable<T>>(
     val venstre: Uttrykk<T>,
     val høyre: Uttrykk<T>
 ) : Uttrykk<Boolean> {
@@ -456,7 +502,7 @@ data class StørreEnn<T : Comparable<T>>(
 /**
  * Sammenligning: Mindre enn (<).
  */
-data class MindreEnn<T : Comparable<T>>(
+internal data class MindreEnn<T : Comparable<T>>(
     val venstre: Uttrykk<T>,
     val høyre: Uttrykk<T>
 ) : Uttrykk<Boolean> {
@@ -475,7 +521,7 @@ data class MindreEnn<T : Comparable<T>>(
 /**
  * Sammenligning: Større eller lik (>=).
  */
-data class StørreEllerLik<T : Comparable<T>>(
+internal data class StørreEllerLik<T : Comparable<T>>(
     val venstre: Uttrykk<T>,
     val høyre: Uttrykk<T>
 ) : Uttrykk<Boolean> {
@@ -494,7 +540,7 @@ data class StørreEllerLik<T : Comparable<T>>(
 /**
  * Sammenligning: Mindre eller lik (<=).
  */
-data class MindreEllerLik<T : Comparable<T>>(
+internal data class MindreEllerLik<T : Comparable<T>>(
     val venstre: Uttrykk<T>,
     val høyre: Uttrykk<T>
 ) : Uttrykk<Boolean> {
@@ -513,7 +559,7 @@ data class MindreEllerLik<T : Comparable<T>>(
 /**
  * Sammenligning: Verdi er blant liste (in).
  */
-data class ErBlant<T : Any>(
+internal data class ErBlant<T : Any>(
     val verdi: Uttrykk<T>,
     val liste: Uttrykk<List<T>>
 ) : Uttrykk<Boolean> {
@@ -532,7 +578,7 @@ data class ErBlant<T : Any>(
 /**
  * Sammenligning: Verdi er ikke blant liste (not in).
  */
-data class ErIkkeBlant<T : Any>(
+internal data class ErIkkeBlant<T : Any>(
     val verdi: Uttrykk<T>,
     val liste: Uttrykk<List<T>>
 ) : Uttrykk<Boolean> {
@@ -554,7 +600,7 @@ data class ErIkkeBlant<T : Any>(
  * Både SÅ og ELLERS må returnere verdier av samme type T.
  * Hvis-uttrykket kan navngis som et Grunnlag for sporbarhet.
  */
-data class Hvis<T : Any>(
+internal data class Hvis<T : Any>(
     val betingelse: Uttrykk<Boolean>,
     val såUttrykk: Uttrykk<T>,
     val ellersUttrykk: Uttrykk<T>
@@ -643,23 +689,50 @@ private fun String.medParentesVedBehov(uttrykk: Uttrykk<*>, høyreSide: Boolean 
 /**
  * Operator overloading for naturlig syntaks.
  */
-operator fun <T : Number> Uttrykk<T>.plus(other: Uttrykk<out Number>): Add<T> = Add(this, other)
-operator fun <T : Number> Uttrykk<T>.plus(other: Number): Add<T> = Add(this, Const(other))
-operator fun <T : Number> Number.plus(other: Uttrykk<T>): Add<T> = Add(Const(this), other)
+@Suppress("REDUNDANT_PROJECTION")
+operator fun <T : Number> Uttrykk<T>.plus(other: Uttrykk<out Number>): Uttrykk<T> = Add(this, other)
+operator fun <T : Number> Uttrykk<T>.plus(other: Number): Uttrykk<T> = Add(this, Const(other))
+operator fun <T : Number> Number.plus(other: Uttrykk<T>): Uttrykk<T> = Add(Const(this), other)
 
-operator fun <T : Number> Uttrykk<T>.minus(other: Uttrykk<out Number>): Sub<T> = Sub(this, other)
-operator fun <T : Number> Uttrykk<T>.minus(other: Number): Sub<T> = Sub(this, Const(other))
-operator fun <T : Number> Number.minus(other: Uttrykk<T>): Sub<T> = Sub(Const(this), other)
+@Suppress("REDUNDANT_PROJECTION")
+operator fun <T : Number> Uttrykk<T>.minus(other: Uttrykk<out Number>): Uttrykk<T> = Sub(this, other)
+operator fun <T : Number> Uttrykk<T>.minus(other: Number): Uttrykk<T> = Sub(this, Const(other))
+operator fun <T : Number> Number.minus(other: Uttrykk<T>): Uttrykk<T> = Sub(Const(this), other)
 
-operator fun <T : Number> Uttrykk<T>.times(other: Uttrykk<out Number>): Mul<T> = Mul(this, other)
-operator fun <T : Number> Uttrykk<T>.times(other: Number): Mul<T> = Mul(this, Const(other))
-operator fun <T : Number> Number.times(other: Uttrykk<T>): Mul<T> = Mul(Const(this), other)
+@Suppress("REDUNDANT_PROJECTION")
+operator fun <T : Number> Uttrykk<T>.times(other: Uttrykk<out Number>): Uttrykk<T> = Mul(this, other)
+operator fun <T : Number> Uttrykk<T>.times(other: Number): Uttrykk<T> = Mul(this, Const(other))
+operator fun <T : Number> Number.times(other: Uttrykk<T>): Uttrykk<T> = Mul(Const(this), other)
 
-operator fun Uttrykk<out Number>.div(other: Uttrykk<out Number>): Div = Div(this, other)
-operator fun Uttrykk<out Number>.div(other: Number): Div = Div(this, Const(other))
-operator fun Number.div(other: Uttrykk<out Number>): Div = Div(Const(this), other)
+@Suppress("REDUNDANT_PROJECTION")
+operator fun Uttrykk<out Number>.div(other: Uttrykk<out Number>): Uttrykk<Double> = Div(this, other)
+@Suppress("REDUNDANT_PROJECTION")
+operator fun Uttrykk<out Number>.div(other: Number): Uttrykk<Double> = Div(this, Const(other))
+@Suppress("REDUNDANT_PROJECTION")
+operator fun Number.div(other: Uttrykk<out Number>): Uttrykk<Double> = Div(Const(this), other)
 
-operator fun <T : Number> Uttrykk<T>.unaryMinus(): Neg<T> = Neg(this)
+/**
+ * Heltallsdivisjon (integer division) med infix syntaks.
+ *
+ * Syntaks: `teller intdiv nevner`
+ * Notasjon: `teller // nevner`
+ *
+ * Eksempler:
+ * ```
+ * val a = Const(10)
+ * val b = Const(3)
+ * val resultat = a intdiv b  // Returns Uttrykk<Int> with value 3
+ * resultat.notasjon()        // Returns "10 // 3"
+ * ```
+ */
+@Suppress("REDUNDANT_PROJECTION")
+infix fun Uttrykk<out Number>.intdiv(other: Uttrykk<out Number>): Uttrykk<Int> = IntDiv(this, other)
+@Suppress("REDUNDANT_PROJECTION")
+infix fun Uttrykk<out Number>.intdiv(other: Number): Uttrykk<Int> = IntDiv(this, Const(other))
+@Suppress("REDUNDANT_PROJECTION")
+infix fun Number.intdiv(other: Uttrykk<out Number>): Uttrykk<Int> = IntDiv(Const(this), other)
+
+operator fun <T : Number> Uttrykk<T>.unaryMinus(): Uttrykk<T> = Neg(this)
 
 /**
  * Builder function for navngitte uttrykk.
@@ -713,87 +786,90 @@ fun <T : Any> Grunnlag<T>.id(rvsId: String): Grunnlag<T> = this.copy(rvsId = rvs
 /**
  * Min-funksjon for Grunnlag.
  */
-fun <T : Number> min(venstre: Grunnlag<T>, høyre: Grunnlag<out Number>): Min = Min(venstre, høyre)
-fun <T : Number> min(venstre: Grunnlag<T>, høyre: Uttrykk<out Number>): Min = Min(venstre, høyre)
-fun <T : Number> min(venstre: Uttrykk<out Number>, høyre: Grunnlag<T>): Min = Min(venstre, høyre)
-fun <T : Number> min(venstre: Grunnlag<T>, høyre: Number): Min = Min(venstre, Const(høyre))
-fun <T : Number> min(venstre: Number, høyre: Grunnlag<T>): Min = Min(Const(venstre), høyre)
+@Suppress("REDUNDANT_PROJECTION")
+fun <T : Number> min(venstre: Grunnlag<T>, høyre: Grunnlag<out Number>): Uttrykk<Double> = Min(venstre, høyre)
+@Suppress("REDUNDANT_PROJECTION")
+fun <T : Number> min(venstre: Grunnlag<T>, høyre: Uttrykk<out Number>): Uttrykk<Double> = Min(venstre, høyre)
+@Suppress("REDUNDANT_PROJECTION")
+fun <T : Number> min(venstre: Uttrykk<out Number>, høyre: Grunnlag<T>): Uttrykk<Double> = Min(venstre, høyre)
+fun <T : Number> min(venstre: Grunnlag<T>, høyre: Number): Uttrykk<Double> = Min(venstre, Const(høyre))
+fun <T : Number> min(venstre: Number, høyre: Grunnlag<T>): Uttrykk<Double> = Min(Const(venstre), høyre)
 
 /**
  * Boolean operator overloading (norske navn).
  */
-infix fun Uttrykk<Boolean>.og(other: Uttrykk<Boolean>): Og = Og(this, other)
-infix fun Uttrykk<Boolean>.eller(other: Uttrykk<Boolean>): Eller = Eller(this, other)
-fun ikke(uttrykk: Uttrykk<Boolean>): Ikke = Ikke(uttrykk)
+infix fun Uttrykk<Boolean>.og(other: Uttrykk<Boolean>): Uttrykk<Boolean> = Og(this, other)
+infix fun Uttrykk<Boolean>.eller(other: Uttrykk<Boolean>): Uttrykk<Boolean> = Eller(this, other)
+fun ikke(uttrykk: Uttrykk<Boolean>): Uttrykk<Boolean> = Ikke(uttrykk)
 
 /**
  * Sammenlignings-operatorer (norske navn, infix).
  */
-infix fun <T : Comparable<T>> Uttrykk<T>.erLik(other: Uttrykk<T>): Lik<T> = Lik(this, other)
-infix fun <T : Comparable<T>> Uttrykk<T>.erLik(other: T): Lik<T> = Lik(this, Const(other))
-infix fun <T : Comparable<T>> T.erLik(other: Uttrykk<T>): Lik<T> = Lik(Const(this), other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erLik(other: Uttrykk<T>): Uttrykk<Boolean> = Lik(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erLik(other: T): Uttrykk<Boolean> = Lik(this, Const(other))
+infix fun <T : Comparable<T>> T.erLik(other: Uttrykk<T>): Uttrykk<Boolean> = Lik(Const(this), other)
 
-infix fun <T : Comparable<T>> Uttrykk<T>.erUlik(other: Uttrykk<T>): Ulik<T> = Ulik(this, other)
-infix fun <T : Comparable<T>> Uttrykk<T>.erUlik(other: T): Ulik<T> = Ulik(this, Const(other))
-infix fun <T : Comparable<T>> T.erUlik(other: Uttrykk<T>): Ulik<T> = Ulik(Const(this), other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erUlik(other: Uttrykk<T>): Uttrykk<Boolean> = Ulik(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erUlik(other: T): Uttrykk<Boolean> = Ulik(this, Const(other))
+infix fun <T : Comparable<T>> T.erUlik(other: Uttrykk<T>): Uttrykk<Boolean> = Ulik(Const(this), other)
 
-infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEnn(other: Uttrykk<T>): StørreEnn<T> = StørreEnn(this, other)
-infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEnn(other: T): StørreEnn<T> = StørreEnn(this, Const(other))
-infix fun <T : Comparable<T>> T.erStørreEnn(other: Uttrykk<T>): StørreEnn<T> = StørreEnn(Const(this), other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEnn(other: Uttrykk<T>): Uttrykk<Boolean> = StørreEnn(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEnn(other: T): Uttrykk<Boolean> = StørreEnn(this, Const(other))
+infix fun <T : Comparable<T>> T.erStørreEnn(other: Uttrykk<T>): Uttrykk<Boolean> = StørreEnn(Const(this), other)
 
-infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEnn(other: Uttrykk<T>): MindreEnn<T> = MindreEnn(this, other)
-infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEnn(other: T): MindreEnn<T> = MindreEnn(this, Const(other))
-infix fun <T : Comparable<T>> T.erMindreEnn(other: Uttrykk<T>): MindreEnn<T> = MindreEnn(Const(this), other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEnn(other: Uttrykk<T>): Uttrykk<Boolean> = MindreEnn(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEnn(other: T): Uttrykk<Boolean> = MindreEnn(this, Const(other))
+infix fun <T : Comparable<T>> T.erMindreEnn(other: Uttrykk<T>): Uttrykk<Boolean> = MindreEnn(Const(this), other)
 
-infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEllerLik(other: Uttrykk<T>): StørreEllerLik<T> = StørreEllerLik(this, other)
-infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEllerLik(other: T): StørreEllerLik<T> = StørreEllerLik(this, Const(other))
-infix fun <T : Comparable<T>> T.erStørreEllerLik(other: Uttrykk<T>): StørreEllerLik<T> = StørreEllerLik(Const(this), other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEllerLik(other: Uttrykk<T>): Uttrykk<Boolean> = StørreEllerLik(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erStørreEllerLik(other: T): Uttrykk<Boolean> = StørreEllerLik(this, Const(other))
+infix fun <T : Comparable<T>> T.erStørreEllerLik(other: Uttrykk<T>): Uttrykk<Boolean> = StørreEllerLik(Const(this), other)
 
-infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEllerLik(other: Uttrykk<T>): MindreEllerLik<T> = MindreEllerLik(this, other)
-infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEllerLik(other: T): MindreEllerLik<T> = MindreEllerLik(this, Const(other))
-infix fun <T : Comparable<T>> T.erMindreEllerLik(other: Uttrykk<T>): MindreEllerLik<T> = MindreEllerLik(Const(this), other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEllerLik(other: Uttrykk<T>): Uttrykk<Boolean> = MindreEllerLik(this, other)
+infix fun <T : Comparable<T>> Uttrykk<T>.erMindreEllerLik(other: T): Uttrykk<Boolean> = MindreEllerLik(this, Const(other))
+infix fun <T : Comparable<T>> T.erMindreEllerLik(other: Uttrykk<T>): Uttrykk<Boolean> = MindreEllerLik(Const(this), other)
 
 /**
  * Liste-sammenlignings-operatorer (norske navn, infix).
  */
-infix fun <T : Any> Uttrykk<T>.erBlant(other: Uttrykk<List<T>>): ErBlant<T> = ErBlant(this, other)
-infix fun <T : Any> Uttrykk<T>.erBlant(other: List<T>): ErBlant<T> = ErBlant(this, Const(other))
-infix fun <T : Any> T.erBlant(other: Uttrykk<List<T>>): ErBlant<T> = ErBlant(Const(this), other)
+infix fun <T : Any> Uttrykk<T>.erBlant(other: Uttrykk<List<T>>): Uttrykk<Boolean> = ErBlant(this, other)
+infix fun <T : Any> Uttrykk<T>.erBlant(other: List<T>): Uttrykk<Boolean> = ErBlant(this, Const(other))
+infix fun <T : Any> T.erBlant(other: Uttrykk<List<T>>): Uttrykk<Boolean> = ErBlant(Const(this), other)
 
-infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: Uttrykk<List<T>>): ErIkkeBlant<T> = ErIkkeBlant(this, other)
-infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: List<T>): ErIkkeBlant<T> = ErIkkeBlant(this, Const(other))
-infix fun <T : Any> T.erIkkeBlant(other: Uttrykk<List<T>>): ErIkkeBlant<T> = ErIkkeBlant(Const(this), other)
+infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: Uttrykk<List<T>>): Uttrykk<Boolean> = ErIkkeBlant(this, other)
+infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: List<T>): Uttrykk<Boolean> = ErIkkeBlant(this, Const(other))
+infix fun <T : Any> T.erIkkeBlant(other: Uttrykk<List<T>>): Uttrykk<Boolean> = ErIkkeBlant(Const(this), other)
 
 /**
  * Dato-sammenlignings-operatorer (norske navn, infix).
  * Disse operatorene er spesifikke for LocalDate og gir mer naturlig språk enn > og <.
  */
-infix fun Uttrykk<java.time.LocalDate>.erEtter(other: Uttrykk<java.time.LocalDate>): StørreEnn<java.time.LocalDate> =
+infix fun Uttrykk<java.time.LocalDate>.erEtter(other: Uttrykk<java.time.LocalDate>): Uttrykk<Boolean> =
     StørreEnn(this, other)
-infix fun Uttrykk<java.time.LocalDate>.erEtter(other: java.time.LocalDate): StørreEnn<java.time.LocalDate> =
+infix fun Uttrykk<java.time.LocalDate>.erEtter(other: java.time.LocalDate): Uttrykk<Boolean> =
     StørreEnn(this, Const(other))
-infix fun java.time.LocalDate.erEtter(other: Uttrykk<java.time.LocalDate>): StørreEnn<java.time.LocalDate> =
+infix fun java.time.LocalDate.erEtter(other: Uttrykk<java.time.LocalDate>): Uttrykk<Boolean> =
     StørreEnn(Const(this), other)
 
-infix fun Uttrykk<java.time.LocalDate>.erEtterEllerLik(other: Uttrykk<java.time.LocalDate>): StørreEllerLik<java.time.LocalDate> =
+infix fun Uttrykk<java.time.LocalDate>.erEtterEllerLik(other: Uttrykk<java.time.LocalDate>): Uttrykk<Boolean> =
     StørreEllerLik(this, other)
-infix fun Uttrykk<java.time.LocalDate>.erEtterEllerLik(other: java.time.LocalDate): StørreEllerLik<java.time.LocalDate> =
+infix fun Uttrykk<java.time.LocalDate>.erEtterEllerLik(other: java.time.LocalDate): Uttrykk<Boolean> =
     StørreEllerLik(this, Const(other))
-infix fun java.time.LocalDate.erEtterEllerLik(other: Uttrykk<java.time.LocalDate>): StørreEllerLik<java.time.LocalDate> =
+infix fun java.time.LocalDate.erEtterEllerLik(other: Uttrykk<java.time.LocalDate>): Uttrykk<Boolean> =
     StørreEllerLik(Const(this), other)
 
-infix fun Uttrykk<java.time.LocalDate>.erFør(other: Uttrykk<java.time.LocalDate>): MindreEnn<java.time.LocalDate> =
+infix fun Uttrykk<java.time.LocalDate>.erFør(other: Uttrykk<java.time.LocalDate>): Uttrykk<Boolean> =
     MindreEnn(this, other)
-infix fun Uttrykk<java.time.LocalDate>.erFør(other: java.time.LocalDate): MindreEnn<java.time.LocalDate> =
+infix fun Uttrykk<java.time.LocalDate>.erFør(other: java.time.LocalDate): Uttrykk<Boolean> =
     MindreEnn(this, Const(other))
-infix fun java.time.LocalDate.erFør(other: Uttrykk<java.time.LocalDate>): MindreEnn<java.time.LocalDate> =
+infix fun java.time.LocalDate.erFør(other: Uttrykk<java.time.LocalDate>): Uttrykk<Boolean> =
     MindreEnn(Const(this), other)
 
-infix fun Uttrykk<java.time.LocalDate>.erFørEllerLik(other: Uttrykk<java.time.LocalDate>): MindreEllerLik<java.time.LocalDate> =
+infix fun Uttrykk<java.time.LocalDate>.erFørEllerLik(other: Uttrykk<java.time.LocalDate>): Uttrykk<Boolean> =
     MindreEllerLik(this, other)
-infix fun Uttrykk<java.time.LocalDate>.erFørEllerLik(other: java.time.LocalDate): MindreEllerLik<java.time.LocalDate> =
+infix fun Uttrykk<java.time.LocalDate>.erFørEllerLik(other: java.time.LocalDate): Uttrykk<Boolean> =
     MindreEllerLik(this, Const(other))
-infix fun java.time.LocalDate.erFørEllerLik(other: Uttrykk<java.time.LocalDate>): MindreEllerLik<java.time.LocalDate> =
+infix fun java.time.LocalDate.erFørEllerLik(other: Uttrykk<java.time.LocalDate>): Uttrykk<Boolean> =
     MindreEllerLik(Const(this), other)
 
 /**
@@ -803,7 +879,7 @@ fun <T : Any> hvis(
     betingelse: Uttrykk<Boolean>,
     så: () -> Uttrykk<T>,
     ellers: () -> Uttrykk<T>
-): Hvis<T> = Hvis(betingelse, så(), ellers())
+): Uttrykk<T> = Hvis(betingelse, så(), ellers())
 
 /**
  * Builder class for betingede uttrykk med fluent API.
@@ -834,11 +910,11 @@ infix fun <T : Any> Uttrykk<Boolean>.så(såBlock: () -> Uttrykk<T>): BetingetBu
  *
  * Må brukes sammen med `.så` for å konstruere et komplett Hvis-uttrykk.
  */
-infix fun <T : Any> BetingetBuilder<T>.ellers(ellersBlock: () -> Uttrykk<T>): Hvis<T> {
+infix fun <T : Any> BetingetBuilder<T>.ellers(ellersBlock: () -> Uttrykk<T>): Uttrykk<T> {
     return Hvis(betingelse, såUttrykk, ellersBlock())
 }
 
-data class Feil<T : Any>(val melding: String) : Uttrykk<T> {
+internal data class Feil<T : Any>(val melding: String) : Uttrykk<T> {
     override fun evaluer(): T = throw IllegalStateException(melding)
     override fun notasjon(): String = "FEIL($melding)"
     override fun konkret(): String = melding
@@ -873,7 +949,7 @@ fun <T : Any> feilUttrykk(melding: String): Uttrykk<T> = Feil(melding)
  * Bruker Kotlin's `lazy` delegate som er thread-safe by default.
  * Cachen er per Memo-instans, så samme Memo-objekt kan gjenbrukes trygt.
  */
-data class Memo<T : Any>(
+internal data class Memo<T : Any>(
     val uttrykk: Uttrykk<T>
 ) : Uttrykk<T> {
 
@@ -911,5 +987,5 @@ data class Memo<T : Any>(
  * val cachetUttrykk = (a + b * c).memoise()
  * ```
  */
-fun <T : Any> Uttrykk<T>.memoise(): Memo<T> =
+fun <T : Any> Uttrykk<T>.memoise(): Uttrykk<T> =
     if (this is Memo) this else Memo(this)

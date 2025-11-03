@@ -1,9 +1,5 @@
 package no.nav.system.rule.dsl.forklaring
 
-import no.nav.system.rule.dsl.formel.Formel
-import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.Verdi
-
 /**
  * Hierarkisk forklaringsstruktur for regelsporing.
  *
@@ -66,19 +62,19 @@ data class HvaForklaring(
 
 /**
  * Forklarer **hvorfor** en regel ble aktivert.
- * Inneholder subsumsjoner og betingelser.
+ * Inneholder betingelser og underliggende forklaringer.
  */
 data class HvorforForklaring(
-    val subsumsjoner: List<SubsumsjonForklaring>,
+    val betingelser: List<String> = emptyList(),
     val underliggende: List<HvorforForklaring> = emptyList(),
     override val nivå: Int = 0
 ) : Forklaring {
     override fun toText(): String = buildString {
         val indent = "    ".repeat(nivå)
-        if (subsumsjoner.isNotEmpty()) {
+        if (betingelser.isNotEmpty()) {
             appendLine("${indent}FORDI")
-            subsumsjoner.forEach { subsumsjonsForklaring ->
-                appendLine("${indent}    ${subsumsjonsForklaring.toText()}")
+            betingelser.forEach { betingelse ->
+                appendLine("${indent}    $betingelse")
             }
         }
         underliggende.forEach { forklaring ->
@@ -88,11 +84,11 @@ data class HvorforForklaring(
 
     override fun toHTML(): String = buildString {
         val indent = "&nbsp;".repeat(nivå * 4)
-        if (subsumsjoner.isNotEmpty()) {
+        if (betingelser.isNotEmpty()) {
             appendLine("$indent<div class='hvorfor'>")
             appendLine("$indent<strong>FORDI</strong><br>")
-            subsumsjoner.forEach { subsumsjonsForklaring ->
-                appendLine("$indent&nbsp;&nbsp;&nbsp;&nbsp;${subsumsjonsForklaring.toHTML()}<br>")
+            betingelser.forEach { betingelse ->
+                appendLine("$indent&nbsp;&nbsp;&nbsp;&nbsp;<span class='betingelse'>$betingelse</span><br>")
             }
             appendLine("$indent</div>")
         }
@@ -101,7 +97,7 @@ data class HvorforForklaring(
         }
     }
 
-    fun copy(nivå: Int) = HvorforForklaring(subsumsjoner, underliggende, nivå)
+    fun copy(nivå: Int) = HvorforForklaring(betingelser, underliggende, nivå)
 }
 
 /**
@@ -204,18 +200,4 @@ data class KomplettForklaring(
 
         appendLine("</div>")
     }
-}
-
-/**
- * Representerer en enkelt subsumsjonsforklaring.
- */
-data class SubsumsjonForklaring(
-    val beskrivelse: String,
-    val verdi1: String,
-    val komparator: String,
-    val verdi2: String,
-    val oppfylt: Boolean
-) {
-    fun toText(): String = "$verdi1 $komparator $verdi2"
-    fun toHTML(): String = "<span class='subsumtion ${if (oppfylt) "oppfylt" else "ikke-oppfylt"}'>$verdi1 $komparator $verdi2</span>"
 }

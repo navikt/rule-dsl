@@ -1,10 +1,10 @@
-package no.nav.system.rule.dsl.demo.forklaring
+package no.nav.system.rule.dsl.demo.forklaring.usecases
 
 import no.nav.system.rule.dsl.demo.domain.ForsteVirkningsdatoGrunnlag
 import no.nav.system.rule.dsl.demo.domain.InngangOgEksportgrunnlag
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Trygdetid
-import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.forklaring.Const
@@ -12,7 +12,7 @@ import no.nav.system.rule.dsl.forklaring.Grunnlag
 import no.nav.system.rule.dsl.forklaring.forklarDetaljert
 import no.nav.system.rule.dsl.forklaring.treVisning
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 /**
@@ -36,11 +36,7 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(IKKE_RELEVANT, resultat.evaluer())
-
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
+        Assertions.assertEquals(UtfallType.IKKE_RELEVANT, resultat.evaluer())
     }
 
     @Test
@@ -58,11 +54,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(false))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -82,11 +75,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(IKKE_OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.IKKE_OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -105,11 +95,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -135,11 +122,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -157,11 +141,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(false))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -179,11 +160,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(false))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -202,11 +180,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -225,11 +200,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(IKKE_OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.IKKE_OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -248,11 +220,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(IKKE_OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.IKKE_OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -278,11 +247,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -308,11 +274,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -338,11 +301,8 @@ class PersonErFlyktningTest {
             kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
         )
 
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 
     @Test
@@ -363,10 +323,7 @@ class PersonErFlyktningTest {
         )
 
         // Skal bruke K20 trygdetid (25) og dermed oppfylle overgangsregel
-        assertEquals(OPPFYLT, resultat.evaluer())
+        Assertions.assertEquals(UtfallType.OPPFYLT, resultat.evaluer())
 
-        println(resultat.forklarDetaljert(resultat.navn))
-        println()
-        println(resultat.treVisning())
     }
 }

@@ -436,4 +436,137 @@ class UttrykkTest {
         assertEquals(5.0, uttrykk.evaluer())  // min returns Double
         assertEquals("min(a,b)", uttrykk.notasjon())  // No space after comma
     }
+
+    // ========================================================================
+    // Tester for heltallsdivisjon (IntDiv)
+    // ========================================================================
+
+    @Test
+    fun `IntDiv skal gi heltallsdivisjon med truncate`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(3))
+        val uttrykk = a intdiv b
+
+        assertEquals(3, uttrykk.evaluer())
+        assertEquals("a // b", uttrykk.notasjon())
+        assertEquals("10 // 3", uttrykk.konkret())
+    }
+
+    @Test
+    fun `IntDiv skal bruke truncate ikke floor for negative tall`() {
+        val a = Grunnlag("a", Const(-10))
+        val b = Grunnlag("b", Const(3))
+        val uttrykk = a intdiv b
+
+        // Truncate: -10 / 3 = -3.33... -> -3 (mot null)
+        // Floor ville gitt: -4 (mot minus uendelig)
+        assertEquals(-3, uttrykk.evaluer())
+        assertEquals("a // b", uttrykk.notasjon())
+    }
+
+    @Test
+    fun `IntDiv med null skal kaste exception`() {
+        val a = Grunnlag("a", Const(100))
+        val b = Grunnlag("b", Const(0))
+        val uttrykk = a intdiv b
+
+        assertThrows(ArithmeticException::class.java) {
+            uttrykk.evaluer()
+        }
+    }
+
+    @Test
+    fun `IntDiv skal fungere med Number literals`() {
+        val x = Grunnlag("x", Const(20))
+
+        // Uttrykk intdiv Number
+        val uttrykk1 = x intdiv 3
+        assertEquals(6, uttrykk1.evaluer())
+        assertEquals("x // 3", uttrykk1.notasjon())
+
+        // Number intdiv Uttrykk
+        val uttrykk2 = 20 intdiv x
+        assertEquals(1, uttrykk2.evaluer())
+        assertEquals("20 // x", uttrykk2.notasjon())
+    }
+
+    @Test
+    fun `IntDiv skal returnere Int type ikke Double`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(3))
+
+        val divResult = a / b  // Regular division
+        val intDivResult = a intdiv b  // Integer division
+
+        // Verify return types
+        assertEquals(3.33, divResult.evaluer(), 0.01)
+        assertEquals(3, intDivResult.evaluer())
+    }
+
+    @Test
+    fun `IntDiv i kompleks uttrykk`() {
+        val a = Grunnlag("a", Const(100))
+        val b = Grunnlag("b", Const(30))
+        val c = Grunnlag("c", Const(2))
+
+        // (a intdiv b) * c = (100 // 30) * 2 = 3 * 2 = 6
+        val uttrykk = (a intdiv b) * c
+
+        assertEquals(6, uttrykk.evaluer())
+        assertTrue(uttrykk.notasjon().contains("//"))
+    }
+
+    @Test
+    fun `IntDiv forklar skal generere HvordanForklaring`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(3))
+        val uttrykk = a intdiv b
+
+        val forklaring = uttrykk.forklar("resultat")
+
+        assertEquals("resultat", forklaring.hvaForklaring.navn)
+        assertEquals("a // b", forklaring.hvaForklaring.symbolskUttrykk)
+        assertEquals(3, forklaring.hvaForklaring.resultat)
+    }
+
+    @Test
+    fun `IntDiv forenkling skal evaluere konstante subtre`() {
+        val x = Grunnlag("x", Const(10))
+
+        // (20 intdiv 3) + x skal forenkles til 6 + x
+        val uttrykk = (Const<Int>(20) intdiv Const<Int>(3)) + x
+        val forenklet = uttrykk.forenkel()
+
+        assertEquals(16, forenklet.evaluer())
+
+        // Sjekk at konstante delen er forenklet
+        assertTrue(forenklet is Add)
+        assertTrue((forenklet as Add).venstre is Const)
+        assertEquals(6, forenklet.venstre.evaluer())
+    }
+
+    @Test
+    fun `IntDiv grunnlagListe skal returnere alle grunnlag`() {
+        val a = Grunnlag("a", Const(100))
+        val b = Grunnlag("b", Const(30))
+
+        val uttrykk = a intdiv b
+        val grunnlagListe = uttrykk.grunnlagListe()
+
+        assertEquals(2, grunnlagListe.size)
+        assertTrue(grunnlagListe.any { it.navn == "a" })
+        assertTrue(grunnlagListe.any { it.navn == "b" })
+    }
+
+    @Test
+    fun `IntDiv dybde skal beregnes korrekt`() {
+        val a = Grunnlag("a", Const(10))
+        val b = Grunnlag("b", Const(3))
+
+        val enkel = a intdiv b
+        assertEquals(2, enkel.dybde())
+
+        val kompleks = (a intdiv b) * Const<Int>(2)
+        assertEquals(3, kompleks.dybde())
+    }
 }

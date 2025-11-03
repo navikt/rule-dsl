@@ -279,7 +279,7 @@ class UttrykkBooleanTest {
     fun `Hvis med Number-resultat`() {
         val alder = Grunnlag("alder", Const(67))
 
-        val pensjon: Hvis<Int> = hvis(
+        val pensjon: Uttrykk<Int> = hvis(
             betingelse = alder erStørreEllerLik 67,
             så = { Const(300000) },
             ellers = { Const(0) }
