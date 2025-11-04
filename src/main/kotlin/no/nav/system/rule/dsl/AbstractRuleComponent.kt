@@ -1,12 +1,14 @@
 package no.nav.system.rule.dsl
 
+import jdk.internal.org.jline.utils.Colors.s
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
-import no.nav.system.rule.dsl.formel.Formel
 import no.nav.system.rule.dsl.inspections.hvorfor
 import no.nav.system.rule.dsl.resource.Root
 import no.nav.system.rule.dsl.resource.root
-import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
+import no.nav.system.rule.dsl.rettsregel.Const
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import java.io.Serializable
 import kotlin.reflect.KClass
 
@@ -57,19 +59,49 @@ abstract class AbstractRuleComponent : Serializable {
         return resource as T
     }
 
+//    /**
+//     * Produserer ForklartFaktum med sporing og angitt Formel.
+//     */
+//    fun <T : Number> faktum(formel: Formel<T>): ForklartFaktum<T> {
+//        return ForklartFaktum(
+//            formel.name,
+//            formel.value,
+//            /**
+//             * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
+//             * Resultatet formes av "hvorfor-renderer".
+//             */
+//            this.root().hvorfor(target = this@AbstractRuleComponent),
+//            hvordan = formel
+//        )
+//    }
+
     /**
-     * Produserer ForklartFaktum med sporing og angitt Formel.
+     * Produserer ForklartFaktum med sporing og angitt Uttrykk.
      */
-    fun <T : Number> faktum(formel: Formel<T>): ForklartFaktum<T> {
-        return ForklartFaktum(
-            formel.name,
-            formel.value,
+    fun <T : Any> faktum(navn: String, uttrykk: Uttrykk<T>): Faktum<T> {
+        return Faktum(
+            navn = navn,
+            uttrykk = uttrykk,
             /**
              * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
              * Resultatet formes av "hvorfor-renderer".
              */
-            this.root().hvorfor(target = this@AbstractRuleComponent),
-            hvordan = formel
+            hvorfor = root().hvorfor(target = this@AbstractRuleComponent)
+        )
+    }
+
+    /**
+     * Produserer ForklartFaktum med sporing og angitt verdi.
+     */
+    fun <T : Any> faktum(navn: String, verdi: T): Faktum<T> {
+        return Faktum(
+            navn = navn,
+            uttrykk = Const(verdi),
+            /**
+             * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
+             * Resultatet formes av "hvorfor-renderer".
+             */
+            hvorfor = root().hvorfor(target = this@AbstractRuleComponent)
         )
     }
 

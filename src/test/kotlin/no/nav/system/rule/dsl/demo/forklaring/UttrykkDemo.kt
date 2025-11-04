@@ -1,7 +1,10 @@
 package no.nav.system.rule.dsl.demo.forklaring
 
-import no.nav.system.rule.dsl.demo.forklaring.usecases.beregnSlitertillegg
-import no.nav.system.rule.dsl.forklaring.*
+import no.nav.system.rule.dsl.rettsregel.Const
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.operators.div
+import no.nav.system.rule.dsl.rettsregel.operators.plus
+import no.nav.system.rule.dsl.rettsregel.operators.times
 
 /**
  * Demonstrasjon av rekursiv Uttrykk-struktur for regelsporing.
@@ -18,16 +21,13 @@ fun main() {
     println("=".repeat(80))
     println()
 
-    uttrykkDirekteGrunnlagSyntaks()
+    uttrykkDirekteFaktumSyntaks()
     println("\n" + "=".repeat(80) + "\n")
 
     uttrykkEnkelBeregning()
     println("\n" + "=".repeat(80) + "\n")
 
     uttrykkKompleksBeregning()
-    println("\n" + "=".repeat(80) + "\n")
-
-    uttrykkNavngitteUttrykk()
     println("\n" + "=".repeat(80) + "\n")
 
     uttrykkTreVisning()
@@ -37,26 +37,26 @@ fun main() {
 }
 
 /**
- * Demonstrasjon av direkte Grunnlag syntaks.
+ * Demonstrasjon av direkte Faktum syntaks.
  */
-fun uttrykkDirekteGrunnlagSyntaks() {
-    println("1. DIREKTE GRUNNLAG SYNTAKS - Enkel og ren kode")
+fun uttrykkDirekteFaktumSyntaks() {
+    println("1. DIREKTE Faktum SYNTAKS - Enkel og ren kode")
     println("-".repeat(80))
 
-    val G = Grunnlag("G", Const(110000))
-    val sats = Grunnlag("sats", Const(0.25))
-    val måneder = Grunnlag("måneder", Const(12))
+    val G = Faktum("G", Const(110000))
+    val sats = Faktum("sats", Const(0.25))
+    val måneder = Faktum("måneder", Const(12))
 
-    // Direkte bruk av Grunnlag
+    // Direkte bruk av Faktum
     val uttrykk = sats * G / måneder
 
-    println("SYNTAKS (direkte Grunnlag):")
+    println("SYNTAKS (direkte Faktum):")
     println("  Kode: val uttrykk = sats * G / måneder")
     println("  Resultat: ${uttrykk.evaluer()}")
     println()
 
     println("Kompakt forklaring:")
-    println(uttrykk.forklarKompakt("fulltSlitertillegg"))
+    println(uttrykk.notasjon())
 }
 
 /**
@@ -66,8 +66,8 @@ fun uttrykkEnkelBeregning() {
     println("2. ENKEL BEREGNING - Grunnbeløp per måned")
     println("-".repeat(80))
 
-    val G = Grunnlag("G", Const(110000))
-    val måneder = Grunnlag("måneder", Const(12))
+    val G = Faktum("G", Const(110000))
+    val måneder = Faktum("måneder", Const(12))
 
     // Direkte syntaks
     val uttrykk = G / måneder
@@ -75,7 +75,7 @@ fun uttrykkEnkelBeregning() {
     println("Resultat: ${uttrykk.evaluer()}")
     println()
     println("Kompakt forklaring:")
-    println(uttrykk.forklarKompakt("grunnbeløpPerMåned"))
+    println(uttrykk.notasjon())
 }
 
 /**
@@ -85,9 +85,9 @@ fun uttrykkKompleksBeregning() {
     println("3. KOMPLEKS BEREGNING - Slitertillegg formel")
     println("-".repeat(80))
 
-    val G = Grunnlag("G", Const(110000))
-    val sats = Grunnlag("sats", Const(0.25))
-    val måneder = Grunnlag("måneder", Const(12))
+    val G = Faktum("G", Const(110000))
+    val sats = Faktum("sats", Const(0.25))
+    val måneder = Faktum("måneder", Const(12))
 
     // Direkte syntaks: sats * G / måneder
     val uttrykk = sats * G / måneder
@@ -98,30 +98,9 @@ fun uttrykkKompleksBeregning() {
     println()
 
     println("Detaljert forklaring:")
-    println(uttrykk.forklarDetaljert("fulltSlitertillegg"))
+    println(uttrykk.notasjon())
 }
 
-/**
- * Navngitte subforklaringer (tilsvarer "locked" formler).
- */
-fun uttrykkNavngitteUttrykk() {
-
-    val slitertillegg = beregnSlitertillegg(
-        faktiskTrygdetid = Grunnlag("faktiskTrygdetid", Const(20)),
-        antallMåneder = Grunnlag("antallMånederEtterNedreAldersgrense", Const(24))
-    ) as Grunnlag<Double>
-    println("4. NAVNGITTE UTTRYKK - $slitertillegg med justeringer")
-    println("-".repeat(80))
-
-    println("Resultat: ${slitertillegg.navn}")
-    println()
-    println("Detaljert forklaring:")
-    println(slitertillegg.forklarDetaljert(slitertillegg.navn, maxDybde = 3))
-
-    println()
-    println("Strukturtre:")
-    println(slitertillegg.treVisning())
-}
 
 /**
  * Visualisering av uttrykkstre.
@@ -130,18 +109,15 @@ fun uttrykkTreVisning() {
     println("5. TRE-VISUALISERING - Struktur av uttrykkstre")
     println("-".repeat(80))
 
-    val a = Grunnlag("a", Const(10))
-    val b = Grunnlag("b", Const(20))
-    val c = Grunnlag("c", Const(30))
+    val a = Faktum("a", Const(10))
+    val b = Faktum("b", Const(20))
+    val c = Faktum("c", Const(30))
 
-    // (a + b) * c - med direkte Grunnlag syntaks
+    // (a + b) * c - med direkte Faktum syntaks
     val uttrykk = (a + b) * c
 
     println("Uttrykk: ${uttrykk.notasjon()}")
     println("Resultat: ${uttrykk.evaluer()}")
-    println()
-    println("Tre-struktur:")
-    println(uttrykk.treVisning())
 }
 
 /**
@@ -151,40 +127,13 @@ fun uttrykkTransformasjoner() {
     println("6. TRANSFORMASJONER - Visitor pattern og forenkling")
     println("-".repeat(80))
 
-    val x = Grunnlag("x", Const(5))
-    val y = Grunnlag("y", Const(3))
+    val x = Faktum("x", Const(5))
+    val y = Faktum("y", Const(3))
 
-    // Komplekst uttrykk: (2 * 3) + (x * y) - direkte Grunnlag syntaks
-    val uttrykk = (Const<Int>(2) * Const<Int>(3)) + (x * y)
+    // Komplekst uttrykk: (2 * 3) + (x * y) - direkte Faktum syntaks
+    val uttrykk = (Const(2) * Const(3)) + (x * y)
 
     println("Originalt uttrykk:")
     println("  Notasjon: ${uttrykk.notasjon()}")
     println("  Resultat: ${uttrykk.evaluer()}")
-    println()
-
-    // Forenkling (konstante subtre evalueres)
-    val forenklet = uttrykk.forenkel()
-    println("Forenklet uttrykk:")
-    println("  Notasjon: ${forenklet.notasjon()}")
-    println("  Resultat: ${forenklet.evaluer()}")
-    println()
-
-    // Finn alle Grunnlag med visitor
-    val grunnlag = uttrykk.visit { expr ->
-        when (expr) {
-            is Grunnlag -> listOf(expr.navn)
-            else -> emptyList()
-        }
-    }
-    println("Grunnlag i uttrykket: ${grunnlag.distinct()}")
-    println()
-
-    // Substitusjon (erstatt variabel) - fungerer ikke med Grunnlag
-    // siden erstatt() er laget for Var med faktum.name
-    println("Substitusjon er ikke støttet for Grunnlag (kun for Var)")
-    println()
-
-    // Dybde av uttrykkstre
-    println("Dybde av uttrykkstre: ${uttrykk.dybde()}")
-    println("Antall grunnlag: ${uttrykk.grunnlagListe().size}")
 }

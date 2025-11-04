@@ -68,7 +68,7 @@ class BeregnAlderspensjonFlyt(
          * Task: Beregn Grunnpensjon
          */
         output.grunnpensjon = BeregnGrunnpensjonRS(
-            grunnbeløpByDate(virkningstidspunkt.value),
+            grunnbeløpByDate(virkningstidspunkt.evaluer()),
             output.anvendtTrygdetid!!.år,
             grunnpensjonSats
         ).run(this)

@@ -26,8 +26,8 @@ class BeregnAlderspensjonServiceTest {
         val response = BeregnAlderspensjonService(params).run()
 
         assertEquals(3, response.anvendtTrygdetid?.år)
-        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.value)
-        assertEquals(OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.value)
+        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.evaluer())
+        assertEquals(OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.evaluer())
 
         assertEquals(9000, response.grunnpensjon?.netto)
         assertEquals(1.0, response.grunnpensjon?.prosentsats)
@@ -50,8 +50,8 @@ class BeregnAlderspensjonServiceTest {
         val response = BeregnAlderspensjonService(params).run()
 
         assertEquals(19, response.anvendtTrygdetid?.år)
-        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.value)
-        assertEquals(IKKE_OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.value)
+        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.evaluer())
+        assertEquals(IKKE_OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.evaluer())
 
         assertEquals(42750, response.grunnpensjon?.netto)
         assertEquals(0.9, response.grunnpensjon?.prosentsats)

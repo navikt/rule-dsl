@@ -4,12 +4,8 @@ import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
-import no.nav.system.rule.dsl.formel.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.erFør
-import no.nav.system.rule.dsl.rettsregel.erLik
-import no.nav.system.rule.dsl.rettsregel.erMindreEnn
-import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
+import no.nav.system.rule.dsl.rettsregel.operators.*
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -25,11 +21,11 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
     innUttakstidspunkt: YearMonth,
     innPerson: Person,
     innGrunnbeløp: Int
-) : AbstractDemoRuleset<ForklartFaktum<Double>>() {
+) : AbstractDemoRuleset<Faktum<Double>>() {
     /**
      * Faktum
      */
-    private val faktiskTrygdetid = Formel.variable("faktiskTrygdetid", innPerson.trygdetid.faktiskTrygdetid)
+    private val faktiskTrygdetid = Faktum("faktiskTrygdetid", innPerson.trygdetid.faktiskTrygdetid)
     private val uttakstidspunkt = Faktum("uttakstidspunkt", innUttakstidspunkt)
     private val nedrePensjonsDato = Faktum("nedrePensjonsDato", innPerson.nedrePensjonsDato())
     private val fullTrygdetid = Faktum("fullTrygdetid", 40)
@@ -37,14 +33,14 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
     /**
      * Formler
      */
-    private val antallMånederEtterNedrePensjonsDato = Formel.variable(
+    private val antallMånederEtterNedrePensjonsDato = Faktum(
         "antallMånederEtterNedrePensjonsDato",
-        ChronoUnit.MONTHS.between(nedrePensjonsDato.value, uttakstidspunkt.value).toInt().coerceAtMost(MND_36)
+        ChronoUnit.MONTHS.between(nedrePensjonsDato.evaluer(), uttakstidspunkt.evaluer()).toInt().coerceAtMost(MND_36)
     )
-    private val G = Formel.variable("G", innGrunnbeløp)
-    private val fulltSlitertillegg: Formel<Double> = formula("fulltSlitertillegg") { expression(0.25 * G / 12) }
-    private val justeringsFaktor: Formel<Double> = formula("justeringsFaktor") { expression((MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36) }
-    private val trygdetidFaktor: Formel<Double> = formula("trygdetidFaktor") { expression(faktiskTrygdetid / fullTrygdetid.value) }
+    private val G = Faktum("G", innGrunnbeløp)
+    private val fulltSlitertillegg: Faktum<Double> = Faktum("fulltSlitertillegg", 0.25 * G / 12)
+    private val justeringsFaktor: Faktum<Double> = Faktum("justeringsFaktor", (MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36)
+    private val trygdetidFaktor: Faktum<Double> = Faktum("trygdetidFaktor", faktiskTrygdetid / fullTrygdetid.evaluer())
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
@@ -75,11 +71,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
             OG { faktiskTrygdetid erLik fullTrygdetid }
             SÅ {
                 RETURNER(
-                    faktum(
-                        formula("slitertillegg") {
-                            expression(fulltSlitertillegg)
-                        }
-                    )
+                    faktum("slitertillegg", fulltSlitertillegg)
                 )
             }
         }
@@ -116,11 +108,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
             OG { faktiskTrygdetid erMindreEnn fullTrygdetid }
             SÅ {
                 RETURNER(
-                    faktum(
-                        formula("slitertillegg") {
-                            expression(fulltSlitertillegg * trygdetidFaktor)
-                        }
-                    )
+                    faktum("slitertillegg", fulltSlitertillegg * trygdetidFaktor)
                 )
             }
         }
@@ -157,11 +145,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
             OG { faktiskTrygdetid erLik fullTrygdetid }
             SÅ {
                 RETURNER(
-                    faktum(
-                        formula("slitertillegg") {
-                            expression(fulltSlitertillegg * justeringsFaktor)
-                        }
-                    )
+                    faktum("slitertillegg", fulltSlitertillegg * justeringsFaktor)
                 )
             }
         }
@@ -201,11 +185,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
             OG { faktiskTrygdetid erMindreEnn fullTrygdetid }
             SÅ {
                 RETURNER(
-                    faktum(
-                        formula("slitertillegg") {
-                            expression(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
-                        }
-                    )
+                    faktum("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
                 )
             }
         }

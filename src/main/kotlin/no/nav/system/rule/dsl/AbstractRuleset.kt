@@ -6,6 +6,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListDomainPredicate
 import org.jetbrains.annotations.TestOnly
@@ -169,9 +170,15 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         val list = findRulesByNameStartsWith(this)
         return ListDomainPredicate(
             comparator = ListComparator.MINST_EN_AV,
-            verdi = Faktum("Regelreferanse", this),
+            uttrykk = Faktum("Regelreferanse", this),
             function = { list.any { it.fired() } },
-            verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) },
+            uttrykkList = list.filter { it.children.isNotEmpty() }.map {
+                Faktum(
+                    navn = it.name(),
+                    uttrykk = Const(it.name()),
+                    rvsId = null
+                )
+            },
         )
     }
 
@@ -186,9 +193,15 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         val list = findRulesByNameStartsWith(this)
         return ListDomainPredicate(
             comparator = ListComparator.ALLE,
-            verdi = Faktum("Regelreferanse", this),
+            uttrykk = Faktum("Regelreferanse", this),
             function = { list.all { it.fired() } },
-            verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) }
+            uttrykkList = list.filter { it.children.isNotEmpty() }.map {
+                Faktum(
+                    navn = it.name(),
+                    uttrykk = Const(it.name()),
+                    rvsId = null
+                )
+            }
         )
     }
 
@@ -196,9 +209,15 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         val list = findRulesByNameStartsWith(this)
         return ListDomainPredicate(
             comparator = ListComparator.INGEN,
-            verdi = Faktum("Regelreferanse", this),
+            uttrykk = Faktum("Regelreferanse", this),
             function = { list.none { it.fired() } },
-            verdiList = list.filter { it.children.isNotEmpty() }.map { Faktum(it.name()) }
+            uttrykkList = list.filter { it.children.isNotEmpty() }.map {
+                Faktum(
+                    navn = it.name(),
+                    uttrykk = Const(it.name()),
+                    rvsId = null
+                )
+            }
         )
     }
 

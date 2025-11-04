@@ -38,14 +38,14 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         // Verify calculation
         val fullt = 0.25 * grunnbeløp / 12
         val forventet = fullt * 1.0 * (20.0 / FULL_TRYGDETID)
-        assertEquals(forventet, faktum.value, 1e-9)
+        assertEquals(forventet, faktum.evaluer(), 1e-9)
 
         // Verify trace information exists
-        assertNotNull(faktum.hvorfor)
-        assertNotNull(faktum.hvordan)
+        assertNotNull(faktum.hvorfor())
+        assertNotNull(faktum.hvordan())
 
         // Verify trace contains expected content
-        val hvordanText = faktum.hvordan.toString()
+        val hvordanText = faktum.hvordan().toString()
         assertTrue(hvordanText.contains("slitertillegg"), "HVORDAN should contain formula name")
     }
 
@@ -72,13 +72,13 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val fullt = 0.25 * grunnbeløp / 12
         val faktorMnd = (36.0 - 35.0) / 36.0
         val faktorTrygdetid = 40.0 / FULL_TRYGDETID
-        assertEquals(fullt * faktorMnd * faktorTrygdetid, faktum.value, 1e-9)
+        assertEquals(fullt * faktorMnd * faktorTrygdetid, faktum.evaluer(), 1e-9)
 
         // Verify trace information
-        assertNotNull(faktum.hvorfor, "HVORFOR trace should exist")
-        assertNotNull(faktum.hvordan, "HVORDAN trace should exist")
+        assertNotNull(faktum.hvorfor(), "HVORFOR trace should exist")
+        assertNotNull(faktum.hvordan(), "HVORDAN trace should exist")
 
-        val hvorforText = faktum.hvorfor
+        val hvorforText = faktum.hvorfor()
         assertTrue(hvorforText.isNotEmpty(), "HVORFOR should not be empty")
     }
 
@@ -100,11 +100,11 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val innvilget = response as Response.SliterordningForklartFaktum.Innvilget
         val faktum = innvilget.slitertillegg
 
-        assertEquals(0.0, faktum.value, 1e-9)
+        assertEquals(0.0, faktum.evaluer(), 1e-9)
 
         // Even with zero result, trace should exist
-        assertNotNull(faktum.hvorfor)
-        assertNotNull(faktum.hvordan)
+        assertNotNull(faktum.hvorfor())
+        assertNotNull(faktum.hvordan())
     }
 
     @Test
@@ -125,11 +125,11 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val innvilget = response as Response.SliterordningForklartFaktum.Innvilget
         val faktum = innvilget.slitertillegg
 
-        assertEquals(0.0, faktum.value, 1e-9)
+        assertEquals(0.0, faktum.evaluer(), 1e-9)
 
         // Verify trace exists
-        assertNotNull(faktum.hvorfor)
-        assertNotNull(faktum.hvordan)
+        assertNotNull(faktum.hvorfor())
+        assertNotNull(faktum.hvordan())
     }
 
     @Test
@@ -151,7 +151,7 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val faktum = innvilget.slitertillegg
 
         // Verify HVORDAN contains formula components
-        val hvordanText = faktum.hvordan.toString()
+        val hvordanText = faktum.hvordan()
 
         // Should contain references to the component formulas
         assertTrue(
@@ -179,7 +179,7 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val faktum = innvilget.slitertillegg
 
         // Verify HVORFOR contains rule execution trace
-        val hvorforText = faktum.hvorfor
+        val hvorforText = faktum.hvorfor()
 
         assertFalse(hvorforText.isEmpty(), "HVORFOR should contain execution trace")
 
@@ -220,15 +220,15 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val faktum2 = (response2 as Response.SliterordningForklartFaktum.Innvilget).slitertillegg
 
         // Both should have trace information
-        assertNotNull(faktum1.hvorfor)
-        assertNotNull(faktum1.hvordan)
-        assertNotNull(faktum2.hvorfor)
-        assertNotNull(faktum2.hvordan)
+        assertNotNull(faktum1.hvorfor())
+        assertNotNull(faktum1.hvordan())
+        assertNotNull(faktum2.hvorfor())
+        assertNotNull(faktum2.hvordan())
 
         // Trace structure should be similar (both should reference same rules/formulas)
         // though specific values will differ
-        assertFalse(faktum1.hvorfor.isEmpty())
-        assertFalse(faktum2.hvorfor.isEmpty())
+        assertFalse(faktum1.hvorfor().isEmpty())
+        assertFalse(faktum2.hvorfor().isEmpty())
     }
 
     @Test
@@ -255,19 +255,19 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         println("=".repeat(80))
         println()
         println("HVA:")
-        println("  Navn: ${faktum.name}")
-        println("  Verdi: ${faktum.value}")
+        println("  Navn: ${faktum.navn}")
+        println("  Verdi: ${faktum.evaluer()}")
         println()
         println("HVORFOR:")
-        println(faktum.hvorfor.prependIndent("  "))
+        println(faktum.hvorfor().prependIndent("  "))
         println()
         println("HVORDAN:")
-        println(faktum.hvordan.toString().prependIndent("  "))
+        println(faktum.hvordan().prependIndent("  "))
         println()
         println("=".repeat(80))
 
         // Basic assertions
-        assertTrue(faktum.value > 0, "Value should be positive")
-        assertFalse(faktum.hvorfor.isEmpty())
+        assertTrue(faktum.evaluer() > 0, "Value should be positive")
+        assertFalse(faktum.hvorfor().isEmpty())
     }
 }

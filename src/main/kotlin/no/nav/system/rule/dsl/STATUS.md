@@ -22,5 +22,23 @@ Se faktum-trace-options.md.
 
 10. Dersom vi skal gjøre større endringer på hvordan regelsett og regler fungerer, vurder om vi kan løse de to store svakhetene med dagens løsning: 1) en not null sjekk i et predikat er opplyser ikke påfølgende predikater, eller SÅ-blokken. 2) regel-chaining er i dag gjort med string. Dette kunne vært bedre med val regelNavn = regel(..). 3) Dagens løsning har ingen muligheter til å skrive ut en "passivt" regelgraf (må ha data for å kjøre). Det hadde vært interessant å se om vi kunne fått ut en statisk tilstandstre av regler/flyter etc.
 
-  
 
+
+
+
+DEL 2
+1. Akkumulering ble ikke like enkelt. Tidligere:
+
+```kotlin
+//Ny:
+ svar.faktiskTrygdetidIMåneder = Faktum(svar.faktiskTrygdetidIMåneder.navn, svar.faktiskTrygdetidIMåneder.evaluer() + økning)
+//Gammel:
+ svar.faktiskTrygdetidIMåneder.value += økning
+
+// Denne er Unit i kotlin, ellers hadde dette vært enkelt.
+ operator fun <T : Number> Faktum<T>.plusAssign(value: T) : Unit 
+```
+
+2. arc.faktum(...) i SÅ-blokken er ikke greit. Det er svært lett å blande Faktum konstruktøren med faktum funsjonen.
+
+3. Uklart om Const skal være internal eller ikke. Hvis vi vil ha den eksponert, kan vi gjeninnføre navngi funksjon som gjør Const til Faktum.

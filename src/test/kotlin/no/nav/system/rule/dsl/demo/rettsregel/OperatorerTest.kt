@@ -1,26 +1,29 @@
 package no.nav.system.rule.dsl.demo.rettsregel
 
 import no.nav.system.rule.dsl.demo.helper.localDate
-import no.nav.system.rule.dsl.rettsregel.*
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.operators.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class OperatorerTest {
 
     companion object {
-        val dato1990 = Faktum(localDate(1990, 1, 1))
-        val dato2000 = Faktum(localDate(2000, 1, 1))
+        val dato1990 = Faktum("1.1.1990", localDate(1990, 1, 1))
+        val dato2000 = Faktum("1.1.2000", localDate(2000, 1, 1))
 
-        const val year1996 = 1996
+        const val YEAR1996 = 1996
 
-        val tjue = Faktum(20)
-        val fem = Faktum(5)
+        val tjue = Faktum("tjue", 20)
+        val fem = Faktum("fem", 5)
 
         val flagg = Faktum("flagg", true)
 
         val list = listOf("A", "B", "C")
         val A = Faktum("A", "A")
         val D = Faktum("D", "D")
+
+        val SANN = Faktum("SANN", true)
     }
 
     /**
@@ -127,11 +130,11 @@ class OperatorerTest {
 
     @Test
     fun erStørre() {
-        (tjue erStørre fem).apply {
+        (tjue erStørreEnn fem).apply {
             assertTrue(fired())
             assertEquals("JA '20' er større enn '5'", toString())
         }
-        (fem erStørre tjue).apply {
+        (fem erStørreEnn tjue).apply {
             assertFalse(fired())
             assertEquals("NEI '5' må være større enn '20'", toString())
         }
@@ -175,11 +178,11 @@ class OperatorerTest {
 
     @Test
     fun erStørreNumber() {
-        (tjue erStørre 5).apply {
+        (tjue erStørreEnn 5).apply {
             assertTrue(fired())
             assertEquals("JA '20' er større enn '5'", toString())
         }
-        (fem erStørre 20).apply {
+        (fem erStørreEnn 20).apply {
             assertFalse(fired())
             assertEquals("NEI '5' må være større enn '20'", toString())
         }
@@ -190,11 +193,11 @@ class OperatorerTest {
      */
     @Test
     fun erMindreEllerLikDatoOgTall() {
-        (dato1990 erMindreEllerLik year1996).apply {
+        (dato1990 erMindreEllerLik YEAR1996).apply {
             assertTrue(fired())
             assertEquals("JA '1990-01-01' er mindre eller lik '1996'", toString())
         }
-        (dato2000 erMindreEllerLik year1996).apply {
+        (dato2000 erMindreEllerLik YEAR1996).apply {
             assertFalse(fired())
             assertEquals("NEI '2000-01-01' må være mindre eller lik '1996'", toString())
         }
@@ -202,11 +205,11 @@ class OperatorerTest {
 
     @Test
     fun erMindreEnnDatoOgTall() {
-        (dato1990 erMindreEnn year1996).apply {
+        (dato1990 erMindreEnn YEAR1996).apply {
             assertTrue(fired())
             assertEquals("JA '1990-01-01' er mindre enn '1996'", toString())
         }
-        (dato2000 erMindreEnn year1996).apply {
+        (dato2000 erMindreEnn YEAR1996).apply {
             assertFalse(fired())
             assertEquals("NEI '2000-01-01' må være mindre enn '1996'", toString())
         }
@@ -214,11 +217,11 @@ class OperatorerTest {
 
     @Test
     fun erStørreEllerLikDatoOgTall() {
-        (dato2000 erStørreEllerLik year1996).apply {
+        (dato2000 erStørreEllerLik YEAR1996).apply {
             assertTrue(fired())
             assertEquals("JA '2000-01-01' er større eller lik '1996'", toString())
         }
-        (dato1990 erStørreEllerLik year1996).apply {
+        (dato1990 erStørreEllerLik YEAR1996).apply {
             assertFalse(fired())
             assertEquals("NEI '1990-01-01' må være større eller lik '1996'", toString())
         }
@@ -226,11 +229,11 @@ class OperatorerTest {
 
     @Test
     fun erStørreEnnDatoOgTall() {
-        (dato2000 erStørreEnn year1996).apply {
+        (dato2000 erStørreEnn YEAR1996).apply {
             assertTrue(fired())
             assertEquals("JA '2000-01-01' er større enn '1996'", toString())
         }
-        (dato1990 erStørreEnn year1996).apply {
+        (dato1990 erStørreEnn YEAR1996).apply {
             assertFalse(fired())
             assertEquals("NEI '1990-01-01' må være større enn '1996'", toString())
         }
@@ -265,15 +268,15 @@ class OperatorerTest {
 
     @Test
     fun erLikFaktum() {
-        (flagg erLik Faktum(true)).apply {
+        (flagg erLik SANN).apply {
             assertTrue(fired())
             assertEquals("JA 'flagg' (true) er lik 'true'", toString())
         }
-        (tjue erLik Faktum(20)).apply {
+        (tjue erLik Faktum("TJUE!", 20)).apply {
             assertTrue(fired())
             assertEquals("JA '20' er lik '20'", toString())
         }
-        (Faktum(false) erLik Faktum(true)).apply {
+        (Faktum("niks", false) erLik SANN).apply {
             assertFalse(fired())
             assertEquals("NEI 'false' må være lik 'true'", toString())
         }
@@ -285,15 +288,15 @@ class OperatorerTest {
 
     @Test
     fun erUlikFaktum() {
-        (flagg erUlik Faktum(false)).apply {
+        (flagg erUlik Faktum("niks", false)).apply {
             assertTrue(fired())
             assertEquals("JA 'flagg' (true) er ulik 'false'", toString())
         }
-        (tjue erUlik Faktum(3)).apply {
+        (tjue erUlik Faktum("tre", 3)).apply {
             assertTrue(fired())
             assertEquals("JA '20' er ulik '3'", toString())
         }
-        (Faktum(false) erUlik Faktum(false)).apply {
+        (Faktum("niks", false) erUlik Faktum("niks!!", false)).apply {
             assertFalse(fired())
             assertEquals("NEI 'false' må være ulik 'false'", toString())
         }

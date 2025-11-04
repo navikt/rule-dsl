@@ -9,7 +9,7 @@ import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.ruleservice.grunnbeløpByYearMonth
 import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.erMindreEnn
+import no.nav.system.rule.dsl.rettsregel.operators.erMindreEnn
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -43,7 +43,7 @@ class BeregnSlitertilleggRS(
             HVIS { antallMånederEtterNedreAldersgrense erMindreEnn TRE_ÅR }
             SÅ {
                 justertSlitertillegg =
-                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense.value) / TRE_ÅR.toDouble())
+                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense.evaluer()) / TRE_ÅR.toDouble())
             }
             ELLERS {
                 justertSlitertillegg = 0.0
@@ -62,7 +62,7 @@ class BeregnSlitertilleggRS(
             HVIS { true }
             SÅ {
                 slitertilleggBeregnet =
-                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense.value) / TRE_ÅR.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
+                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense.evaluer()) / TRE_ÅR.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
             }
         }
 
@@ -72,7 +72,7 @@ class BeregnSlitertilleggRS(
                 RETURNER(
                     Slitertillegg(
                         grunnbeløp = grunnbeløp,
-                        antallMånederEtterNedreAldersgrense = antallMånederEtterNedreAldersgrense.value,
+                        antallMånederEtterNedreAldersgrense = antallMånederEtterNedreAldersgrense.evaluer(),
                         fulltSlitertillegg = fulltSlitertillegg,
                         justertSlitertillegg = justertSlitertillegg,
                         avkortetSlitertilleggEtterTrygdetid = avkortetSlitertilleggEtterTrygdetid,

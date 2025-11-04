@@ -5,7 +5,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.REGEL
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.DomainPredicate
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.erLik
+import no.nav.system.rule.dsl.rettsregel.operators.erLik
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import kotlin.experimental.ExperimentalTypeInference
 
@@ -103,7 +103,7 @@ open class Rule<T : Any>(
     @JvmName("FaktumOG")
     @DslDomainPredicate
     fun OG(predicateFunction: () -> Faktum<Boolean>) {
-        predicateFunctionList.add { predicateFunction.invoke() erLik Faktum(true) }
+        predicateFunctionList.add { predicateFunction.invoke() erLik Faktum("SANN", true) }
     }
 
     /**

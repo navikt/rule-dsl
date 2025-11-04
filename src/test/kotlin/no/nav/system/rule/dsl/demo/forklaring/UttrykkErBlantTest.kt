@@ -1,8 +1,10 @@
 package no.nav.system.rule.dsl.demo.forklaring
 
-import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
-import no.nav.system.rule.dsl.forklaring.*
+import no.nav.system.rule.dsl.rettsregel.Const
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.operators.erBlant
+import no.nav.system.rule.dsl.rettsregel.operators.erIkkeBlant
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -12,11 +14,9 @@ import org.junit.jupiter.api.Test
 class UttrykkErBlantTest {
 
     @Test
-    fun `erBlant med Const verdi og Grunnlag liste`() {
-        val aktuelleUnntakstyper = Grunnlag(
-            "aktuelleUnntakstyper",
-            Const(listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP))
-        )
+    fun `erBlant med Const verdi og Faktum liste`() {
+        val aktuelleUnntakstyper =
+            listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP)
 
         val unntakType = FLYKT_ALDER
         val uttrykk = Const(unntakType) erBlant aktuelleUnntakstyper
@@ -33,7 +33,7 @@ class UttrykkErBlantTest {
 
     @Test
     fun `erBlant med verdi som ikke finnes i listen`() {
-        val aktuelleUnntakstyper = Grunnlag(
+        val aktuelleUnntakstyper = Faktum(
             "aktuelleUnntakstyper",
             Const(listOf(FLYKT_ALDER, FLYKT_BARNEP))
         )
@@ -46,8 +46,8 @@ class UttrykkErBlantTest {
     }
 
     @Test
-    fun `erIkkeBlant med Const verdi og Grunnlag liste`() {
-        val aktuelleUnntakstyper = Grunnlag(
+    fun `erIkkeBlant med Const verdi og Faktum liste`() {
+        val aktuelleUnntakstyper = Faktum(
             "aktuelleUnntakstyper",
             Const(listOf(FLYKT_ALDER, FLYKT_BARNEP))
         )
@@ -63,8 +63,8 @@ class UttrykkErBlantTest {
     }
 
     @Test
-    fun `erBlant med Grunnlag verdi og Const liste`() {
-        val unntakType = Grunnlag("unntakType", Const(FLYKT_ALDER))
+    fun `erBlant med Faktum verdi og Const liste`() {
+        val unntakType = Faktum("unntakType", Const(FLYKT_ALDER))
         val uttrykk = unntakType erBlant listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP)
 
         // Test evaluering
@@ -79,7 +79,7 @@ class UttrykkErBlantTest {
 
     @Test
     fun `erBlant med heltall`() {
-        val tall = Grunnlag("tall", Const(5))
+        val tall = Faktum("tall", Const(5))
         val uttrykk = tall erBlant listOf(1, 2, 3, 4, 5)
 
         // Test evaluering
@@ -94,7 +94,7 @@ class UttrykkErBlantTest {
 
     @Test
     fun `erIkkeBlant med heltall`() {
-        val tall = Grunnlag("tall", Const(10))
+        val tall = Faktum("tall", Const(10))
         val uttrykk = tall erIkkeBlant listOf(1, 2, 3, 4, 5)
 
         // Test evaluering
@@ -109,7 +109,7 @@ class UttrykkErBlantTest {
 
     @Test
     fun `erBlant med strenger`() {
-        val tekst = Grunnlag("tekst", Const("hei"))
+        val tekst = Faktum("tekst", Const("hei"))
         val uttrykk = tekst erBlant listOf("hei", "ha", "hallo")
 
         // Test evaluering
@@ -119,58 +119,4 @@ class UttrykkErBlantTest {
         assertEquals("tekst ER BLANT [hei, ha, hallo]", uttrykk.notasjon())
     }
 
-    @Test
-    fun `erBlant i betinget uttrykk`() {
-        val unntakType = Grunnlag("unntakType", Const(FLYKT_ALDER))
-        val aktuelleUnntakstyper = Grunnlag(
-            "aktuelleUnntakstyper",
-            Const(listOf(FLYKT_ALDER, FLYKT_BARNEP))
-        )
-
-        val resultat = (unntakType erBlant aktuelleUnntakstyper)
-            .så { Const("GODKJENT") }
-            .ellers { Const("AVVIST") }
-
-        // Test evaluering
-        assertEquals("GODKJENT", resultat.evaluer())
-
-        // Test notasjon
-        val notasjon = resultat.notasjon()
-        assertTrue(notasjon.contains("ER BLANT"))
-        assertTrue(notasjon.contains("GODKJENT"))
-        assertTrue(notasjon.contains("AVVIST"))
-    }
-
-    @Test
-    fun `erBlant i logisk OG uttrykk`() {
-        val unntakType = Grunnlag("unntakType", Const(FLYKT_ALDER))
-        val aktuelleUnntakstyper = Grunnlag(
-            "aktuelleUnntakstyper",
-            Const(listOf(FLYKT_ALDER, FLYKT_BARNEP))
-        )
-        val harUnntak = Grunnlag("harUnntak", Const(true))
-
-        val uttrykk = harUnntak og (unntakType erBlant aktuelleUnntakstyper)
-
-        // Test evaluering
-        assertTrue(uttrykk.evaluer())
-    }
-
-    @Test
-    fun `forklar med erBlant`() {
-        val unntakType = Grunnlag("unntakType", Const(FLYKT_ALDER))
-        val aktuelleUnntakstyper = Grunnlag(
-            "aktuelleUnntakstyper",
-            Const(listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP))
-        )
-
-        val uttrykk = unntakType erBlant aktuelleUnntakstyper
-
-        val forklaring = uttrykk.forklar("erFlyktning")
-
-        // Verifiser at forklaringen inneholder nødvendig informasjon
-        assertNotNull(forklaring)
-        assertTrue(forklaring.hvaForklaring.symbolskUttrykk.contains("ER BLANT"))
-        assertEquals(true, forklaring.hvaForklaring.resultat)
-    }
 }

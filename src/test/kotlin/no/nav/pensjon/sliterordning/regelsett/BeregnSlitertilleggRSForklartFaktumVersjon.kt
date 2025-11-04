@@ -5,9 +5,11 @@ import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
-import no.nav.system.rule.dsl.formel.*
-import no.nav.system.rule.dsl.rettsregel.erMindreEnn
-import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.operators.div
+import no.nav.system.rule.dsl.rettsregel.operators.erMindreEnn
+import no.nav.system.rule.dsl.rettsregel.operators.minus
+import no.nav.system.rule.dsl.rettsregel.operators.times
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -22,25 +24,25 @@ class BeregnSlitertilleggRSForklartFaktumVersjon(
     val virkningstidspunkt: YearMonth,
     val person: Person,
     val grunnbeløp: Int
-) : AbstractDemoRuleset<ForklartFaktum<Double>>() {
-    private val G = Formel.variable("G", grunnbeløp)
-    private val fulltSlitertillegg: Formel<Double> = FormelBuilder.create<Double>()
-        .name("SLITERTILLEGG-BEREGNING-UAVKORTET")
-        .expression(0.25 * G / 12)
-        .build()
+) : AbstractDemoRuleset<Faktum<Double>>() {
+    private val G = Faktum("G", grunnbeløp)
+    private val fulltSlitertillegg: Faktum<Double> = Faktum(
+        "SLITERTILLEGG-BEREGNING-UAVKORTET",
+        0.25 * G / 12
+    )
 
-    private val faktiskTrygdetid = Formel.variable("faktiskTrygdetid", person.trygdetid.faktiskTrygdetid)
-    private val trygdetidFaktor: Formel<Double> = FormelBuilder.create<Double>()
-        .name("SLITERTILLEGG-AVKORTING-TRYGDETID")
-        .expression(faktiskTrygdetid / FULL_TRYGDETID)
-        .build()
+    private val faktiskTrygdetid = Faktum("faktiskTrygdetid", person.trygdetid.faktiskTrygdetid)
+    private val trygdetidFaktor: Faktum<Double> = Faktum(
+        "SLITERTILLEGG-AVKORTING-TRYGDETID",
+        faktiskTrygdetid / FULL_TRYGDETID
+    )
 
-    private val antallMånederEtterNedreAldersgrense = Formel.variable(
+    private val antallMånederEtterNedreAldersgrense = Faktum(
         "antallMånederEtterNedreAldersgrense",
         ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), uttakstidspunkt).toInt()
     )
 
-    private var justeringsFaktor: Formel<Double> = Formel.variable("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", 0.0)
+    private var justeringsFaktor: Faktum<Double> = Faktum("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", 0.0)
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
@@ -65,10 +67,10 @@ class BeregnSlitertilleggRSForklartFaktumVersjon(
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
             HVIS { antallMånederEtterNedreAldersgrense erMindreEnn MND_36 }
             SÅ {
-                justeringsFaktor = FormelBuilder.create<Double>()
-                    .name("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT")
-                    .expression((MND_36 - antallMånederEtterNedreAldersgrense) / MND_36)
-                    .build()
+                justeringsFaktor = Faktum(
+                    "SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT",
+                    (MND_36 - antallMånederEtterNedreAldersgrense) / MND_36
+                )
             }
         }
 
@@ -113,9 +115,8 @@ class BeregnSlitertilleggRSForklartFaktumVersjon(
             SÅ {
                 RETURNER(
                     faktum(
-                        formula("slitertillegg") {
-                            expression(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
-                        }
+                        "slitertillegg",
+                        fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
                     )
                 )
             }

@@ -21,7 +21,7 @@ class BeregnFaktiskTrygdetidRSTest {
     fun `test fagregel 'Redusert fremtidig trygdetid' har truffet`() {
         val result = BeregnFaktiskTrygdetidRS(
             fødselsdato = Faktum("Fødselsdato", localDate(1990, 1, 1)),
-            virkningstidspunkt = Faktum(name = "virkningstidspunkt", localDate(2000, 1, 1)),
+            virkningstidspunkt = Faktum("virkningstidspunkt", localDate(2000, 1, 1)),
             boperiodeListe = listOf(
                 Boperiode(fom = localDate(1990, 1, 1), tom = localDate(2018, 12, 31), LandEnum.NOR)
             ),

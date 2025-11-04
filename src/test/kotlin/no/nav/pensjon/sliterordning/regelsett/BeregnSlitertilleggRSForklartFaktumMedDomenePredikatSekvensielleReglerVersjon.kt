@@ -4,11 +4,8 @@ import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.ruleset.AbstractDemoRuleset
-import no.nav.system.rule.dsl.formel.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.erMindreEnn
-import no.nav.system.rule.dsl.rettsregel.erStørreEllerLik
-import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartFaktum
+import no.nav.system.rule.dsl.rettsregel.operators.*
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -25,15 +22,15 @@ import java.time.temporal.ChronoUnit
  * WIP
  *
  */
-class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVersjon(
+class BeregnSlitertilleggRSFaktum2MedDomenePredikatSekvensielleReglerVersjon(
     innUttakstidspunkt: YearMonth,
     innPerson: Person,
     innGrunnbeløp: Int
-) : AbstractDemoRuleset<ForklartFaktum<Double>>() {
+) : AbstractDemoRuleset<Faktum<Double>>() {
     /**
      * Faktum
      */
-    private val faktiskTrygdetid = Formel.variable("faktiskTrygdetid", innPerson.trygdetid.faktiskTrygdetid)
+    private val faktiskTrygdetid = Faktum("faktiskTrygdetid", innPerson.trygdetid.faktiskTrygdetid)
     private val uttakstidspunkt = Faktum("uttakstidspunkt", innUttakstidspunkt)
     private val nedrePensjonsDato = Faktum("nedrePensjonsDato", innPerson.nedrePensjonsDato())
     private val fullTrygdetid = Faktum("fullTrygdetid", 40)
@@ -41,14 +38,15 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
     /**
      * Formler
      */
-    private val antallMånederEtterNedrePensjonsDato = Formel.variable(
+    private val antallMånederEtterNedrePensjonsDato = Faktum(
         "antallMånederEtterNedrePensjonsDato",
-        ChronoUnit.MONTHS.between(nedrePensjonsDato.value, uttakstidspunkt.value).toInt().coerceAtMost(MND_36)
+        ChronoUnit.MONTHS.between(nedrePensjonsDato.evaluer(), uttakstidspunkt.evaluer()).toInt().coerceAtMost(MND_36)
     )
-    private val G = Formel.variable("G", innGrunnbeløp)
-    private val fulltSlitertillegg: Formel<Double> = formula("fulltSlitertillegg") { expression(0.25 * G / 12) }
-    private lateinit var justeringsFaktor: Faktum<Double>
-    private val trygdetidFaktor: Formel<Double> = formula("trygdetidFaktor") { expression(faktiskTrygdetid / fullTrygdetid.value) }
+
+    private val G = Faktum("G", innGrunnbeløp)
+    private val fulltSlitertillegg: Faktum<Double> = Faktum("fulltSlitertillegg", 0.25 * G / 12)
+    private var justeringsFaktor: Faktum<Double> = Faktum("justeringsFaktor", 0.0)
+    private val trygdetidFaktor: Faktum<Double> = Faktum("trygdetidFaktor", faktiskTrygdetid / fullTrygdetid)
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
@@ -57,7 +55,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             HVIS { antallMånederEtterNedrePensjonsDato erMindreEnn MND_36 }
             SÅ {
                 justeringsFaktor = faktum(
-                    formula("justeringsFaktor") { expression((MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36) }
+                    "justeringsFaktor", (MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36
                 )
             }
         }
@@ -66,11 +64,10 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             HVIS { antallMånederEtterNedrePensjonsDato erStørreEllerLik MND_36 }
             SÅ {
                 justeringsFaktor = faktum(
-                    variable("justeringsFaktor", 0.0)
+                    "justeringsFaktor", 0.0
                 )
             }
         }
-
 
         /**
          * Forklaring:
@@ -106,15 +103,9 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             HVIS { true }
             SÅ {
                 RETURNER(
-                    faktum(
-                        formula("slitertillegg") {
-                            expression(fulltSlitertillegg )
-//                            expression(fulltSlitertillegg * justeringsFaktor)
-                        }
-                    )
+                    faktum("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
                 )
             }
         }
-
     }
 }

@@ -755,24 +755,25 @@ HVORDAN
 ### Example 3: Chained Comparisons
 
 ```kotlin
+// Where numOfMonths was created earlier:
+regel("Calculate duration") {
+    HVIS { startDate erFør endDate }
+    SÅ {
+        
+        val base = Faktum("baseMonths", 6+6)
+        val extra = Faktum("extraMonths", 3)
+//        val sum : Faktum<Int> = base + extra
+        
+
+        numOfMonths = faktum("numOfMonths", base + extra)
+    }
+}
+
 regel("Approve application") {
     HVIS { numOfMonths erStørreEnn 12 }
     OG { applicant.status erLik ELIGIBLE }
     SÅ {
         result = faktum("approvalStatus", APPROVED)
-    }
-}
-
-// Where numOfMonths was created earlier:
-regel("Calculate duration") {
-    HVIS { startDate erFør endDate }
-    SÅ {
-        val start = Faktum("startDate", LocalDate.of(2023, 1, 1))
-        val end = Faktum("endDate", LocalDate.of(2024, 3, 1))
-        val base = Faktum("baseMonths", 12)
-        val extra = Faktum("extraMonths", 3)
-
-        numOfMonths = faktum("numOfMonths", base + extra)
     }
 }
 

@@ -1,10 +1,11 @@
 package no.nav.system.rule.dsl.enums
 
 interface Comparator {
+    val text: String
     fun negated(): String
 }
 
-enum class PairComparator(val text: String) : Comparator {
+enum class PairComparator(override val text: String) : Comparator {
     FØR_ELLER_LIK(" er før eller lik "),
     FØR(" er før "),
     ETTER_ELLER_LIK(" er etter eller lik "),
@@ -32,7 +33,7 @@ enum class PairComparator(val text: String) : Comparator {
     }
 }
 
-enum class ListComparator(val text: String) : Comparator {
+enum class ListComparator(override val text: String) : Comparator {
     ER_BLANDT(" er blandt "),
     ER_IKKE_BLANDT(" er ikke blandt "),
     ALLE(" gjelder samtlige"),

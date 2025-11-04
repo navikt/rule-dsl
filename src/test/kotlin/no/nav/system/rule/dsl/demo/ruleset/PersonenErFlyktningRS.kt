@@ -12,6 +12,11 @@ import no.nav.system.rule.dsl.demo.helper.år
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
 import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.rettsregel.*
+import no.nav.system.rule.dsl.rettsregel.operators.erBlant
+import no.nav.system.rule.dsl.rettsregel.operators.erEtterEllerLik
+import no.nav.system.rule.dsl.rettsregel.operators.erLik
+import no.nav.system.rule.dsl.rettsregel.operators.erMindreEllerLik
+import no.nav.system.rule.dsl.rettsregel.operators.erStørreEllerLik
 import java.time.LocalDate
 
 /**
@@ -27,7 +32,7 @@ class PersonenErFlyktningRS(
     private val innKravlinjeFremsattDatoFom2021: Faktum<Boolean>,
 ) : AbstractRuleset<Faktum<UtfallType>>() {
     private var dato67m: Faktum<LocalDate> =
-        Faktum("Fødselsdato67m", innPersongrunnlag.fødselsdato.value.withDayOfMonth(1) + 67.år + 1.måneder)
+        Faktum("Fødselsdato67m", innPersongrunnlag.fødselsdato.evaluer().withDayOfMonth(1) + 67.år + 1.måneder)
     private val unntakFraForutgaendeMedlemskap =
         innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap
     private val unntakFraForutgaendeTT = innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT
@@ -82,33 +87,33 @@ class PersonenErFlyktningRS(
             OG { unntakFraForutgaendeTT!!.unntakType erBlant aktuelleUnntakstyper }
         }
         regel("Overgangsregel_AP") {
-            HVIS { innYtelseType.value == AP }
+            HVIS { innYtelseType.evaluer() == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
         }
         regel("Overgangsregel_AP_tidligereUT") {
-            HVIS { innYtelseType.value == AP }
+            HVIS { innYtelseType.evaluer() == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG { harUTfør2021 }
         }
         regel("Overgangsregel_AP_tidligereGJP") {
-            HVIS { innYtelseType.value == AP }
+            HVIS { innYtelseType.evaluer() == AP }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG { harGJPfør2021 }
         }
         regel("Overgangsregel_GJR_tidligereUT_GJT") {
-            HVIS { innYtelseType.value == GJR }
+            HVIS { innYtelseType.evaluer() == GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
             OG { harUTGJRfør2021 }
         }
         regel("Overgangsregel_GJR_tidligereGJR") {
-            HVIS { innYtelseType.value == GJR }
+            HVIS { innYtelseType.evaluer() == GJR }
             OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
             OG { innVirk erEtterEllerLik dato67m }
             OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }

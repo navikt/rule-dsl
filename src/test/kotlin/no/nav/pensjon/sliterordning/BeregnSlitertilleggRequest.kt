@@ -7,6 +7,4 @@ class BeregnSlitertilleggRequest(
     val uttakstidspunkt: YearMonth,
     val virkningstidspunkt: YearMonth,
     val person: Person
-) {
-
-}
+)

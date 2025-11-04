@@ -31,7 +31,7 @@ class PersonenErFlyktningRSTest {
             this.returnValue
         }
 
-        assertEquals(IKKE_RELEVANT, flyktningUtfall.value)
+        assertEquals(IKKE_RELEVANT, flyktningUtfall.evaluer())
 //        assertTrue(flyktningUtfall.children[0].fired())
 
 //        val flyktningSubsum = flyktningUtfall.children[0].children.first() as ListSubsumtion
@@ -57,7 +57,7 @@ class PersonenErFlyktningRSTest {
             this.returnValue
         }
 
-        assertEquals(OPPFYLT, flyktningUtfall.value)
+        assertEquals(OPPFYLT, flyktningUtfall.evaluer())
 //        assertEquals(1, flyktningUtfall.children[0].children[0].children.size)
 //        assertEquals(1, flyktningUtfall.children[0].children[1].children.size)
     }
@@ -67,7 +67,7 @@ class PersonenErFlyktningRSTest {
         val person = Person(
             fødselsdato = Faktum("Fødselsdato", localDate(1980, 1, 1)),
             inngangOgEksportgrunnlag = InngangOgEksportgrunnlag().apply {
-                unntakFraForutgaendeMedlemskap.unntak.value = true
+                unntakFraForutgaendeMedlemskap.unntak = Faktum("unntak", true)
             }
         )
 
@@ -85,7 +85,7 @@ class PersonenErFlyktningRSTest {
 //        val regelOvergangsregelAP = flyktningUtfall.children[0].children[2].children[0]
 
 //        assertEquals(2, regelOvergangsregelAP.children.size)
-        assertEquals(IKKE_OPPFYLT, flyktningUtfall.value)
+        assertEquals(IKKE_OPPFYLT, flyktningUtfall.evaluer())
 //        assertTrue(flyktningUtfall.children[0].fired())
 //        assertEquals(3, flyktningUtfall.children[0].children.size)
     }
@@ -95,7 +95,7 @@ class PersonenErFlyktningRSTest {
         val person = Person(
             fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
             flyktning = Faktum("Angitt flyktning", true),
-            trygdetidK19 = Trygdetid().apply { tt_fa_F2021.value = 20 }
+            trygdetidK19 = Trygdetid().apply { tt_fa_F2021 = Faktum(tt_fa_F2021.navn, 20) }
         )
 
         val flyktningUtfall = PersonenErFlyktningRS(
@@ -109,7 +109,7 @@ class PersonenErFlyktningRSTest {
             this.returnValue
         }
 
-        assertEquals(OPPFYLT, flyktningUtfall.value)
+        assertEquals(OPPFYLT, flyktningUtfall.evaluer())
 //        assertTrue(flyktningUtfall.children[0].fired())
 //        val overgangsregelTreSubsumsjon = flyktningUtfall.children[0].children[2] as ListSubsumtion
 //        assertEquals(MINST_EN_AV, overgangsregelTreSubsumsjon.comparator)
@@ -124,7 +124,7 @@ class PersonenErFlyktningRSTest {
         val person = Person(
             fødselsdato = Faktum("Fødselsdato", localDate(1958, 12, 31)),
             flyktning = Faktum("Angitt flyktning", true),
-            trygdetidK19 = Trygdetid().apply { tt_fa_F2021.value = 20 }
+            trygdetidK19 = Trygdetid().apply { tt_fa_F2021 = Faktum(tt_fa_F2021.navn, 20) }
         ).apply {
             this.forsteVirkningsdatoGrunnlagListe.add(
                 ForsteVirkningsdatoGrunnlag(
@@ -145,7 +145,7 @@ class PersonenErFlyktningRSTest {
             this.returnValue
         }
 
-        assertEquals(OPPFYLT, flyktningUtfall.value)
+        assertEquals(OPPFYLT, flyktningUtfall.evaluer())
 //        assertTrue(flyktningUtfall.children[0].fired())
 //        val overgangsregelTreSubsumsjon = flyktningUtfall.children[0].children[2] as ListSubsumtion
 //        assertEquals(MINST_EN_AV, overgangsregelTreSubsumsjon.comparator)
