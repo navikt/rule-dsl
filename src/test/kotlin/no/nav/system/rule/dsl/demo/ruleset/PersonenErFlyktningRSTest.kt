@@ -8,7 +8,9 @@ import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PersonenErFlyktningRSTest {
@@ -46,20 +48,28 @@ class PersonenErFlyktningRSTest {
             flyktning = Faktum("Angitt flyktning", true),
         )
 
-        val flyktningUtfall = PersonenErFlyktningRS(
+        val rs = PersonenErFlyktningRS(
             person,
             Faktum("Ytelsestype", YtelseEnum.AP),
             Faktum("Kapittel20", false),
             Faktum("Virkningstidspunkt", localDate(2020, 1, 1)),
             Faktum("HarKravlinjeFremsattDatoFom2021", false)
-        ).run {
-            test()
-            this.returnValue
-        }
+        )
+        rs.test()
 
-        assertEquals(OPPFYLT, flyktningUtfall.value)
-//        assertEquals(1, flyktningUtfall.children[0].children[0].children.size)
-//        assertEquals(1, flyktningUtfall.children[0].children[1].children.size)
+        // Hent resultat med forklaring
+        val forklartResultat = rs.medForklaring()
+
+        // Skriv ut forklaring for demonstrasjon
+        println("\n" + "=".repeat(80))
+        println("DEMONSTRASJON: Regelflyt-forklaring for ikke-numerisk verdi")
+        println("=".repeat(80))
+        println(forklartResultat.forklaring())
+        println("=".repeat(80))
+
+        assertEquals(OPPFYLT, forklartResultat.value)
+        assertNotNull(forklartResultat.hvorfor)
+        assertTrue(forklartResultat.hvorfor.isNotEmpty(), "Forklaring skal ikke være tom")
     }
 
     @Test
@@ -98,25 +108,28 @@ class PersonenErFlyktningRSTest {
             trygdetidK19 = Trygdetid().apply { tt_fa_F2021.value = 20 }
         )
 
-        val flyktningUtfall = PersonenErFlyktningRS(
+        val rs = PersonenErFlyktningRS(
             person,
             Faktum("Ytelsestype", YtelseEnum.AP),
             Faktum("Kapittel20", false),
             Faktum("Virkningstidspunkt", localDate(2021, 1, 1)),
             Faktum("HarKravlinjeFremsattDatoFom2021", true)
-        ).run {
-            test()
-            this.returnValue
-        }
+        )
+        rs.test()
 
-        assertEquals(OPPFYLT, flyktningUtfall.value)
-//        assertTrue(flyktningUtfall.children[0].fired())
-//        val overgangsregelTreSubsumsjon = flyktningUtfall.children[0].children[2] as ListSubsumtion
-//        assertEquals(MINST_EN_AV, overgangsregelTreSubsumsjon.comparator)
-//        assertEquals(3, overgangsregelTreSubsumsjon.children.size)
-//        assertTrue(overgangsregelTreSubsumsjon.children[0].fired())
-//        assertFalse(overgangsregelTreSubsumsjon.children[1].fired())
-//        assertFalse(overgangsregelTreSubsumsjon.children[2].fired())
+        // Hent resultat med forklaring
+        val forklartResultat = rs.medForklaring()
+
+        // Skriv ut forklaring for demonstrasjon av kompleks regelflyt
+        println("\n" + "=".repeat(80))
+        println("DEMONSTRASJON: Kompleks regelflyt med overgangsregler")
+        println("=".repeat(80))
+        println(forklartResultat.forklaring())
+        println("=".repeat(80))
+
+        assertEquals(OPPFYLT, forklartResultat.value)
+        assertNotNull(forklartResultat.hvorfor)
+        assertTrue(forklartResultat.hvorfor.isNotEmpty(), "Forklaring skal ikke være tom")
     }
 
     @Test

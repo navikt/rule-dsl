@@ -7,37 +7,37 @@ import java.io.Serializable
 
 /**
  * Represents a mathematical formula with traceable computation and human-readable notation.
- * 
+ *
  * Formel provides:
  * - **Immutable mathematical expressions** that preserve both human-readable notation and computational content
  * - **Type safety** for Int and Double operations
  * - **Variable tracking** to prevent naming conflicts
  * - **Locking mechanism** for performance and encapsulation
- * 
+ *
  * ## Locking Behavior
- * 
+ *
  * Formulas can be either **locked** or **unlocked**:
- * 
+ *
  * ### Unlocked Formulas (default for simple operations)
  * - Variables are expanded into parent formulas
  * - Full mathematical expression is visible in notation
  * - More detailed tracing but potentially verbose
- * 
+ *
  * ### Locked Formulas (default for builder-created formulas)
- * - Treated as atomic units in parent formulas  
+ * - Treated as atomic units in parent formulas
  * - Referenced by name only, not expanded
  * - Stored as sub-formulas for hierarchical structure
  * - Better performance and cleaner notation for complex expressions
- * 
+ *
  * ## Examples
  * ```kotlin
  * // Simple variables (unlocked)
  * val grunnbeløp = Formel.variable("G", 118620)
  * val sats = Formel.variable("sats", 0.45)
- * 
+ *
  * // Simple expression (unlocked)
  * val beregning = grunnbeløp * sats  // Shows: "G * sats" in notation
- * 
+ *
  * // Complex locked formula
  * val kompleksBeløp = FormelBuilder.create<Int>()
  *     .name("bruttoAlderspensjon")
@@ -45,15 +45,15 @@ import java.io.Serializable
  *     .expression(someVeryComplexCalculation)
  *     .locked()  // This is the default
  *     .build()
- * 
+ *
  * // When used in another formula:
  * val total = kompleksBeløp + tillegg  // Shows: "AP_bruttoAlderspensjon + tillegg"
  *                                        // (not the full complex calculation)
  * ```
- * 
+ *
  * @param T The numeric type (Int or Double)
  */
-class Formel<T : Number> internal constructor(
+open class Formel<T : Number> internal constructor(
     val emne: String,
     val prefix: String,
     val postfix: String,

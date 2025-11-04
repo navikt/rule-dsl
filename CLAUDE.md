@@ -173,6 +173,241 @@ Located in `src/main/kotlin/no/nav/system/rule/dsl/formel/`, this subsystem prov
 
 `Formel` objects represent computed numeric values that can track their calculation structure.
 
+## Integrasjon av Uttrykk-forklaring i Rule DSL
+
+The framework supports two approaches for generating calculation explanations:
+
+1. **Formel-systemet** - Direct calculation with manual explanation tracking
+2. **Uttrykk-systemet** - AST-based automatic explanation generation (located in `forklaring/`)
+
+The `faktum()` function in `AbstractRuleComponent` provides integration that combines:
+- **HVORFOR** - Rule flow tracing via `Trace.kt` (which rules fired and in what order)
+- **HVORDAN** - Calculation explanation (how the value was computed)
+
+### Using Uttrykk with faktum()
+
+Uttrykk-based calculations can be integrated into Rule DSL using `faktum(grunnlag: Grunnlag<T>)`:
+
+```kotlin
+class BeregnSlitertilleggRS(
+    val virkningstidspunkt: YearMonth,
+    val person: Person
+) : AbstractDemoRuleset<ForklartFaktum<Double>>() {
+
+    // Use Grunnlag (Uttrykk) for calculations
+    private lateinit var fulltSlitertillegg: Grunnlag<Double>
+    private lateinit var justeringsFaktor: Grunnlag<Double>
+    private lateinit var trygdetidFaktor: Grunnlag<Double>
+
+    override fun create() {
+        regel("SLITERTILLEGG-BEREGNING-UAVKORTET") {
+            HVIS { true }
+            SÅ {
+                fulltSlitertillegg = (Const(0.25) * Const(grunnbeløp) / Const(12.0))
+                    .navngi("fulltSlitertillegg")        // Name for explanation
+                    .id("SLITERTILLEGG-UAVKORTET")       // RVS-ID for legal reference
+            }
+        }
+
+        regel("SLITERTILLEGG-JUSTERING") {
+            HVIS { månederEtter < 36 }
+            SÅ {
+                justeringsFaktor = ((Const(36) - Const(månederEtter)) / Const(36.0))
+                    .navngi("justeringsFaktor")
+                    .id("JUSTERING-UTTAKSTIDSPUNKT")
+            }
+            ELLERS {
+                justeringsFaktor = Const(1.0).navngi("justeringsFaktor")
+            }
+        }
+
+        regel("SLITERTILLEGG-TRYGDETID") {
+            HVIS { true }
+            SÅ {
+                trygdetidFaktor = (Const(person.trygdetid) / Const(480.0))
+                    .navngi("trygdetidFaktor")
+                    .id("AVKORTING-TRYGDETID")
+            }
+        }
+
+        regel("SLITERTILLEGG-BEREGNET") {
+            HVIS { true }
+            SÅ {
+                val slitertillegg = (fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
+                    .navngi("slitertillegg")
+                    .id("SLITERTILLEGG-BEREGNET")
+
+                // faktum() combines HVORFOR (rule trace) + HVORDAN (AST explanation)
+                RETURNER(faktum(slitertillegg))
+            }
+        }
+    }
+}
+```
+
+### Output Structure
+
+The `ForklartFaktum` returned by `faktum()` contains:
+
+```kotlin
+data class ForklartFaktum<T>(
+    val name: String,              // "slitertillegg"
+    val value: T,                  // 378.15
+    val hvorfor: String,           // Rule flow trace
+    val hvordan: Formel<T>         // Calculation explanation (AST-based)
+)
+```
+
+**HVORFOR** (from `Trace.kt`):
+```
+BeregnSlitertilleggService
+  BehandleSliterordningFlyt
+    BeregnSlitertilleggRS
+      SLITERTILLEGG-BEREGNING-UAVKORTET
+      SLITERTILLEGG-JUSTERING
+      SLITERTILLEGG-TRYGDETID
+      SLITERTILLEGG-BEREGNET
+```
+
+**HVORDAN** (from `Uttrykk.forklarDetaljert()`):
+```
+SLITERTILLEGG-BEREGNET
+slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
+slitertillegg = 2292.0 * 0.33 * 0.5
+slitertillegg = 378.15
+
+fulltSlitertillegg = 0.25 * G / 12
+fulltSlitertillegg = 0.25 * 110000 / 12
+fulltSlitertillegg = 2292.0
+
+justeringsFaktor = (36 - månederEtter) / 36
+justeringsFaktor = (36 - 24) / 36
+justeringsFaktor = 0.33
+
+trygdetidFaktor = trygdetid / 480
+trygdetidFaktor = 240 / 480
+trygdetidFaktor = 0.5
+```
+
+### Implementation Details
+
+The integration uses an adapter pattern (`UttrykkFormelAdapter`) to make `Grunnlag<T>` compatible with the `Formel<T>` interface:
+
+```kotlin
+fun <T : Number> faktum(grunnlag: Grunnlag<T>): ForklartFaktum<T> {
+    return faktum(UttrykkFormelAdapter(grunnlag))
+}
+```
+
+The adapter delegates to `Uttrykk.forklarDetaljert()` for automatic AST-based explanation generation, combining:
+- RVS-ID (legal reference from `.id()`)
+- Variable names (from `.navngi()`)
+- Symbolic notation (AST structure)
+- Concrete notation (with actual values)
+- Sub-formulas (nested named expressions)
+
+### When to Use
+
+**Use Uttrykk + faktum()** when:
+- Calculation explanation is required for end users or legal documentation
+- Complex formulas need automatic breakdown and tracing
+- You want AST-based explanation generation without manual tracking
+
+**Use direct calculation** when:
+- Simple value computation without explanation needs
+- Performance is critical (Uttrykk has AST overhead)
+- The calculation is self-explanatory or purely technical
+
+See `BeregnSlitertilleggRSUttrykk.kt` and `BeregnSlitertilleggRSUttrykkTest.kt` in `src/test/kotlin/no/nav/pensjon/sliterordning/regelsett/` for a complete working example.
+
+### Regelflyt-forklaring for ikke-numeriske verdier
+
+For regelsett som returnerer ikke-numeriske verdier (enum, boolean, etc.), er `medForklaring()` tilgjengelig fra `AbstractRuleset`:
+
+```kotlin
+class PersonenErFlyktningRS(
+    private val person: Person,
+    // ... parameters
+) : AbstractRuleset<Faktum<UtfallType>>() {
+
+    override fun create() {
+        regel("AngittFlyktning_HarFlyktningFlaggetSatt") {
+            HVIS { person.flyktning }
+            // ...
+        }
+        regel("AnvendtFlyktning_oppfylt") {
+            HVIS { "AngittFlyktning".minstEnHarTruffet() }
+            SÅ {
+                RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
+            }
+        }
+    }
+}
+
+// I test:
+val rs = PersonenErFlyktningRS(person, ...)
+rs.test()
+val forklartResultat = rs.medForklaring()  // Fra AbstractRuleset
+
+println(forklartResultat.forklaring())
+```
+
+Output:
+```
+HVA
+    Anvendt flyktning = OPPFYLT
+
+HVORFOR (Regelflyt-sporing):
+    regelsett: PersonenErFlyktningRS
+      regel: JA AngittFlyktning_HarFlyktningFlaggetSatt
+      regel: JA AnvendtFlyktning_oppfylt
+```
+
+### Comparing Approaches: Uttrykk vs Formel
+
+**Uttrykk-approach** (recommended for complex calculations):
+- **HVORFOR**: Rule flow explanation
+- **HVORDAN**: Automatic AST-based calculation breakdown
+- Use `faktum(grunnlag: Grunnlag<T>)` with Uttrykk expressions
+- Best for: Complex formulas requiring detailed explanation
+
+**Formel-approach** (traditional):
+- **HVORFOR**: Rule flow explanation only
+- No automatic calculation breakdown
+- Use `medForklaring()` with regular Double/Int values
+- Best for: Simple calculations or non-numeric values
+
+Example comparison in `BeregnSlitertilleggRSFormelTest.kt` shows:
+
+**Formel output (HVORFOR only):**
+```
+regelsett: BeregnSlitertilleggRSFormel
+  regel: JA SLITERTILLEGG-BEREGNING-UAVKORTET
+  regel: JA SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT
+  regel: JA SLITERTILLEGG-AVKORTING-TRYGDETID
+  regel: JA SLITERTILEGG-BEREGNET
+```
+
+**Uttrykk output (HVORFOR + HVORDAN):**
+```
+HVORFOR:
+  regelsett: BeregnSlitertilleggRSUttrykk
+    regel: JA SLITERTILEGG-BEREGNET
+
+HVORDAN:
+  SLITERTILLEGG-BEREGNET
+  slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
+  slitertillegg = 2291.67 * 1.0 * 0.5
+  slitertillegg = 1145.83
+
+  fulltSlitertillegg = 0.25 * G / 12
+  fulltSlitertillegg = 0.25 * 110000 / 12
+  fulltSlitertillegg = 2291.67
+  ...
+```
+
+See `BeregnSlitertilleggRSFormel.kt` vs `BeregnSlitertilleggRSUttrykk.kt` for implementation comparison.
+
 ## Testing
 
 Test structure is in `src/test/kotlin/`:

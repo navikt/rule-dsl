@@ -2,6 +2,8 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
+import no.nav.system.rule.dsl.forklaring.Grunnlag
+import no.nav.system.rule.dsl.forklaring.UttrykkFormelAdapter
 import no.nav.system.rule.dsl.formel.Formel
 import no.nav.system.rule.dsl.inspections.hvorfor
 import no.nav.system.rule.dsl.resource.Root
@@ -65,12 +67,64 @@ abstract class AbstractRuleComponent : Serializable {
             formel.name,
             formel.value,
             /**
-             * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
+             * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) has eksekvert.
              * Resultatet formes av "hvorfor-renderer".
              */
             this.root().hvorfor(target = this@AbstractRuleComponent),
             hvordan = formel
         )
+    }
+
+    /**
+     * Produserer ForklartFaktum med sporing og angitt Uttrykk/Grunnlag.
+     *
+     * Dette er den foretrukne metoden for nye beregninger da den bruker Uttrykk-systemets
+     * AST-baserte forklaringsgenerering. Den kombinerer:
+     * - HVORFOR: Regelflyt-sporing via Trace.kt (hvilken vei gjennom regeltreet)
+     * - HVORDAN: Beregningsforklaring via Uttrykk.forklarDetaljert() (hvordan verdien ble beregnet)
+     *
+     * Eksempel:
+     * ```kotlin
+     * regel("BeregnSlitertillegg") {
+     *     HVIS { true }
+     *     SÅ {
+     *         val fulltSlitertillegg = (0.25 * G() / 12).navngi("fulltSlitertillegg")
+     *         val justeringsFaktor = beregn...
+     *         val slitertillegg = (fulltSlitertillegg * justeringsFaktor)
+     *             .navngi("slitertillegg")
+     *             .id("SLITERTILLEGG-BEREGNET")
+     *
+     *         RETURNER(faktum(slitertillegg))
+     *     }
+     * }
+     * ```
+     *
+     * Output vil inneholde både regelsporing (HVORFOR) og AST-forklaring (HVORDAN):
+     * ```
+     * HVORFOR:
+     *   BeregnSlitertilleggService
+     *     BehandleSliterordningFlyt
+     *       BeregnSlitertilleggRS
+     *         BeregnSlitertillegg
+     *
+     * HVORDAN:
+     *     SLITERTILLEGG-BEREGNET
+     *     slitertillegg = fulltSlitertillegg * justeringsFaktor
+     *     slitertillegg = 2292.0 * 0.33
+     *     slitertillegg = 756.36
+     *
+     *     fulltSlitertillegg = 0.25 * G / 12
+     *     fulltSlitertillegg = 0.25 * 110000 / 12
+     *     fulltSlitertillegg = 2292.0
+     *     ...
+     * ```
+     *
+     * @param grunnlag Uttrykk-basert Grunnlag som inneholder AST-struktur for beregningen
+     * @return ForklartFaktum med kombinert HVORFOR + HVORDAN forklaring
+     * @see UttrykkFormelAdapter for detaljer om integrasjonen
+     */
+    fun <T : Number> faktum(grunnlag: Grunnlag<T>): ForklartFaktum<T> {
+        return faktum(UttrykkFormelAdapter(grunnlag))
     }
 
 }

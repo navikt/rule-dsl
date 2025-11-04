@@ -8,6 +8,7 @@ import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListDomainPredicate
+import no.nav.system.rule.dsl.rettsregel.forklartfaktum.ForklartResultat
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -263,6 +264,52 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
             .ifEmpty {
                 throw InvalidRulesetException("No rule with name that starts with ['$rettsregelNavn'] found during rule chaining.")
             }
+    }
+
+    /**
+     * Returnerer resultat med regelflyt-forklaring.
+     *
+     * Denne metoden er tilgjengelig for alle regelsett og gir en forklaring på hvordan
+     * resultatet ble nådd ved å vise hvilke regler som ble evaluert og truffet.
+     *
+     * For numeriske verdier med komplekse beregninger, vurder å bruke
+     * faktum(grunnlag: Grunnlag<T>) i stedet for å få både HVORFOR (regelflyt)
+     * og HVORDAN (AST-basert beregningsforklaring).
+     *
+     * @return [ForklartResultat] med resultatverdi og regelflyt-forklaring
+     *
+     * @see ForklartResultat for struktur på forklaringen
+     * @see no.nav.system.rule.dsl.AbstractRuleComponent.faktum for numeriske verdier med AST-forklaring
+     */
+    fun medForklaring(): ForklartResultat<T> {
+        val resultat = returnValue
+
+        // Bygg regelflyt-forklaring ved å vise alle regler som truffet
+        val regelflytForklaring = buildString {
+            appendLine("regelsett: $rulesetName")
+
+            // Finn og vis alle regler som truffet
+            children
+                .filter { it.fired() }
+                .forEach { regel ->
+                    appendLine("  regel: ${if (regel.fired()) "JA" else "NEI"} ${regel.name()}")
+                }
+        }.trim()
+
+        // Hvis returnValue er Faktum, bruk navnet og verdien derfra
+        return if (resultat is Faktum<*>) {
+            ForklartResultat(
+                name = resultat.name,
+                value = resultat.value as T,
+                hvorfor = regelflytForklaring
+            )
+        } else {
+            ForklartResultat(
+                name = rulesetName,
+                value = resultat,
+                hvorfor = regelflytForklaring
+            )
+        }
     }
 
     override fun name(): String = rulesetName

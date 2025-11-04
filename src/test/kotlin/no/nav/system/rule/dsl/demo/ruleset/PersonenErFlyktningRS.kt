@@ -17,6 +17,8 @@ import java.time.LocalDate
 /**
  * Hvis unntak fra forutgående medlemsskap er angitt i inngang og eksportgrunnlag og unntaktype er
  * flyktning så har personen status som flyktning.
+ *
+ * Demonstrerer bruk av medForklaring() fra AbstractRuleset for regelflyt-forklaring.
  */
 @OptIn(DslDomainPredicate::class)
 class PersonenErFlyktningRS(
@@ -144,4 +146,6 @@ class PersonenErFlyktningRS(
             }
         }
     }
+
+    // medForklaring() er nå tilgjengelig fra AbstractRuleset - ingen egen implementasjon nødvendig
 }
