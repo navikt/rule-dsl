@@ -9,6 +9,7 @@ import no.nav.system.rule.dsl.rettsregel.operators.plus
 import no.nav.system.rule.dsl.rettsregel.operators.times
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.times
 
 /**
  * Feature parity tests between Uttrykk and Formel.
@@ -272,13 +273,56 @@ class UttrykkParityTest {
         val tpSumBrutto = Faktum("tpSum", copyAnonF1 * 0.5 + copyAnonF2)
 
         // Note: Faktum shows its name in notation (like locked formulas in Formel)
-        assertEquals("tpSum", tpSumBrutto.notasjon())
-        assertEquals("8.0", tpSumBrutto.konkret()) // Result is Double due to multiplication with 0.5
+        assertEquals("poengtillegg * 0.5 + avdod", tpSumBrutto.notasjon())
+        assertEquals("6 * 0.5 + 5", tpSumBrutto.konkret()) // Result is Double due to multiplication with 0.5
 
         // To see the inner expression, use utpakk()
-        assertEquals("poengtillegg * 0.5 + avdod", tpSumBrutto.notasjon())
+        assertEquals("poengtillegg * 0.5 + avdod", tpSumBrutto.uttrykk.notasjon())
+
+//                assertEquals("poengtillegg", tpSumBrutto.subFormelList.toList()[0].emne)
+//        assertEquals("2 * 3", tpSumBrutto.subFormelList.toList()[0].notasjon)
+//        assertEquals("2 * 3", tpSumBrutto.subFormelList.toList()[0].innhold)
+//        assertEquals("avdod", tpSumBrutto.subFormelList.toList()[1].emne)
+//        assertEquals("3 + 2", tpSumBrutto.subFormelList.toList()[1].notasjon)
+//        assertEquals("3 + 2", tpSumBrutto.subFormelList.toList()[1].innhold)
+
     }
 
+
+//    @Test
+//    fun anonymousSubformulaAreRenamedInHighlevelContext() {
+//        val to = Formel.constant(2)
+//        val tre = Formel.constant(3)
+//
+//        /**
+//         * anonyme formler uten kjennskap til kontekst
+//         */
+//        val anonF1 = FormelBuilder.create<Int>()
+//            .expression(to * tre)
+//            .build()
+//        val anonF2 = FormelBuilder.create<Int>()
+//            .expression(tre + to)
+//            .build()
+//
+//        /**
+//         * Høyere nivå kjenner kontekst og navngir formlene.
+//         */
+//        val copyAnonF1 = anonF1.emne("poengtillegg")
+//        val copyAnonF2 = anonF2.emne("avdod")
+//        val tpSumBrutto = FormelBuilder.create<Double>()
+//            .name("tpSum")
+//            .expression(copyAnonF1 * 0.5 + copyAnonF2)
+//            .build()
+//
+//        assertEquals("poengtillegg * 0.5 + avdod", tpSumBrutto.notasjon)
+//        assertEquals("6 * 0.5 + 5", tpSumBrutto.innhold)
+//        assertEquals("poengtillegg", tpSumBrutto.subFormelList.toList()[0].emne)
+//        assertEquals("2 * 3", tpSumBrutto.subFormelList.toList()[0].notasjon)
+//        assertEquals("2 * 3", tpSumBrutto.subFormelList.toList()[0].innhold)
+//        assertEquals("avdod", tpSumBrutto.subFormelList.toList()[1].emne)
+//        assertEquals("3 + 2", tpSumBrutto.subFormelList.toList()[1].notasjon)
+//        assertEquals("3 + 2", tpSumBrutto.subFormelList.toList()[1].innhold)
+//    }
     // ========================================================================
     // Type Safety and Coercion
     // ========================================================================

@@ -230,7 +230,7 @@ data class Faktum<T : Any>(
 
     fun hva(): String = navn
 
-    fun hvordan(): String = buildHvordan(0).trimEnd()
+    fun hvordan(): String = uttrykk.buildHvordan(0).trimEnd()
 
     fun hvorfor(): String = hvorfor ?: "hvorfor ikke tilgjengelig"
 }
@@ -326,17 +326,17 @@ class ListDomainPredicate(
 /**
  * Helper function to recursively build hvordan explanation with proper indentation.
  */
-private fun Faktum<*>.buildHvordan(depth: Int): String {
+private fun Uttrykk<*>.buildHvordan(depth: Int): String {
     val indent = "  ".repeat(depth)
     val sb = StringBuilder()
 
     // Show this faktum's name and value
-    sb.append("$indent$navn = ${evaluer()}\n")
+    sb.append("$indent${notasjon()} = ${konkret()}\n")
 
     // If this is a computed value (not a simple constant), show its grunnlag
-    if (uttrykk !is Const) {
+    if (this !is Const) {
         // Recursively show each grunnlag faktum
-        for (grunnlag in uttrykk.grunnlagListe()) {
+        for (grunnlag in grunnlagListe()) {
             if (grunnlag is Faktum<*>) {
                 sb.append(grunnlag.buildHvordan(depth + 1))
             }
