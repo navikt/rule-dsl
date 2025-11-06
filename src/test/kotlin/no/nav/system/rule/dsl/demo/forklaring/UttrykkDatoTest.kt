@@ -24,8 +24,8 @@ class UttrykkDatoTest {
         val resultat = senereDato erEtter tidligereDato
 
         assertTrue(resultat.evaluer())
-        assertEquals("senereDato > tidligereDato", resultat.notasjon())
-        assertEquals("2021-01-01 > 2020-01-01", resultat.konkret())
+        assertEquals("JA 'senereDato' er etter 'tidligereDato'", resultat.notasjon())
+        assertEquals("JA '2021-01-01' er etter '2020-01-01'", resultat.konkret())
     }
 
     @Test
@@ -35,7 +35,7 @@ class UttrykkDatoTest {
         val resultat = dato erEtter dato1
 
         assertTrue(resultat.evaluer())
-        assertEquals("dato > 2020-01-01", resultat.notasjon())
+        assertEquals("JA 'dato' er etter '2020-01-01'", resultat.notasjon())
     }
 
     @Test
@@ -55,7 +55,7 @@ class UttrykkDatoTest {
         val resultat = dato erEtterEllerLik sammenligningsDato
 
         assertTrue(resultat.evaluer())
-        assertEquals("dato ≥ sammenligningsDato", resultat.notasjon())
+        assertEquals("JA 'dato' er etter eller lik 'sammenligningsDato'", resultat.notasjon())
     }
 
     @Test
@@ -93,8 +93,8 @@ class UttrykkDatoTest {
         val resultat = tidligereDato erFør senereDato
 
         assertTrue(resultat.evaluer())
-        assertEquals("tidligereDato < senereDato", resultat.notasjon())
-        assertEquals("2020-01-01 < 2021-01-01", resultat.konkret())
+        assertEquals("JA 'tidligereDato' er før 'senereDato'", resultat.notasjon())
+        assertEquals("JA '2020-01-01' er før '2021-01-01'", resultat.konkret())
     }
 
     @Test
@@ -114,7 +114,7 @@ class UttrykkDatoTest {
         val resultat = tidligereDato erFørEllerLik senereDato
 
         assertTrue(resultat.evaluer())
-        assertEquals("tidligereDato ≤ senereDato", resultat.notasjon())
+        assertEquals("JA 'tidligereDato' er før eller lik 'senereDato'", resultat.notasjon())
     }
 
     @Test

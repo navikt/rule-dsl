@@ -70,7 +70,7 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
             HVIS { antallMånederEtterNedreAldersgrense erMindreEnn MND_36 }
             SÅ {
-                justeringsFaktor = faktum(
+                justeringsFaktor = forklaring(
                     "justeringsFaktor",
                     (MND_36 - antallMånederEtterNedreAldersgrense) / MND_36
                 )
@@ -114,7 +114,7 @@ class BeregnSlitertilleggRSVårFaktumVersjon(
             SÅ {
                 RETURNER(
                     SlitertilleggFaktum(
-                        slitertilleggBeregnet = faktum(
+                        slitertilleggBeregnet = forklaring(
                             "slitertillegg",
                             fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
                         )

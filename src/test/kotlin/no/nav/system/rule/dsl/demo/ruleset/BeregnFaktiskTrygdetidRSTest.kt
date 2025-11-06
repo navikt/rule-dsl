@@ -8,8 +8,8 @@ import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.IKKE_OPPFYLT
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.inspections.find
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.system.rule.dsl.rettsregel.PairDomainPredicate
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 /**
@@ -35,13 +35,17 @@ class BeregnFaktiskTrygdetidRSTest {
         val redFttRegel = result.first() as Rule<*>
         assertTrue(redFttRegel.evaluated)
         assertTrue(redFttRegel.fired())
-        Assertions.assertEquals(
-            "JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)", redFttRegel.children[0].toString()
-        )
-        Assertions.assertEquals(
-            "JA 'faktisk trygdetid i måneder' (155) er mindre enn 'firefemtedelskrav' (480)",
-            redFttRegel.children[1].toString()
-        )
+        (redFttRegel.children[0] as? PairDomainPredicate)?.let { pdp ->
+            assertEquals("JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)", pdp.toString())
+            assertEquals("JA 'virkningstidspunkt' er etter eller lik 'januar 1991'", pdp.notasjon())
+            assertEquals("JA '2000-01-01' er etter eller lik '1991-01-01'", pdp.konkret())
+
+        }
+        (redFttRegel.children[1] as? PairDomainPredicate)?.let { pdp ->
+            assertEquals("JA 'faktisk trygdetid i måneder' (155) er mindre enn 'firefemtedelskrav' (480)", pdp.toString())
+            assertEquals("JA 'faktisk trygdetid i måneder' er mindre enn 'firefemtedelskrav'", pdp.notasjon())
+            assertEquals("JA '155' er mindre enn '480'", pdp.konkret())
+        }
     }
 
     @Test
@@ -63,14 +67,16 @@ class BeregnFaktiskTrygdetidRSTest {
         assertTrue(result.isNotEmpty())
         val regelSkalHaRedusertFremtidigTrygdetid = result.first() as Rule<*>
         assertTrue(regelSkalHaRedusertFremtidigTrygdetid.evaluated)
-        Assertions.assertFalse(regelSkalHaRedusertFremtidigTrygdetid.fired())
-        Assertions.assertEquals(
-            "JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)",
-            regelSkalHaRedusertFremtidigTrygdetid.children[0].toString()
-        )
-        Assertions.assertEquals(
-            "NEI 'faktisk trygdetid i måneder' (515) må være mindre enn 'firefemtedelskrav' (480)",
-            regelSkalHaRedusertFremtidigTrygdetid.children[1].toString()
-        )
+        assertFalse(regelSkalHaRedusertFremtidigTrygdetid.fired())
+        (regelSkalHaRedusertFremtidigTrygdetid.children[0] as? PairDomainPredicate)?.let { pdp ->
+            assertEquals("JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)", pdp.toString())
+            assertEquals("JA 'virkningstidspunkt' er etter eller lik 'januar 1991'", pdp.notasjon())
+            assertEquals("JA '2000-01-01' er etter eller lik '1991-01-01'", pdp.konkret())
+        }
+        (regelSkalHaRedusertFremtidigTrygdetid.children[1] as? PairDomainPredicate)?.let { pdp ->
+            assertEquals("NEI 'faktisk trygdetid i måneder' (515) må være mindre enn 'firefemtedelskrav' (480)", pdp.toString())
+            assertEquals("NEI 'faktisk trygdetid i måneder' må være mindre enn 'firefemtedelskrav'", pdp.notasjon())
+            assertEquals("NEI '515' må være mindre enn '480'", pdp.konkret())
+        }
     }
 }

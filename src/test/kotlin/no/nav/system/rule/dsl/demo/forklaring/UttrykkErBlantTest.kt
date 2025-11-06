@@ -15,8 +15,9 @@ class UttrykkErBlantTest {
 
     @Test
     fun `erBlant med Const verdi og Faktum liste`() {
-        val aktuelleUnntakstyper =
+        val aktuelleUnntakstyper = Faktum("aktuelleUnntakstyper",
             listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP)
+        )
 
         val unntakType = FLYKT_ALDER
         val uttrykk = Const(unntakType) erBlant aktuelleUnntakstyper
@@ -25,10 +26,10 @@ class UttrykkErBlantTest {
         assertTrue(uttrykk.evaluer())
 
         // Test notasjon
-        assertEquals("FLYKT_ALDER ER BLANT aktuelleUnntakstyper", uttrykk.notasjon())
+        assertEquals("JA 'FLYKT_ALDER' er blandt 'aktuelleUnntakstyper'", uttrykk.notasjon())
 
         // Test konkret
-        assertEquals("FLYKT_ALDER ER BLANT [FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP]", uttrykk.konkret())
+        assertEquals("JA 'FLYKT_ALDER' er blandt '[FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP]'", uttrykk.konkret())
     }
 
     @Test
@@ -59,7 +60,7 @@ class UttrykkErBlantTest {
         assertTrue(uttrykk.evaluer())
 
         // Test notasjon
-        assertEquals("FLYKT_GJENLEV ER IKKE BLANT aktuelleUnntakstyper", uttrykk.notasjon())
+        assertEquals("JA 'FLYKT_GJENLEV' er ikke blandt 'aktuelleUnntakstyper'", uttrykk.notasjon())
     }
 
     @Test
@@ -71,10 +72,10 @@ class UttrykkErBlantTest {
         assertTrue(uttrykk.evaluer())
 
         // Test notasjon
-        assertEquals("unntakType ER BLANT [FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP]", uttrykk.notasjon())
+        assertEquals("JA 'unntakType' er blandt '[FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP]'", uttrykk.notasjon())
 
         // Test konkret
-        assertEquals("FLYKT_ALDER ER BLANT [FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP]", uttrykk.konkret())
+        assertEquals("JA 'FLYKT_ALDER' er blandt '[FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP]'", uttrykk.konkret())
     }
 
     @Test
@@ -86,10 +87,10 @@ class UttrykkErBlantTest {
         assertTrue(uttrykk.evaluer())
 
         // Test notasjon
-        assertEquals("tall ER BLANT [1, 2, 3, 4, 5]", uttrykk.notasjon())
+        assertEquals("JA 'tall' er blandt '[1, 2, 3, 4, 5]'", uttrykk.notasjon())
 
         // Test konkret
-        assertEquals("5 ER BLANT [1, 2, 3, 4, 5]", uttrykk.konkret())
+        assertEquals("JA '5' er blandt '[1, 2, 3, 4, 5]'", uttrykk.konkret())
     }
 
     @Test
@@ -101,10 +102,10 @@ class UttrykkErBlantTest {
         assertTrue(uttrykk.evaluer())
 
         // Test notasjon
-        assertEquals("tall ER IKKE BLANT [1, 2, 3, 4, 5]", uttrykk.notasjon())
+        assertEquals("JA 'tall' er ikke blandt '[1, 2, 3, 4, 5]'", uttrykk.notasjon())
 
         // Test konkret
-        assertEquals("10 ER IKKE BLANT [1, 2, 3, 4, 5]", uttrykk.konkret())
+        assertEquals("JA '10' er ikke blandt '[1, 2, 3, 4, 5]'", uttrykk.konkret())
     }
 
     @Test
@@ -116,7 +117,7 @@ class UttrykkErBlantTest {
         assertTrue(uttrykk.evaluer())
 
         // Test notasjon
-        assertEquals("tekst ER BLANT [hei, ha, hallo]", uttrykk.notasjon())
+        assertEquals("JA 'tekst' er blandt '[hei, ha, hallo]'", uttrykk.notasjon())
     }
 
 }

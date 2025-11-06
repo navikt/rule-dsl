@@ -691,9 +691,6 @@ HVORDAN
     monthlyBenefit = 0.25 * 118620 / 12
     monthlyBenefit = 2467.92
 
-    sats = 0.25
-    G = 118620
-    måneder = 12
 ```
 
 ### Example 2: Complex Calculation with Nested Faktum

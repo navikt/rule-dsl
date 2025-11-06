@@ -27,7 +27,7 @@ Se faktum-trace-options.md.
 
 
 DEL 2
-1. Akkumulering ble ikke like enkelt. Tidligere:
+1. [????] Akkumulering ble ikke like enkelt. Tidligere:
 
 ```kotlin
 //Ny:
@@ -39,6 +39,11 @@ DEL 2
  operator fun <T : Number> Faktum<T>.plusAssign(value: T) : Unit 
 ```
 
-2. arc.faktum(...) i SÅ-blokken er ikke greit. Det er svært lett å blande Faktum konstruktøren med faktum funsjonen.
+2. [????] arc.faktum(...) i SÅ-blokken er ikke greit. Det er svært lett å blande Faktum konstruktøren med faktum funsjonen. Denne er nå kallt forklaring(...) men synes fortsatt det er litt mangelfullt.
 
-3. Uklart om Const skal være internal eller ikke. Hvis vi vil ha den eksponert, kan vi gjeninnføre navngi funksjon som gjør Const til Faktum.
+3. [DONE] Uklart om Const skal være internal eller ikke. Hvis vi vil ha den eksponert, kan vi gjeninnføre navngi funksjon som gjør Const til Faktum. Bør være avklart nå at Const forblir internal.
+
+4. [????] Forklaring er nå basert på at rammeverket produserer String. Dette er greit mens vi utvikler mekansimene, men må byttes ut. Flere veier til mål men vurder:
+a) rådata er AST (Abstract Syntax Tree) av Uttrykk, og Uttrykk må skille seg ut fra Forklaring. Forklaring må være et eget objekt som bruker av rammeverket selv kan bestemme. Vi leverer noen enkle forslag på Forklaring med diverse String utgaver. I pensjon-regler har vi ytterligere en AST til GuiModel transformasjon som gjør at vi kan vise forklaringer i GUI.
+b) som a, men vi transformerer AST til et ForklaringsNode objekt som intermediary før man transformerer videre til hva nå man trenger.
+c) noe annet?

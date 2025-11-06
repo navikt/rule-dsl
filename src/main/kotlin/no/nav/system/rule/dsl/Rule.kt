@@ -103,7 +103,7 @@ open class Rule<T : Any>(
     @JvmName("FaktumOG")
     @DslDomainPredicate
     fun OG(predicateFunction: () -> Faktum<Boolean>) {
-        predicateFunctionList.add { predicateFunction.invoke() erLik Faktum("SANN", true) }
+        predicateFunctionList.add { predicateFunction.invoke() erLik true }
     }
 
     /**
@@ -145,7 +145,6 @@ open class Rule<T : Any>(
      */
     fun RETURNER(returnValue: T) {
         this.returnValue = returnValue
-//        if (returnValue is Faktum<*>) returnValue.children.add(this)
         returnRule = true
     }
 
@@ -199,6 +198,10 @@ open class Rule<T : Any>(
 
     internal fun prettyDoc(): String {
         return comment.trim().replace('\n', ' ').replace("\"", "\\\"").replace(" +".toRegex(), " ")
+    }
+
+    internal fun shortName(): String {
+        return name.substringAfter('.', name).substringBefore('.')
     }
 
     /**

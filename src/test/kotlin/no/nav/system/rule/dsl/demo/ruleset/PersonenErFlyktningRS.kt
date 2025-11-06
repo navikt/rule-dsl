@@ -1,22 +1,19 @@
 package no.nav.system.rule.dsl.demo.ruleset
 
-import no.nav.system.rule.dsl.*
+import no.nav.system.rule.dsl.AbstractRuleset
+import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.domain.Person
 import no.nav.system.rule.dsl.demo.domain.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.koder.UnntakEnum.*
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
+import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum
 import no.nav.system.rule.dsl.demo.domain.koder.YtelseEnum.*
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.helper.måneder
 import no.nav.system.rule.dsl.demo.helper.år
-import no.nav.system.rule.dsl.demo.domain.koder.UtfallType
-import no.nav.system.rule.dsl.demo.domain.koder.UtfallType.*
-import no.nav.system.rule.dsl.rettsregel.*
-import no.nav.system.rule.dsl.rettsregel.operators.erBlant
-import no.nav.system.rule.dsl.rettsregel.operators.erEtterEllerLik
-import no.nav.system.rule.dsl.rettsregel.operators.erLik
-import no.nav.system.rule.dsl.rettsregel.operators.erMindreEllerLik
-import no.nav.system.rule.dsl.rettsregel.operators.erStørreEllerLik
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.operators.*
 import java.time.LocalDate
 
 /**
@@ -122,14 +119,14 @@ class PersonenErFlyktningRS(
         regel("AnvendtFlyktning_ikkeRelevant") {
             HVIS { "AngittFlyktning".ingenHarTruffet() }
             SÅ {
-                RETURNER(Faktum("Anvendt flyktning", IKKE_RELEVANT))
+                RETURNER(forklaring("Anvendt flyktning", IKKE_RELEVANT))
             }
         }
         regel("AnvendtFlyktning_oppfylt") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
             OG { innKravlinjeFremsattDatoFom2021 erLik false }
             SÅ {
-                RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
+                RETURNER(forklaring("Anvendt flyktning", OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_ingenOvergang") {
@@ -137,7 +134,7 @@ class PersonenErFlyktningRS(
             OG { innKravlinjeFremsattDatoFom2021 }
             OG { "Overgangsregel".ingenHarTruffet() }
             SÅ {
-                RETURNER(Faktum("Anvendt flyktning", IKKE_OPPFYLT))
+                RETURNER(forklaring("Anvendt flyktning", IKKE_OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_harOvergang") {
@@ -145,7 +142,7 @@ class PersonenErFlyktningRS(
             OG { innKravlinjeFremsattDatoFom2021 }
             OG { "Overgangsregel".minstEnHarTruffet() }
             SÅ {
-                RETURNER(Faktum("Anvendt flyktning", OPPFYLT))
+                RETURNER(forklaring("Anvendt flyktning", OPPFYLT))
             }
         }
     }

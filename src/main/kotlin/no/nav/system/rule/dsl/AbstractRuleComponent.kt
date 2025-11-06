@@ -1,6 +1,5 @@
 package no.nav.system.rule.dsl
 
-import jdk.internal.org.jline.utils.Colors.s
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
 import no.nav.system.rule.dsl.inspections.hvorfor
@@ -15,8 +14,7 @@ import kotlin.reflect.KClass
 /**
  * Common functionality across all components of the DSL.
  *
- * All rulecomponents are organized in a tree of rulecomponents using [children]. Navigate the
- * rulecomponenttree by providing a [TreeVisitor] in the [accept] method.
+ * All rulecomponents are organized in a tree of rulecomponents using [children].
  *
  * A [resourceMap] keeps track of all instantiated resources for convenient access during rule processing.
  * Resources are all classes that needs to be instantiated once per ruleService call, typically resources
@@ -59,26 +57,10 @@ abstract class AbstractRuleComponent : Serializable {
         return resource as T
     }
 
-//    /**
-//     * Produserer ForklartFaktum med sporing og angitt Formel.
-//     */
-//    fun <T : Number> faktum(formel: Formel<T>): ForklartFaktum<T> {
-//        return ForklartFaktum(
-//            formel.name,
-//            formel.value,
-//            /**
-//             * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
-//             * Resultatet formes av "hvorfor-renderer".
-//             */
-//            this.root().hvorfor(target = this@AbstractRuleComponent),
-//            hvordan = formel
-//        )
-//    }
-
     /**
      * Produserer ForklartFaktum med sporing og angitt Uttrykk.
      */
-    fun <T : Any> faktum(navn: String, uttrykk: Uttrykk<T>): Faktum<T> {
+    fun <T : Any> forklaring(navn: String, uttrykk: Uttrykk<T>): Faktum<T> {
         return Faktum(
             navn = navn,
             uttrykk = uttrykk,
@@ -93,7 +75,7 @@ abstract class AbstractRuleComponent : Serializable {
     /**
      * Produserer ForklartFaktum med sporing og angitt verdi.
      */
-    fun <T : Any> faktum(navn: String, verdi: T): Faktum<T> {
+    fun <T : Any> forklaring(navn: String, verdi: T): Faktum<T> {
         return Faktum(
             navn = navn,
             uttrykk = Const(verdi),

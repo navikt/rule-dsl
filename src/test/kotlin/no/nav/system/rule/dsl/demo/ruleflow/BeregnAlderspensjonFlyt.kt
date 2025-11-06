@@ -17,15 +17,14 @@ class BeregnAlderspensjonFlyt(
     private val virkningstidspunkt: Faktum<LocalDate>,
 ) : AbstractRuleflow<AlderspensjonOutput>() {
     private var grunnpensjonSats = 0.0
-    private lateinit var flyktningUtfall: Faktum<UtfallType>
-    private var output = AlderspensjonOutput()
+    private val output = AlderspensjonOutput()
 
     override var ruleflow: () -> AlderspensjonOutput = {
 
         /**
          * Sjekk om anvendtFlyktning
          */
-        flyktningUtfall = PersonenErFlyktningRS(
+        output.anvendtFlyktning = PersonenErFlyktningRS(
             person,
             Faktum("Ytelsestype", YtelseEnum.AP),
             Faktum("Kapittel 20", false),
@@ -40,7 +39,7 @@ class BeregnAlderspensjonFlyt(
             person.fødselsdato,
             virkningstidspunkt,
             person.boperioder,
-            flyktningUtfall
+            output.anvendtFlyktning!!
         ).run(this)
 
         forgrening("Sivilstand?") {

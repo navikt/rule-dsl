@@ -6,7 +6,6 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListDomainPredicate
 import org.jetbrains.annotations.TestOnly
@@ -172,13 +171,10 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
             comparator = ListComparator.MINST_EN_AV,
             uttrykk = Faktum("Regelreferanse", this),
             function = { list.any { it.fired() } },
-            uttrykkList = list.filter { it.children.isNotEmpty() }.map {
-                Faktum(
-                    navn = it.name(),
-                    uttrykk = Const(it.name()),
-                    rvsId = null
-                )
-            },
+            mengdeUttrykk = Faktum(
+                "aktuelle regler",
+                list.map { it.shortName() }
+            )
         )
     }
 
@@ -195,13 +191,10 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
             comparator = ListComparator.ALLE,
             uttrykk = Faktum("Regelreferanse", this),
             function = { list.all { it.fired() } },
-            uttrykkList = list.filter { it.children.isNotEmpty() }.map {
-                Faktum(
-                    navn = it.name(),
-                    uttrykk = Const(it.name()),
-                    rvsId = null
-                )
-            }
+            mengdeUttrykk = Faktum(
+                "aktuelle regler",
+                list.map { it.shortName() }
+            )
         )
     }
 
@@ -211,13 +204,10 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
             comparator = ListComparator.INGEN,
             uttrykk = Faktum("Regelreferanse", this),
             function = { list.none { it.fired() } },
-            uttrykkList = list.filter { it.children.isNotEmpty() }.map {
-                Faktum(
-                    navn = it.name(),
-                    uttrykk = Const(it.name()),
-                    rvsId = null
-                )
-            }
+            mengdeUttrykk = Faktum(
+                "uaktuelle regler",
+                list.map { it.shortName() }
+            )
         )
     }
 

@@ -11,18 +11,14 @@ import java.time.temporal.ChronoUnit
 
 /**
  *
- * WIP
- *
  * Regelsett for beregning av slitertillegg
  *
  * Denne versjonen legger mer vekt på Domenepredikatene, dvs reglene er spisset mot den aktuelle formel.
  *
  * https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering#
  *
- * WIP
- *
  */
-class BeregnSlitertilleggRSFaktum2MedDomenePredikatSekvensielleReglerVersjon(
+class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
     innUttakstidspunkt: YearMonth,
     innPerson: Person,
     innGrunnbeløp: Int
@@ -44,17 +40,31 @@ class BeregnSlitertilleggRSFaktum2MedDomenePredikatSekvensielleReglerVersjon(
     )
 
     private val G = Faktum("G", innGrunnbeløp)
-    private val fulltSlitertillegg: Faktum<Double> = Faktum("fulltSlitertillegg", 0.25 * G / 12)
-    private var justeringsFaktor: Faktum<Double> = Faktum("justeringsFaktor", 0.0)
-    private val trygdetidFaktor: Faktum<Double> = Faktum("trygdetidFaktor", faktiskTrygdetid / fullTrygdetid)
+    private val fulltSlitertillegg = Faktum("fulltSlitertillegg", 0.25 * G / 12)
+    private var justeringsFaktor = Faktum("justeringsFaktor", 0.0)
+    private val trygdetidFaktor = Faktum("trygdetidFaktor", faktiskTrygdetid / fullTrygdetid)
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
 
+        /**
+         * justeringsFaktor.forklar():
+         * HVA
+         *    justeringsFaktor = 1.0
+         *
+         * HVORFOR
+         *    antallMånederEtterNedrePensjonsDato erMindreEnn 36
+         *    0 erMindreEnn 36
+         *
+         * HVORDAN
+         *    justeringsFaktor = (36 - antallMånederEtterNedrePensjonsDato) / 36
+         *    justeringsFaktor = (36 - 0) / 36
+         *    justeringsFaktor = 1.0
+         */
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG") {
             HVIS { antallMånederEtterNedrePensjonsDato erMindreEnn MND_36 }
             SÅ {
-                justeringsFaktor = faktum(
+                justeringsFaktor = forklaring(
                     "justeringsFaktor", (MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36
                 )
             }
@@ -63,7 +73,7 @@ class BeregnSlitertilleggRSFaktum2MedDomenePredikatSekvensielleReglerVersjon(
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-SENT") {
             HVIS { antallMånederEtterNedrePensjonsDato erStørreEllerLik MND_36 }
             SÅ {
-                justeringsFaktor = faktum(
+                justeringsFaktor = forklaring(
                     "justeringsFaktor", 0.0
                 )
             }
@@ -90,11 +100,24 @@ class BeregnSlitertilleggRSFaktum2MedDomenePredikatSekvensielleReglerVersjon(
          *          slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
          *          slitertillegg = 5 * 5 * 5
          *
-         *          fulltSlitertillegg = 0.25 * G / 12
-         *          fulltSlitertillegg = 0.25 * 110000 / 12
+         *          HVA
+         *              fulltSlitertillegg = 1.0
          *
-         *          justeringsFaktor = MND_36 - antallMånederEtterNedreAldersgrense) / MND_36
-         *          justeringsFaktor = (36 - 16) / 36
+         *          HVORDAN
+         *              fulltSlitertillegg = 0.25 * G / 12
+         *              fulltSlitertillegg = 0.25 * 110000 / 12
+         *
+         *          HVA
+         *              justeringsFaktor = 1.0
+         *
+         *           HVORFOR
+         *              antallMånederEtterNedrePensjonsDato erMindreEnn 36
+         *              0 erMindreEnn 36
+         *
+         *           HVORDAN
+         *              justeringsFaktor = (36 - antallMånederEtterNedrePensjonsDato) / 36
+         *              justeringsFaktor = (36 - 0) / 36
+         *              justeringsFaktor = 1.0
          *
          *          trygdetidFaktor = faktiskTrygdetid / fullTrygdetid
          *          trygdetidFaktor = 30 / 40
@@ -103,7 +126,7 @@ class BeregnSlitertilleggRSFaktum2MedDomenePredikatSekvensielleReglerVersjon(
             HVIS { true }
             SÅ {
                 RETURNER(
-                    faktum("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
+                    forklaring("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
                 )
             }
         }

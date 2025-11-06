@@ -25,7 +25,7 @@ interface Uttrykk<out T : Any> : Serializable {
     fun notasjon(): String
     fun konkret(): String
     fun grunnlagListe(): List<Uttrykk<Any>>
-
+    fun forklar(level: Int = 0): String
 
 }
 
@@ -57,13 +57,20 @@ internal data class Add<T : Number>(
     }
 
     override fun konkret(): String {
-        val v = venstre.konkret().medParentesVedBehov(venstre)
-        val h = høyre.konkret().medParentesVedBehov(høyre)
-        return "$v + $h"
+        // Addition doesn't need parentheses - it's associative
+        return "${venstre.konkret()} + ${høyre.konkret()}"
     }
 
     override fun grunnlagListe(): List<Uttrykk<Any>> =
         venstre.grunnlagListe() + høyre.grunnlagListe()
+
+    override fun forklar(level: Int): String = buildString {
+        append(" ".repeat(level * 2)).append("HVORDAN\n")
+        append(" ".repeat((level + 1) * 2)).append("${notasjon()}\n")
+        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
+//        append(venstre.forklar())
+//        append(høyre.forklar())
+    }
 
 }
 
@@ -105,6 +112,13 @@ internal data class Sub<T : Number>(
     override fun grunnlagListe(): List<Uttrykk<Any>> =
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
+    override fun forklar(level: Int): String = buildString {
+        append(" ".repeat(level * 2)).append("HVORDAN\n")
+        append(" ".repeat((level + 1) * 2)).append("${notasjon()}\n")
+        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
+//        append(venstre.forklar())
+//        append(høyre.forklar())
+    }
 }
 
 /**
@@ -145,6 +159,16 @@ internal data class Mul<T : Number>(
     override fun grunnlagListe(): List<Uttrykk<Any>> =
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
+    override fun forklar(level: Int): String = buildString {
+        append(" ".repeat(level * 2)).append("HVORDAN\n")
+        append(" ".repeat((level + 1) * 2)).append("${notasjon()}\n")
+        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
+//        append(" ".repeat((level + 1) * 2)).append(venstre.forklar())
+//        append(" ".repeat((level + 1) * 2)).append(høyre.forklar())
+        grunnlagListe().forEach {
+            append(" ".repeat((level + 1) * 2)).append(it.forklar(level + 2))
+        }
+    }
 }
 
 /**
@@ -180,6 +204,12 @@ internal data class Div(
     override fun grunnlagListe(): List<Uttrykk<Any>> =
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
+    override fun forklar(level: Int): String = buildString {
+        append(" ".repeat(level * 2)).append("HVORDAN\n")
+        append(" ".repeat((level + 1) * 2)).append("${notasjon()}\n")
+        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
+    }
+
 }
 
 
@@ -191,7 +221,6 @@ private fun String.medParentesVedBehov(uttrykk: Uttrykk<*>, høyreSide: Boolean 
         is Add, is Sub -> true
         else -> false
     }
-
     return if (trengerParentes) "($this)" else this
 }
 
@@ -223,16 +252,19 @@ data class Faktum<T : Any>(
 
     override fun konkret(): String = evaluer().toString()
 
-    override fun grunnlagListe(): List<Faktum<out Any>> = listOf(this)
+    override fun grunnlagListe(): List<Uttrykk<Any>> = listOf(uttrykk)
 
-    fun forklaring(): String = "${hva()} = ${konkret()}"
-    fun forklarUsing(forklaringProdusent: (Uttrykk<Any>) -> String): String = forklaringProdusent(this)
+    override fun toString(): String = "'$navn' (${evaluer()})"
 
-    fun hva(): String = navn
-
-    fun hvordan(): String = uttrykk.buildHvordan(0).trimEnd()
-
-    fun hvorfor(): String = hvorfor ?: "hvorfor ikke tilgjengelig"
+    override fun forklar(level: Int): String = buildString {
+        append(" ".repeat(level * 2)).append("HVA\n")
+        append(" ".repeat((level + 1) * 2)).append("$navn = ${evaluer()}\n")
+        append("\n")
+        append(" ".repeat(level * 2)).append("HVORFOR\n")
+        append(" ".repeat((level + 1) * 2)).append("$hvorfor\n")
+        append("\n")
+        append(" ".repeat((level + 1) * 2)).append("${uttrykk.forklar(level + 2)}\n")
+    }
 }
 
 /**
@@ -251,7 +283,8 @@ internal data class Const<T : Any>(
 
     override fun grunnlagListe(): List<Faktum<out Any>> = emptyList()
 
-    override fun toString(): String = verdi.toString()
+    override fun toString(): String = "'$verdi'"
+    override fun forklar(level: Int): String = ""
 }
 
 /**
@@ -287,16 +320,27 @@ class PairDomainPredicate(
 ) : DomainPredicate(comparator = comparator, function = function) {
 
     override fun type(): RuleComponentType = DOMENE_PREDIKAT_PAR
-
-    override fun toString(): String = "${fired.svarord()} '${venstre.notasjon()}' (${venstre.konkret()})${komparatorText()}'${høyre.notasjon()}' (${høyre.konkret()})"
-
     override fun evaluer(): Boolean = fired
+    override fun toString(): String =  "${fired.svarord()} ${venstre}${komparatorText()}${høyre}"
 
-    override fun notasjon(): String = "${fired.svarord()} ${venstre.notasjon()}${komparatorText()}${høyre.notasjon()}"
+    /**
+     * someStartDate erFør someEndDate
+     * 2022-01-01 erFør 2023-01-01
+     *
+     * someStartDate (2022-01-01) erFør someEndDate (2023-01-01)
+     *
+     * someStartDate erFør someEndDate -> 2022-01-01 erFør 2023-01-01
+     */
+    override fun forklar(level: Int): String = buildString {
+        append(" ".repeat(level * 2)).append("${notasjon()}\n")
+        append(" ".repeat(level * 2)).append("${konkret()}\n")
+    }
 
-    override fun konkret(): String = "${venstre.konkret()}${komparatorText()}${høyre.konkret()}"
+    override fun notasjon(): String = "${fired.svarord()} '${venstre.notasjon()}'${komparatorText()}'${høyre.notasjon()}'"
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> = listOf(venstre, høyre)
+    override fun konkret(): String = "${fired.svarord()} '${venstre.konkret()}'${komparatorText()}'${høyre.konkret()}'"
+
+    override fun grunnlagListe(): List<Uttrykk<Any>> = venstre.grunnlagListe() + høyre.grunnlagListe()
 }
 
 /**
@@ -305,22 +349,32 @@ class PairDomainPredicate(
 class ListDomainPredicate(
     override val comparator: ListComparator,
     private val uttrykk: Uttrykk<*>,
-    val uttrykkList: List<Uttrykk<*>>,
+    val mengdeUttrykk: Uttrykk<List<*>>,
     override val function: () -> Boolean
 ) : DomainPredicate(comparator = comparator, function = function) {
 
     override fun type(): RuleComponentType = DOMENE_PREDIKAT_LISTE
 
-    override fun toString(): String = "${fired.svarord()} $uttrykk${komparatorText()}$uttrykkList"
+    //    override fun toString(): String = "${fired.svarord()} $uttrykk${komparatorText()}$uttrykkList"
+    override fun toString(): String = konkret()
 
     override fun evaluer(): Boolean = fired
 
-    override fun notasjon(): String = "${uttrykk.notasjon()}${komparatorText()}${uttrykkList.map { it.notasjon() }}"
+    override fun notasjon(): String = "${fired.svarord()} '${uttrykk.notasjon()}'${komparatorText()}'${mengdeUttrykk.notasjon()}'"
 
-    override fun konkret(): String = "${uttrykk.konkret()}${komparatorText()}${uttrykkList.map { it.konkret() }}"
+    override fun konkret(): String = "${fired.svarord()} '${uttrykk.konkret()}'${komparatorText()}'${mengdeUttrykk.evaluer().map { it.toString() }}'"
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> = listOf(uttrykk) + uttrykkList
+    override fun grunnlagListe(): List<Uttrykk<Any>> = listOf(uttrykk, mengdeUttrykk)
 
+    override fun forklar(level: Int): String = buildString {
+        val uttrykkItems = mengdeUttrykk.evaluer().map { "'${it.toString()}'" }
+        append(" ".repeat(level * 2)).append("${notasjon()}\n")
+        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
+//        append(" ".repeat((level + 1) * 2)).append(uttrykk.forklar(level + 2))
+        uttrykkItems.forEach {
+            append(" ".repeat((level + 1) * 2)).append(it.toString())
+        }
+    }
 }
 
 /**

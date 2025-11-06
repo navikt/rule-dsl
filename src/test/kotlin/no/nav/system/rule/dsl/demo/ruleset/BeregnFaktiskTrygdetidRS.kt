@@ -21,11 +21,6 @@ import kotlin.math.roundToInt
 /**
  * Demo regelsett viser bruk av Pattern og regelsporing.
  */
-
-operator fun <T : Number> Faktum<T>.plusAssign(value: T): Unit {
-    // This won't work well because plusAssign expects Unit return
-}
-
 class BeregnFaktiskTrygdetidRS(
     fødselsdato: Faktum<LocalDate>,
     private val virkningstidspunkt: Faktum<LocalDate>,

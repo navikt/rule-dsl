@@ -114,7 +114,7 @@ class BeregnSlitertilleggRSForklartFaktumVersjon(
             HVIS { true }
             SÅ {
                 RETURNER(
-                    faktum(
+                    forklaring(
                         "slitertillegg",
                         fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
                     )
