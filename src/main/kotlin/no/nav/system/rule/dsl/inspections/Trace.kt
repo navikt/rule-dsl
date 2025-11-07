@@ -118,10 +118,8 @@ private fun hvorforForklaringRenderer(): (TraceNode, Int) -> String {
                     append(" ".repeat(level * 2)).append(node.arc.toString()).append("\n")
                     node.arc.children
                         .filterIsInstance<DomainPredicate>()
-//                        .map { it.toString() }
                         .forEach { domenePredikat ->
                             append(" ".repeat((level + 1) * 2)).append(domenePredikat.forklar(level + 2)).append("\n")
-//                            append(" ".repeat((level + 2) * 2)).append(domenePredikat.forklar())
                         }
                 }
 
