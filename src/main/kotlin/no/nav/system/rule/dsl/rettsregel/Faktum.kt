@@ -1,9 +1,11 @@
 package no.nav.system.rule.dsl.rettsregel
 
 import no.nav.system.rule.dsl.Predicate
-import no.nav.system.rule.dsl.enums.Comparator
-import no.nav.system.rule.dsl.enums.ListComparator
-import no.nav.system.rule.dsl.enums.PairComparator
+import no.nav.system.rule.dsl.enums.Operator
+import no.nav.system.rule.dsl.enums.ListOperator
+import no.nav.system.rule.dsl.enums.MathOperator
+import no.nav.system.rule.dsl.enums.NegatableOperator
+import no.nav.system.rule.dsl.enums.PairOperator
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.DOMENE_PREDIKAT_LISTE
 import no.nav.system.rule.dsl.enums.RuleComponentType.DOMENE_PREDIKAT_PAR
@@ -56,7 +58,7 @@ internal data class Add<T : Number>(
     override fun notasjon(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.notasjon(), venstre,
-            Operator.ADD,
+            MathOperator.ADD,
             høyre.notasjon(), høyre
         )
         return "$v + $h"
@@ -65,7 +67,7 @@ internal data class Add<T : Number>(
     override fun konkret(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.konkret(), venstre,
-            Operator.ADD,
+            MathOperator.ADD,
             høyre.konkret(), høyre
         )
         return "$v + $h"
@@ -113,7 +115,7 @@ internal data class Sub<T : Number>(
     override fun notasjon(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.notasjon(), venstre,
-            Operator.SUB,
+            MathOperator.SUB,
             høyre.notasjon(), høyre
         )
         return "$v - $h"
@@ -122,7 +124,7 @@ internal data class Sub<T : Number>(
     override fun konkret(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.konkret(), venstre,
-            Operator.SUB,
+            MathOperator.SUB,
             høyre.konkret(), høyre
         )
         return "$v - $h"
@@ -169,7 +171,7 @@ internal data class Mul<T : Number>(
     override fun notasjon(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.notasjon(), venstre,
-            Operator.MUL,
+            MathOperator.MUL,
             høyre.notasjon(), høyre
         )
         return "$v * $h"
@@ -178,7 +180,7 @@ internal data class Mul<T : Number>(
     override fun konkret(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.konkret(), venstre,
-            Operator.MUL,
+            MathOperator.MUL,
             høyre.konkret(), høyre
         )
         return "$v * $h"
@@ -220,7 +222,7 @@ internal data class Div(
     override fun notasjon(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.notasjon(), venstre,
-            Operator.DIV,
+            MathOperator.DIV,
             høyre.notasjon(), høyre
         )
         return "$v / $h"
@@ -229,7 +231,7 @@ internal data class Div(
     override fun konkret(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.konkret(), venstre,
-            Operator.DIV,
+            MathOperator.DIV,
             høyre.konkret(), høyre
         )
         return "$v / $h"
@@ -272,12 +274,12 @@ private fun medParenteserVedBehov(
     høyreUttrykk: Uttrykk<*>
 ): Pair<String, String> {
     val venstreTrengerParentes = when (operator) {
-        Operator.MUL, Operator.DIV -> venstreUttrykk is Add || venstreUttrykk is Sub
+        MathOperator.MUL, MathOperator.DIV -> venstreUttrykk is Add || venstreUttrykk is Sub
         else -> false
     }
 
     val høyreTrengerParentes = when (operator) {
-        Operator.MUL, Operator.DIV, Operator.SUB -> høyreUttrykk is Add || høyreUttrykk is Sub
+        MathOperator.MUL, MathOperator.DIV, MathOperator.SUB -> høyreUttrykk is Add || høyreUttrykk is Sub
         else -> false
     }
 
@@ -354,7 +356,7 @@ internal data class Const<T : Any>(
  * The application of a [function] that returns the boolean.
  */
 abstract class DomainPredicate(
-    open val comparator: Comparator,
+    open val operator: NegatableOperator,
     override val function: () -> Boolean,
 ) : Predicate(function = function), Uttrykk<Boolean> {
 
@@ -368,7 +370,7 @@ abstract class DomainPredicate(
         function.invoke().also { terminateEvaluation = false }
     }
 
-    fun komparatorText(): String = if (fired) comparator.text else comparator.negated()
+    fun komparatorText(): String = if (fired) operator.text else operator.negated()
 
 }
 
@@ -376,11 +378,11 @@ abstract class DomainPredicate(
  * Compares [venstre] with [høyre]
  */
 class PairDomainPredicate(
-    override val comparator: PairComparator,
+    override val operator: PairOperator,
     private val venstre: Uttrykk<*>,
     private val høyre: Uttrykk<*>,
     override val function: () -> Boolean,
-) : DomainPredicate(comparator = comparator, function = function) {
+) : DomainPredicate(operator = operator, function = function) {
 
     override fun type(): RuleComponentType = DOMENE_PREDIKAT_PAR
     override fun evaluer(): Boolean = fired
@@ -410,11 +412,11 @@ class PairDomainPredicate(
  * Compares [uttrykk] relationship with items [uttrykkList]
  */
 class ListDomainPredicate(
-    override val comparator: ListComparator,
+    override val operator: ListOperator,
     private val uttrykk: Uttrykk<*>,
     val mengdeUttrykk: Uttrykk<List<*>>,
     override val function: () -> Boolean
-) : DomainPredicate(comparator = comparator, function = function) {
+) : DomainPredicate(operator = operator, function = function) {
 
     override fun type(): RuleComponentType = DOMENE_PREDIKAT_LISTE
 

@@ -1,6 +1,6 @@
 package no.nav.system.rule.dsl
 
-import no.nav.system.rule.dsl.enums.ListComparator
+import no.nav.system.rule.dsl.enums.ListOperator
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
@@ -168,7 +168,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     protected fun String.minstEnHarTruffet(): ListDomainPredicate {
         val list = findRulesByNameStartsWith(this)
         return ListDomainPredicate(
-            comparator = ListComparator.MINST_EN_AV,
+            operator = ListOperator.MINST_EN_AV,
             uttrykk = Faktum("Regelreferanse", this),
             function = { list.any { it.fired() } },
             mengdeUttrykk = Faktum(
@@ -188,7 +188,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     protected fun String.alleHarTruffet(): ListDomainPredicate {
         val list = findRulesByNameStartsWith(this)
         return ListDomainPredicate(
-            comparator = ListComparator.ALLE,
+            operator = ListOperator.ALLE,
             uttrykk = Faktum("Regelreferanse", this),
             function = { list.all { it.fired() } },
             mengdeUttrykk = Faktum(
@@ -201,7 +201,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     protected fun String.ingenHarTruffet(): ListDomainPredicate {
         val list = findRulesByNameStartsWith(this)
         return ListDomainPredicate(
-            comparator = ListComparator.INGEN,
+            operator = ListOperator.INGEN,
             uttrykk = Faktum("Regelreferanse", this),
             function = { list.none { it.fired() } },
             mengdeUttrykk = Faktum(

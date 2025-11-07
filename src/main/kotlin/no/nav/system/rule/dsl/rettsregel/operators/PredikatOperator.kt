@@ -1,8 +1,8 @@
 package no.nav.system.rule.dsl.rettsregel.operators
 
-import no.nav.system.rule.dsl.enums.ListComparator.ER_BLANDT
-import no.nav.system.rule.dsl.enums.ListComparator.ER_IKKE_BLANDT
-import no.nav.system.rule.dsl.enums.PairComparator.*
+import no.nav.system.rule.dsl.enums.ListOperator.ER_BLANDT
+import no.nav.system.rule.dsl.enums.ListOperator.ER_IKKE_BLANDT
+import no.nav.system.rule.dsl.enums.PairOperator.*
 import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate
 import java.time.YearMonth
@@ -263,42 +263,42 @@ infix fun Number.erUlik(other: Faktum<out Number>) = PairDomainPredicate(
 
 @JvmName("uttrykk_erBlant_list")
 infix fun <T : Any> Uttrykk<T>.erBlant(others: List<T>) = ListDomainPredicate(
-    comparator = ER_BLANDT,
+    operator = ER_BLANDT,
     uttrykk = this,
     mengdeUttrykk = Const(others)
 ) { this.evaluer() in others }
 
 @JvmName("uttrykk_erBlant_list_faktum")
 infix fun <T : Any> Uttrykk<T>.erBlant(others: List<Faktum<T>>) = ListDomainPredicate(
-    comparator = ER_BLANDT,
+    operator = ER_BLANDT,
     uttrykk = this,
     mengdeUttrykk = Const(others.map { faktum -> faktum.evaluer() })
 ) { this.evaluer() in others.map { it.evaluer() } }
 
 @JvmName("uttrykk_erBlant_faktum_list")
 infix fun <T : Any> Uttrykk<T>.erBlant(other: Faktum<List<T>>) = ListDomainPredicate(
-    comparator = ER_BLANDT,
+    operator = ER_BLANDT,
     uttrykk = this,
     mengdeUttrykk = other
 ) { this.evaluer() in other.evaluer() }
 
 @JvmName("uttrykk_erIkkeBlant_list")
 infix fun <T : Any> Uttrykk<T>.erIkkeBlant(others: List<T>) = ListDomainPredicate(
-    comparator = ER_IKKE_BLANDT,
+    operator = ER_IKKE_BLANDT,
     uttrykk = this,
     mengdeUttrykk = Const(others)
 ) { this.evaluer() !in others }
 
 @JvmName("uttrykk_erIkkeBlant_list_faktum")
 infix fun <T : Any> Uttrykk<T>.erIkkeBlant(others: List<Faktum<T>>) = ListDomainPredicate(
-    comparator = ER_IKKE_BLANDT,
+    operator = ER_IKKE_BLANDT,
     uttrykk = this,
     mengdeUttrykk = Const(others.map { faktum -> faktum.evaluer() })
 ) { this.evaluer() !in others.map { it.evaluer() } }
 
 @JvmName("uttrykk_erIkkeBlant_faktum_list")
 infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: Faktum<List<T>>) = ListDomainPredicate(
-    comparator = ER_IKKE_BLANDT,
+    operator = ER_IKKE_BLANDT,
     uttrykk = this,
     mengdeUttrykk = other
 ) { this.evaluer() !in other.evaluer() }

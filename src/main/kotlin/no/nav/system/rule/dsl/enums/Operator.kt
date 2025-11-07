@@ -1,11 +1,17 @@
 package no.nav.system.rule.dsl.enums
 
-interface Comparator {
+/**
+ * Base interface for all operators (pair-, list and math operations).
+ */
+interface Operator {
     val text: String
+}
+
+interface NegatableOperator : Operator {
     fun negated(): String
 }
 
-enum class PairComparator(override val text: String) : Comparator {
+enum class PairOperator(override val text: String) : NegatableOperator {
     FØR_ELLER_LIK(" er før eller lik "),
     FØR(" er før "),
     ETTER_ELLER_LIK(" er etter eller lik "),
@@ -33,7 +39,7 @@ enum class PairComparator(override val text: String) : Comparator {
     }
 }
 
-enum class ListComparator(override val text: String) : Comparator {
+enum class ListOperator(override val text: String) : NegatableOperator {
     ER_BLANDT(" er blandt "),
     ER_IKKE_BLANDT(" er ikke blandt "),
     ALLE(" gjelder samtlige"),
@@ -41,8 +47,7 @@ enum class ListComparator(override val text: String) : Comparator {
     MINST_EN_AV(" minst én er JA "),
     MINST(" minst "),
     MAKS(" maks "),
-    AKKURAT(" akkurat "),
-    ;
+    AKKURAT(" akkurat ");
 
     override fun negated(): String {
         return when (this) {
@@ -56,4 +61,11 @@ enum class ListComparator(override val text: String) : Comparator {
             AKKURAT -> " ikke akkurat "
         }
     }
+}
+
+enum class MathOperator(override val text: String) : Operator {
+    ADD(" + "),
+    SUB(" - "),
+    MUL(" * "),
+    DIV(" / ");
 }
