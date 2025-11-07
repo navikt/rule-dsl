@@ -3,10 +3,11 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGEL
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.DomainPredicate
+import no.nav.system.rule.dsl.rettsregel.ComparisonOperation
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.operators.erLik
+import no.nav.system.rule.dsl.rettsregel.ListOperation
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
+import no.nav.system.rule.dsl.rettsregel.operators.erLik
 import kotlin.experimental.ExperimentalTypeInference
 
 /**
@@ -81,49 +82,85 @@ open class Rule<T : Any>(
     /**
      * DSL: Technical Predicate entry.
      */
-    fun HVIS(predicate: () -> Boolean) {
-        OG(predicate)
+    fun HVIS(predicateFunction: () -> Boolean) {
+        OG(predicateFunction)
     }
 
     /**
      * DSL: Technical Predicate entry.
      */
     fun OG(predicateFunction: () -> Boolean) {
-        predicateFunctionList.add { Predicate(function = predicateFunction) }
+        predicateFunctionList.add {
+            Predicate(
+                function = predicateFunction
+            )
+        }
     }
 
     @OverloadResolutionByLambdaReturnType
-    @JvmName("FaktumHVIS")
+    @JvmName("FaktumBooleanHVIS")
     @DslDomainPredicate
-    fun HVIS(predicateFunction: () -> Faktum<Boolean>) {
-        OG(predicateFunction)
+    fun HVIS(faktumFunction: () -> Faktum<Boolean>) {
+        OG(faktumFunction)
     }
 
     @OverloadResolutionByLambdaReturnType
-    @JvmName("FaktumOG")
+    @JvmName("FaktumBooleanOG")
     @DslDomainPredicate
-    fun OG(predicateFunction: () -> Faktum<Boolean>) {
-        predicateFunctionList.add { predicateFunction.invoke() erLik true }
+    fun OG(faktumFunction: () -> Faktum<Boolean>) {
+        predicateFunctionList.add {
+            TrackablePredicate(
+                uttrykk = faktumFunction.invoke() erLik true
+            )
+        }
     }
 
     /**
-     * DSL: Functional Predicate entry.
+     * DSL: Functional Predicate entry (Domain predicates - boolean expressions).
      */
     @OverloadResolutionByLambdaReturnType
-    @JvmName("arcHVIS")
+    @JvmName("ComparisonOperationBooleanHVIS")
     @DslDomainPredicate
-    fun HVIS(arcFunction: () -> DomainPredicate) {
-        OG(arcFunction)
+    fun HVIS(comparisonFunction: () -> ComparisonOperation) {
+        OG(comparisonFunction)
     }
 
     /**
-     * DSL: Functional Predicate entry.
+     * DSL: Functional Predicate entry (Domain predicates - boolean expressions).
      */
     @OverloadResolutionByLambdaReturnType
-    @JvmName("arcOG")
+    @JvmName("ComparisonOperationBooleanOG")
     @DslDomainPredicate
-    fun OG(arcFunction: () -> DomainPredicate) {
-        predicateFunctionList.add(arcFunction)
+    fun OG(comparisonOperationFunction: () -> ComparisonOperation) {
+        predicateFunctionList.add {
+            TrackablePredicate(
+                uttrykk = comparisonOperationFunction()
+            )
+        }
+    }
+
+    /**
+     * DSL: Functional Predicate entry (Domain predicates - boolean expressions).
+     */
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("ListOperationBooleanHVIS")
+    @DslDomainPredicate
+    fun HVIS(listOperationFunction: () -> ListOperation) {
+        OG(listOperationFunction)
+    }
+
+    /**
+     * DSL: Functional Predicate entry (Domain predicates - boolean expressions).
+     */
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("ListOperationBooleanOG")
+    @DslDomainPredicate
+    fun OG(listOperationFunction: () -> ListOperation) {
+        predicateFunctionList.add {
+            TrackablePredicate(
+                uttrykk = listOperationFunction()
+            )
+        }
     }
 
     /**
@@ -167,7 +204,7 @@ open class Rule<T : Any>(
             predicateFunctionList.forEach { predicateFunction ->
                 val predicate = predicateFunction.invoke()
 
-                if (predicate is DomainPredicate) {
+                if (predicate is TrackablePredicate) {
                     this.children.add(predicate)
                 }
 

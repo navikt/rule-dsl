@@ -7,7 +7,7 @@ import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.ListDomainPredicate
+import no.nav.system.rule.dsl.rettsregel.ListOperation
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -165,16 +165,17 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         return maxSequence + 100
     }
 
-    protected fun String.minstEnHarTruffet(): ListDomainPredicate {
+
+    protected fun String.minstEnHarTruffet(): ListOperation {
         val list = findRulesByNameStartsWith(this)
-        return ListDomainPredicate(
-            operator = ListOperator.MINST_EN_AV,
+        return ListOperation(
             uttrykk = Faktum("Regelreferanse", this),
-            function = { list.any { it.fired() } },
             mengdeUttrykk = Faktum(
-                "aktuelle regler",
+                "uaktuelle regler",
                 list.map { it.shortName() }
-            )
+            ),
+            operator = ListOperator.MINST_EN_AV,
+            evaluator = { list.any { it.fired() } }
         )
     }
 
@@ -185,32 +186,31 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      *          "JA AngittFlyktning_r2"
      *          "JA AngittFlyktning_r3"
      */
-    protected fun String.alleHarTruffet(): ListDomainPredicate {
+    protected fun String.alleHarTruffet(): ListOperation {
         val list = findRulesByNameStartsWith(this)
-        return ListDomainPredicate(
-            operator = ListOperator.ALLE,
+        return ListOperation(
             uttrykk = Faktum("Regelreferanse", this),
-            function = { list.all { it.fired() } },
-            mengdeUttrykk = Faktum(
-                "aktuelle regler",
-                list.map { it.shortName() }
-            )
-        )
-    }
-
-    protected fun String.ingenHarTruffet(): ListDomainPredicate {
-        val list = findRulesByNameStartsWith(this)
-        return ListDomainPredicate(
-            operator = ListOperator.INGEN,
-            uttrykk = Faktum("Regelreferanse", this),
-            function = { list.none { it.fired() } },
             mengdeUttrykk = Faktum(
                 "uaktuelle regler",
                 list.map { it.shortName() }
-            )
+            ),
+            operator = ListOperator.ALLE,
+            evaluator = { list.all { it.fired() } }
         )
     }
 
+    protected fun String.ingenHarTruffet(): ListOperation {
+        val list = findRulesByNameStartsWith(this)
+        return ListOperation(
+            uttrykk = Faktum("Regelreferanse", this),
+            mengdeUttrykk = Faktum(
+                "uaktuelle regler",
+                list.map { it.shortName() }
+            ),
+            operator = ListOperator.INGEN,
+            evaluator = { list.none { it.fired() } }
+        )
+    }
 
     /**
      * Checks if a rule with name equal to receiver has fired.

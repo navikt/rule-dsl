@@ -4,7 +4,7 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.AbstractRuleflow
 import no.nav.system.rule.dsl.Predicate
 import no.nav.system.rule.dsl.Rule
-import no.nav.system.rule.dsl.rettsregel.DomainPredicate
+import no.nav.system.rule.dsl.TrackablePredicate
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -42,7 +42,7 @@ private fun inspect(arc: AbstractRuleComponent, debugString: StringBuilder, leve
             }
         }
 
-        is DomainPredicate -> {
+        is TrackablePredicate -> {
             leafElement = true
             openAndCloseContentTag(debugString, arc.type().toString(), arc.toString(), " fired=\"${arc.fired()}\"")
         }

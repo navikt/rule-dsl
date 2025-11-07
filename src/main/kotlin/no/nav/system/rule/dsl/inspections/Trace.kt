@@ -1,8 +1,8 @@
 package no.nav.system.rule.dsl.inspections
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
+import no.nav.system.rule.dsl.TrackablePredicate
 import no.nav.system.rule.dsl.enums.RuleComponentType
-import no.nav.system.rule.dsl.rettsregel.DomainPredicate
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import org.jetbrains.kotlin.builtins.StandardNames.FqNames.target
 
@@ -117,7 +117,7 @@ private fun hvorforForklaringRenderer(): (TraceNode, Int) -> String {
                 RuleComponentType.REGEL -> {
                     append(" ".repeat(level * 2)).append(node.arc.toString()).append("\n")
                     node.arc.children
-                        .filterIsInstance<DomainPredicate>()
+                        .filterIsInstance<TrackablePredicate>()
                         .forEach { domenePredikat ->
                             append(" ".repeat((level + 1) * 2)).append(domenePredikat.forklar(level + 2)).append("\n")
                         }

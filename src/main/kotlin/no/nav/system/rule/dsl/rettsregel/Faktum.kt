@@ -1,9 +1,8 @@
 package no.nav.system.rule.dsl.rettsregel
 
-import no.nav.system.rule.dsl.Predicate
-import no.nav.system.rule.dsl.enums.*
-import no.nav.system.rule.dsl.enums.RuleComponentType.DOMENE_PREDIKAT_LISTE
-import no.nav.system.rule.dsl.enums.RuleComponentType.DOMENE_PREDIKAT_PAR
+import no.nav.system.rule.dsl.enums.ListOperator
+import no.nav.system.rule.dsl.enums.MathOperator
+import no.nav.system.rule.dsl.enums.PairOperator
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import java.io.Serializable
 
@@ -96,33 +95,64 @@ internal data class MathOperation<T : Number>(
 }
 
 /**
- * Comparison operation for boolean comparisons (erLik, erMindreEnn, erFør, etc.).
- * This stores the operands and evaluation logic but doesn't format output
- * (formatting is handled by PairDomainPredicate which knows about fired/negation state).
+ * Comparison operation for pair comparisons (erLik, erMindreEnn, erFør, etc.).
+ * Pure boolean expression without Predicate machinery.
  */
-internal data class ComparisonOperation(
+data class ComparisonOperation(
     val venstre: Uttrykk<*>,
     val høyre: Uttrykk<*>,
     val operator: PairOperator,
-    private val evaluator: () -> Boolean
+    val evaluator: () -> Boolean
 ) : Uttrykk<Boolean> {
 
     override fun evaluer(): Boolean = evaluator()
 
-    // These methods format with operator text - used by PairDomainPredicate
-    fun notasjonMedOperator(operatorText: String): String = "'${venstre.notasjon()}'${operatorText}'${høyre.notasjon()}'"
+    override fun notasjon(): String = "${evaluer().svarord()} '${venstre.notasjon()}'${operatorText()}'${høyre.notasjon()}'"
 
-    fun konkretMedOperator(operatorText: String): String = "'${venstre.konkret()}'${operatorText}'${høyre.konkret()}'"
+    override fun konkret(): String = "${evaluer().svarord()} '${venstre.konkret()}'${operatorText()}'${høyre.konkret()}'"
 
-    // Not used directly but required by Uttrykk interface
-    override fun notasjon(): String = notasjonMedOperator(operator.text)
-    override fun konkret(): String = konkretMedOperator(operator.text)
+    override fun toString(): String = "${evaluer().svarord()} ${venstre}${operatorText()}${høyre}"
+
+    private fun operatorText(): String = if (evaluator()) operator.text else operator.negated()
 
     override fun faktumSet(): Set<Faktum<*>> = venstre.faktumSet() + høyre.faktumSet()
 
     override fun forklar(level: Int): String = buildString {
         indent(level).append("${notasjon()}\n")
         indent(level).append("${konkret()}\n")
+    }
+}
+
+
+/**
+ * List operation for list membership checks (erBlant, erIkkeBlant).
+ * Pure boolean expression without Predicate machinery.
+ */
+data class ListOperation(
+    val uttrykk: Uttrykk<*>,
+    val mengdeUttrykk: Uttrykk<List<*>>,
+    val operator: ListOperator,
+    private val evaluator: () -> Boolean
+) : Uttrykk<Boolean> {
+
+    override fun evaluer(): Boolean = evaluator()
+
+    override fun notasjon(): String = "${evaluer().svarord()} '${uttrykk.notasjon()}'${operatorText()}'${mengdeUttrykk.notasjon()}'"
+
+    override fun konkret(): String = "${evaluer().svarord()} '${uttrykk.konkret()}'${operatorText()}'${mengdeUttrykk.evaluer().map { it.toString() }}'"
+
+    override fun toString(): String = "${evaluer().svarord()} ${uttrykk}${operatorText()}${mengdeUttrykk}"
+
+    private fun operatorText(): String = if (evaluator()) operator.text else operator.negated()
+    override fun faktumSet(): Set<Faktum<*>> = uttrykk.faktumSet() + mengdeUttrykk.faktumSet()
+
+    override fun forklar(level: Int): String = buildString {
+        val uttrykkItems = mengdeUttrykk.evaluer().map { "'${it.toString()}'" }
+        indent(level).append("${notasjon()}\n")
+        indent(level + 1).append("${konkret()}\n")
+        uttrykkItems.forEach {
+            indent(level + 1).append(it.toString())
+        }
     }
 }
 
@@ -226,95 +256,4 @@ internal data class Const<T : Any>(
 
     override fun toString(): String = "'$verdi'"
     override fun forklar(level: Int): String = ""
-}
-
-/**
- * The application of a [function] that returns the boolean.
- */
-abstract class DomainPredicate(
-    open val operator: NegatableOperator,
-    override val function: () -> Boolean,
-) : Predicate(function = function), Uttrykk<Boolean> {
-
-    /**
-     * Evaluates the predicate function.
-     * DomainPredicate never terminates callers evaluation chain ([terminateEvaluation] )
-     *
-     * @return boolean result of function.
-     */
-    override val fired: Boolean by lazy {
-        function.invoke().also { terminateEvaluation = false }
-    }
-
-    fun komparatorText(): String = if (fired) operator.text else operator.negated()
-
-}
-
-/**
- * Compares two values using a comparison operator.
- * Wraps ComparisonOperation to add Predicate behavior for rule evaluation.
- */
-class PairDomainPredicate(
-    override val operator: PairOperator,
-    venstre: Uttrykk<*>,
-    høyre: Uttrykk<*>,
-    override val function: () -> Boolean,
-) : DomainPredicate(operator = operator, function = function) {
-
-    private val operation = ComparisonOperation(venstre, høyre, operator, function)
-
-    override fun type(): RuleComponentType = DOMENE_PREDIKAT_PAR
-    override fun evaluer(): Boolean = fired
-    override fun toString(): String = "${fired.svarord()} ${operation.venstre}${komparatorText()}${operation.høyre}"
-
-    /**
-     * someStartDate erFør someEndDate
-     * 2022-01-01 erFør 2023-01-01
-     *
-     * someStartDate (2022-01-01) erFør someEndDate (2023-01-01)
-     *
-     * someStartDate erFør someEndDate -> 2022-01-01 erFør 2023-01-01
-     */
-    override fun forklar(level: Int): String = buildString {
-        indent(level).append("${notasjon()}\n")
-        indent(level).append("${konkret()}\n")
-    }
-
-    override fun notasjon(): String = "${fired.svarord()} ${operation.notasjonMedOperator(komparatorText())}"
-
-    override fun konkret(): String = "${fired.svarord()} ${operation.konkretMedOperator(komparatorText())}"
-
-    override fun faktumSet(): Set<Faktum<*>> = operation.faktumSet()
-}
-
-/**
- * Compares [uttrykk] relationship with items [uttrykkList]
- */
-class ListDomainPredicate(
-    override val operator: ListOperator,
-    private val uttrykk: Uttrykk<*>,
-    val mengdeUttrykk: Uttrykk<List<*>>,
-    override val function: () -> Boolean
-) : DomainPredicate(operator = operator, function = function) {
-
-    override fun type(): RuleComponentType = DOMENE_PREDIKAT_LISTE
-
-    override fun toString(): String = konkret()
-
-    override fun evaluer(): Boolean = fired
-
-    override fun notasjon(): String = "${fired.svarord()} '${uttrykk.notasjon()}'${komparatorText()}'${mengdeUttrykk.notasjon()}'"
-
-    override fun konkret(): String = "${fired.svarord()} '${uttrykk.konkret()}'${komparatorText()}'${mengdeUttrykk.evaluer().map { it.toString() }}'"
-
-    override fun faktumSet(): Set<Faktum<*>> = uttrykk.faktumSet() + mengdeUttrykk.faktumSet()
-
-    override fun forklar(level: Int): String = buildString {
-        val uttrykkItems = mengdeUttrykk.evaluer().map { "'${it.toString()}'" }
-        indent(level).append("${notasjon()}\n")
-        indent(level + 1).append("${konkret()}\n")
-        uttrykkItems.forEach {
-            indent(level + 1).append(it.toString())
-        }
-    }
 }
