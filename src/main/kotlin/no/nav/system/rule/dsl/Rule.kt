@@ -213,7 +213,7 @@ open class Rule<T : Any>(
                  */
                 fired = predicate.fired && fired
 
-                if (predicate.terminateEvaluation) {
+                if (!fired && predicate.terminateEvaluation) {
                     return@predLoop
                 }
             }

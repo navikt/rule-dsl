@@ -69,7 +69,7 @@ regeltjeneste: BeregnAlderspensjonService
       regel: NEI PersonenErFlyktningRS.Overgangsregel_GJR_tidligereUT_GJT
       regel: NEI PersonenErFlyktningRS.Overgangsregel_GJR_tidligereGJR
       regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
-        JA 'AngittFlyktning' ingen '[AngittFlyktning_HarFlyktningFlaggetSatt, AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning, AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning]'
+        JA 'Regelreferanse' (AngittFlyktning) ingen 'uaktuelle regler' ([AngittFlyktning_HarFlyktningFlaggetSatt, AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning, AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning])
     regelsett: BeregnFaktiskTrygdetidRS
       regel: JA BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.1
       regel: NEI BeregnFaktiskTrygdetidRS.BoPeriodeStartFør16år.2
@@ -103,36 +103,36 @@ regeltjeneste: BeregnAlderspensjonService
   <BeregnAlderspensjonFlyt>
     <PersonenErFlyktningRS>
       <SettRelevantTrygdetid_kap19 fired="true">
-        <domene_predikat_par fired="true">JA 'Kapittel 20' (false) er lik 'false'</domene_predikat_par>
+        <predikat fired="true">JA 'Kapittel 20' (false) er lik 'false'</predikat>
       </SettRelevantTrygdetid_kap19>
       <SettRelevantTrygdetid_kap20 fired="false">
-        <domene_predikat_par fired="false">NEI 'Kapittel 20' (false) må være lik 'true'</domene_predikat_par>
+        <predikat fired="false">NEI 'Kapittel 20' (false) må være lik 'true'</predikat>
       </SettRelevantTrygdetid_kap20>
       <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
-        <domene_predikat_par fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</domene_predikat_par>
+        <predikat fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</predikat>
       </AngittFlyktning_HarFlyktningFlaggetSatt>
       <AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning fired="false"></AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning>
       <AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning fired="false"></AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning>
       <Overgangsregel_AP fired="false">
-        <domene_predikat_par fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</domene_predikat_par>
-        <domene_predikat_par fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</domene_predikat_par>
+        <predikat fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</predikat>
+        <predikat fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</predikat>
       </Overgangsregel_AP>
       <Overgangsregel_AP_tidligereUT fired="false">
-        <domene_predikat_par fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</domene_predikat_par>
-        <domene_predikat_par fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)</domene_predikat_par>
-        <domene_predikat_par fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</domene_predikat_par>
-        <domene_predikat_par fired="false">NEI 'Uføretrygd før 2021' (false) må være lik 'true'</domene_predikat_par>
+        <predikat fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</predikat>
+        <predikat fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)</predikat>
+        <predikat fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</predikat>
+        <predikat fired="false">NEI 'Uføretrygd før 2021' (false) må være lik 'true'</predikat>
       </Overgangsregel_AP_tidligereUT>
       <Overgangsregel_AP_tidligereGJP fired="false">
-        <domene_predikat_par fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</domene_predikat_par>
-        <domene_predikat_par fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)</domene_predikat_par>
-        <domene_predikat_par fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</domene_predikat_par>
-        <domene_predikat_par fired="false">NEI 'Gjenlevendepensjon før 2021' (false) må være lik 'true'</domene_predikat_par>
+        <predikat fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</predikat>
+        <predikat fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)</predikat>
+        <predikat fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</predikat>
+        <predikat fired="false">NEI 'Gjenlevendepensjon før 2021' (false) må være lik 'true'</predikat>
       </Overgangsregel_AP_tidligereGJP>
       <Overgangsregel_GJR_tidligereUT_GJT fired="false"></Overgangsregel_GJR_tidligereUT_GJT>
       <Overgangsregel_GJR_tidligereGJR fired="false"></Overgangsregel_GJR_tidligereGJR>
       <AnvendtFlyktning_ikkeRelevant fired="true">
-        <domene_predikat_liste fired="true">JA 'AngittFlyktning' ingen '[AngittFlyktning_HarFlyktningFlaggetSatt, AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning, AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning]'</domene_predikat_liste>
+        <predikat fired="true">JA 'Regelreferanse' (AngittFlyktning) ingen 'uaktuelle regler' ([AngittFlyktning_HarFlyktningFlaggetSatt, AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning, AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning])</predikat>
       </AnvendtFlyktning_ikkeRelevant>
     </PersonenErFlyktningRS>
     <BeregnFaktiskTrygdetidRS>
@@ -142,14 +142,14 @@ regeltjeneste: BeregnAlderspensjonService
       <BoPeriodeStartFom16år.2 fired="true"></BoPeriodeStartFom16år.2>
       <SettFireFemtedelskrav fired="true"></SettFireFemtedelskrav>
       <Skal_ha_redusert_fremtidig_trygdetid fired="false" comment="Dersom faktisk trygdetid i Norge er mindre enn 4/5 av opptjeningstiden skal den framtidige trygdetiden være redusert.">
-        <domene_predikat_par fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'januar 1991' (1991-01-01)</domene_predikat_par>
-        <domene_predikat_par fired="true">JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)</domene_predikat_par>
+        <predikat fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'januar 1991' (1991-01-01)</predikat>
+        <predikat fired="true">JA 'faktisk trygdetid i måneder' (224) er mindre enn 'firefemtedelskrav' (480)</predikat>
       </Skal_ha_redusert_fremtidig_trygdetid>
       <FastsettTrygdetid_ikkeFlyktning fired="true">
-        <domene_predikat_par fired="true">JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'</domene_predikat_par>
+        <predikat fired="true">JA 'Anvendt flyktning' (IKKE_RELEVANT) er ulik 'OPPFYLT'</predikat>
       </FastsettTrygdetid_ikkeFlyktning>
       <FastsettTrygdetid_Flyktning fired="false">
-        <domene_predikat_par fired="false">NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'</domene_predikat_par>
+        <predikat fired="false">NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'</predikat>
       </FastsettTrygdetid_Flyktning>
       <ReturnRegel fired="true"></ReturnRegel>
     </BeregnFaktiskTrygdetidRS>

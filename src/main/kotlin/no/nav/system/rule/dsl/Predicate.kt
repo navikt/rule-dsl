@@ -2,7 +2,6 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.PREDIKAT
-import no.nav.system.rule.dsl.rettsregel.ComparisonOperation
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
@@ -15,7 +14,7 @@ open class Predicate(
      *
      * Typicaly used by null-check predicates.
      */
-    internal var terminateEvaluation: Boolean = true,
+    internal val terminateEvaluation: Boolean = true,
     open val function: () -> Boolean
 ) : AbstractRuleComponent() {
 
@@ -25,7 +24,7 @@ open class Predicate(
      * @return returns true if further evaluation of remaining predicates in the rule should be prevented.
      */
     internal open val fired: Boolean by lazy {
-        function.invoke().also { terminateEvaluation = !it }
+        function.invoke()
     }
 
     override fun name(): String = ""
@@ -38,18 +37,14 @@ open class Predicate(
  * Adapter between Uttrykk and Predicate to allow the tracking of the predicate to rely on Uttrykk.
  */
 class TrackablePredicate(
-//    val uttrykk: ComparisonOperation
     val uttrykk: Uttrykk<Boolean>
 ) : Predicate(
     terminateEvaluation = false,
-//    function = uttrykk.evaluer()
     function = { uttrykk.evaluer() }
 ) {
     fun forklar(level: Int): String = uttrykk.forklar(level)
     fun notasjon(): String = uttrykk.notasjon()
     fun konkret(): String = uttrykk.konkret()
 
-    override fun toString(): String {
-        return uttrykk.toString()
-    }
+    override fun toString(): String = uttrykk.toString()
 }
