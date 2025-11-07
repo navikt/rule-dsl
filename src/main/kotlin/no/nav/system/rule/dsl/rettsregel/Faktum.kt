@@ -24,7 +24,11 @@ interface Uttrykk<out T : Any> : Serializable {
     fun evaluer(): T
     fun notasjon(): String
     fun konkret(): String
-    fun grunnlagListe(): List<Uttrykk<Any>>
+
+    /**
+     * Hvilke navngitte faktum bidrar til dette uttrykket.
+     */
+    fun faktumSet(): Set<Faktum<*>>
     fun forklar(level: Int = 0): String
 }
 
@@ -67,16 +71,17 @@ internal data class Add<T : Number>(
         return "$v + $h"
     }
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> =
-        venstre.grunnlagListe() + høyre.grunnlagListe()
+    override fun faktumSet(): Set<Faktum<*>> =
+        venstre.faktumSet() + høyre.faktumSet()
 
     override fun forklar(level: Int): String = buildString {
         indent(level).append("HVORDAN\n")
         indent(level + 1).append("${notasjon()}\n")
         indent(level + 1).append("${konkret()}\n")
 
-        grunnlagListe().forEach {
-            indent(level + 1).append(it.forklar(level + 2))
+        faktumSet().forEach { faktum ->
+            // Show HVORDAN for each Faktum's expression (skip HVA/HVORFOR)
+            indent(level + 1).append(faktum.uttrykk.forklar(level + 2))
         }
     }
 
@@ -123,16 +128,17 @@ internal data class Sub<T : Number>(
         return "$v - $h"
     }
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> =
-        venstre.grunnlagListe() + høyre.grunnlagListe()
+    override fun faktumSet(): Set<Faktum<*>> =
+        venstre.faktumSet() + høyre.faktumSet()
 
     override fun forklar(level: Int): String = buildString {
         indent(level).append("HVORDAN\n")
         indent(level + 1).append("${notasjon()}\n")
         indent(level + 1).append("${konkret()}\n")
 
-        grunnlagListe().forEach {
-            indent(level + 1).append(it.forklar(level + 2))
+        faktumSet().forEach { faktum ->
+            // Show HVORDAN for each Faktum's expression (skip HVA/HVORFOR)
+            indent(level + 1).append(faktum.uttrykk.forklar(level + 2))
         }
     }
 }
@@ -178,16 +184,17 @@ internal data class Mul<T : Number>(
         return "$v * $h"
     }
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> =
-        venstre.grunnlagListe() + høyre.grunnlagListe()
+    override fun faktumSet(): Set<Faktum<*>> =
+        venstre.faktumSet() + høyre.faktumSet()
 
     override fun forklar(level: Int): String = buildString {
         indent(level).append("HVORDAN\n")
         indent(level + 1).append("${notasjon()}\n")
         indent(level + 1).append("${konkret()}\n")
 
-        grunnlagListe().forEach {
-            indent(level + 1).append(it.forklar(level + 2))
+        faktumSet().forEach { faktum ->
+            // Show HVORDAN for each Faktum's expression (skip HVA/HVORFOR)
+            indent(level + 1).append(faktum.uttrykk.forklar(level + 2))
         }
     }
 }
@@ -228,16 +235,17 @@ internal data class Div(
         return "$v / $h"
     }
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> =
-        venstre.grunnlagListe() + høyre.grunnlagListe()
+    override fun faktumSet(): Set<Faktum<*>> =
+        venstre.faktumSet() + høyre.faktumSet()
 
     override fun forklar(level: Int): String = buildString {
         indent(level).append("HVORDAN\n")
         indent(level + 1).append("${notasjon()}\n")
         indent(level + 1).append("${konkret()}\n")
 
-        grunnlagListe().forEach {
-            indent(level + 1).append(it.forklar(level + 2))
+        faktumSet().forEach { faktum ->
+            // Show HVORDAN for each Faktum's expression (skip HVA/HVORFOR)
+            indent(level + 1).append(faktum.uttrykk.forklar(level + 2))
         }
     }
 }
@@ -307,7 +315,7 @@ data class Faktum<T : Any>(
 
     override fun konkret(): String = evaluer().toString()
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> = listOf(uttrykk)
+    override fun faktumSet(): Set<Faktum<*>> = setOf(this)
 
     override fun toString(): String = "'$navn' (${evaluer()})"
 
@@ -336,7 +344,7 @@ internal data class Const<T : Any>(
 
     override fun konkret(): String = verdi.toString()
 
-    override fun grunnlagListe(): List<Faktum<out Any>> = emptyList()
+    override fun faktumSet(): Set<Faktum<out Any>> = emptySet()
 
     override fun toString(): String = "'$verdi'"
     override fun forklar(level: Int): String = ""
@@ -395,7 +403,7 @@ class PairDomainPredicate(
 
     override fun konkret(): String = "${fired.svarord()} '${venstre.konkret()}'${komparatorText()}'${høyre.konkret()}'"
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> = venstre.grunnlagListe() + høyre.grunnlagListe()
+    override fun faktumSet(): Set<Faktum<*>> = venstre.faktumSet() + høyre.faktumSet()
 }
 
 /**
@@ -418,7 +426,7 @@ class ListDomainPredicate(
 
     override fun konkret(): String = "${fired.svarord()} '${uttrykk.konkret()}'${komparatorText()}'${mengdeUttrykk.evaluer().map { it.toString() }}'"
 
-    override fun grunnlagListe(): List<Uttrykk<Any>> = listOf(uttrykk, mengdeUttrykk)
+    override fun faktumSet(): Set<Faktum<*>> = uttrykk.faktumSet() + mengdeUttrykk.faktumSet()
 
     override fun forklar(level: Int): String = buildString {
         val uttrykkItems = mengdeUttrykk.evaluer().map { "'${it.toString()}'" }

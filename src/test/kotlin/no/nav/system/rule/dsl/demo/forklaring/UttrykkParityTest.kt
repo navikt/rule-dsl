@@ -445,10 +445,10 @@ class UttrykkParityTest {
         val c = Faktum("c", Const(30))
 
         val expr = (a + b) * c - a
-        val FaktumListe = expr.grunnlagListe()
+        val FaktumListe = expr.faktumSet()
 
-        // Faktum in expression: a appears twice, b once, c once = 4 total (with duplicates)
-        assertEquals(4, FaktumListe.size)
+        // Unique Faktum in expression is 3. The 4 usages of Faktum include a which is used twice.
+        assertEquals(3, FaktumListe.size)
     }
 
 }
