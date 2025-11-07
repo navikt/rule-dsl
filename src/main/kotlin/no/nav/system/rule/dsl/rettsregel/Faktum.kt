@@ -26,7 +26,6 @@ interface Uttrykk<out T : Any> : Serializable {
     fun konkret(): String
     fun grunnlagListe(): List<Uttrykk<Any>>
     fun forklar(level: Int = 0): String
-
 }
 
 internal data class Add<T : Number>(
@@ -51,25 +50,34 @@ internal data class Add<T : Number>(
     }
 
     override fun notasjon(): String {
-        val v = venstre.notasjon().medParentesVedBehov(venstre)
-        val h = høyre.notasjon().medParentesVedBehov(høyre)
+        val (v, h) = medParenteserVedBehov(
+            venstre.notasjon(), venstre,
+            Operator.ADD,
+            høyre.notasjon(), høyre
+        )
         return "$v + $h"
     }
 
     override fun konkret(): String {
-        // Addition doesn't need parentheses - it's associative
-        return "${venstre.konkret()} + ${høyre.konkret()}"
+        val (v, h) = medParenteserVedBehov(
+            venstre.konkret(), venstre,
+            Operator.ADD,
+            høyre.konkret(), høyre
+        )
+        return "$v + $h"
     }
 
     override fun grunnlagListe(): List<Uttrykk<Any>> =
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun forklar(level: Int): String = buildString {
-        append(" ".repeat(level * 2)).append("HVORDAN\n")
-        append(" ".repeat((level + 1) * 2)).append("${notasjon()}\n")
-        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
-//        append(venstre.forklar())
-//        append(høyre.forklar())
+        indent(level).append("HVORDAN\n")
+        indent(level + 1).append("${notasjon()}\n")
+        indent(level + 1).append("${konkret()}\n")
+
+        grunnlagListe().forEach {
+            indent(level + 1).append(it.forklar(level + 2))
+        }
     }
 
 }
@@ -98,14 +106,20 @@ internal data class Sub<T : Number>(
     }
 
     override fun notasjon(): String {
-        val v = venstre.notasjon().medParentesVedBehov(venstre)
-        val h = høyre.notasjon().medParentesVedBehov(høyre, true)
+        val (v, h) = medParenteserVedBehov(
+            venstre.notasjon(), venstre,
+            Operator.SUB,
+            høyre.notasjon(), høyre
+        )
         return "$v - $h"
     }
 
     override fun konkret(): String {
-        val v = venstre.konkret().medParentesVedBehov(venstre)
-        val h = høyre.konkret().medParentesVedBehov(høyre, true)
+        val (v, h) = medParenteserVedBehov(
+            venstre.konkret(), venstre,
+            Operator.SUB,
+            høyre.konkret(), høyre
+        )
         return "$v - $h"
     }
 
@@ -113,11 +127,13 @@ internal data class Sub<T : Number>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun forklar(level: Int): String = buildString {
-        append(" ".repeat(level * 2)).append("HVORDAN\n")
-        append(" ".repeat((level + 1) * 2)).append("${notasjon()}\n")
-        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
-//        append(venstre.forklar())
-//        append(høyre.forklar())
+        indent(level).append("HVORDAN\n")
+        indent(level + 1).append("${notasjon()}\n")
+        indent(level + 1).append("${konkret()}\n")
+
+        grunnlagListe().forEach {
+            indent(level + 1).append(it.forklar(level + 2))
+        }
     }
 }
 
@@ -145,14 +161,20 @@ internal data class Mul<T : Number>(
     }
 
     override fun notasjon(): String {
-        val v = venstre.notasjon().medParentesVedBehov(venstre)
-        val h = høyre.notasjon().medParentesVedBehov(høyre)
+        val (v, h) = medParenteserVedBehov(
+            venstre.notasjon(), venstre,
+            Operator.MUL,
+            høyre.notasjon(), høyre
+        )
         return "$v * $h"
     }
 
     override fun konkret(): String {
-        val v = venstre.konkret().medParentesVedBehov(venstre)
-        val h = høyre.konkret().medParentesVedBehov(høyre)
+        val (v, h) = medParenteserVedBehov(
+            venstre.konkret(), venstre,
+            Operator.MUL,
+            høyre.konkret(), høyre
+        )
         return "$v * $h"
     }
 
@@ -160,13 +182,12 @@ internal data class Mul<T : Number>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun forklar(level: Int): String = buildString {
-        append(" ".repeat(level * 2)).append("HVORDAN\n")
-        append(" ".repeat((level + 1) * 2)).append("${notasjon()}\n")
-        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
-//        append(" ".repeat((level + 1) * 2)).append(venstre.forklar())
-//        append(" ".repeat((level + 1) * 2)).append(høyre.forklar())
+        indent(level).append("HVORDAN\n")
+        indent(level + 1).append("${notasjon()}\n")
+        indent(level + 1).append("${konkret()}\n")
+
         grunnlagListe().forEach {
-            append(" ".repeat((level + 1) * 2)).append(it.forklar(level + 2))
+            indent(level + 1).append(it.forklar(level + 2))
         }
     }
 }
@@ -190,14 +211,20 @@ internal data class Div(
     }
 
     override fun notasjon(): String {
-        val v = venstre.notasjon().medParentesVedBehov(venstre)
-        val h = høyre.notasjon().medParentesVedBehov(høyre, true)
+        val (v, h) = medParenteserVedBehov(
+            venstre.notasjon(), venstre,
+            Operator.DIV,
+            høyre.notasjon(), høyre
+        )
         return "$v / $h"
     }
 
     override fun konkret(): String {
-        val v = venstre.konkret().medParentesVedBehov(venstre)
-        val h = høyre.konkret().medParentesVedBehov(høyre, true)
+        val (v, h) = medParenteserVedBehov(
+            venstre.konkret(), venstre,
+            Operator.DIV,
+            høyre.konkret(), høyre
+        )
         return "$v / $h"
     }
 
@@ -205,23 +232,51 @@ internal data class Div(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun forklar(level: Int): String = buildString {
-        append(" ".repeat(level * 2)).append("HVORDAN\n")
-        append(" ".repeat((level + 1) * 2)).append("${notasjon()}\n")
-        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
-    }
+        indent(level).append("HVORDAN\n")
+        indent(level + 1).append("${notasjon()}\n")
+        indent(level + 1).append("${konkret()}\n")
 
+        grunnlagListe().forEach {
+            indent(level + 1).append(it.forklar(level + 2))
+        }
+    }
 }
 
+private fun StringBuilder.indent(level: Int): StringBuilder = append(" ".repeat(level * 2))
+
+private enum class Operator {
+    ADD, SUB, MUL, DIV
+}
 
 /**
- * Hjelpefunksjon for å legge til parenteser ved behov.
+ * Legger til parenteser rundt uttrykk ved behov basert på operator precedence.
+ *
+ * Regler basert på standard aritmetisk presedens:
+ * - Multiplikasjon og divisjon: venstre og høyre side får parenteser hvis de er addisjon/subtraksjon
+ * - Subtraksjon: høyre side får parenteser hvis den er addisjon/subtraksjon (for å bevare korrekt evaluering)
+ * - Addisjon: ingen automatiske parenteser (assosiativ og lav presedens)
  */
-private fun String.medParentesVedBehov(uttrykk: Uttrykk<*>, høyreSide: Boolean = false): String {
-    val trengerParentes = when (uttrykk) {
-        is Add, is Sub -> true
+private fun medParenteserVedBehov(
+    venstre: String,
+    venstreUttrykk: Uttrykk<*>,
+    operator: Operator,
+    høyre: String,
+    høyreUttrykk: Uttrykk<*>
+): Pair<String, String> {
+    val venstreTrengerParentes = when (operator) {
+        Operator.MUL, Operator.DIV -> venstreUttrykk is Add || venstreUttrykk is Sub
         else -> false
     }
-    return if (trengerParentes) "($this)" else this
+
+    val høyreTrengerParentes = when (operator) {
+        Operator.MUL, Operator.DIV, Operator.SUB -> høyreUttrykk is Add || høyreUttrykk is Sub
+        else -> false
+    }
+
+    val v = if (venstreTrengerParentes) "($venstre)" else venstre
+    val h = if (høyreTrengerParentes) "($høyre)" else høyre
+
+    return v to h
 }
 
 
@@ -257,13 +312,13 @@ data class Faktum<T : Any>(
     override fun toString(): String = "'$navn' (${evaluer()})"
 
     override fun forklar(level: Int): String = buildString {
-        append(" ".repeat(level * 2)).append("HVA\n")
-        append(" ".repeat((level + 1) * 2)).append("$navn = ${evaluer()}\n")
+        indent(level).append("HVA\n")
+        indent(level + 1).append("$navn = ${evaluer()}\n")
         append("\n")
-        append(" ".repeat(level * 2)).append("HVORFOR\n")
-        append(" ".repeat((level + 1) * 2)).append("$hvorfor\n")
+        indent(level).append("HVORFOR\n")
+        indent(level + 1).append("$hvorfor\n")
         append("\n")
-        append(" ".repeat((level + 1) * 2)).append("${uttrykk.forklar(level + 2)}\n")
+        indent(level + 1).append("${uttrykk.forklar(level + 2)}\n")
     }
 }
 
@@ -321,7 +376,7 @@ class PairDomainPredicate(
 
     override fun type(): RuleComponentType = DOMENE_PREDIKAT_PAR
     override fun evaluer(): Boolean = fired
-    override fun toString(): String =  "${fired.svarord()} ${venstre}${komparatorText()}${høyre}"
+    override fun toString(): String = "${fired.svarord()} ${venstre}${komparatorText()}${høyre}"
 
     /**
      * someStartDate erFør someEndDate
@@ -332,8 +387,8 @@ class PairDomainPredicate(
      * someStartDate erFør someEndDate -> 2022-01-01 erFør 2023-01-01
      */
     override fun forklar(level: Int): String = buildString {
-        append(" ".repeat(level * 2)).append("${notasjon()}\n")
-        append(" ".repeat(level * 2)).append("${konkret()}\n")
+        indent(level).append("${notasjon()}\n")
+        indent(level).append("${konkret()}\n")
     }
 
     override fun notasjon(): String = "${fired.svarord()} '${venstre.notasjon()}'${komparatorText()}'${høyre.notasjon()}'"
@@ -355,7 +410,6 @@ class ListDomainPredicate(
 
     override fun type(): RuleComponentType = DOMENE_PREDIKAT_LISTE
 
-    //    override fun toString(): String = "${fired.svarord()} $uttrykk${komparatorText()}$uttrykkList"
     override fun toString(): String = konkret()
 
     override fun evaluer(): Boolean = fired
@@ -368,34 +422,10 @@ class ListDomainPredicate(
 
     override fun forklar(level: Int): String = buildString {
         val uttrykkItems = mengdeUttrykk.evaluer().map { "'${it.toString()}'" }
-        append(" ".repeat(level * 2)).append("${notasjon()}\n")
-        append(" ".repeat((level + 1) * 2)).append("${konkret()}\n")
-//        append(" ".repeat((level + 1) * 2)).append(uttrykk.forklar(level + 2))
+        indent(level).append("${notasjon()}\n")
+        indent(level + 1).append("${konkret()}\n")
         uttrykkItems.forEach {
-            append(" ".repeat((level + 1) * 2)).append(it.toString())
+            indent(level + 1).append(it.toString())
         }
     }
-}
-
-/**
- * Helper function to recursively build hvordan explanation with proper indentation.
- */
-private fun Uttrykk<*>.buildHvordan(depth: Int): String {
-    val indent = "  ".repeat(depth)
-    val sb = StringBuilder()
-
-    // Show this faktum's name and value
-    sb.append("$indent${notasjon()} = ${konkret()}\n")
-
-    // If this is a computed value (not a simple constant), show its grunnlag
-    if (this !is Const) {
-        // Recursively show each grunnlag faktum
-        for (grunnlag in grunnlagListe()) {
-            if (grunnlag is Faktum<*>) {
-                sb.append(grunnlag.buildHvordan(depth + 1))
-            }
-        }
-    }
-
-    return sb.toString()
 }

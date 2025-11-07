@@ -3,8 +3,10 @@ package no.nav.system.rule.dsl.demo.forklaring
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
-import no.nav.system.rule.dsl.rettsregel.operators.*
-
+import no.nav.system.rule.dsl.rettsregel.operators.div
+import no.nav.system.rule.dsl.rettsregel.operators.minus
+import no.nav.system.rule.dsl.rettsregel.operators.plus
+import no.nav.system.rule.dsl.rettsregel.operators.times
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -466,5 +468,223 @@ class UttrykkOperatorTest {
         assertEquals("sats * G / måneder", expr.notasjon())
         assertEquals("0.45 * 100000 / 12", expr.konkret())
         assertEquals(3750.0, expr.evaluer())
+    }
+
+    // ========================================================================
+    // Operator Precedence and Parentheses Tests
+    // ========================================================================
+
+    @Test
+    fun `operator precedence - multiplication before addition`() {
+        val a = Faktum("a", Const(2))
+        val b = Faktum("b", Const(3))
+        val c = Faktum("c", Const(4))
+
+        // 2 + 3 * 4 = 2 + 12 = 14 (not 20)
+        val expr = a + b * c
+        assertEquals(14, expr.evaluer())
+        assertEquals("a + b * c", expr.notasjon())
+        assertEquals("2 + 3 * 4", expr.konkret())
+    }
+
+    @Test
+    fun `operator precedence - division before subtraction`() {
+        val a = Faktum("a", Const(20))
+        val b = Faktum("b", Const(8))
+        val c = Faktum("c", Const(2))
+
+        // 20 - 8 / 2 = 20 - 4 = 16 (not 6)
+        val expr = a - b / c
+        assertEquals(16.0, expr.evaluer())
+        assertEquals("a - b / c", expr.notasjon())
+        assertEquals("20 - 8 / 2", expr.konkret())
+    }
+
+    @Test
+    fun `parentheses override precedence - addition before multiplication`() {
+        val a = Faktum("a", Const(2))
+        val b = Faktum("b", Const(3))
+        val c = Faktum("c", Const(4))
+
+        // (2 + 3) * 4 = 5 * 4 = 20 (not 14)
+        val expr = (a + b) * c
+        assertEquals(20, expr.evaluer())
+        assertEquals("(a + b) * c", expr.notasjon())
+        assertEquals("(2 + 3) * 4", expr.konkret())
+    }
+
+    @Test
+    fun `parentheses override precedence - subtraction before division`() {
+        val a = Faktum("a", Const(20))
+        val b = Faktum("b", Const(8))
+        val c = Faktum("c", Const(2))
+
+        // (20 - 8) / 2 = 12 / 2 = 6 (not 16)
+        val expr = (a - b) / c
+        assertEquals(6.0, expr.evaluer())
+        assertEquals("(a - b) / c", expr.notasjon())
+        assertEquals("(20 - 8) / 2", expr.konkret())
+    }
+
+    @Test
+    fun `left-to-right associativity for subtraction`() {
+        val a = Faktum("a", Const(10))
+        val b = Faktum("b", Const(3))
+        val c = Faktum("c", Const(2))
+
+        // 10 - 3 - 2 = (10 - 3) - 2 = 7 - 2 = 5
+        // NOT 10 - (3 - 2) = 10 - 1 = 9
+        val expr = a - b - c
+        assertEquals(5, expr.evaluer())
+        assertEquals("a - b - c", expr.notasjon())
+        assertEquals("10 - 3 - 2", expr.konkret())
+    }
+
+    @Test
+    fun `left-to-right associativity for division`() {
+        val a = Faktum("a", Const(20))
+        val b = Faktum("b", Const(4))
+        val c = Faktum("c", Const(2))
+
+        // 20 / 4 / 2 = (20 / 4) / 2 = 5 / 2 = 2.5
+        // NOT 20 / (4 / 2) = 20 / 2 = 10
+        val expr = a / b / c
+        assertEquals(2.5, expr.evaluer())
+        assertEquals("a / b / c", expr.notasjon())
+        assertEquals("20 / 4 / 2", expr.konkret())
+    }
+
+    @Test
+    fun `nested parentheses with addition and multiplication`() {
+        val a = Faktum("a", Const(1))
+        val b = Faktum("b", Const(2))
+        val c = Faktum("c", Const(3))
+        val d = Faktum("d", Const(4))
+
+        // (1 + 2) * (3 + 4) = 3 * 7 = 21
+        val expr = (a + b) * (c + d)
+        assertEquals(21, expr.evaluer())
+        assertEquals("(a + b) * (c + d)", expr.notasjon())
+        assertEquals("(1 + 2) * (3 + 4)", expr.konkret())
+    }
+
+    @Test
+    fun `parentheses on right side of subtraction`() {
+        val a = Faktum("a", Const(10))
+        val b = Faktum("b", Const(2))
+        val c = Faktum("c", Const(3))
+
+        // 10 - (2 + 3) = 10 - 5 = 5
+        // NOT 10 - 2 + 3 = 11
+        val expr = a - (b + c)
+        assertEquals(5, expr.evaluer())
+        assertEquals("a - (b + c)", expr.notasjon())
+        assertEquals("10 - (2 + 3)", expr.konkret())
+    }
+
+    @Test
+    fun `parentheses on right side of division`() {
+        val a = Faktum("a", Const(20))
+        val b = Faktum("b", Const(2))
+        val c = Faktum("c", Const(3))
+
+        // 20 / (2 + 3) = 20 / 5 = 4
+        // NOT 20 / 2 + 3 = 13
+        val expr = a / (b + c)
+        assertEquals(4.0, expr.evaluer())
+        assertEquals("a / (b + c)", expr.notasjon())
+        assertEquals("20 / (2 + 3)", expr.konkret())
+    }
+
+    @Test
+    fun `mixed precedence - multiplication and division left to right`() {
+        val a = Faktum("a", Const(12))
+        val b = Faktum("b", Const(3))
+        val c = Faktum("c", Const(2))
+
+        // 12 * 3 / 2 = (12 * 3) / 2 = 36 / 2 = 18
+        val expr = a * b / c
+        assertEquals(18.0, expr.evaluer())
+        assertEquals("a * b / c", expr.notasjon())
+        assertEquals("12 * 3 / 2", expr.konkret())
+    }
+
+    @Test
+    fun `mixed precedence - division and multiplication left to right`() {
+        val a = Faktum("a", Const(12))
+        val b = Faktum("b", Const(3))
+        val c = Faktum("c", Const(2))
+
+        // 12 / 3 * 2 = (12 / 3) * 2 = 4 * 2 = 8
+        val expr = a / b * c
+        assertEquals(8.0, expr.evaluer())
+        assertEquals("a / b * c", expr.notasjon())
+        assertEquals("12 / 3 * 2", expr.konkret())
+    }
+
+    @Test
+    fun `complex expression with multiple operators`() {
+        val a = Faktum("a", Const(5))
+        val b = Faktum("b", Const(3))
+        val c = Faktum("c", Const(2))
+        val d = Faktum("d", Const(4))
+
+        // 5 + 3 * 2 - 4 = 5 + 6 - 4 = 7
+        val expr = a + b * c - d
+        assertEquals(7, expr.evaluer())
+        assertEquals("a + b * c - d", expr.notasjon())
+        assertEquals("5 + 3 * 2 - 4", expr.konkret())
+    }
+
+    @Test
+    fun `no unnecessary parentheses for same precedence operations`() {
+        val a = Faktum("a", Const(10))
+        val b = Faktum("b", Const(5))
+        val c = Faktum("c", Const(3))
+
+        // a + b - c should not add parentheses (same precedence, left-to-right)
+        val expr = a + b - c
+        assertEquals(12, expr.evaluer())
+        assertEquals("a + b - c", expr.notasjon())
+        assertEquals("10 + 5 - 3", expr.konkret())
+    }
+
+    @Test
+    fun `multiplication with subtraction on left requires parentheses`() {
+        val a = Faktum("a", Const(5))
+        val b = Faktum("b", Const(3))
+        val c = Faktum("c", Const(2))
+
+        // (5 - 3) * 2 = 2 * 2 = 4
+        val expr = (a - b) * c
+        assertEquals(4, expr.evaluer())
+        assertEquals("(a - b) * c", expr.notasjon())
+        assertEquals("(5 - 3) * 2", expr.konkret())
+    }
+
+    @Test
+    fun `multiplication with subtraction on right requires parentheses`() {
+        val a = Faktum("a", Const(2))
+        val b = Faktum("b", Const(5))
+        val c = Faktum("c", Const(3))
+
+        // 2 * (5 - 3) = 2 * 2 = 4
+        val expr = a * (b - c)
+        assertEquals(4, expr.evaluer())
+        assertEquals("a * (b - c)", expr.notasjon())
+        assertEquals("2 * (5 - 3)", expr.konkret())
+    }
+
+    @Test
+    fun `division with addition on right requires parentheses`() {
+        val a = Faktum("a", Const(12))
+        val b = Faktum("b", Const(2))
+        val c = Faktum("c", Const(4))
+
+        // 12 / (2 + 4) = 12 / 6 = 2
+        val expr = a / (b + c)
+        assertEquals(2.0, expr.evaluer())
+        assertEquals("a / (b + c)", expr.notasjon())
+        assertEquals("12 / (2 + 4)", expr.konkret())
     }
 }

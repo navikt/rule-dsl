@@ -166,9 +166,9 @@ class UttrykkParityTest {
         val f = (a + b) - 4
 
         assertEquals(-5, f.evaluer())
-        // Note: Uttrykk preserves parentheses for subtraction on right side
-        assertEquals("(a + b) - 4", f.notasjon())
-        assertEquals("(-2 + 1) - 4", f.konkret())
+        // Note: Left side of subtraction doesn't need parentheses (same precedence, left-to-right)
+        assertEquals("a + b - 4", f.notasjon())
+        assertEquals("-2 + 1 - 4", f.konkret())
     }
 
     @Test
@@ -431,8 +431,11 @@ class UttrykkParityTest {
 
         // All should still have correct notation
         assertEquals("base * 2 + 5", expr1.notasjon())
+        assertEquals("10 * 2 + 5", expr1.konkret())
         assertEquals("base * 2 - 5", expr2.notasjon())
+        assertEquals("10 * 2 - 5", expr2.konkret())
         assertEquals("base * 2 + base * 2", expr3.notasjon())
+        assertEquals("10 * 2 + 10 * 2", expr3.konkret())
     }
 
     @Test
