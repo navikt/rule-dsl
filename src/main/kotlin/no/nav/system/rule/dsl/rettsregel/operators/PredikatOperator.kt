@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl.rettsregel.operators
 
 import no.nav.system.rule.dsl.enums.ListOperator.ER_BLANDT
 import no.nav.system.rule.dsl.enums.ListOperator.ER_IKKE_BLANDT
+import no.nav.system.rule.dsl.enums.MathOperator
 import no.nav.system.rule.dsl.enums.PairOperator.*
 import no.nav.system.rule.dsl.rettsregel.*
 import java.time.LocalDate

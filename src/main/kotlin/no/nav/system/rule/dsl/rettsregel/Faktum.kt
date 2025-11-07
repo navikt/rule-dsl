@@ -1,12 +1,7 @@
 package no.nav.system.rule.dsl.rettsregel
 
 import no.nav.system.rule.dsl.Predicate
-import no.nav.system.rule.dsl.enums.Operator
-import no.nav.system.rule.dsl.enums.ListOperator
-import no.nav.system.rule.dsl.enums.MathOperator
-import no.nav.system.rule.dsl.enums.NegatableOperator
-import no.nav.system.rule.dsl.enums.PairOperator
-import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.enums.*
 import no.nav.system.rule.dsl.enums.RuleComponentType.DOMENE_PREDIKAT_LISTE
 import no.nav.system.rule.dsl.enums.RuleComponentType.DOMENE_PREDIKAT_PAR
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
@@ -18,9 +13,6 @@ import java.io.Serializable
  * IMPORTANT: This is now INTERNAL to Faktum<Number>.
  * Users do not work with Uttrykk directly - they use Faktum operators.
  *
- * Supported operations:
- * - Add, Sub, Mul, Div: arithmetic operations
- * - Min: minimum function
  */
 interface Uttrykk<out T : Any> : Serializable {
     fun evaluer(): T
@@ -34,9 +26,14 @@ interface Uttrykk<out T : Any> : Serializable {
     fun forklar(level: Int = 0): String
 }
 
-internal data class Add<T : Number>(
+/**
+ * Math operation for arithmetic calculations (addition, subtraction, multiplication, division).
+ * This replaces the previous Add, Sub, Mul, Div classes with a single implementation.
+ */
+internal data class MathOperation<T : Number>(
     val venstre: Uttrykk<Number>,
-    val høyre: Uttrykk<Number>
+    val høyre: Uttrykk<Number>,
+    val operator: MathOperator
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
     override fun evaluer(): T {
@@ -45,10 +42,19 @@ internal data class Add<T : Number>(
         val hVerdi = høyre.evaluer()
         val v = vVerdi.toDouble()
         val h = hVerdi.toDouble()
-        val resultat = v + h
 
-        // Returner riktig type basert på input
-        return if (vVerdi is Int && hVerdi is Int) {
+        val resultat = when (operator) {
+            MathOperator.ADD -> v + h
+            MathOperator.SUB -> v - h
+            MathOperator.MUL -> v * h
+            MathOperator.DIV -> {
+                if (h == 0.0) throw ArithmeticException("Divisjon med null: $v / $h")
+                v / h
+            }
+        }
+
+        // Returner riktig type basert på input (DIV alltid Double)
+        return if (vVerdi is Int && hVerdi is Int && operator != MathOperator.DIV) {
             resultat.toInt() as T
         } else {
             resultat as T
@@ -58,19 +64,19 @@ internal data class Add<T : Number>(
     override fun notasjon(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.notasjon(), venstre,
-            MathOperator.ADD,
+            operator,
             høyre.notasjon(), høyre
         )
-        return "$v + $h"
+        return "$v${operator.text}$h"
     }
 
     override fun konkret(): String {
         val (v, h) = medParenteserVedBehov(
             venstre.konkret(), venstre,
-            MathOperator.ADD,
+            operator,
             høyre.konkret(), høyre
         )
-        return "$v + $h"
+        return "$v${operator.text}$h"
     }
 
     override fun faktumSet(): Set<Faktum<*>> =
@@ -90,173 +96,37 @@ internal data class Add<T : Number>(
 }
 
 /**
- * Subtraksjon.
+ * Comparison operation for boolean comparisons (erLik, erMindreEnn, erFør, etc.).
+ * This stores the operands and evaluation logic but doesn't format output
+ * (formatting is handled by PairDomainPredicate which knows about fired/negation state).
  */
-internal data class Sub<T : Number>(
-    val venstre: Uttrykk<Number>,
-    val høyre: Uttrykk<Number>
-) : Uttrykk<T> {
-    @Suppress("UNCHECKED_CAST")
-    override fun evaluer(): T {
-        // Cache evalueringene for å unngå dobbel-evaluering
-        val vVerdi = venstre.evaluer()
-        val hVerdi = høyre.evaluer()
-        val v = vVerdi.toDouble()
-        val h = hVerdi.toDouble()
-        val resultat = v - h
+internal data class ComparisonOperation(
+    val venstre: Uttrykk<*>,
+    val høyre: Uttrykk<*>,
+    val operator: PairOperator,
+    private val evaluator: () -> Boolean
+) : Uttrykk<Boolean> {
 
-        return if (vVerdi is Int && hVerdi is Int) {
-            resultat.toInt() as T
-        } else {
-            resultat as T
-        }
-    }
+    override fun evaluer(): Boolean = evaluator()
 
-    override fun notasjon(): String {
-        val (v, h) = medParenteserVedBehov(
-            venstre.notasjon(), venstre,
-            MathOperator.SUB,
-            høyre.notasjon(), høyre
-        )
-        return "$v - $h"
-    }
+    // These methods format with operator text - used by PairDomainPredicate
+    fun notasjonMedOperator(operatorText: String): String = "'${venstre.notasjon()}'${operatorText}'${høyre.notasjon()}'"
 
-    override fun konkret(): String {
-        val (v, h) = medParenteserVedBehov(
-            venstre.konkret(), venstre,
-            MathOperator.SUB,
-            høyre.konkret(), høyre
-        )
-        return "$v - $h"
-    }
+    fun konkretMedOperator(operatorText: String): String = "'${venstre.konkret()}'${operatorText}'${høyre.konkret()}'"
 
-    override fun faktumSet(): Set<Faktum<*>> =
-        venstre.faktumSet() + høyre.faktumSet()
+    // Not used directly but required by Uttrykk interface
+    override fun notasjon(): String = notasjonMedOperator(operator.text)
+    override fun konkret(): String = konkretMedOperator(operator.text)
+
+    override fun faktumSet(): Set<Faktum<*>> = venstre.faktumSet() + høyre.faktumSet()
 
     override fun forklar(level: Int): String = buildString {
-        indent(level).append("HVORDAN\n")
-        indent(level + 1).append("${notasjon()}\n")
-        indent(level + 1).append("${konkret()}\n")
-
-        faktumSet().forEach { faktum ->
-            // Show HVORDAN for each Faktum's expression (skip HVA/HVORFOR)
-            indent(level + 1).append(faktum.uttrykk.forklar(level + 2))
-        }
-    }
-}
-
-/**
- * Multiplikasjon.
- */
-internal data class Mul<T : Number>(
-    val venstre: Uttrykk<Number>,
-    val høyre: Uttrykk<Number>
-) : Uttrykk<T> {
-    @Suppress("UNCHECKED_CAST")
-    override fun evaluer(): T {
-        // Cache evalueringene for å unngå dobbel-evaluering
-        val vVerdi = venstre.evaluer()
-        val hVerdi = høyre.evaluer()
-        val v = vVerdi.toDouble()
-        val h = hVerdi.toDouble()
-        val resultat = v * h
-
-        return if (vVerdi is Int && hVerdi is Int) {
-            resultat.toInt() as T
-        } else {
-            resultat as T
-        }
-    }
-
-    override fun notasjon(): String {
-        val (v, h) = medParenteserVedBehov(
-            venstre.notasjon(), venstre,
-            MathOperator.MUL,
-            høyre.notasjon(), høyre
-        )
-        return "$v * $h"
-    }
-
-    override fun konkret(): String {
-        val (v, h) = medParenteserVedBehov(
-            venstre.konkret(), venstre,
-            MathOperator.MUL,
-            høyre.konkret(), høyre
-        )
-        return "$v * $h"
-    }
-
-    override fun faktumSet(): Set<Faktum<*>> =
-        venstre.faktumSet() + høyre.faktumSet()
-
-    override fun forklar(level: Int): String = buildString {
-        indent(level).append("HVORDAN\n")
-        indent(level + 1).append("${notasjon()}\n")
-        indent(level + 1).append("${konkret()}\n")
-
-        faktumSet().forEach { faktum ->
-            // Show HVORDAN for each Faktum's expression (skip HVA/HVORFOR)
-            indent(level + 1).append(faktum.uttrykk.forklar(level + 2))
-        }
-    }
-}
-
-/**
- * Divisjon (gir alltid Double).
- */
-internal data class Div(
-    val venstre: Uttrykk<Number>,
-    val høyre: Uttrykk<Number>
-) : Uttrykk<Double> {
-    override fun evaluer(): Double {
-        val v = venstre.evaluer().toDouble()
-        val h = høyre.evaluer().toDouble()
-
-        if (h == 0.0) {
-            throw ArithmeticException("Divisjon med null: $v / $h")
-        }
-
-        return v / h
-    }
-
-    override fun notasjon(): String {
-        val (v, h) = medParenteserVedBehov(
-            venstre.notasjon(), venstre,
-            MathOperator.DIV,
-            høyre.notasjon(), høyre
-        )
-        return "$v / $h"
-    }
-
-    override fun konkret(): String {
-        val (v, h) = medParenteserVedBehov(
-            venstre.konkret(), venstre,
-            MathOperator.DIV,
-            høyre.konkret(), høyre
-        )
-        return "$v / $h"
-    }
-
-    override fun faktumSet(): Set<Faktum<*>> =
-        venstre.faktumSet() + høyre.faktumSet()
-
-    override fun forklar(level: Int): String = buildString {
-        indent(level).append("HVORDAN\n")
-        indent(level + 1).append("${notasjon()}\n")
-        indent(level + 1).append("${konkret()}\n")
-
-        faktumSet().forEach { faktum ->
-            // Show HVORDAN for each Faktum's expression (skip HVA/HVORFOR)
-            indent(level + 1).append(faktum.uttrykk.forklar(level + 2))
-        }
+        indent(level).append("${notasjon()}\n")
+        indent(level).append("${konkret()}\n")
     }
 }
 
 private fun StringBuilder.indent(level: Int): StringBuilder = append(" ".repeat(level * 2))
-
-private enum class Operator {
-    ADD, SUB, MUL, DIV
-}
 
 /**
  * Legger til parenteser rundt uttrykk ved behov basert på operator precedence.
@@ -269,17 +139,23 @@ private enum class Operator {
 private fun medParenteserVedBehov(
     venstre: String,
     venstreUttrykk: Uttrykk<*>,
-    operator: Operator,
+    operator: MathOperator,
     høyre: String,
     høyreUttrykk: Uttrykk<*>
 ): Pair<String, String> {
     val venstreTrengerParentes = when (operator) {
-        MathOperator.MUL, MathOperator.DIV -> venstreUttrykk is Add || venstreUttrykk is Sub
+        MathOperator.MUL, MathOperator.DIV ->
+            venstreUttrykk is MathOperation<*> &&
+                    (venstreUttrykk.operator == MathOperator.ADD || venstreUttrykk.operator == MathOperator.SUB)
+
         else -> false
     }
 
     val høyreTrengerParentes = when (operator) {
-        MathOperator.MUL, MathOperator.DIV, MathOperator.SUB -> høyreUttrykk is Add || høyreUttrykk is Sub
+        MathOperator.MUL, MathOperator.DIV, MathOperator.SUB ->
+            høyreUttrykk is MathOperation<*> &&
+                    (høyreUttrykk.operator == MathOperator.ADD || høyreUttrykk.operator == MathOperator.SUB)
+
         else -> false
     }
 
@@ -375,18 +251,21 @@ abstract class DomainPredicate(
 }
 
 /**
- * Compares [venstre] with [høyre]
+ * Compares two values using a comparison operator.
+ * Wraps ComparisonOperation to add Predicate behavior for rule evaluation.
  */
 class PairDomainPredicate(
     override val operator: PairOperator,
-    private val venstre: Uttrykk<*>,
-    private val høyre: Uttrykk<*>,
+    venstre: Uttrykk<*>,
+    høyre: Uttrykk<*>,
     override val function: () -> Boolean,
 ) : DomainPredicate(operator = operator, function = function) {
 
+    private val operation = ComparisonOperation(venstre, høyre, operator, function)
+
     override fun type(): RuleComponentType = DOMENE_PREDIKAT_PAR
     override fun evaluer(): Boolean = fired
-    override fun toString(): String = "${fired.svarord()} ${venstre}${komparatorText()}${høyre}"
+    override fun toString(): String = "${fired.svarord()} ${operation.venstre}${komparatorText()}${operation.høyre}"
 
     /**
      * someStartDate erFør someEndDate
@@ -401,11 +280,11 @@ class PairDomainPredicate(
         indent(level).append("${konkret()}\n")
     }
 
-    override fun notasjon(): String = "${fired.svarord()} '${venstre.notasjon()}'${komparatorText()}'${høyre.notasjon()}'"
+    override fun notasjon(): String = "${fired.svarord()} ${operation.notasjonMedOperator(komparatorText())}"
 
-    override fun konkret(): String = "${fired.svarord()} '${venstre.konkret()}'${komparatorText()}'${høyre.konkret()}'"
+    override fun konkret(): String = "${fired.svarord()} ${operation.konkretMedOperator(komparatorText())}"
 
-    override fun faktumSet(): Set<Faktum<*>> = venstre.faktumSet() + høyre.faktumSet()
+    override fun faktumSet(): Set<Faktum<*>> = operation.faktumSet()
 }
 
 /**
