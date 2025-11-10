@@ -28,12 +28,11 @@ fun main() {
         println("Detaljert forklaring: ${netto.navn}")
         println(netto.forklarDetaljert(netto.navn, maxDybde = 3))
 
-            println()
-            println("Strukturtre:")
-            println(netto.treVisning())
+        println()
+        println("Strukturtre:")
+        println(netto.treVisning())
 
-            // Print call trace på slutten
-            CallTracker.printTrace()
+        CallTracker.printTrace()
     }
 
 }
@@ -67,7 +66,7 @@ fun beregnAlderspensjon(
     (grunnbelop() * sivilstandSats * trygdetidsFaktor).navngi("netto")
 }
 
-fun grunnbelop() = tracked {Const(120_000.0).navngi("grunnbelop") }
+fun grunnbelop() = tracked { Const(120_000.0).navngi("grunnbelop") }
 fun maksTrygdetidAr() = tracked { Const(40).navngi("maksTrygdetidAr") }
 
 fun beregnFaktiskTrygdetidAr(
@@ -75,51 +74,44 @@ fun beregnFaktiskTrygdetidAr(
     boperiodeListe: List<Boperiode>,
     flykningUtfall: Grunnlag<UtfallType>
 ) = tracked {
-    tabell("trygdetidAr") {
 
-        val faktiskTrygdetidIMåneder = akkumulerBotidIMånederNorge(fødselsdato, boperiodeListe)
+    val faktiskTrygdetidIMåneder = akkumulerBotidIMånederNorge(fødselsdato, boperiodeListe)
 
-        regel {
-            når { flykningUtfall erLik UtfallType.OPPFYLT }
-            resultat { maksTrygdetidAr() }
-        }
-
-        regel {
-            når { flykningUtfall erUlik UtfallType.OPPFYLT }
-            resultat { Const((faktiskTrygdetidIMåneder / Const(12)).evaluer().roundToInt()) }
-        }
-    }.navngi("faktiskTrygdetidAr")
+    (flykningUtfall erLik UtfallType.OPPFYLT)
+        .så { maksTrygdetidAr() }
+        .ellers { Const((faktiskTrygdetidIMåneder / Const(12)).evaluer().roundToInt()) }
+        .navngi("faktiskTrygdetidAr")
 }
 
 fun akkumulerBotidIMånederNorge(
     fødselsdato: Grunnlag<LocalDate>,
     boperiodeListe: List<Boperiode>,
 ) = tracked {
-    Grunnlag("dato16år", Const(fødselsdato.evaluer().plusYears(16))).let { dato16år ->
-        Grunnlag(
-            "norske boperioder",
-            Const(boperiodeListe.filter { it.land == LandEnum.NOR })
-        ).let { norskeBoperioder ->
 
-            val monthsBetween: (LocalDate, LocalDate?) -> Const<Int> = { fom, tom ->
-                Const(ChronoUnit.MONTHS.between(fom, tom).toInt())
+    val dato16år = Const(fødselsdato.evaluer().plusYears(16)).navngi("dato16år")
+
+    val norskeBoperioder =
+        Const(boperiodeListe.filter { it.land == LandEnum.NOR }).navngi("norskeBoperioder")
+
+    val monthsBetween: (LocalDate, LocalDate?) -> Const<Int> = { fom, tom ->
+        Const(ChronoUnit.MONTHS.between(fom, tom).toInt())
+    }
+
+    val norskBotidRef16årMåneder = norskeBoperioder.evaluer().map {
+        tabell("periodeRef16år") {
+            regel {
+                når { it.fom erMindreEnn dato16år }
+                resultat { monthsBetween(dato16år.evaluer(), it.tom) }
             }
+            regel {
+                når { it.fom erStørreEllerLik dato16år }
+                resultat { monthsBetween(it.fom, it.tom) }
+            }
+            ellers { Const(0) }
+        }.evaluer()
+    }
 
-            Grunnlag(
-                "faktiskTrygdetidMåneder",
-                norskeBoperioder.evaluer().fold(Const(0) as Uttrykk<Int>) { acc, periode ->
-                    val fom = Grunnlag("fom", Const(periode.fom))
-                    acc +
-                            (fom erMindreEnn dato16år)
-                                .så { monthsBetween(dato16år.evaluer(), periode.tom) }
-                                .ellers { Const(0) } +
-                            (fom erStørreEllerLik dato16år)
-                                .så { monthsBetween(periode.fom, periode.tom) }
-                                .ellers { Const(0) }
-                }
-            )
-        }
-    }.navngi("akkumulertBotidMånederINorge")
+    Const(norskBotidRef16årMåneder.sum()).navngi("akkumulertBotidMånederINorge")
 }
 
 fun erFremtidigTrygdetidRedusert(
