@@ -50,7 +50,7 @@ regeltjeneste: BeregnAlderspensjonService
       regel: NEI PersonenErFlyktningRS.SettRelevantTrygdetid_kap20
         NEI 'Kapittel 20' (false) må være lik 'true'
       regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarFlyktningFlaggetSatt
-        NEI 'Angitt flyktning' (false) må være lik 'true'
+        'Angitt flyktning' (false)
       regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning
       regel: NEI PersonenErFlyktningRS.AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning
       regel: NEI PersonenErFlyktningRS.Overgangsregel_AP
@@ -60,12 +60,12 @@ regeltjeneste: BeregnAlderspensjonService
         NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'
         NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)
         NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'
-        NEI 'Uføretrygd før 2021' (false) må være lik 'true'
+        'Uføretrygd før 2021' (false)
       regel: NEI PersonenErFlyktningRS.Overgangsregel_AP_tidligereGJP
         NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'
         NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)
         NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'
-        NEI 'Gjenlevendepensjon før 2021' (false) må være lik 'true'
+        'Gjenlevendepensjon før 2021' (false)
       regel: NEI PersonenErFlyktningRS.Overgangsregel_GJR_tidligereUT_GJT
       regel: NEI PersonenErFlyktningRS.Overgangsregel_GJR_tidligereGJR
       regel: JA PersonenErFlyktningRS.AnvendtFlyktning_ikkeRelevant
@@ -109,7 +109,7 @@ regeltjeneste: BeregnAlderspensjonService
         <predikat fired="false">NEI 'Kapittel 20' (false) må være lik 'true'</predikat>
       </SettRelevantTrygdetid_kap20>
       <AngittFlyktning_HarFlyktningFlaggetSatt fired="false" comment="Flyktningerflagget er angitt av saksbehandler.">
-        <predikat fired="false">NEI 'Angitt flyktning' (false) må være lik 'true'</predikat>
+        <predikat fired="false">'Angitt flyktning' (false)</predikat>
       </AngittFlyktning_HarFlyktningFlaggetSatt>
       <AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning fired="false"></AngittFlyktning_HarUnntakFraForutgaendeMedlemskapTypeFlyktning>
       <AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning fired="false"></AngittFlyktning_HarUnntakFraForutgaendeTTTypeFlyktning>
@@ -121,13 +121,13 @@ regeltjeneste: BeregnAlderspensjonService
         <predikat fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</predikat>
         <predikat fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)</predikat>
         <predikat fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</predikat>
-        <predikat fired="false">NEI 'Uføretrygd før 2021' (false) må være lik 'true'</predikat>
+        <predikat fired="false">'Uføretrygd før 2021' (false)</predikat>
       </Overgangsregel_AP_tidligereUT>
       <Overgangsregel_AP_tidligereGJP fired="false">
         <predikat fired="false">NEI 'Fødselsdato' (1974-03-03) må være mindre eller lik '1959'</predikat>
         <predikat fired="false">NEI 'virkningstidspunkt' (1990-05-01) må være etter eller lik 'Fødselsdato67m' (2041-04-01)</predikat>
         <predikat fired="false">NEI 'Faktisk trygdetid før 2021' (0) må være større eller lik '20'</predikat>
-        <predikat fired="false">NEI 'Gjenlevendepensjon før 2021' (false) må være lik 'true'</predikat>
+        <predikat fired="false">'Gjenlevendepensjon før 2021' (false)</predikat>
       </Overgangsregel_AP_tidligereGJP>
       <Overgangsregel_GJR_tidligereUT_GJT fired="false"></Overgangsregel_GJR_tidligereUT_GJT>
       <Overgangsregel_GJR_tidligereGJR fired="false"></Overgangsregel_GJR_tidligereGJR>

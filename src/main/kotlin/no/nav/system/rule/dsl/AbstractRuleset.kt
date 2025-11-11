@@ -8,6 +8,7 @@ import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListOperation
+import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -166,7 +167,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     }
 
 
-    protected fun String.minstEnHarTruffet(): ListOperation {
+    protected fun String.minstEnHarTruffet(): Uttrykk<Boolean> {
         val list = findRulesByNameStartsWith(this)
         return ListOperation(
             uttrykk = Faktum("Regelreferanse", this),
@@ -186,7 +187,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      *          "JA AngittFlyktning_r2"
      *          "JA AngittFlyktning_r3"
      */
-    protected fun String.alleHarTruffet(): ListOperation {
+    protected fun String.alleHarTruffet(): Uttrykk<Boolean> {
         val list = findRulesByNameStartsWith(this)
         return ListOperation(
             uttrykk = Faktum("Regelreferanse", this),
@@ -199,7 +200,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         )
     }
 
-    protected fun String.ingenHarTruffet(): ListOperation {
+    protected fun String.ingenHarTruffet(): Uttrykk<Boolean> {
         val list = findRulesByNameStartsWith(this)
         return ListOperation(
             uttrykk = Faktum("Regelreferanse", this),

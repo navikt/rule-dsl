@@ -71,7 +71,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
             OG { faktiskTrygdetid erLik fullTrygdetid }
             SÅ {
                 RETURNER(
-                    forklaring("slitertillegg", fulltSlitertillegg)
+                    sporing("slitertillegg", fulltSlitertillegg)
                 )
             }
         }
@@ -108,7 +108,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
             OG { faktiskTrygdetid erMindreEnn fullTrygdetid }
             SÅ {
                 RETURNER(
-                    forklaring("slitertillegg", fulltSlitertillegg * trygdetidFaktor)
+                    sporing("slitertillegg", fulltSlitertillegg * trygdetidFaktor)
                 )
             }
         }
@@ -145,7 +145,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
             OG { faktiskTrygdetid erLik fullTrygdetid }
             SÅ {
                 RETURNER(
-                    forklaring("slitertillegg", fulltSlitertillegg * justeringsFaktor)
+                    sporing("slitertillegg", fulltSlitertillegg * justeringsFaktor)
                 )
             }
         }
@@ -185,7 +185,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
             OG { faktiskTrygdetid erMindreEnn fullTrygdetid }
             SÅ {
                 RETURNER(
-                    forklaring("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
+                    sporing("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
                 )
             }
         }

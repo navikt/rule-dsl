@@ -64,7 +64,7 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG") {
             HVIS { antallMånederEtterNedrePensjonsDato erMindreEnn MND_36 }
             SÅ {
-                justeringsFaktor = forklaring(
+                justeringsFaktor = sporing(
                     "justeringsFaktor", (MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36
                 )
             }
@@ -73,7 +73,7 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-SENT") {
             HVIS { antallMånederEtterNedrePensjonsDato erStørreEllerLik MND_36 }
             SÅ {
-                justeringsFaktor = forklaring(
+                justeringsFaktor = sporing(
                     "justeringsFaktor", 0.0
                 )
             }
@@ -126,7 +126,7 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
             HVIS { true }
             SÅ {
                 RETURNER(
-                    forklaring("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
+                    sporing("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
                 )
             }
         }

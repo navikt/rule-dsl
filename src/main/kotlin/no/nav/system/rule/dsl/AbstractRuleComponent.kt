@@ -58,9 +58,9 @@ abstract class AbstractRuleComponent : Serializable {
     }
 
     /**
-     * Produserer ForklartFaktum med sporing og angitt Uttrykk.
+     * Produserer Faktum med hvorfor-sporing og angitt Uttrykk.
      */
-    fun <T : Any> forklaring(navn: String, uttrykk: Uttrykk<T>): Faktum<T> {
+    fun <T : Any> sporing(navn: String, uttrykk: Uttrykk<T>): Faktum<T> {
         return Faktum(
             navn = navn,
             uttrykk = uttrykk,
@@ -75,7 +75,7 @@ abstract class AbstractRuleComponent : Serializable {
     /**
      * Produserer ForklartFaktum med sporing og angitt verdi.
      */
-    fun <T : Any> forklaring(navn: String, verdi: T): Faktum<T> {
+    fun <T : Any> sporing(navn: String, verdi: T): Faktum<T> {
         return Faktum(
             navn = navn,
             uttrykk = Const(verdi),

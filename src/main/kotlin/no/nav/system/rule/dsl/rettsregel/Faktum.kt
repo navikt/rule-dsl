@@ -98,7 +98,7 @@ internal data class MathOperation<T : Number>(
  * Comparison operation for pair comparisons (erLik, erMindreEnn, erFør, etc.).
  * Pure boolean expression without Predicate machinery.
  */
-data class ComparisonOperation(
+internal data class ComparisonOperation(
     val venstre: Uttrykk<*>,
     val høyre: Uttrykk<*>,
     val operator: PairOperator,
@@ -128,7 +128,7 @@ data class ComparisonOperation(
  * List operation for list membership checks (erBlant, erIkkeBlant).
  * Pure boolean expression without Predicate machinery.
  */
-data class ListOperation(
+internal data class ListOperation(
     val uttrykk: Uttrykk<*>,
     val mengdeUttrykk: Uttrykk<List<*>>,
     val operator: ListOperator,

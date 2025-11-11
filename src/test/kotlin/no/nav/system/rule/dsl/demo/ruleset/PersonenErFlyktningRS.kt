@@ -119,14 +119,14 @@ class PersonenErFlyktningRS(
         regel("AnvendtFlyktning_ikkeRelevant") {
             HVIS { "AngittFlyktning".ingenHarTruffet() }
             SÅ {
-                RETURNER(forklaring("Anvendt flyktning", IKKE_RELEVANT))
+                RETURNER(sporing("Anvendt flyktning", IKKE_RELEVANT))
             }
         }
         regel("AnvendtFlyktning_oppfylt") {
             HVIS { "AngittFlyktning".minstEnHarTruffet() }
             OG { innKravlinjeFremsattDatoFom2021 erLik false }
             SÅ {
-                RETURNER(forklaring("Anvendt flyktning", OPPFYLT))
+                RETURNER(sporing("Anvendt flyktning", OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_ingenOvergang") {
@@ -134,7 +134,7 @@ class PersonenErFlyktningRS(
             OG { innKravlinjeFremsattDatoFom2021 }
             OG { "Overgangsregel".ingenHarTruffet() }
             SÅ {
-                RETURNER(forklaring("Anvendt flyktning", IKKE_OPPFYLT))
+                RETURNER(sporing("Anvendt flyktning", IKKE_OPPFYLT))
             }
         }
         regel("AnvendtFlyktning_harOvergang") {
@@ -142,7 +142,7 @@ class PersonenErFlyktningRS(
             OG { innKravlinjeFremsattDatoFom2021 }
             OG { "Overgangsregel".minstEnHarTruffet() }
             SÅ {
-                RETURNER(forklaring("Anvendt flyktning", OPPFYLT))
+                RETURNER(sporing("Anvendt flyktning", OPPFYLT))
             }
         }
     }

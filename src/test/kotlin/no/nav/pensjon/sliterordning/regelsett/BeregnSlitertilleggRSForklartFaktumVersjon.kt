@@ -114,7 +114,7 @@ class BeregnSlitertilleggRSForklartFaktumVersjon(
             HVIS { true }
             SÅ {
                 RETURNER(
-                    forklaring(
+                    sporing(
                         "slitertillegg",
                         fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
                     )

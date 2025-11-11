@@ -3,11 +3,8 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGEL
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.ComparisonOperation
-import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.ListOperation
+import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
-import no.nav.system.rule.dsl.rettsregel.operators.erLik
 import kotlin.experimental.ExperimentalTypeInference
 
 /**
@@ -82,35 +79,17 @@ open class Rule<T : Any>(
     /**
      * DSL: Technical Predicate entry.
      */
-    fun HVIS(predicateFunction: () -> Boolean) {
-        OG(predicateFunction)
+    fun HVIS(booleanFunction: () -> Boolean) {
+        OG(booleanFunction)
     }
 
     /**
      * DSL: Technical Predicate entry.
      */
-    fun OG(predicateFunction: () -> Boolean) {
+    fun OG(booleanFunction: () -> Boolean) {
         predicateFunctionList.add {
             Predicate(
-                function = predicateFunction
-            )
-        }
-    }
-
-    @OverloadResolutionByLambdaReturnType
-    @JvmName("FaktumBooleanHVIS")
-    @DslDomainPredicate
-    fun HVIS(faktumFunction: () -> Faktum<Boolean>) {
-        OG(faktumFunction)
-    }
-
-    @OverloadResolutionByLambdaReturnType
-    @JvmName("FaktumBooleanOG")
-    @DslDomainPredicate
-    fun OG(faktumFunction: () -> Faktum<Boolean>) {
-        predicateFunctionList.add {
-            TrackablePredicate(
-                uttrykk = faktumFunction.invoke() erLik true
+                function = booleanFunction
             )
         }
     }
@@ -119,46 +98,22 @@ open class Rule<T : Any>(
      * DSL: Functional Predicate entry (Domain predicates - boolean expressions).
      */
     @OverloadResolutionByLambdaReturnType
-    @JvmName("ComparisonOperationBooleanHVIS")
+    @JvmName("UttrykkBooleanHVIS")
     @DslDomainPredicate
-    fun HVIS(comparisonFunction: () -> ComparisonOperation) {
-        OG(comparisonFunction)
+    fun HVIS(uttrykkFunction:  () -> Uttrykk<Boolean>) {
+        OG(uttrykkFunction)
     }
 
     /**
      * DSL: Functional Predicate entry (Domain predicates - boolean expressions).
      */
     @OverloadResolutionByLambdaReturnType
-    @JvmName("ComparisonOperationBooleanOG")
+    @JvmName("UttrykkBooleanOG")
     @DslDomainPredicate
-    fun OG(comparisonOperationFunction: () -> ComparisonOperation) {
+    fun OG(uttrykkFunction:  () -> Uttrykk<Boolean>) {
         predicateFunctionList.add {
             TrackablePredicate(
-                uttrykk = comparisonOperationFunction()
-            )
-        }
-    }
-
-    /**
-     * DSL: Functional Predicate entry (Domain predicates - boolean expressions).
-     */
-    @OverloadResolutionByLambdaReturnType
-    @JvmName("ListOperationBooleanHVIS")
-    @DslDomainPredicate
-    fun HVIS(listOperationFunction: () -> ListOperation) {
-        OG(listOperationFunction)
-    }
-
-    /**
-     * DSL: Functional Predicate entry (Domain predicates - boolean expressions).
-     */
-    @OverloadResolutionByLambdaReturnType
-    @JvmName("ListOperationBooleanOG")
-    @DslDomainPredicate
-    fun OG(listOperationFunction: () -> ListOperation) {
-        predicateFunctionList.add {
-            TrackablePredicate(
-                uttrykk = listOperationFunction()
+                uttrykk = uttrykkFunction()
             )
         }
     }

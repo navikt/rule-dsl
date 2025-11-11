@@ -51,3 +51,16 @@ c) noe annet?
 5. Er vi tjent med å lage et Uttrykk til som kun har navn og en set-funksjon som tar i mot uttrykket og konverterer til Faktum? Det kan gjøre domene klassene i stand til å diktiere NAVN, men ikke verdien. Noe sånnt som "UinitsialisertFaktum". evaluer på denne kaster exception. Klassen kan kanskje også støtte akkumulering.
 
 6. DomainPredicate bør heller hete SporingsPredikat eller SporbartPredikat. Evt. TrackingPredicate/Trackable.
+
+7. Dersom man benytter et Faktum<Boolean> i som regelpredikat må man nå si "erLik true". Tidligere kunne man bare sende inn Faktum<Boolean> uten sammenligning mot boolean. Hvis vi ønsker det tilbake kan vi vurdere å gjeninnføre fun OG(faktumFunction: () -> Faktum<Boolean>) {
+
+```kotlin
+    fun OG(faktumFunction: () -> Faktum<Boolean>) {
+    predicateFunctionList.add {
+        TrackablePredicate(
+            uttrykk = faktumFunction.invoke() erLik true
+        )
+    }
+}
+```
+Eller en annen løsning.
