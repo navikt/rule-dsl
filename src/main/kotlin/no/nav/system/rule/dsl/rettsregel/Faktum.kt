@@ -92,6 +92,43 @@ internal data class MathOperation<T : Number>(
         }
     }
 
+    /**
+     * Legger til parenteser rundt uttrykk ved behov basert på operator precedence.
+     *
+     * Regler basert på standard aritmetisk presedens:
+     * - Multiplikasjon og divisjon: venstre og høyre side får parenteser hvis de er addisjon/subtraksjon
+     * - Subtraksjon: høyre side får parenteser hvis den er addisjon/subtraksjon (for å bevare korrekt evaluering)
+     * - Addisjon: ingen automatiske parenteser (assosiativ og lav presedens)
+     */
+    private fun medParenteserVedBehov(
+        venstre: String,
+        venstreUttrykk: Uttrykk<*>,
+        operator: MathOperator,
+        høyre: String,
+        høyreUttrykk: Uttrykk<*>
+    ): Pair<String, String> {
+        val venstreTrengerParentes = when (operator) {
+            MathOperator.MUL, MathOperator.DIV ->
+                venstreUttrykk is MathOperation<*> &&
+                        (venstreUttrykk.operator == MathOperator.ADD || venstreUttrykk.operator == MathOperator.SUB)
+
+            else -> false
+        }
+
+        val høyreTrengerParentes = when (operator) {
+            MathOperator.MUL, MathOperator.DIV, MathOperator.SUB ->
+                høyreUttrykk is MathOperation<*> &&
+                        (høyreUttrykk.operator == MathOperator.ADD || høyreUttrykk.operator == MathOperator.SUB)
+
+            else -> false
+        }
+
+        val v = if (venstreTrengerParentes) "($venstre)" else venstre
+        val h = if (høyreTrengerParentes) "($høyre)" else høyre
+
+        return v to h
+    }
+
 }
 
 /**
@@ -158,42 +195,7 @@ internal data class ListOperation(
 
 private fun StringBuilder.indent(level: Int): StringBuilder = append(" ".repeat(level * 2))
 
-/**
- * Legger til parenteser rundt uttrykk ved behov basert på operator precedence.
- *
- * Regler basert på standard aritmetisk presedens:
- * - Multiplikasjon og divisjon: venstre og høyre side får parenteser hvis de er addisjon/subtraksjon
- * - Subtraksjon: høyre side får parenteser hvis den er addisjon/subtraksjon (for å bevare korrekt evaluering)
- * - Addisjon: ingen automatiske parenteser (assosiativ og lav presedens)
- */
-private fun medParenteserVedBehov(
-    venstre: String,
-    venstreUttrykk: Uttrykk<*>,
-    operator: MathOperator,
-    høyre: String,
-    høyreUttrykk: Uttrykk<*>
-): Pair<String, String> {
-    val venstreTrengerParentes = when (operator) {
-        MathOperator.MUL, MathOperator.DIV ->
-            venstreUttrykk is MathOperation<*> &&
-                    (venstreUttrykk.operator == MathOperator.ADD || venstreUttrykk.operator == MathOperator.SUB)
 
-        else -> false
-    }
-
-    val høyreTrengerParentes = when (operator) {
-        MathOperator.MUL, MathOperator.DIV, MathOperator.SUB ->
-            høyreUttrykk is MathOperation<*> &&
-                    (høyreUttrykk.operator == MathOperator.ADD || høyreUttrykk.operator == MathOperator.SUB)
-
-        else -> false
-    }
-
-    val v = if (venstreTrengerParentes) "($venstre)" else venstre
-    val h = if (høyreTrengerParentes) "($høyre)" else høyre
-
-    return v to h
-}
 
 
 /**
