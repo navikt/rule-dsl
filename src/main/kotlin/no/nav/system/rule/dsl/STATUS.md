@@ -39,7 +39,7 @@ DEL 2
  operator fun <T : Number> Faktum<T>.plusAssign(value: T) : Unit 
 ```
 
-2. [????] arc.faktum(...) i SÅ-blokken er ikke greit. Det er svært lett å blande Faktum konstruktøren med faktum funsjonen. Denne er nå kallt forklaring(...) men synes fortsatt det er litt mangelfullt.
+2. [????] arc.faktum(...) i SÅ-blokken er ikke greit. Det er svært lett å blande Faktum konstruktøren med faktum funsjonen. Denne er nå kallt sporing(...) men synes fortsatt det er litt mangelfullt.
 
 3. [DONE] Uklart om Const skal være internal eller ikke. Hvis vi vil ha den eksponert, kan vi gjeninnføre navngi funksjon som gjør Const til Faktum. Bør være avklart nå at Const forblir internal.
 
@@ -50,7 +50,7 @@ c) noe annet?
 
 5. Er vi tjent med å lage et Uttrykk til som kun har navn og en set-funksjon som tar i mot uttrykket og konverterer til Faktum? Det kan gjøre domene klassene i stand til å diktiere NAVN, men ikke verdien. Noe sånnt som "UinitsialisertFaktum". evaluer på denne kaster exception. Klassen kan kanskje også støtte akkumulering.
 
-6. DomainPredicate bør heller hete SporingsPredikat eller SporbartPredikat. Evt. TrackingPredicate/Trackable.
+6. [DONE] DomainPredicate bør heller hete SporingsPredikat eller SporbartPredikat. Evt. TrackingPredicate/Trackable.
 
 7. Dersom man benytter et Faktum<Boolean> i som regelpredikat må man nå si "erLik true". Tidligere kunne man bare sende inn Faktum<Boolean> uten sammenligning mot boolean. Hvis vi ønsker det tilbake kan vi vurdere å gjeninnføre fun OG(faktumFunction: () -> Faktum<Boolean>) {
 
@@ -64,3 +64,8 @@ c) noe annet?
 }
 ```
 Eller en annen løsning.
+
+
+8. Burde også MathOperator ha en val evaluator -> Number, istedenfor å bruke when (operator) { add, sub, etc }? Kanskje gjør dette det lettere å lage custom operatorer som "min", "max", "avrund", "avrundMedToDesimal" etc ?
+
+9. Caching må innføres i Uttrykk evalueringsmekanisme. Hver Uttrykk bør cache sitt evaluerte resultat slik at rekursive kall ikke påvirker ytelse.
