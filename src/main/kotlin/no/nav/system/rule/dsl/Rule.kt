@@ -100,7 +100,7 @@ open class Rule<T : Any>(
     @OverloadResolutionByLambdaReturnType
     @JvmName("UttrykkBooleanHVIS")
     @DslDomainPredicate
-    fun HVIS(uttrykkFunction:  () -> Uttrykk<Boolean>) {
+    fun HVIS(uttrykkFunction: () -> Uttrykk<Boolean>) {
         OG(uttrykkFunction)
     }
 
@@ -110,7 +110,7 @@ open class Rule<T : Any>(
     @OverloadResolutionByLambdaReturnType
     @JvmName("UttrykkBooleanOG")
     @DslDomainPredicate
-    fun OG(uttrykkFunction:  () -> Uttrykk<Boolean>) {
+    fun OG(uttrykkFunction: () -> Uttrykk<Boolean>) {
         predicateFunctionList.add {
             TrackablePredicate(
                 uttrykk = uttrykkFunction()
