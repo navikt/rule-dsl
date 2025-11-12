@@ -4,6 +4,7 @@ import no.nav.system.rule.dsl.enums.ListOperator
 import no.nav.system.rule.dsl.enums.MathOperator
 import no.nav.system.rule.dsl.enums.PairOperator
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
+import org.jetbrains.kotlin.fir.declarations.FirDeclarationDataRegistry.data
 import java.io.Serializable
 
 /**
@@ -87,8 +88,9 @@ internal data class MathOperation<T : Number>(
         indent(level + 1).append("${konkret()}\n")
 
         faktumSet().forEach { faktum ->
-            // Show HVORDAN for each Faktum's expression (skip HVA/HVORFOR)
-            indent(level + 1).append(faktum.uttrykk.forklar(level + 2))
+            // Show full explanation for each contributing Faktum at the same level
+            // (only indent for named Faktum, not for intermediate AST nodes)
+            append(faktum.forklar(level))
         }
     }
 
@@ -194,12 +196,30 @@ internal data class ListOperation(
 }
 
 private fun StringBuilder.indent(level: Int): StringBuilder = append(" ".repeat(level * 2))
+private fun StringBuilder.appendIf(level: Int, statement : () -> Boolean ): StringBuilder = if (statement()) append(" ".repeat(level * 2)) else this
 
 
 
 
 /**
- * Named expression - treated as atomic unit.
+ * Named expression - treated as atomic unit for fact tracking.
+ *
+ * Faktum wraps any [Uttrykk] and gives it a name, making it user-visible and trackable.
+ * It acts as the boundary between anonymous calculations (Const, MathOperation) and
+ * named business facts that appear in rule explanations.
+ *
+ * Example:
+ * ```
+ * val alder = Faktum("Alder", 67)              // Named fact
+ * val sats = Faktum("Sats", 1000)              // Named fact
+ * val produkt = alder * sats                   // Anonymous MathOperation
+ * val tillegg = Faktum("Tillegg", produkt)     // Wrap as named result
+ *
+ * produkt.faktumSet()  // → { alder, sats }    Input facts
+ * tillegg.faktumSet()  // → { tillegg }         Result fact (stops at boundary)
+ * tillegg.uttrykk.faktumSet()  // → { alder, sats }  Contributing facts inside
+ * ```
+ *
  * This is can be created by users.
  */
 data class Faktum<T : Any>(
@@ -225,16 +245,31 @@ data class Faktum<T : Any>(
 
     override fun konkret(): String = evaluer().toString()
 
+    /**
+     * Returns this Faktum as the atomic unit.
+     *
+     * IMPORTANT: Returns `setOf(this)` rather than `uttrykk.faktumSet()` because
+     * Faktum defines the boundary for named facts. This stops recursion at the name,
+     * enabling layered explanations (result facts vs. input facts).
+     *
+     * To access contributing facts inside this Faktum, use `uttrykk.faktumSet()`.
+     */
     override fun faktumSet(): Set<Faktum<*>> = setOf(this)
 
     override fun toString(): String = "'$navn' (${evaluer()})"
 
     override fun forklar(level: Int): String = buildString {
-        indent(level).append("HVA\n")
-        indent(level + 1).append("$navn = ${evaluer()}\n")
+        if (level == 0) {
+            append("HVA\n")
+            indent(1).append("$navn = ${evaluer()}\n")
+        }
         append("\n")
-        indent(level).append("HVORFOR\n")
-        indent(level + 1).append("$hvorfor\n")
+
+        hvorfor?.let {
+            indent(level).append("HVORFOR\n")
+            indent(level + 1).append("$hvorfor\n")
+        }
+
         append("\n")
         indent(level + 1).append("${uttrykk.forklar(level + 2)}\n")
     }

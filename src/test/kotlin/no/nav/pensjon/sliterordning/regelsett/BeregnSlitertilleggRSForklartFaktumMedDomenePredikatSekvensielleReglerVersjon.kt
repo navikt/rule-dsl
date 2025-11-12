@@ -87,40 +87,25 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
          *      REFERANSE
          *          SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID
          *
-         *      FORDI
-         *          nedrePensjonsDato er før uttakstidspunkt
-         *          2022-09 er før 2024-01
-         *
-         *          OG
-         *
-         *          faktiskTrygdetid er mindre enn fullTrygdetid
-         *          30 er mindre enn 40
-         *
          *      HVORDAN
          *          slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
          *          slitertillegg = 5 * 5 * 5
-         *
-         *          HVA
-         *              fulltSlitertillegg = 1.0
          *
          *          HVORDAN
          *              fulltSlitertillegg = 0.25 * G / 12
          *              fulltSlitertillegg = 0.25 * 110000 / 12
          *
-         *          HVA
-         *              justeringsFaktor = 1.0
-         *
-         *           HVORFOR
-         *              antallMånederEtterNedrePensjonsDato erMindreEnn 36
-         *              0 erMindreEnn 36
-         *
-         *           HVORDAN
+         *          HVORDAN
          *              justeringsFaktor = (36 - antallMånederEtterNedrePensjonsDato) / 36
          *              justeringsFaktor = (36 - 0) / 36
-         *              justeringsFaktor = 1.0
          *
-         *          trygdetidFaktor = faktiskTrygdetid / fullTrygdetid
-         *          trygdetidFaktor = 30 / 40
+         *              HVORFOR
+         *                  antallMånederEtterNedrePensjonsDato erMindreEnn 36
+         *                  0 erMindreEnn 36
+         *
+         *          HVORDAN
+         *              trygdetidFaktor = faktiskTrygdetid / fullTrygdetid
+         *              trygdetidFaktor = 30 / 40
          */
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID") {
             HVIS { true }
