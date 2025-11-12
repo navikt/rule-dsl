@@ -49,11 +49,19 @@ fun beregnAlderspensjon(
         kravlinjeFremsattDatoFom2021 = Grunnlag("kravlinjeFremsattDatoFom2021", Const(true))
     )
 
-    val faktiskTrygdetidAr = beregnFaktiskTrygdetidAr(
-        fødselsdato = request.person.fødselsdato.toGrunnlag(),
-        boperiodeListe = request.person.boperioder,
-        flykningUtfall = flykningUtfall
-    )
+    val faktiskTrygdetidAr = (flykningUtfall erLik UtfallType.OPPFYLT)
+        .så { maksTrygdetidAr() }
+        .ellers {
+            val akkumulertBotidIArNorge = akkumulerBotidIMånederNorge(
+                request.person.fødselsdato.toGrunnlag(),
+                request.person.boperioder
+            ) / Const(12)
+
+            Const(akkumulertBotidIArNorge.evaluer().roundToInt())
+        }
+        .navngi("faktiskTrygdetidAr")
+
+    val trygdetidsFaktor = (faktiskTrygdetidAr / maksTrygdetidAr()).navngi("trygdetidFaktor")
 
     val sivilstandSats = Const(request.person.erGift).navngi("erGift").let { erGift ->
         erGift
@@ -61,27 +69,11 @@ fun beregnAlderspensjon(
             .ellers { Const(1.0) }
     }.navngi("sivilstandSats")
 
-    val trygdetidsFaktor = (faktiskTrygdetidAr / maksTrygdetidAr()).navngi("trygdetidFaktor")
-
     (grunnbelop() * sivilstandSats * trygdetidsFaktor).navngi("netto")
 }
 
 fun grunnbelop() = tracked { Const(120_000.0).navngi("grunnbelop") }
 fun maksTrygdetidAr() = tracked { Const(40).navngi("maksTrygdetidAr") }
-
-fun beregnFaktiskTrygdetidAr(
-    fødselsdato: Grunnlag<LocalDate>,
-    boperiodeListe: List<Boperiode>,
-    flykningUtfall: Grunnlag<UtfallType>
-) = tracked {
-
-    val faktiskTrygdetidIMåneder = akkumulerBotidIMånederNorge(fødselsdato, boperiodeListe)
-
-    (flykningUtfall erLik UtfallType.OPPFYLT)
-        .så { maksTrygdetidAr() }
-        .ellers { Const((faktiskTrygdetidIMåneder / Const(12)).evaluer().roundToInt()) }
-        .navngi("faktiskTrygdetidAr")
-}
 
 fun akkumulerBotidIMånederNorge(
     fødselsdato: Grunnlag<LocalDate>,
