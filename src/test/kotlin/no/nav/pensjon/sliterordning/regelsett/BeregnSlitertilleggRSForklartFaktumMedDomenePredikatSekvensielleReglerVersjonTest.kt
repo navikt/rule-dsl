@@ -24,8 +24,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("slitertillegg", slitertillegg.navn)
         assertEquals(2291.67, slitertillegg.evaluer(), 0.01)
 
-        val sePåForklaring = slitertillegg.forklar()
-
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
 
