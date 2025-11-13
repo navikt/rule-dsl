@@ -39,9 +39,9 @@ fun main() {
                 println("Detaljert forklaring: ${slitertillegg.navn}")
                 println(slitertillegg.forklarDetaljert(slitertillegg.navn, maxDybde = 3))
 
-                //    println()
-                //    println("Strukturtre:")
-                //    println(slitertillegg.treVisning())
+                    println()
+                    println("Strukturtre:")
+                    println(slitertillegg.treVisning())
                 //
                 //    // Print call trace på slutten
                 //    CallTracker.printTrace()
