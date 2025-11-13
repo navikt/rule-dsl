@@ -11,7 +11,7 @@ fun main() {
     listOf(
         Pair(
             fullTrygdetid().navngi("faktiskTrygdetid"),
-            Grunnlag("antallMånederEtterNedreAldersgrense", Const(0))
+            Grunnlag("antallMånederEtterNedreAldersgrense", 0)
         ),
 
         Pair(
@@ -19,7 +19,7 @@ fun main() {
             (uttaksgrense() intdiv 2).navngi("antallMånederEtterNedreAldersgrense")
         ),
         Pair(
-            Grunnlag("faktiskTrygdetid", Const(0)),
+            Grunnlag("faktiskTrygdetid", 0),
             (uttaksgrense() intdiv 2).navngi("antallMånederEtterNedreAldersgrense")
 
         ),
@@ -41,7 +41,7 @@ fun main() {
 
                     println()
                     println("Strukturtre:")
-                    println(slitertillegg.treVisning())
+                    println(slitertillegg.treVisningKompakt())
                 //
                 //    // Print call trace på slutten
                 //    CallTracker.printTrace()
@@ -58,9 +58,9 @@ fun beregnSlitertillegg(
         .id("SLITERTILEGG-BEREGNET")
 }
 
-fun G() = tracked { Grunnlag("G", Const(110000)) }
-fun fullTrygdetid() = tracked { Grunnlag("FULL_TRYGDETID", Const(40)) }
-fun uttaksgrense() = tracked { Grunnlag("UTTAKSGRENSE_MND", Const(36)) }
+fun G() = tracked { Grunnlag("G", 110_000) }
+fun fullTrygdetid() = tracked { Grunnlag("FULL_TRYGDETID", 40) }
+fun uttaksgrense() = tracked { Grunnlag("UTTAKSGRENSE_MND", 36) }
 
 fun trygdetidFaktor(faktiskTrygdetid: Grunnlag<Int>) = tracked {
     fullTrygdetid().let { fullTrygdetid ->

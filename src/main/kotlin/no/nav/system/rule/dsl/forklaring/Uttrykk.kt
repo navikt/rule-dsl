@@ -129,6 +129,46 @@ data class Grunnlag<T : Any>(
     fun utpakk(): Uttrykk<T> = uttrykk
 }
 
+// ========================================================================
+// Convenience constructors for Grunnlag
+// ========================================================================
+
+/**
+ * Convenience constructor for creating Grunnlag with an Int value.
+ * Automatically wraps the value in a Const.
+ *
+ * Example: `Grunnlag("alder", 42)` instead of `Grunnlag("alder", Const(42))`
+ */
+fun Grunnlag(navn: String, verdi: Int, rvsId: String? = null, funksjon: String? = null): Grunnlag<Int> =
+    Grunnlag(navn, Const(verdi), rvsId, funksjon)
+
+/**
+ * Convenience constructor for creating Grunnlag with a Double value.
+ * Automatically wraps the value in a Const.
+ *
+ * Example: `Grunnlag("sats", 0.25)` instead of `Grunnlag("sats", Const(0.25))`
+ */
+fun Grunnlag(navn: String, verdi: Double, rvsId: String? = null, funksjon: String? = null): Grunnlag<Double> =
+    Grunnlag(navn, Const(verdi), rvsId, funksjon)
+
+/**
+ * Convenience constructor for creating Grunnlag with a Boolean value.
+ * Automatically wraps the value in a Const.
+ *
+ * Example: `Grunnlag("erGyldig", true)` instead of `Grunnlag("erGyldig", Const(true))`
+ */
+fun Grunnlag(navn: String, verdi: Boolean, rvsId: String? = null, funksjon: String? = null): Grunnlag<Boolean> =
+    Grunnlag(navn, Const(verdi), rvsId, funksjon)
+
+/**
+ * Convenience constructor for creating Grunnlag with a LocalDate value.
+ * Automatically wraps the value in a Const.
+ *
+ * Example: `Grunnlag("dato", LocalDate.now())` instead of `Grunnlag("dato", Const(LocalDate.now()))`
+ */
+fun Grunnlag(navn: String, verdi: java.time.LocalDate, rvsId: String? = null, funksjon: String? = null): Grunnlag<java.time.LocalDate> =
+    Grunnlag(navn, Const(verdi), rvsId, funksjon)
+
 /**
  * Betinget uttrykk som velger mellom to verdier basert på en Boolean-betingelse.
  *
