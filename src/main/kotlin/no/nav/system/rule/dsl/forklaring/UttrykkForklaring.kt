@@ -1031,3 +1031,304 @@ fun <T : Any> Uttrykk<T>.finnFunksjonFor(uttrykkNavn: String): String? {
         else -> null
     }
 }
+
+/**
+ * Data class for tracking structural duplicates
+ */
+private data class SubtreeInfo(
+    val hash: String,
+    val firstOccurrence: Uttrykk<*>,
+    val referenceId: Int,
+    var occurrenceCount: Int = 1
+)
+
+/**
+ * Visualiserer uttrykkstre som ASCII-tre med strukturell deduplikasjon.
+ *
+ * Strukturelt identiske subtrær vises kun én gang.  Duplikater erstattes med referanser.
+ * Dette gjør komplekse trær med repeterende mønstre mye mer lesbare.
+ *
+ * ## Eksempel output:
+ * ```
+ * Tabell(flyktningVurdering)
+ * ├─ Regel 1:
+ * │  ├─ Når: Ikke
+ * │  │  └─ angittFlyktning → [1]
+ * │  └─ Resultat: Const(IKKE_RELEVANT)
+ * ├─ Regel 2:
+ * │  ├─ Når: Og
+ * │  │  ├─ angittFlyktning → [1]
+ * │  │  └─ kravFom2021 → [2]
+ * │  └─ Resultat: Const(OPPFYLT)
+ *
+ * [Appendix - Strukturelt Dedupliserte Uttrykk]
+ * [1] angittFlyktning:
+ *     Memo (cached)
+ *     └─ Eller
+ *        ├─ flyktningFlagg → [3]
+ *        └─ ...
+ *
+ * [2] kravFom2021:
+ *     Const(true)
+ * ```
+ *
+ * @param nivå Startnivå for innrykk (default 0)
+ * @return String med kompakt trevisning inkludert appendix
+ */
+fun <T : Any> Uttrykk<T>.treVisningKompakt(nivå: Int = 0): String {
+    // Pass 1: Samle alle strukturelle hash-verdier og deres forekomster
+    val seenSubtrees = mutableMapOf<String, SubtreeInfo>()
+    var nextRefId = 1
+
+    fun samleHashes(expr: Uttrykk<*>) {
+        // Kun track Grunnlag-noder for deduplikasjon
+        if (expr is Grunnlag) {
+            val hash = expr.strukturellHash()
+
+            if (hash in seenSubtrees) {
+                seenSubtrees[hash]!!.occurrenceCount++
+            } else {
+                seenSubtrees[hash] = SubtreeInfo(hash, expr, nextRefId++)
+            }
+        }
+
+        // Traverser children
+        when (expr) {
+            is Add -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is Sub -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is Mul -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is Div -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is IntDiv -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is Min -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is Neg -> samleHashes(expr.uttrykk)
+            is Og -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is Eller -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is Ikke -> samleHashes(expr.uttrykk)
+            is Lik<*> -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is Ulik<*> -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is StørreEnn<*> -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is MindreEnn<*> -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is StørreEllerLik<*> -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is MindreEllerLik<*> -> { samleHashes(expr.venstre); samleHashes(expr.høyre) }
+            is ErBlant<*> -> { samleHashes(expr.verdi); samleHashes(expr.liste) }
+            is ErIkkeBlant<*> -> { samleHashes(expr.verdi); samleHashes(expr.liste) }
+            is Hvis<*> -> { samleHashes(expr.betingelse); samleHashes(expr.såUttrykk); samleHashes(expr.ellersUttrykk) }
+            is Grunnlag -> samleHashes(expr.uttrykk)
+            is Tabell<*> -> {
+                expr.regler.forEach { regel ->
+                    samleHashes(regel.betingelse)
+                    samleHashes(regel.resultat)
+                }
+                expr.ellersUttrykk?.let { samleHashes(it) }
+            }
+            is Memo<*> -> samleHashes(expr.uttrykk)
+            else -> { /* Leaf nodes */ }
+        }
+    }
+
+    samleHashes(this)
+
+    // Pass 2: Render treet med referanser for duplikater
+    val shownHashes = mutableSetOf<String>()
+
+    fun renderMedReferanser(expr: Uttrykk<*>, nivå: Int, erSiste: Boolean = false): String {
+        val indent = "│  ".repeat(nivå)
+        val prefix = if (nivå == 0) "" else if (erSiste) "└─ " else "├─ "
+
+        // Kun sjekk deduplikasjon for Grunnlag-noder
+        if (expr is Grunnlag) {
+            val hash = expr.strukturellHash()
+            val info = seenSubtrees[hash]!!
+
+            // Hvis dette er en duplicate OG har mer enn 1 forekomst, vis referanse
+            if (info.occurrenceCount > 1 && hash in shownHashes) {
+                return "$indent$prefix${expr.navn} → [${info.referenceId}]"
+            }
+
+            // Marker som vist
+            shownHashes.add(hash)
+        }
+
+        // Render normalt
+        return when (expr) {
+            is Const -> "$indent$prefix Const(${expr.verdi})"
+            is Add -> buildString {
+                appendLine("${indent}${prefix}Add")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is Sub -> buildString {
+                appendLine("${indent}${prefix}Sub")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is Mul -> buildString {
+                appendLine("${indent}${prefix}Mul")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is Div -> buildString {
+                appendLine("${indent}${prefix}Div")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is IntDiv -> buildString {
+                appendLine("${indent}${prefix}IntDiv")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is Min -> buildString {
+                appendLine("${indent}${prefix}Min")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is Neg -> buildString {
+                appendLine("${indent}${prefix}Neg")
+                append(renderMedReferanser(expr.uttrykk, nivå + 1, true))
+            }
+            is Og -> buildString {
+                appendLine("${indent}${prefix}Og")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is Eller -> buildString {
+                appendLine("${indent}${prefix}Eller")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is Ikke -> buildString {
+                appendLine("${indent}${prefix}Ikke")
+                append(renderMedReferanser(expr.uttrykk, nivå + 1, true))
+            }
+            is Lik<*> -> buildString {
+                appendLine("${indent}${prefix}Lik")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is Ulik<*> -> buildString {
+                appendLine("${indent}${prefix}Ulik")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is StørreEnn<*> -> buildString {
+                appendLine("${indent}${prefix}StørreEnn")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is MindreEnn<*> -> buildString {
+                appendLine("${indent}${prefix}MindreEnn")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is StørreEllerLik<*> -> buildString {
+                appendLine("${indent}${prefix}StørreEllerLik")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is MindreEllerLik<*> -> buildString {
+                appendLine("${indent}${prefix}MindreEllerLik")
+                appendLine(renderMedReferanser(expr.venstre, nivå + 1, false))
+                append(renderMedReferanser(expr.høyre, nivå + 1, true))
+            }
+            is ErBlant<*> -> buildString {
+                appendLine("${indent}${prefix}ErBlant")
+                appendLine(renderMedReferanser(expr.verdi, nivå + 1, false))
+                append(renderMedReferanser(expr.liste, nivå + 1, true))
+            }
+            is ErIkkeBlant<*> -> buildString {
+                appendLine("${indent}${prefix}ErIkkeBlant")
+                appendLine(renderMedReferanser(expr.verdi, nivå + 1, false))
+                append(renderMedReferanser(expr.liste, nivå + 1, true))
+            }
+            is Hvis<*> -> buildString {
+                appendLine("${indent}${prefix}Hvis")
+                appendLine("${indent}│  ├─ Betingelse:")
+                appendLine(renderMedReferanser(expr.betingelse, nivå + 2, false))
+                appendLine("${indent}│  ├─ Så:")
+                appendLine(renderMedReferanser(expr.såUttrykk, nivå + 2, false))
+                appendLine("${indent}│  └─ Ellers:")
+                append(renderMedReferanser(expr.ellersUttrykk, nivå + 2, true))
+            }
+            is Grunnlag -> buildString {
+                val hash = expr.strukturellHash()
+                val info = seenSubtrees[hash]!!
+                val refMarker = if (info.occurrenceCount > 1) " [${info.referenceId}]" else ""
+                appendLine("${indent}${prefix}Grunnlag(${expr.navn})$refMarker")
+                append(renderMedReferanser(expr.uttrykk, nivå + 1, true))
+            }
+            is Feil<*> -> "$indent$prefix Feil(${expr.melding})"
+            is Tabell<*> -> buildString {
+                appendLine("${indent}${prefix}Tabell${if (expr.navn != null) "(${expr.navn})" else ""}")
+                expr.regler.forEachIndexed { index, regel ->
+                    appendLine("${indent}│  ├─ Regel ${index + 1}:")
+                    appendLine("${indent}│  │  ├─ Når:")
+                    appendLine(renderMedReferanser(regel.betingelse, nivå + 3, false))
+                    appendLine("${indent}│  │  └─ Resultat:")
+                    append(renderMedReferanser(regel.resultat, nivå + 3, true))
+                    if (index < expr.regler.size - 1) appendLine()
+                }
+                expr.ellersUttrykk?.let {
+                    appendLine()
+                    appendLine("${indent}│  └─ Ellers:")
+                    append(renderMedReferanser(it, nivå + 2, true))
+                }
+            }
+            is Memo<*> -> buildString {
+                appendLine("${indent}${prefix}Memo (cached)")
+                append(renderMedReferanser(expr.uttrykk, nivå + 1, true))
+            }
+            else -> "$indent$prefix${expr::class.simpleName}(...)"
+        }
+    }
+
+    val hovedtre = renderMedReferanser(this, nivå)
+
+    // Pass 3: Generer appendix for duplikater
+    val duplikater = seenSubtrees.values
+        .filter { it.occurrenceCount > 1 }
+        .sortedBy { it.referenceId }
+
+    return if (duplikater.isEmpty()) {
+        hovedtre
+    } else {
+        buildString {
+            append(hovedtre)
+            appendLine()
+            appendLine()
+            appendLine("═══ Appendix - Strukturelt Dedupliserte Uttrykk ═══")
+
+            duplikater.forEach { info ->
+                appendLine()
+                val navn = if (info.firstOccurrence is Grunnlag)
+                    (info.firstOccurrence as Grunnlag<*>).navn
+                else
+                    info.firstOccurrence::class.simpleName
+                appendLine("[${info.referenceId}] $navn (${info.occurrenceCount} forekomster):")
+
+                // Reset shownHashes for appendix rendering
+                val appendixShownHashes = mutableSetOf<String>()
+                fun renderAppendix(expr: Uttrykk<*>, nivå: Int, erSiste: Boolean = false): String {
+                    val indent = "│  ".repeat(nivå)
+                    val prefix = if (nivå == 0) "" else if (erSiste) "└─ " else "├─ "
+
+                    // Bruk samme dedup-logikk i appendix, men kun for Grunnlag-noder
+                    if (expr is Grunnlag) {
+                        val hash = expr.strukturellHash()
+                        val subInfo = seenSubtrees[hash]!!
+
+                        if (subInfo.occurrenceCount > 1 && hash in appendixShownHashes && hash != info.hash) {
+                            return "$indent$prefix${expr.navn} → [${subInfo.referenceId}]"
+                        }
+
+                        appendixShownHashes.add(hash)
+                    }
+
+                    // Simplified rendering for appendix - just show structure
+                    return expr.treVisning(nivå)
+                }
+
+                append(renderAppendix(info.firstOccurrence, 1))
+            }
+        }
+    }
+}

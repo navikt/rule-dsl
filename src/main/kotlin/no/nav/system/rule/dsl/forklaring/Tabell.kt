@@ -115,6 +115,14 @@ data class Tabell<T : Any>(
         val ellersDybde = ellersUttrykk?.dybde() ?: 0
         return 1 + maxOf((regelDybder.maxOrNull() ?: 0), ellersDybde)
     }
+
+    override fun strukturellHash(): String {
+        val regelHashes = regler.joinToString(":") {
+            "R:${it.betingelse.strukturellHash()}:${it.resultat.strukturellHash()}"
+        }
+        val ellersHash = ellersUttrykk?.let { ":E:${it.strukturellHash()}" } ?: ""
+        return "Tabell:${navn ?: "anonym"}:$regelHashes$ellersHash"
+    }
 }
 
 /**

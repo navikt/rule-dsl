@@ -64,6 +64,20 @@ sealed interface Uttrykk<out T : Any> : Serializable {
      * Returnerer dybde av uttrykkstre.
      */
     fun dybde(): Int
+
+    /**
+     * Genererer en strukturell hash av uttrykkstre for deduplikasjon.
+     *
+     * Hash-verdien er basert på:
+     * - Type av uttrykk (Add, Mul, Grunnlag, etc.)
+     * - Verdier i Const-noder
+     * - Navn i Grunnlag-noder
+     * - Strukturell hash av child-noder
+     *
+     * To uttrykk med samme struktur og verdier vil ha samme hash,
+     * uavhengig av objektreferanse.
+     */
+    fun strukturellHash(): String
 }
 
 /**
@@ -82,6 +96,8 @@ data class Const<T : Any>(
     override fun grunnlagListe(): List<Grunnlag<out Any>> = emptyList()
 
     override fun dybde(): Int = 1
+
+    override fun strukturellHash(): String = "Const:${verdi::class.simpleName}:$verdi"
 
     override fun toString(): String = verdi.toString()
 }
@@ -126,6 +142,8 @@ internal data class Add<T : Number>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Add:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -167,6 +185,8 @@ internal data class Sub<T : Number>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Sub:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -208,6 +228,8 @@ internal data class Mul<T : Number>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Mul:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -244,6 +266,8 @@ internal data class Div(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Div:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -288,6 +312,8 @@ internal data class IntDiv(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "IntDiv:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 internal data class Min(
@@ -314,6 +340,8 @@ internal data class Min(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Min:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -343,6 +371,8 @@ internal data class Neg<T : Number>(
     override fun grunnlagListe(): List<Grunnlag<out Any>> = uttrykk.grunnlagListe()
 
     override fun dybde(): Int = 1 + uttrykk.dybde()
+
+    override fun strukturellHash(): String = "Neg:${uttrykk.strukturellHash()}"
 }
 
 /**
@@ -364,6 +394,8 @@ data class Grunnlag<T : Any>(
     override fun grunnlagListe(): List<Grunnlag<out Any>> = listOf(this)
 
     override fun dybde(): Int = 1  // Grunnlag uttrykk teller som atomisk
+
+    override fun strukturellHash(): String = "Grunnlag:$navn:${uttrykk.strukturellHash()}"
 
     /**
      * Returnerer det underliggende uttrykket.
@@ -396,6 +428,8 @@ internal data class Og(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Og:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -423,6 +457,8 @@ internal data class Eller(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Eller:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -440,6 +476,8 @@ internal data class Ikke(
     override fun grunnlagListe(): List<Grunnlag<out Any>> = uttrykk.grunnlagListe()
 
     override fun dybde(): Int = 1 + uttrykk.dybde()
+
+    override fun strukturellHash(): String = "Ikke:${uttrykk.strukturellHash()}"
 }
 
 /**
@@ -459,6 +497,8 @@ internal data class Lik<T : Comparable<T>>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Lik:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -478,6 +518,8 @@ internal data class Ulik<T : Comparable<T>>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "Ulik:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -497,6 +539,8 @@ internal data class StørreEnn<T : Comparable<T>>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "StørreEnn:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -516,6 +560,8 @@ internal data class MindreEnn<T : Comparable<T>>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "MindreEnn:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -535,6 +581,8 @@ internal data class StørreEllerLik<T : Comparable<T>>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "StørreEllerLik:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -554,6 +602,8 @@ internal data class MindreEllerLik<T : Comparable<T>>(
         venstre.grunnlagListe() + høyre.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(venstre.dybde(), høyre.dybde())
+
+    override fun strukturellHash(): String = "MindreEllerLik:${venstre.strukturellHash()}:${høyre.strukturellHash()}"
 }
 
 /**
@@ -573,6 +623,8 @@ internal data class ErBlant<T : Any>(
         verdi.grunnlagListe() + liste.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(verdi.dybde(), liste.dybde())
+
+    override fun strukturellHash(): String = "ErBlant:${verdi.strukturellHash()}:${liste.strukturellHash()}"
 }
 
 /**
@@ -592,6 +644,8 @@ internal data class ErIkkeBlant<T : Any>(
         verdi.grunnlagListe() + liste.grunnlagListe()
 
     override fun dybde(): Int = 1 + maxOf(verdi.dybde(), liste.dybde())
+
+    override fun strukturellHash(): String = "ErIkkeBlant:${verdi.strukturellHash()}:${liste.strukturellHash()}"
 }
 
 /**
@@ -670,6 +724,9 @@ internal data class Hvis<T : Any>(
 
     override fun dybde(): Int =
         1 + maxOf(betingelse.dybde(), såUttrykk.dybde(), ellersUttrykk.dybde())
+
+    override fun strukturellHash(): String =
+        "Hvis:${betingelse.strukturellHash()}:${såUttrykk.strukturellHash()}:${ellersUttrykk.strukturellHash()}"
 }
 
 /**
@@ -920,6 +977,7 @@ internal data class Feil<T : Any>(val melding: String) : Uttrykk<T> {
     override fun konkret(): String = melding
     override fun grunnlagListe() = emptyList<Grunnlag<out Any>>()
     override fun dybde(): Int = 1
+    override fun strukturellHash(): String = "Feil:$melding"
 }
 
 fun <T : Any> feilUttrykk(melding: String): Uttrykk<T> = Feil(melding)
@@ -969,6 +1027,8 @@ internal data class Memo<T : Any>(
     override fun grunnlagListe(): List<Grunnlag<out Any>> = cachedGrunnlagListe.value
 
     override fun dybde(): Int = cachedDybde.value
+
+    override fun strukturellHash(): String = "Memo:${uttrykk.strukturellHash()}"
 
     /**
      * Returnerer det underliggende uttrykket.

@@ -46,6 +46,11 @@ fun main() {
         println("Strukturtre:")
         println(resultat.treVisning())
 
+        println()
+        println("=".repeat(80))
+        println("Kompakt strukturtre (med deduplikasjon):")
+        println(resultat.treVisningKompakt())
+
         // Print call trace på slutten
         CallTracker.printTrace()
     }
