@@ -522,6 +522,7 @@ fun <T : Any> Uttrykk<T>.treVisning(nivå: Int = 0): String {
             appendLine("${indent}${prefix}Memo (cached)")
             append(uttrykk.treVisning(nivå + 1))
         }
+        else -> "$indent$prefix${this::class.simpleName}(...)"
     }
 }
 
@@ -802,6 +803,7 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             // Forenkle det underliggende uttrykket, men behold memoisering
             Memo(uttrykk.forenkel()) as Uttrykk<T>
         }
+        else -> this // Returner uendret for ukjente typer
     }
 }
 
@@ -936,6 +938,7 @@ fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<Any>):
             // Erstatt i det underliggende uttrykket, men behold memoisering
             Memo(uttrykk.erstatt(variabelNavn, med)) as Uttrykk<T>
         }
+        else -> this // Returner uendret for ukjente typer
     }
 }
 

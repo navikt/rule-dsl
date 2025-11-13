@@ -30,7 +30,7 @@ fun main() {
 
         println()
         println("Strukturtre:")
-        println(netto.treVisning())
+        println(netto.treVisningKompakt())
 
         CallTracker.printTrace()
     }
