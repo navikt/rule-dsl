@@ -157,6 +157,8 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
                         regel.betingelse.finnNavngitteUttrykk(nivå, maxDybde) +
                         regel.resultat.finnNavngitteUttrykk(nivå, maxDybde)
                     } + (unpacked.ellersUttrykk?.finnNavngitteUttrykk(nivå, maxDybde) ?: emptyList())
+                is RoundToInt -> unpacked.uttrykk.finnNavngitteUttrykk(nivå, maxDybde)
+                is SummerAlle -> unpacked.uttrykk.flatMap { it.finnNavngitteUttrykk(nivå, maxDybde) }
                 else -> emptyList()
             }
         }
@@ -226,6 +228,10 @@ private fun <T : Any> Uttrykk<T>.finnNavngitteUttrykk(
 
         is Memo<*> -> this.uttrykk.finnNavngitteUttrykk(nivå, maxDybde)
 
+        is RoundToInt -> this.uttrykk.finnNavngitteUttrykk(nivå, maxDybde)
+
+        is SummerAlle -> this.uttrykk.flatMap { it.finnNavngitteUttrykk(nivå, maxDybde) }
+
         else -> emptyList()
     }
 }
@@ -288,6 +294,8 @@ private fun <T : Any> Uttrykk<T>.finnKonstanteGrunnlag(): List<KonstantGrunnlagI
                 regel.betingelse.finnKonstanteGrunnlag() + regel.resultat.finnKonstanteGrunnlag()
             } + (ellersUttrykk?.finnKonstanteGrunnlag() ?: emptyList())
         is Memo<*> -> uttrykk.finnKonstanteGrunnlag()
+        is RoundToInt -> uttrykk.finnKonstanteGrunnlag()
+        is SummerAlle -> uttrykk.flatMap { it.finnKonstanteGrunnlag() }
         else -> emptyList()
     }
 }
@@ -522,6 +530,18 @@ fun <T : Any> Uttrykk<T>.treVisning(nivå: Int = 0): String {
             appendLine("${indent}${prefix}Memo (cached)")
             append(uttrykk.treVisning(nivå + 1))
         }
+        is RoundToInt -> buildString {
+            appendLine("${indent}${prefix}RoundToInt")
+            append(uttrykk.treVisning(nivå + 1))
+        }
+        is SummerAlle -> buildString {
+            appendLine("${indent}${prefix}SummerAlle")
+            uttrykk.forEachIndexed { index, expr ->
+                val erSiste = index == uttrykk.size - 1
+                append(expr.treVisning(nivå + 1))
+                if (!erSiste) appendLine()
+            }
+        }
         else -> "$indent$prefix${this::class.simpleName}(...)"
     }
 }
@@ -570,6 +590,8 @@ fun <T : Any, R> Uttrykk<T>.visit(transform: (Uttrykk<*>) -> List<R>): List<R> {
                 regel.betingelse.visit(transform) + regel.resultat.visit(transform)
             } + (ellersUttrykk?.visit(transform) ?: emptyList())
         is Memo<*> -> uttrykk.visit(transform)
+        is RoundToInt -> uttrykk.visit(transform)
+        is SummerAlle -> uttrykk.flatMap { it.visit(transform) }
         else -> emptyList()
     }
 
@@ -803,6 +825,26 @@ fun <T : Any> Uttrykk<T>.forenkel(): Uttrykk<T> {
             // Forenkle det underliggende uttrykket, men behold memoisering
             Memo(uttrykk.forenkel()) as Uttrykk<T>
         }
+
+        is RoundToInt -> {
+            val u = uttrykk.forenkel()
+            if (u is Const) {
+                Const(evaluer()) as Uttrykk<T>
+            } else {
+                RoundToInt(u) as Uttrykk<T>
+            }
+        }
+
+        is SummerAlle -> {
+            val forenkledeUttrykk = uttrykk.map { it.forenkel() }
+            if (forenkledeUttrykk.all { it is Const }) {
+                Const(evaluer()) as Uttrykk<T>
+            } else {
+                @Suppress("UNCHECKED_CAST")
+                SummerAlle(forenkledeUttrykk as List<Uttrykk<out Number>>) as Uttrykk<T>
+            }
+        }
+
         else -> this // Returner uendret for ukjente typer
     }
 }
@@ -938,6 +980,18 @@ fun <T : Any> Uttrykk<T>.erstatt(variabelNavn: String, med: () -> Uttrykk<Any>):
             // Erstatt i det underliggende uttrykket, men behold memoisering
             Memo(uttrykk.erstatt(variabelNavn, med)) as Uttrykk<T>
         }
+
+        is RoundToInt -> {
+            val u = uttrykk.erstatt(variabelNavn, med)
+            RoundToInt(u) as Uttrykk<T>
+        }
+
+        is SummerAlle -> {
+            val erstattedeUttrykk = uttrykk.map { it.erstatt(variabelNavn, med) }
+            @Suppress("UNCHECKED_CAST")
+            SummerAlle(erstattedeUttrykk as List<Uttrykk<out Number>>) as Uttrykk<T>
+        }
+
         else -> this // Returner uendret for ukjente typer
     }
 }
@@ -984,6 +1038,8 @@ fun <T : Any> Uttrykk<T>.finnRvsIdFor(uttrykkNavn: String): String? {
                 ?: ellersUttrykk?.finnRvsIdFor(uttrykkNavn)
         }
         is Memo<*> -> uttrykk.finnRvsIdFor(uttrykkNavn)
+        is RoundToInt -> uttrykk.finnRvsIdFor(uttrykkNavn)
+        is SummerAlle -> uttrykk.asSequence().mapNotNull { it.finnRvsIdFor(uttrykkNavn) }.firstOrNull()
         else -> null
     }
 }
@@ -1031,6 +1087,8 @@ fun <T : Any> Uttrykk<T>.finnFunksjonFor(uttrykkNavn: String): String? {
         }
         is Memo<*> -> uttrykk.finnFunksjonFor(uttrykkNavn)
         is Const -> this.funksjon
+        is RoundToInt -> uttrykk.finnFunksjonFor(uttrykkNavn)
+        is SummerAlle -> uttrykk.asSequence().mapNotNull { it.finnFunksjonFor(uttrykkNavn) }.firstOrNull()
         else -> null
     }
 }
@@ -1125,6 +1183,8 @@ fun <T : Any> Uttrykk<T>.treVisningKompakt(nivå: Int = 0): String {
                 expr.ellersUttrykk?.let { samleHashes(it) }
             }
             is Memo<*> -> samleHashes(expr.uttrykk)
+            is RoundToInt -> samleHashes(expr.uttrykk)
+            is SummerAlle -> expr.uttrykk.forEach { samleHashes(it) }
             else -> { /* Leaf nodes */ }
         }
     }
@@ -1279,6 +1339,18 @@ fun <T : Any> Uttrykk<T>.treVisningKompakt(nivå: Int = 0): String {
             is Memo<*> -> buildString {
                 appendLine("${indent}${prefix}Memo (cached)")
                 append(renderMedReferanser(expr.uttrykk, nivå + 1, true))
+            }
+            is RoundToInt -> buildString {
+                appendLine("${indent}${prefix}RoundToInt")
+                append(renderMedReferanser(expr.uttrykk, nivå + 1, true))
+            }
+            is SummerAlle -> buildString {
+                appendLine("${indent}${prefix}SummerAlle")
+                expr.uttrykk.forEachIndexed { index, subExpr ->
+                    val erSiste = index == expr.uttrykk.size - 1
+                    append(renderMedReferanser(subExpr, nivå + 1, erSiste))
+                    if (!erSiste) appendLine()
+                }
             }
             else -> "$indent$prefix${expr::class.simpleName}(...)"
         }

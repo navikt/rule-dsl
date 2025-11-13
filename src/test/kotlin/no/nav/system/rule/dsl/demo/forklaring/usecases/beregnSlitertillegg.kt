@@ -14,19 +14,19 @@ fun main() {
             Grunnlag("antallMånederEtterNedreAldersgrense", 0)
         ),
 
-        Pair(
-            (fullTrygdetid() intdiv 2).navngi("faktiskTrygdetid"),
-            (uttaksgrense() intdiv 2).navngi("antallMånederEtterNedreAldersgrense")
-        ),
-        Pair(
-            Grunnlag("faktiskTrygdetid", 0),
-            (uttaksgrense() intdiv 2).navngi("antallMånederEtterNedreAldersgrense")
-
-        ),
-        Pair(
-            (fullTrygdetid() intdiv 2).navngi("faktiskTrygdetid"),
-            uttaksgrense().navngi("antallMånederEtterNedreAldersgrense")
-        ),
+//        Pair(
+//            (fullTrygdetid() intdiv 2).navngi("faktiskTrygdetid"),
+//            (uttaksgrense() intdiv 2).navngi("antallMånederEtterNedreAldersgrense")
+//        ),
+//        Pair(
+//            Grunnlag("faktiskTrygdetid", 0),
+//            (uttaksgrense() intdiv 2).navngi("antallMånederEtterNedreAldersgrense")
+//
+//        ),
+//        Pair(
+//            (fullTrygdetid() intdiv 2).navngi("faktiskTrygdetid"),
+//            uttaksgrense().navngi("antallMånederEtterNedreAldersgrense")
+//        ),
     )
         .forEach { par ->
             println()

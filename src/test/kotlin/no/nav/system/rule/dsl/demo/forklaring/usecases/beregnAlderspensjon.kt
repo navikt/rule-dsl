@@ -11,7 +11,6 @@ import no.nav.system.rule.dsl.forklaring.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import kotlin.math.roundToInt
 
 fun main() {
 
@@ -52,12 +51,10 @@ fun beregnAlderspensjon(
     val faktiskTrygdetidAr = (flykningUtfall erLik UtfallType.OPPFYLT)
         .så { maksTrygdetidAr() }
         .ellers {
-            val akkumulertBotidIArNorge = akkumulerBotidIMånederNorge(
+            (akkumulerBotidIMånederNorge(
                 request.person.fødselsdato.toGrunnlag(),
                 request.person.boperioder
-            ) / 12
-
-            Const(akkumulertBotidIArNorge.evaluer().roundToInt())
+            ) / 12).avrund()
         }
         .navngi("faktiskTrygdetidAr")
 
@@ -81,28 +78,27 @@ fun akkumulerBotidIMånederNorge(
 
     val dato16år = Const(fødselsdato.evaluer().plusYears(16)).navngi("dato16år")
 
-    val norskeBoperioder =
-        Const(boperiodeListe.filter { it.land == LandEnum.NOR }).navngi("norskeBoperioder")
+    val norskeBoperioder = boperiodeListe.filter { it.land == LandEnum.NOR }
 
-    val monthsBetween: (LocalDate, LocalDate?) -> Const<Int> = { fom, tom ->
-        Const(ChronoUnit.MONTHS.between(fom, tom).toInt())
+    val monthsBetween: (LocalDate, LocalDate?) -> Grunnlag<Int> = { fom, tom ->
+        Const(ChronoUnit.MONTHS.between(fom, tom).toInt()).navngi("måneder(${fom} til ${tom})")
     }
 
-    val norskBotidRef16årMåneder = norskeBoperioder.evaluer().map {
-        tabell("periodeRef16år") {
+    val norskBotidRef16årMåneder = norskeBoperioder.mapIndexed { index, periode ->
+        tabell("periode${index + 1}") {
             regel {
-                når { it.fom erMindreEnn dato16år }
-                resultat { monthsBetween(dato16år.evaluer(), it.tom) }
+                når { periode.fom erMindreEnn dato16år }
+                resultat { monthsBetween(dato16år.evaluer(), periode.tom) }
             }
             regel {
-                når { it.fom erStørreEllerLik dato16år }
-                resultat { monthsBetween(it.fom, it.tom) }
+                når { periode.fom erStørreEllerLik dato16år }
+                resultat { monthsBetween(periode.fom, periode.tom) }
             }
-            ellers { Const(0) }
-        }.evaluer()
+            ellers { Grunnlag("måneder(ingen)", 0) }
+        }
     }
 
-    Const(norskBotidRef16årMåneder.sum()).navngi("akkumulertBotidMånederINorge")
+    summerAlle(*norskBotidRef16årMåneder.toTypedArray()).navngi("akkumulertBotidMånederINorge")
 }
 
 fun erFremtidigTrygdetidRedusert(

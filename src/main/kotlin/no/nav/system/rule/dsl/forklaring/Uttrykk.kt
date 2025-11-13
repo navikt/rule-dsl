@@ -570,3 +570,110 @@ internal data class Memo<T : Any>(
  */
 fun <T : Any> Uttrykk<T>.memoise(): Uttrykk<T> =
     if (this is Memo) this else Memo(this)
+
+// ========================================================================
+// Matematiske funksjoner
+// ========================================================================
+
+/**
+ * Avrundingsoperator - runder et flyttall til nærmeste heltall.
+ *
+ * Bruker standard matematisk avrunding (half-up rounding):
+ * - 2.4 → 2
+ * - 2.5 → 3
+ * - 2.6 → 3
+ * - -2.5 → -2
+ *
+ * ## Eksempel
+ * ```kotlin
+ * val måneder = Grunnlag("måneder", 36.0)
+ * val år = (måneder / 12).avrund().navngi("år")
+ * // år.evaluer() = 3
+ * // år.notasjon() = "avrund(måneder / 12)"
+ * ```
+ */
+internal data class RoundToInt(
+    val uttrykk: Uttrykk<out Number>
+) : Uttrykk<Int> {
+
+    override fun evaluer(): Int {
+        val verdi = uttrykk.evaluer().toDouble()
+        return kotlin.math.round(verdi).toInt()
+    }
+
+    override fun notasjon(): String = "avrund(${uttrykk.notasjon()})"
+
+    override fun konkret(): String = "avrund(${uttrykk.konkret()})"
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> = uttrykk.grunnlagListe()
+
+    override fun dybde(): Int = 1 + uttrykk.dybde()
+
+    override fun strukturellHash(): String = "RoundToInt:${uttrykk.strukturellHash()}"
+}
+
+/**
+ * Extension function for å runde et uttrykk til nærmeste heltall.
+ *
+ * ## Eksempel
+ * ```kotlin
+ * val resultat = (beregning / 12).avrund()
+ * ```
+ */
+fun Uttrykk<out Number>.avrund(): Uttrykk<Int> = RoundToInt(this)
+
+/**
+ * Summerings-operator - summerer en liste av uttrykk.
+ *
+ * Tar en liste av numeriske uttrykk og returnerer summen som Int.
+ * Dette er typisk for telling av heltall (måneder, dager, etc.).
+ *
+ * ## Eksempel
+ * ```kotlin
+ * val periode1 = Grunnlag("periode1Måneder", 12)
+ * val periode2 = Grunnlag("periode2Måneder", 18)
+ * val periode3 = Grunnlag("periode3Måneder", 6)
+ * val totalt = summerAlle(periode1, periode2, periode3).navngi("totaltMåneder")
+ * // totalt.evaluer() = 36
+ * // totalt.notasjon() = "periode1Måneder + periode2Måneder + periode3Måneder"
+ * ```
+ */
+internal data class SummerAlle(
+    val uttrykk: List<Uttrykk<out Number>>
+) : Uttrykk<Int> {
+
+    override fun evaluer(): Int =
+        uttrykk.sumOf { it.evaluer().toInt() }
+
+    override fun notasjon(): String {
+        if (uttrykk.isEmpty()) return "0"
+        return uttrykk.joinToString(" + ") { it.notasjon() }
+    }
+
+    override fun konkret(): String {
+        if (uttrykk.isEmpty()) return "0"
+        return uttrykk.joinToString(" + ") { it.konkret() }
+    }
+
+    override fun grunnlagListe(): List<Grunnlag<out Any>> =
+        uttrykk.flatMap { it.grunnlagListe() }
+
+    override fun dybde(): Int =
+        if (uttrykk.isEmpty()) 1
+        else 1 + (uttrykk.maxOfOrNull { it.dybde() } ?: 0)
+
+    override fun strukturellHash(): String =
+        "SummerAlle:${uttrykk.joinToString(":") { it.strukturellHash() }}"
+}
+
+/**
+ * Helper function for å summere flere uttrykk.
+ * Returnerer summen som Int, typisk for telling av heltall.
+ *
+ * ## Eksempel
+ * ```kotlin
+ * val sum = summerAlle(a, b, c, d)
+ * ```
+ */
+fun summerAlle(vararg uttrykk: Uttrykk<out Number>): Uttrykk<Int> =
+    SummerAlle(uttrykk.toList())
