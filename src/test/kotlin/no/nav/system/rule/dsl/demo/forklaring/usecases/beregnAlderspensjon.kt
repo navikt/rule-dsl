@@ -44,9 +44,9 @@ fun beregnAlderspensjon(
     val flykningUtfall = personErFlyktning(
         persongrunnlag = request.person,
         ytelseType = Grunnlag("Ytelsetype", Const(YtelseEnum.AP)),
-        erKapittel20 = Grunnlag("erKapittel20", Const(false)),
-        virk = Grunnlag("virkningstidspunkt", Const(request.virkningstidspunkt)),
-        kravlinjeFremsattDatoFom2021 = Grunnlag("kravlinjeFremsattDatoFom2021", Const(true))
+        erKapittel20 = Grunnlag("erKapittel20", false),
+        virk = Grunnlag("virkningstidspunkt", request.virkningstidspunkt),
+        kravlinjeFremsattDatoFom2021 = Grunnlag("kravlinjeFremsattDatoFom2021", true)
     )
 
     val faktiskTrygdetidAr = (flykningUtfall erLik UtfallType.OPPFYLT)
@@ -55,7 +55,7 @@ fun beregnAlderspensjon(
             val akkumulertBotidIArNorge = akkumulerBotidIMånederNorge(
                 request.person.fødselsdato.toGrunnlag(),
                 request.person.boperioder
-            ) / Const(12)
+            ) / 12
 
             Const(akkumulertBotidIArNorge.evaluer().roundToInt())
         }
@@ -63,11 +63,10 @@ fun beregnAlderspensjon(
 
     val trygdetidsFaktor = (faktiskTrygdetidAr / maksTrygdetidAr()).navngi("trygdetidFaktor")
 
-    val sivilstandSats = Const(request.person.erGift).navngi("erGift").let { erGift ->
-        erGift
+    val sivilstandSats = Grunnlag("erGift",request.person.erGift)
             .så { Const(0.9) }
             .ellers { Const(1.0) }
-    }.navngi("sivilstandSats")
+            .navngi("sivilstandSats")
 
     (grunnbelop() * sivilstandSats * trygdetidsFaktor).navngi("netto")
 }
@@ -113,8 +112,8 @@ fun erFremtidigTrygdetidRedusert(
 ) = tracked {
     akkumulerBotidIMånederNorge(fødselsdato, boperiodeListe).let { faktiskTrygdetidIMåneder ->
 
-        val dato1991 = Grunnlag("januar 1991", Const(localDate(1991, 1, 1)))
-        val fireFemtedelsKrav = Grunnlag("fireFemtedelskrav", Const(480))
+        val dato1991 = Grunnlag("januar 1991", localDate(1991, 1, 1))
+        val fireFemtedelsKrav = Grunnlag("fireFemtedelskrav", 480)
 
         ((virkningstidspunkt erStørreEllerLik dato1991) og (faktiskTrygdetidIMåneder erMindreEnn fireFemtedelsKrav))
             .så { Const(UtfallType.OPPFYLT) }

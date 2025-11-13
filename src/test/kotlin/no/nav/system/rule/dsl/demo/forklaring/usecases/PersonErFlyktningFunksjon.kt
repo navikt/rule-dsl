@@ -29,9 +29,9 @@ fun main() {
     personErFlyktning(
         persongrunnlag = person,
         ytelseType = Grunnlag("Ytelsestype", Const(AP)),
-        erKapittel20 = Grunnlag("Kapittel20", Const(false)),
-        virk = Grunnlag("Virkningstidspunkt", Const(localDate(2021, 1, 1))),
-        kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", Const(true))
+        erKapittel20 = Grunnlag("Kapittel20", false),
+        virk = Grunnlag("Virkningstidspunkt", localDate(2021, 1, 1)),
+        kravlinjeFremsattDatoFom2021 = Grunnlag("HarKravlinjeFremsattDatoFom2021", true)
     ).let { resultat ->
 
         println("Er flyktning demo ")
@@ -42,9 +42,9 @@ fun main() {
         println("Detaljert forklaring: ${resultat.navn}")
         println(resultat.forklarDetaljert(resultat.navn, maxDybde = 3))
 
-        println()
-        println("Strukturtre:")
-        println(resultat.treVisning())
+//        println()
+//        println("Strukturtre:")
+//        println(resultat.treVisning())
 
         println()
         println("=".repeat(80))
@@ -132,7 +132,7 @@ fun overgangsRegler(
 
     val dato67m = Grunnlag(
         "Fødselsdato67m",
-        Const(persongrunnlag.fødselsdato.value.withDayOfMonth(1) + 67.år + 1.måneder)
+        persongrunnlag.fødselsdato.value.withDayOfMonth(1) + 67.år + 1.måneder
     )
 
     val trygdetid = erKapittel20
@@ -147,7 +147,7 @@ fun overgangsRegler(
 
     val fødselsdatoÅr = Grunnlag(
         "fødselsdatoÅr",
-        Const(persongrunnlag.fødselsdato.value.year)
+        persongrunnlag.fødselsdato.value.year
     )
 
     val fødselsdatoErMindreEllerLik1959 = (fødselsdatoÅr erMindreEllerLik 1959)
