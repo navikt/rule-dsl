@@ -1,13 +1,14 @@
 package no.nav.pensjon.sliterordning.flyt
 
 import no.nav.pensjon.sliterordning.grunnlag.Person
-import no.nav.pensjon.sliterordning.regelsett.BeregnSlitertilleggRSForklartFaktumVersjon
+import no.nav.pensjon.sliterordning.regelsett.BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon
 import no.nav.pensjon.sliterordning.regelsett.VilkårsprøvSlitertilleggRS
 import no.nav.system.rule.dsl.AbstractRuleflow
 import no.nav.system.rule.dsl.demo.domain.Response
 import no.nav.system.rule.dsl.demo.domain.Response.SliterordningForklartFaktum.Avslag
 import no.nav.system.rule.dsl.demo.domain.Response.SliterordningForklartFaktum.Innvilget
 import no.nav.system.rule.dsl.demo.ruleservice.grunnbeløpByYearMonth
+import no.nav.system.rule.dsl.rettsregel.operators.erLik
 import java.time.YearMonth
 
 class BehandleSliterordningForklartFaktumFlyt(
@@ -17,18 +18,17 @@ class BehandleSliterordningForklartFaktumFlyt(
 ) : AbstractRuleflow<Response.SliterordningForklartFaktum>() {
     override var ruleflow: () -> Response.SliterordningForklartFaktum = {
 
-        val innvilget = VilkårsprøvSlitertilleggRS().run(this)
+        val vilkårStatus = VilkårsprøvSlitertilleggRS().run(this)
         var sliterordning: Response.SliterordningForklartFaktum? = null
 
-        forgrening("innvilget?") {
+        forgrening("Vilkår status?") {
 
             gren {
-                betingelse("Ja") { innvilget }
+                betingelse("Innvilget") { vilkårStatus }
                 flyt {
                     sliterordning = Innvilget(
-                        slitertillegg = BeregnSlitertilleggRSForklartFaktumVersjon(
+                        slitertillegg = BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
                             uttakstidspunkt,
-                            virkningstidspunkt,
                             person,
                             grunnbeløpByYearMonth(virkningstidspunkt)
                         ).run(this)
@@ -37,7 +37,7 @@ class BehandleSliterordningForklartFaktumFlyt(
             }
 
             gren {
-                betingelse("Nei") { !innvilget }
+                betingelse("Avslag") { vilkårStatus erLik false }
                 flyt {
                     sliterordning = Avslag("avslag")
                 }

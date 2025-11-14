@@ -2,7 +2,7 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
-import no.nav.system.rule.dsl.inspections.hvorfor
+import no.nav.system.rule.dsl.inspections.hvorforAsUttrykk
 import no.nav.system.rule.dsl.resource.Root
 import no.nav.system.rule.dsl.resource.root
 import no.nav.system.rule.dsl.rettsregel.Const
@@ -66,9 +66,9 @@ abstract class AbstractRuleComponent : Serializable {
             uttrykk = uttrykk,
             /**
              * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
-             * Resultatet formes av "hvorfor-renderer".
+             * Resultatet er en liste av Uttrykk som representerer eksekveringsstien.
              */
-            hvorfor = root().hvorfor(target = this@AbstractRuleComponent)
+            hvorfor = root().hvorforAsUttrykk(target = this@AbstractRuleComponent)
         )
     }
 
@@ -81,9 +81,9 @@ abstract class AbstractRuleComponent : Serializable {
             uttrykk = Const(verdi),
             /**
              * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
-             * Resultatet formes av "hvorfor-renderer".
+             * Resultatet er en liste av Uttrykk som representerer eksekveringsstien.
              */
-            hvorfor = root().hvorfor(target = this@AbstractRuleComponent)
+            hvorfor = root().hvorforAsUttrykk(target = this@AbstractRuleComponent)
         )
     }
 

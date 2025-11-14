@@ -120,7 +120,6 @@ class BeregnSlitertilleggRSForklartFaktumVersjon(
                     )
                 )
             }
-//            REFERANSE("SLITERTILEGG-BEREGNET")
         }
     }
 }

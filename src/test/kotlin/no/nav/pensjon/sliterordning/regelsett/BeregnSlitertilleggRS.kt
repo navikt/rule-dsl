@@ -1,8 +1,8 @@
 package no.nav.pensjon.sliterordning.regelsett
 
-import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.ETT_ÅR
 import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
-import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.TRE_ÅR
+import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_12
+import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.resultat.Slitertillegg
 import no.nav.system.rule.dsl.DslDomainPredicate
@@ -35,15 +35,15 @@ class BeregnSlitertilleggRS(
         regel("SLITERTILLEGG-BEREGNING-UAVKORTET") {
             HVIS { true }
             SÅ {
-                fulltSlitertillegg = 0.25 * grunnbeløp / ETT_ÅR
+                fulltSlitertillegg = 0.25 * grunnbeløp / MND_12
             }
         }
 
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
-            HVIS { antallMånederEtterNedreAldersgrense erMindreEnn TRE_ÅR }
+            HVIS { antallMånederEtterNedreAldersgrense erMindreEnn MND_36 }
             SÅ {
                 justertSlitertillegg =
-                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense.evaluer()) / TRE_ÅR.toDouble())
+                    fulltSlitertillegg * ((MND_36 - antallMånederEtterNedreAldersgrense.evaluer()) / MND_36.toDouble())
             }
             ELLERS {
                 justertSlitertillegg = 0.0
@@ -62,7 +62,7 @@ class BeregnSlitertilleggRS(
             HVIS { true }
             SÅ {
                 slitertilleggBeregnet =
-                    fulltSlitertillegg * ((TRE_ÅR - antallMånederEtterNedreAldersgrense.evaluer()) / TRE_ÅR.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
+                    fulltSlitertillegg * ((MND_36 - antallMånederEtterNedreAldersgrense.evaluer()) / MND_36.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
             }
         }
 

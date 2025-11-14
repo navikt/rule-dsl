@@ -4,8 +4,11 @@ import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.regelsett.BeregnSlitertilleggRS
 import no.nav.pensjon.sliterordning.regelsett.VilkårsprøvSlitertilleggRS
 import no.nav.system.rule.dsl.AbstractRuleflow
+import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.demo.domain.Response
-import no.nav.system.rule.dsl.demo.domain.Response.Sliterordning.*
+import no.nav.system.rule.dsl.demo.domain.Response.Sliterordning.Avslag
+import no.nav.system.rule.dsl.demo.domain.Response.Sliterordning.Innvilget
+import no.nav.system.rule.dsl.rettsregel.operators.erLik
 import java.time.YearMonth
 
 class BehandleSliterordningFlyt(
@@ -13,9 +16,11 @@ class BehandleSliterordningFlyt(
     val virkningstidspunkt: YearMonth,
     val person: Person
 ) : AbstractRuleflow<Response.Sliterordning>() {
+    @OptIn(DslDomainPredicate::class)
     override var ruleflow: () -> Response.Sliterordning = {
 
         val innvilget = VilkårsprøvSlitertilleggRS().run(this)
+
         var sliterordning: Response.Sliterordning? = null
 
         forgrening("innvilget?") {
@@ -29,7 +34,7 @@ class BehandleSliterordningFlyt(
             }
 
             gren {
-                betingelse("NEI") { !innvilget }
+                betingelse("NEI") { innvilget erLik false }
                 flyt {
                     sliterordning = Avslag("avslag")
                 }

@@ -2,9 +2,13 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
+import no.nav.system.rule.dsl.rettsregel.Const
+import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import org.jetbrains.annotations.TestOnly
 import java.util.*
+import kotlin.experimental.ExperimentalTypeInference
 
 /**
  * Common ruleflow behaviour used by all ruleflow implementations.
@@ -71,7 +75,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         fun run() {
             val flowsToRun = mutableListOf<Branch>()
             branchList.forEach {
-                it.fired = it.condition.invoke()
+                it.fired = it.condition.evaluer()
                 if (it.fired) {
                     flowsToRun.add(it)
                 }
@@ -102,7 +106,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         class Branch(
             defaultName: String,
         ) : AbstractRuleComponent() {
-            lateinit var condition: () -> Boolean
+            lateinit var condition: Uttrykk<Boolean>
             lateinit var flowFunction: () -> Unit
             private var betingelseName: String = defaultName
 
@@ -112,11 +116,21 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
              * DSL: Branch condition entry.
              * Defines a boolean condition that must be evaluated to true for the following [flyt] to be run.
              */
-            fun betingelse(init: () -> Boolean) {
-                condition = init
+            fun betingelse(booleanFunction: () -> Boolean) {
+                condition = Const(booleanFunction.invoke())
             }
-            fun betingelse(name: String, init: () -> Boolean) {
-                condition = init
+
+            fun betingelse(name: String, booleanFunction: () -> Boolean) {
+                condition = Faktum(name, booleanFunction())
+                betingelseName = name
+            }
+
+            @OptIn(ExperimentalTypeInference::class)
+            @OverloadResolutionByLambdaReturnType
+            @JvmName("UttrykkBooleanBetingelse")
+            @DslDomainPredicate
+            fun betingelse(name: String, uttrykkFunction: () -> Uttrykk<Boolean>) {
+                condition = uttrykkFunction()
                 betingelseName = name
             }
 
@@ -131,7 +145,10 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
             override fun name(): String = betingelseName
             override fun fired(): Boolean = fired
             override fun type(): RuleComponentType = GREN
-            override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
+
+            //            override fun toString(): String = "${type()}!!: ${fired().svarord()} ${condition.forklar()}"
+            override fun toString(): String = "${type()}: ${fired().svarord()} ${condition.notasjon()} = ${condition.konkret()} "
+
         }
     }
 }

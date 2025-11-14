@@ -23,7 +23,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
     innGrunnbeløp: Int
 ) : AbstractDemoRuleset<Faktum<Double>>() {
     /**
-     * Faktum
+     * Faktum data
      */
     private val faktiskTrygdetid = Faktum("faktiskTrygdetid", innPerson.trygdetid.faktiskTrygdetid)
     private val uttakstidspunkt = Faktum("uttakstidspunkt", innUttakstidspunkt)
@@ -31,7 +31,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon(
     private val fullTrygdetid = Faktum("fullTrygdetid", 40)
 
     /**
-     * Formler
+     * Faktum beregnet
      */
     private val antallMånederEtterNedrePensjonsDato = Faktum(
         "antallMånederEtterNedrePensjonsDato",

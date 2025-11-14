@@ -33,7 +33,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
             forklaringIterator.next()
@@ -44,14 +43,25 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
         assertEquals("2291.6666666666665 * 1.0 * 1.0", forklaringIterator.next())
 
+        // ASSERT HVA (rekursjon) fulltSlitertillegg
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
+
         // ASSERT HVORDAN fulltSlitertillegg
         assertEquals("HVORDAN", forklaringIterator.next())
         assertEquals("0.25 * G / 12", forklaringIterator.next())
         assertEquals("0.25 * 110000 / 12", forklaringIterator.next())
 
+        // ASSERT HVA (rekursjon) G
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("G = 110000", forklaringIterator.next())
+
+        // ASSERT HVA (rekursjon) justeringsFaktor
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("justeringsFaktor = 1.0", forklaringIterator.next())
+
         // ASSERT HVORFOR justeringsFaktor
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG",
             forklaringIterator.next()
@@ -63,6 +73,14 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("HVORDAN", forklaringIterator.next())
         assertEquals("(36 - antallMånederEtterNedrePensjonsDato) / 36", forklaringIterator.next())
         assertEquals("(36 - 0) / 36", forklaringIterator.next())
+
+        // ASSERT HVA antallMånederEtterNedrePensjonsDato
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("antallMånederEtterNedrePensjonsDato = 0", forklaringIterator.next())
+
+        // ASSERT HVA trygdetidFaktor
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("trygdetidFaktor = 1.0", forklaringIterator.next())
 
         // ASSERT HVORDAN trygdetidFaktor
         assertEquals("HVORDAN", forklaringIterator.next())
@@ -91,7 +109,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
             forklaringIterator.next()
@@ -102,14 +119,25 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
         assertEquals("2291.6666666666665 * 1.0 * 0.75", forklaringIterator.next())
 
+        // ASSERT HVA (rekursjon) fulltSlitertillegg
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
+
         // ASSERT HVORDAN fulltSlitertillegg
         assertEquals("HVORDAN", forklaringIterator.next())
         assertEquals("0.25 * G / 12", forklaringIterator.next())
         assertEquals("0.25 * 110000 / 12", forklaringIterator.next())
 
+        // ASSERT HVA G
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("G = 110000", forklaringIterator.next())
+
+        // ASSERT HVA G
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("justeringsFaktor = 1.0", forklaringIterator.next())
+
         // ASSERT HVORFOR justeringsFaktor
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG",
             forklaringIterator.next()
@@ -121,6 +149,14 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("HVORDAN", forklaringIterator.next())
         assertEquals("(36 - antallMånederEtterNedrePensjonsDato) / 36", forklaringIterator.next())
         assertEquals("(36 - 0) / 36", forklaringIterator.next())
+
+        // ASSERT HVA antallMånederEtterNedrePensjonsDato
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("antallMånederEtterNedrePensjonsDato = 0", forklaringIterator.next())
+
+        // ASSERT HVA trygdetidFaktor
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("trygdetidFaktor = 0.75", forklaringIterator.next())
 
         // ASSERT HVORDAN trygdetidFaktor
         assertEquals("HVORDAN", forklaringIterator.next())
@@ -149,7 +185,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
             forklaringIterator.next()
@@ -160,14 +195,25 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
         assertEquals("2291.6666666666665 * 0.4444444444444444 * 1.0", forklaringIterator.next())
 
+        // ASSERT HVA (rekursjon) fulltSlitertillegg
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
+
         // ASSERT HVORDAN fulltSlitertillegg
         assertEquals("HVORDAN", forklaringIterator.next())
         assertEquals("0.25 * G / 12", forklaringIterator.next())
         assertEquals("0.25 * 110000 / 12", forklaringIterator.next())
 
+        // ASSERT HVA (rekursjon) G
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("G = 110000", forklaringIterator.next())
+
+        // ASSERT HVORFOR justeringsFaktor
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("justeringsFaktor = 0.4444444444444444", forklaringIterator.next())
+
         // ASSERT HVORFOR justeringsFaktor
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG",
             forklaringIterator.next()
@@ -179,6 +225,14 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("HVORDAN", forklaringIterator.next())
         assertEquals("(36 - antallMånederEtterNedrePensjonsDato) / 36", forklaringIterator.next())
         assertEquals("(36 - 20) / 36", forklaringIterator.next())
+
+        // ASSERT HVA (rekursjon) antallMånederEtterNedrePensjonsDato
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("antallMånederEtterNedrePensjonsDato = 20", forklaringIterator.next())
+
+        // ASSERT HVA (rekursjon) trygdetidFaktor
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("trygdetidFaktor = 1.0", forklaringIterator.next())
 
         // ASSERT HVORDAN trygdetidFaktor
         assertEquals("HVORDAN", forklaringIterator.next())
@@ -207,7 +261,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
             forklaringIterator.next()
@@ -218,14 +271,25 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
         assertEquals("2291.6666666666665 * 0.4444444444444444 * 0.5", forklaringIterator.next())
 
+        // ASSERT HVA (rekursjon) fulltSlitertillegg
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
+
         // ASSERT HVORDAN fulltSlitertillegg
         assertEquals("HVORDAN", forklaringIterator.next())
         assertEquals("0.25 * G / 12", forklaringIterator.next())
         assertEquals("0.25 * 110000 / 12", forklaringIterator.next())
 
+        // ASSERT HVA (rekursjon) G
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("G = 110000", forklaringIterator.next())
+
+        // ASSERT HVA (rekursjon) justeringsFaktor
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("justeringsFaktor = 0.4444444444444444", forklaringIterator.next())
+
         // ASSERT HVORFOR justeringsFaktor
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG",
             forklaringIterator.next()
@@ -233,11 +297,18 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("JA 'antallMånederEtterNedrePensjonsDato' er mindre enn '36'", forklaringIterator.next())
         assertEquals("JA '20' er mindre enn '36'", forklaringIterator.next())
 
-
         // ASSERT HVORDAN justeringsFaktor
         assertEquals("HVORDAN", forklaringIterator.next())
         assertEquals("(36 - antallMånederEtterNedrePensjonsDato) / 36", forklaringIterator.next())
         assertEquals("(36 - 20) / 36", forklaringIterator.next())
+
+        // ASSERT HVA (rekursjon) antallMånederEtterNedrePensjonsDato
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("antallMånederEtterNedrePensjonsDato = 20", forklaringIterator.next())
+
+        // ASSERT HVA (rekursjon) trygdetidFaktor
+        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("trygdetidFaktor = 0.5", forklaringIterator.next())
 
         // ASSERT HVORDAN trygdetidFaktor
         assertEquals("HVORDAN", forklaringIterator.next())

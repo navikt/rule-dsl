@@ -33,7 +33,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon", forklaringIterator.next())
         assertEquals("regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-BEREGNING-UAVKORTET", forklaringIterator.next())
         assertEquals("JA 'nedrePensjonsDato' er lik 'uttakstidspunkt'", forklaringIterator.next())
         assertEquals("JA '2024-01' er lik '2024-01'", forklaringIterator.next())
@@ -62,7 +61,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon", forklaringIterator.next())
         assertEquals("regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-AVKORTING-TRYGDETID", forklaringIterator.next())
         assertEquals("JA 'nedrePensjonsDato' er lik 'uttakstidspunkt'", forklaringIterator.next())
         assertEquals("JA '2024-01' er lik '2024-01'", forklaringIterator.next())
@@ -96,7 +94,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon", forklaringIterator.next())
         assertEquals("regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", forklaringIterator.next())
         assertEquals("JA 'nedrePensjonsDato' er før 'uttakstidspunkt'", forklaringIterator.next())
         assertEquals("JA '2024-01' er før '2025-09'", forklaringIterator.next())
@@ -130,7 +127,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regelsett: BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
             forklaringIterator.next()

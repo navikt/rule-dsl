@@ -1,8 +1,8 @@
 package no.nav.pensjon.sliterordning.regelsett
 
-import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.ETT_ÅR
 import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
-import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.TRE_ÅR
+import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_12
+import no.nav.pensjon.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.resultat.SlitertilleggVårVersjon
 import no.nav.system.rule.dsl.demo.ruleservice.grunnbeløpByYearMonth
@@ -37,14 +37,14 @@ class BeregnSlitertilleggRSVårVersjon(
         regel("SLITERTILLEGG-BEREGNING-UAVKORTET") {
             HVIS { true }
             SÅ {
-                fulltSlitertillegg = 0.25 * grunnbeløp / ETT_ÅR
+                fulltSlitertillegg = 0.25 * grunnbeløp / MND_12
             }
         }
 
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
-            HVIS { antallMånederEtterNedreAldersgrense < TRE_ÅR }
+            HVIS { antallMånederEtterNedreAldersgrense < MND_36 }
             SÅ {
-                justeringsFaktor = (TRE_ÅR - antallMånederEtterNedreAldersgrense) / TRE_ÅR.toDouble()
+                justeringsFaktor = (MND_36 - antallMånederEtterNedreAldersgrense) / MND_36.toDouble()
             }
         }
 

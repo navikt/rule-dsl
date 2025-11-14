@@ -85,8 +85,8 @@ regeltjeneste: BeregnAlderspensjonService
         NEI 'Anvendt flyktning' (IKKE_RELEVANT) må være lik 'OPPFYLT'
       regel: JA BeregnFaktiskTrygdetidRS.ReturnRegel
     forgrening: BeregnAlderspensjonFlyt.Sivilstand?
-      gren: JA Gift
-      gren: NEI Ugift
+      gren: JA Gift = true 
+      gren: NEI Ugift = false 
     regelsett: BeregnGrunnpensjonRS
       regel: NEI BeregnGrunnpensjonRS.FullTrygdetid
       regel: JA BeregnGrunnpensjonRS.RedusertTrygdetid

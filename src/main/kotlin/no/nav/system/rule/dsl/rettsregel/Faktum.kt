@@ -4,7 +4,6 @@ import no.nav.system.rule.dsl.enums.ListOperator
 import no.nav.system.rule.dsl.enums.MathOperator
 import no.nav.system.rule.dsl.enums.PairOperator
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
-import org.jetbrains.kotlin.fir.declarations.FirDeclarationDataRegistry.data
 import java.io.Serializable
 
 /**
@@ -196,9 +195,7 @@ internal data class ListOperation(
 }
 
 private fun StringBuilder.indent(level: Int): StringBuilder = append(" ".repeat(level * 2))
-private fun StringBuilder.appendIf(level: Int, statement : () -> Boolean ): StringBuilder = if (statement()) append(" ".repeat(level * 2)) else this
-
-
+private fun StringBuilder.appendIf(level: Int, statement: () -> Boolean): StringBuilder = if (statement()) append(" ".repeat(level * 2)) else this
 
 
 /**
@@ -220,13 +217,16 @@ private fun StringBuilder.appendIf(level: Int, statement : () -> Boolean ): Stri
  * tillegg.uttrykk.faktumSet()  // → { alder, sats }  Contributing facts inside
  * ```
  *
+ * @param hvorfor Execution trace as list of expressions. Contains Const<String> for component names
+ *                and Uttrykk<Boolean> for predicates (ComparisonOperation, ListOperation, Faktum<Boolean>).
+ *
  * This is can be created by users.
  */
 data class Faktum<T : Any>(
     val navn: String,
     val uttrykk: Uttrykk<T>,
     val rvsId: String? = null,
-    private val hvorfor: String? = null
+    private val hvorfor: List<Uttrykk<*>>? = null
 ) : Uttrykk<T> {
 
     constructor(
@@ -259,15 +259,20 @@ data class Faktum<T : Any>(
     override fun toString(): String = "'$navn' (${evaluer()})"
 
     override fun forklar(level: Int): String = buildString {
-        if (level == 0) {
             append("HVA\n")
-            indent(1).append("$navn = ${evaluer()}\n")
-        }
+            indent(level+1).append("$navn = ${evaluer()}\n")
         append("\n")
 
-        hvorfor?.let {
+        hvorfor?.let { trace ->
             indent(level).append("HVORFOR\n")
-            indent(level + 1).append("$hvorfor\n")
+            trace.forEach { uttrykk ->
+                when (uttrykk) {
+                    // Component names - simple string output
+                    is Const<*> -> indent(level + 1).append("${uttrykk.evaluer()}\n")
+                    // Predicates - recursively explain (includes nested Faktum)
+                    else -> append(uttrykk.forklar(level + 1))
+                }
+            }
         }
 
         append("\n")

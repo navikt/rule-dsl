@@ -69,3 +69,7 @@ Eller en annen løsning.
 8. Burde også MathOperator ha en val evaluator -> Number, istedenfor å bruke when (operator) { add, sub, etc }? Kanskje gjør dette det lettere å lage custom operatorer som "min", "max", "avrund", "avrundMedToDesimal" etc ?
 
 9. Caching må innføres i Uttrykk evalueringsmekanisme. Hver Uttrykk bør cache sitt evaluerte resultat slik at rekursive kall ikke påvirker ytelse.
+
+10. Hadde vært kjekt å kunne negere Faktum<Boolean>. Dvs skrive "!innvilget" istedenfor "innvilget erLik false".
+
+11. Dobbeltsjekk at det ikke er fjere steder med unødvendig dobbel funksjonswrapping: "{ ogFunksjon() }".

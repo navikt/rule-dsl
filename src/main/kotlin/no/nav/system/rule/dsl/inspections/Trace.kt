@@ -1,8 +1,12 @@
 package no.nav.system.rule.dsl.inspections
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
+import no.nav.system.rule.dsl.AbstractRuleflow
+import no.nav.system.rule.dsl.Rule
 import no.nav.system.rule.dsl.TrackablePredicate
 import no.nav.system.rule.dsl.enums.RuleComponentType
+import no.nav.system.rule.dsl.rettsregel.Const
+import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import org.jetbrains.kotlin.builtins.StandardNames.FqNames.target
 
@@ -15,6 +19,68 @@ import org.jetbrains.kotlin.builtins.StandardNames.FqNames.target
  */
 fun AbstractRuleComponent.traceType(targetType: RuleComponentType): String {
     return trace(target = { arc -> arc.type() == targetType })
+}
+
+/**
+ * Builds a structured execution trace as a list of Uttrykk from root to target component.
+ *
+ * The list contains:
+ * - Const<String> for component names (regelsett, regel)
+ * - Uttrykk<Boolean> for predicates (extracted from TrackablePredicate)
+ *
+ * This structured format allows custom rendering and filtering.
+ */
+fun AbstractRuleComponent.hvorforAsUttrykk(
+    target: AbstractRuleComponent
+): List<Uttrykk<*>> {
+    val rootTraceNode = TraceNode(parent = null, arc = this).apply {
+        inspect(this, qualifier = { true }, target = { arc -> arc === target })
+    }
+
+    return buildHvorforUttrykk(rootTraceNode)
+}
+
+/**
+ * Bygger uttrykkliste for hvorfor forklaring.
+ * Kun noder som representerer en besluttninger (grener, regler og predikat) er med.
+ */
+private fun buildHvorforUttrykk(node: TraceNode): List<Uttrykk<*>> {
+    val result = mutableListOf<Uttrykk<*>>()
+
+    fun collect(currentNode: TraceNode) {
+        if (!currentNode.partOfResult) return
+
+        when (currentNode.arc.type()) {
+
+            RuleComponentType.REGEL -> {
+                result.add(Const("regel: ${currentNode.arc.fired().svarord()} ${currentNode.arc.name()}"))
+
+                // Extract predicates from Rule's children
+                currentNode.arc.children
+                    .filterIsInstance<TrackablePredicate>()
+                    .forEach { predicate ->
+                        result.add(predicate.uttrykk)  // Already Uttrykk<Boolean>
+                    }
+            }
+
+            RuleComponentType.GREN -> {
+                (currentNode.arc as AbstractRuleflow.Decision.Branch).let { branch ->
+                    result.add(branch.condition)
+                }
+            }
+
+            else -> {
+            }
+        }
+
+        // Recursively collect from children
+        currentNode.children
+            .filter { it.partOfResult }
+            .forEach { collect(it) }
+    }
+
+    collect(node)
+    return result
 }
 
 fun AbstractRuleComponent.hvorfor(
