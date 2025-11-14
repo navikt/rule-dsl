@@ -12,11 +12,11 @@ import no.nav.system.rule.dsl.TrackablePredicate
 
 fun AbstractRuleComponent.xmlDebug(): String {
     val debugString = StringBuilder()
-    inspect(this, debugString, 0)
+    xmlDebug(this, debugString, 0)
     return debugString.toString().trim()
 }
 
-private fun inspect(arc: AbstractRuleComponent, debugString: StringBuilder, level: Int) {
+private fun xmlDebug(arc: AbstractRuleComponent, debugString: StringBuilder, level: Int) {
     debugString.append(" ".repeat(level * 2))
     var tagName = arc.name()
     val relevantChildren = arc.children
@@ -50,7 +50,7 @@ private fun inspect(arc: AbstractRuleComponent, debugString: StringBuilder, leve
         is Predicate -> {}
         else -> openTag(debugString, tagName)
     }
-    relevantChildren.forEach { inspect(it, debugString, level + 1) }
+    relevantChildren.forEach { xmlDebug(it, debugString, level + 1) }
 
     if (!leafElement) {
         debugString.append(" ".repeat(level * 2))

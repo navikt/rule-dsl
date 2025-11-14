@@ -6,9 +6,10 @@ import no.nav.system.rule.dsl.demo.domain.Request
 import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.ruleservice.BeregnAlderspensjonService
-import no.nav.system.rule.dsl.demo.ruleset.PersonenErFlyktningRS
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
-import no.nav.system.rule.dsl.inspections.*
+import no.nav.system.rule.dsl.inspections.debug
+import no.nav.system.rule.dsl.inspections.find
+import no.nav.system.rule.dsl.inspections.xmlDebug
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
@@ -33,7 +34,6 @@ class InspectionTest {
 
 
     @Test
-    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
     fun `find test`() {
         val result = service.find { arc -> arc.type() == REGELSETT }
         assertEquals(3, result.size)
@@ -42,7 +42,7 @@ class InspectionTest {
 
     @Test
     @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
-    fun `debug inspect test`() {
+    fun `debug test`() {
         assertEquals(
             """
 regeltjeneste: BeregnAlderspensjonService
@@ -98,8 +98,7 @@ regeltjeneste: BeregnAlderspensjonService
     }
 
     @Test
-    @Disabled("Disablet i påvente av ny sporingsmekanisme") // TODO: Oppdater test med resultatet fra ny sporingsmekanisme
-    fun `XML debug inspect test`() {
+    fun `XML debug test`() {
         assertEquals(
             """
 <BeregnAlderspensjonService>
@@ -170,40 +169,4 @@ regeltjeneste: BeregnAlderspensjonService
         )
     }
 
-    @Test
-    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
-    fun `trace inspect, all`() {
-        assertEquals(service.debug(), service.trace(target = { true }))
-    }
-
-    @Test
-    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
-    fun `trace inspect, some`() {
-        assertEquals(
-            """
-            regeltjeneste: BeregnAlderspensjonService
-              regelflyt: BeregnAlderspensjonFlyt
-                regelsett: BeregnFaktiskTrygdetidRS
-                  regel: JA BeregnFaktiskTrygdetidRS.FastsettTrygdetid_ikkeFlyktning
-                  regel: NEI BeregnFaktiskTrygdetidRS.FastsettTrygdetid_Flyktning
-        """.trimIndent(), service.trace(
-                qualifier = { arc -> arc.name() != PersonenErFlyktningRS::class.java.simpleName },
-                target = { r -> r.name().endsWith("Flyktning") }
-            )
-        )
-    }
-
-    @Test
-    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
-    fun `trace inspect, by type`() {
-        assertEquals(
-            """
-            regeltjeneste: BeregnAlderspensjonService
-              regelflyt: BeregnAlderspensjonFlyt
-                regelsett: PersonenErFlyktningRS
-                regelsett: BeregnFaktiskTrygdetidRS
-                regelsett: BeregnGrunnpensjonRS
-            """.trimIndent(), service.traceType(targetType = REGELSETT)
-        )
-    }
 }

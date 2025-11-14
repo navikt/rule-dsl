@@ -2,7 +2,7 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
-import no.nav.system.rule.dsl.inspections.ExecutionTrace
+import no.nav.system.rule.dsl.resource.ExecutionTrace
 import no.nav.system.rule.dsl.resource.Root
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
@@ -84,7 +84,7 @@ abstract class AbstractRuleComponent : Serializable {
         return Faktum(
             navn = navn,
             uttrykk = uttrykk,
-            hvorfor = getResourceOrNull(ExecutionTrace::class)?.currentPathAsUttrykk()
+            hvorfor = getResourceOrNull(ExecutionTrace::class)?.pathForHvorfor()
         )
     }
 
@@ -97,7 +97,7 @@ abstract class AbstractRuleComponent : Serializable {
         return Faktum(
             navn = navn,
             uttrykk = Const(verdi),
-            hvorfor = getResourceOrNull(ExecutionTrace::class)?.currentPathAsUttrykk()
+            hvorfor = getResourceOrNull(ExecutionTrace::class)?.pathForHvorfor()
         )
     }
 

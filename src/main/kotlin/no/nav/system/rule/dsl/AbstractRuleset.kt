@@ -4,9 +4,9 @@ import no.nav.system.rule.dsl.enums.ListOperator
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
-import no.nav.system.rule.dsl.inspections.ExecutionTrace
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.resource.ExecutionTrace
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListOperation

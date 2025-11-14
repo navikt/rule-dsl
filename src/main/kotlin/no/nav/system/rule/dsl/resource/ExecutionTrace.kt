@@ -1,4 +1,4 @@
-package no.nav.system.rule.dsl.inspections
+package no.nav.system.rule.dsl.resource
 
 import no.nav.system.rule.dsl.AbstractResource
 import no.nav.system.rule.dsl.AbstractRuleComponent
@@ -35,12 +35,23 @@ class ExecutionTrace : AbstractResource() {
     }
 
     /**
-     * Get the current execution path as a list of Uttrykk.
+     * Get the complete execution path with all components.
      *
-     * Converts each component on the stack via toTraceUttrykk(),
-     * filtering for components that represent decisions (rules, branches).
+     * Returns unfiltered trace - simply converts each component on the stack
+     * via toTraceUttrykk(). Useful for debugging and full execution traces.
      */
-    fun currentPathAsUttrykk(): List<Uttrykk<*>> {
+    fun fullPath(): List<Uttrykk<*>> {
+        return stack.map { it.toTraceUttrykk() }
+    }
+
+    /**
+     * Get the execution path filtered for hvorfor explanations.
+     *
+     * Filters for components that represent decisions (rules, branches) and
+     * includes predicates from rules. This provides a focused view of the
+     * decision path without container components like rulesets and ruleflows.
+     */
+    fun pathForHvorfor(): List<Uttrykk<*>> {
         return stack.flatMap { arc ->
             when (arc.type()) {
                 RuleComponentType.REGEL -> {
@@ -61,11 +72,6 @@ class ExecutionTrace : AbstractResource() {
                     // Add branch condition
                     listOf(arc.toTraceUttrykk())
                 }
-
-                // Other types not included in trace
-                // Uncomment these to include them:
-                // RuleComponentType.REGELSETT -> listOf(arc.toTraceUttrykk())
-                // RuleComponentType.FORGRENING -> listOf(arc.toTraceUttrykk())
 
                 else -> emptyList()
             }

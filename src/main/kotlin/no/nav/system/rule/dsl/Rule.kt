@@ -2,8 +2,8 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGEL
-import no.nav.system.rule.dsl.inspections.ExecutionTrace
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.resource.ExecutionTrace
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord

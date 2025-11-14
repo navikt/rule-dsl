@@ -10,12 +10,12 @@ fun AbstractRuleComponent.find(
     target: (AbstractRuleComponent) -> Boolean
 ): MutableList<AbstractRuleComponent> {
     val result: MutableList<AbstractRuleComponent> = mutableListOf()
-    inspect(this, result, qualifier, target)
+    find(this, result, qualifier, target)
     return result
 }
 
 
-private fun inspect(
+private fun find(
     arc: AbstractRuleComponent,
     result: MutableList<AbstractRuleComponent>,
     qualifier: (AbstractRuleComponent) -> Boolean,
@@ -24,5 +24,5 @@ private fun inspect(
     if (target.invoke(arc)) result.add(arc)
     arc.children
         .filter(qualifier)
-        .forEach { inspect(it, result, qualifier, target) }
+        .forEach { find(it, result, qualifier, target) }
 }
