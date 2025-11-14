@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
+import no.nav.system.rule.dsl.inspections.ExecutionTrace
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
@@ -26,8 +27,19 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
      */
     @TestOnly
     open fun test(): T {
+        val trace = try {
+            getResource(ExecutionTrace::class)
+        } catch (e: Exception) {
+            null
+        }
+
         branchNameStack.push(this.javaClass.simpleName)
-        return ruleflow.invoke()
+        trace?.push(this)
+        try {
+            return ruleflow.invoke()
+        } finally {
+            trace?.pop()
+        }
     }
 
     /**
@@ -37,8 +49,19 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         this.resourceMap = parent.resourceMap
         parent.children.add(this)
 
+        val trace = try {
+            getResource(ExecutionTrace::class)
+        } catch (e: Exception) {
+            null
+        }
+
         branchNameStack.push(this.javaClass.simpleName)
-        return ruleflow.invoke()
+        trace?.push(this)
+        try {
+            return ruleflow.invoke()
+        } finally {
+            trace?.pop()
+        }
     }
 
     protected abstract var ruleflow: () -> T
@@ -62,6 +85,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
     override fun fired(): Boolean = true
     override fun type(): RuleComponentType = REGELFLYT
     override fun toString(): String = "${type()}: ${name()}"
+    override fun toTraceUttrykk(): Uttrykk<*> = Const("${type()}: ${name()}")
 
     /**
      * Represents a split in ruleflow logic. Each [Decision] can have multiple outcomes ([Branch]).
@@ -73,15 +97,32 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         private var branchList = mutableListOf<Branch>()
 
         fun run() {
-            val flowsToRun = mutableListOf<Branch>()
-            branchList.forEach {
-                it.fired = it.condition.evaluer()
-                if (it.fired) {
-                    flowsToRun.add(it)
-                }
+            val trace = try {
+                getResource(ExecutionTrace::class)
+            } catch (e: Exception) {
+                null
             }
-            flowsToRun.forEach {
-                it.flowFunction.invoke()
+
+            trace?.push(this)
+            try {
+                val flowsToRun = mutableListOf<Branch>()
+                branchList.forEach {
+                    it.fired = it.condition.evaluer()
+                    if (it.fired) {
+                        flowsToRun.add(it)
+                    }
+                }
+                flowsToRun.forEach { branch ->
+                    // Push branch before executing its flow
+                    trace?.push(branch)
+                    try {
+                        branch.flowFunction.invoke()
+                    } finally {
+                        trace?.pop()
+                    }
+                }
+            } finally {
+                trace?.pop()
             }
         }
 
@@ -102,6 +143,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         override fun fired(): Boolean = true
         override fun type(): RuleComponentType = FORGRENING
         override fun toString(): String = "${type()}: ${name()}"
+        override fun toTraceUttrykk(): Uttrykk<*> = Const("forgrening: ${name()}")
 
         class Branch(
             defaultName: String,
@@ -146,8 +188,8 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
             override fun fired(): Boolean = fired
             override fun type(): RuleComponentType = GREN
 
-            //            override fun toString(): String = "${type()}!!: ${fired().svarord()} ${condition.forklar()}"
             override fun toString(): String = "${type()}: ${fired().svarord()} ${condition.notasjon()} = ${condition.konkret()} "
+            override fun toTraceUttrykk(): Uttrykk<*> = condition
 
         }
     }

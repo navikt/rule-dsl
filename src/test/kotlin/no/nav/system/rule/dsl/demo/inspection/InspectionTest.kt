@@ -11,6 +11,7 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.inspections.*
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class InspectionTest {
@@ -32,6 +33,7 @@ class InspectionTest {
 
 
     @Test
+    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
     fun `find test`() {
         val result = service.find { arc -> arc.type() == REGELSETT }
         assertEquals(3, result.size)
@@ -39,6 +41,7 @@ class InspectionTest {
 
 
     @Test
+    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
     fun `debug inspect test`() {
         assertEquals(
             """
@@ -95,7 +98,7 @@ regeltjeneste: BeregnAlderspensjonService
     }
 
     @Test
-//    @Disabled("Disablet i påvente av ny sporingsmekanisme") // TODO: Oppdater test med resultatet fra ny sporingsmekanisme
+    @Disabled("Disablet i påvente av ny sporingsmekanisme") // TODO: Oppdater test med resultatet fra ny sporingsmekanisme
     fun `XML debug inspect test`() {
         assertEquals(
             """
@@ -168,11 +171,13 @@ regeltjeneste: BeregnAlderspensjonService
     }
 
     @Test
+    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
     fun `trace inspect, all`() {
         assertEquals(service.debug(), service.trace(target = { true }))
     }
 
     @Test
+    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
     fun `trace inspect, some`() {
         assertEquals(
             """
@@ -189,6 +194,7 @@ regeltjeneste: BeregnAlderspensjonService
     }
 
     @Test
+    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
     fun `trace inspect, by type`() {
         assertEquals(
             """

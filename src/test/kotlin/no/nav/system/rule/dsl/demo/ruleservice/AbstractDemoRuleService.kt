@@ -2,17 +2,17 @@ package no.nav.system.rule.dsl.demo.ruleservice
 
 import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.AbstractRuleService
+import no.nav.system.rule.dsl.inspections.ExecutionTrace
 import java.time.LocalDate
 import java.time.YearMonth
 
 abstract class AbstractDemoRuleService<Response> : AbstractRuleService<Response>() {
 
     override fun run(): Response {
-        putResource(
-            GrunnbeløpSatsResource::class,
-            GrunnbeløpSatsResource()
-        )
-        return ruleService.invoke()
+        // Enable tracing by adding ExecutionTrace to resources
+        putResource(ExecutionTrace::class, ExecutionTrace())
+        putResource(GrunnbeløpSatsResource::class, GrunnbeløpSatsResource())
+        return super.run()
     }
 }
 

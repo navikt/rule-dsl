@@ -4,8 +4,10 @@ import no.nav.system.rule.dsl.enums.ListOperator
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
+import no.nav.system.rule.dsl.inspections.ExecutionTrace
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListOperation
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
@@ -102,6 +104,8 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
 
     @TestOnly
     open fun test(): T {
+        // Enable tracing for standalone tests
+        putResource(ExecutionTrace::class, ExecutionTrace())
         return internalRun()
     }
 
@@ -129,25 +133,36 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      */
     @Suppress("MemberVisibilityCanBePrivate")
     protected fun internalRun(): T {
-        create()
-
-        ruleFunctionMap.values.forEach { ruleSpawn ->
-            ruleSpawn.invoke().forEach {
-                it.resourceMap = this.resourceMap
-                it.evaluate()
-                if (it.returnRule) {
-                    returnValue = it.returnValue
-                    return it.returnValue
-                }
-            }
+        val trace = try {
+            getResource(ExecutionTrace::class)
+        } catch (e: Exception) {
+            null
         }
 
-        /**
-         * Ruleset must be of type Unit if no rules have returned a value.
-         * If the ruleset is not of type Unit, a ClassCastException is thrown _when the value is used_.
-         */
-        @Suppress("UNCHECKED_CAST")
-        return Unit as T
+        trace?.push(this)
+        try {
+            create()
+
+            ruleFunctionMap.values.forEach { ruleSpawn ->
+                ruleSpawn.invoke().forEach {
+                    it.resourceMap = this.resourceMap
+                    it.evaluate()
+                    if (it.returnRule) {
+                        returnValue = it.returnValue
+                        return it.returnValue
+                    }
+                }
+            }
+
+            /**
+             * Ruleset must be of type Unit if no rules have returned a value.
+             * If the ruleset is not of type Unit, a ClassCastException is thrown _when the value is used_.
+             */
+            @Suppress("UNCHECKED_CAST")
+            return Unit as T
+        } finally {
+            trace?.pop()
+        }
     }
 
     /**
@@ -279,5 +294,6 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     override fun fired(): Boolean = true
     override fun type(): RuleComponentType = REGELSETT
     override fun toString(): String = "${type()}: $rulesetName"
+    override fun toTraceUttrykk(): Uttrykk<*> = Const("regelsett: $rulesetName")
 
 }

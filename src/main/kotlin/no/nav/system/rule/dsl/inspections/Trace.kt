@@ -24,63 +24,82 @@ fun AbstractRuleComponent.traceType(targetType: RuleComponentType): String {
 /**
  * Builds a structured execution trace as a list of Uttrykk from root to target component.
  *
+ * Walks the component tree directly from root to target, collecting trace representations.
+ * Each component contributes via its toTraceUttrykk() method.
+ *
  * The list contains:
  * - Const<String> for component names (regelsett, regel)
- * - Uttrykk<Boolean> for predicates (extracted from TrackablePredicate)
+ * - Uttrykk<Boolean> for predicates and branch conditions
  *
  * This structured format allows custom rendering and filtering.
  */
 fun AbstractRuleComponent.hvorforAsUttrykk(
     target: AbstractRuleComponent
 ): List<Uttrykk<*>> {
-    val rootTraceNode = TraceNode(parent = null, arc = this).apply {
-        inspect(this, qualifier = { true }, target = { arc -> arc === target })
-    }
+    val visited = mutableSetOf<AbstractRuleComponent>()
 
-    return buildHvorforUttrykk(rootTraceNode)
-}
-
-/**
- * Bygger uttrykkliste for hvorfor forklaring.
- * Kun noder som representerer en besluttninger (grener, regler og predikat) er med.
- */
-private fun buildHvorforUttrykk(node: TraceNode): List<Uttrykk<*>> {
-    val result = mutableListOf<Uttrykk<*>>()
-
-    fun collect(currentNode: TraceNode) {
-        if (!currentNode.partOfResult) return
-
-        when (currentNode.arc.type()) {
-
+    fun addNodeToResult(node: AbstractRuleComponent): List<Uttrykk<*>> {
+        return when (node.type()) {
             RuleComponentType.REGEL -> {
-                result.add(Const("regel: ${currentNode.arc.fired().svarord()} ${currentNode.arc.name()}"))
+                buildList {
+                    // Add rule name first
+                    add(node.toTraceUttrykk())
 
-                // Extract predicates from Rule's children
-                currentNode.arc.children
-                    .filterIsInstance<TrackablePredicate>()
-                    .forEach { predicate ->
-                        result.add(predicate.uttrykk)  // Already Uttrykk<Boolean>
-                    }
-            }
-
-            RuleComponentType.GREN -> {
-                (currentNode.arc as AbstractRuleflow.Decision.Branch).let { branch ->
-                    result.add(branch.condition)
+                    // Then add predicates from rule's children
+                    node.children
+                        .filterIsInstance<TrackablePredicate>()
+                        .forEach { predicate ->
+                            add(predicate.toTraceUttrykk())
+                        }
                 }
             }
 
+            RuleComponentType.GREN -> {
+                // Add branch condition (the Uttrykk<Boolean>)
+                listOf(node.toTraceUttrykk())
+            }
+
+            // Commented out types - not included in trace currently
+            // RuleComponentType.REGELSETT -> listOf(node.toTraceUttrykk())
+            // RuleComponentType.FORGRENING -> listOf(node.toTraceUttrykk())
+
             else -> {
+                // Other types (REGELTJENESTE, REGELFLYT, etc.) - not included in trace
+                emptyList()
+            }
+        }
+    }
+
+    /**
+     * Recursively searches for target and returns trace path if found.
+     * Returns null if target not found in this subtree.
+     * Detects cycles to prevent stack overflow.
+     */
+    fun collect(node: AbstractRuleComponent): List<Uttrykk<*>>? {
+        // Cycle detection - skip if already visited
+        if (node in visited) return null
+        visited.add(node)
+
+        // Is this the target?
+        if (node === target) {
+            // Return this node's representation
+            return addNodeToResult(node)
+        }
+
+        // Search children for target
+        for (child in node.children) {
+            val childPath = collect(child)
+            if (childPath != null) {
+                // Target found in this child's subtree - prepend this node
+                return addNodeToResult(node) + childPath
             }
         }
 
-        // Recursively collect from children
-        currentNode.children
-            .filter { it.partOfResult }
-            .forEach { collect(it) }
+        // Target not found in this subtree
+        return null
     }
 
-    collect(node)
-    return result
+    return collect(this) ?: emptyList()
 }
 
 fun AbstractRuleComponent.hvorfor(

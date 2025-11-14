@@ -2,12 +2,13 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
-import no.nav.system.rule.dsl.inspections.hvorforAsUttrykk
+import no.nav.system.rule.dsl.inspections.ExecutionTrace
 import no.nav.system.rule.dsl.resource.Root
 import no.nav.system.rule.dsl.resource.root
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
+import sun.jvm.hotspot.HelloWorld.e
 import java.io.Serializable
 import kotlin.reflect.KClass
 
@@ -37,6 +38,12 @@ abstract class AbstractRuleComponent : Serializable {
     abstract fun type(): RuleComponentType
     abstract fun fired(): Boolean
 
+    /**
+     * Converts this component to an Uttrykk for trace representation.
+     * Each component decides how to represent itself in execution traces.
+     */
+    abstract fun toTraceUttrykk(): Uttrykk<*>
+
     fun <T : AbstractResource> putResource(key: KClass<T>, service: T) {
         resourceMap[key] = service
     }
@@ -57,33 +64,42 @@ abstract class AbstractRuleComponent : Serializable {
         return resource as T
     }
 
+    fun <T : AbstractResource> getResourceOrNull(key: KClass<T>): T? {
+        val resource = resourceMap[key]
+
+        if (resource != null && !key.isInstance(resource)) {
+            throw ResourceAccessException(
+                "Type mismatch for resource key $key. Expected: ${key.qualifiedName}, Found: ${resource.javaClass.name}"
+            )
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        return resource as T?
+    }
+
     /**
      * Produserer Faktum med hvorfor-sporing og angitt Uttrykk.
+     *
+     * Captures the current execution path from the ExecutionTrace resource (if enabled).
      */
     fun <T : Any> sporing(navn: String, uttrykk: Uttrykk<T>): Faktum<T> {
         return Faktum(
             navn = navn,
             uttrykk = uttrykk,
-            /**
-             * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
-             * Resultatet er en liste av Uttrykk som representerer eksekveringsstien.
-             */
-            hvorfor = root().hvorforAsUttrykk(target = this@AbstractRuleComponent)
+            hvorfor = getResourceOrNull(ExecutionTrace::class)?.currentPathAsUttrykk()
         )
     }
 
     /**
      * Produserer ForklartFaktum med sporing og angitt verdi.
+     *
+     * Captures the current execution path from the ExecutionTrace resource (if enabled).
      */
     fun <T : Any> sporing(navn: String, verdi: T): Faktum<T> {
         return Faktum(
             navn = navn,
             uttrykk = Const(verdi),
-            /**
-             * Med utgangspunkt i root(), spor opp hvorfor denne (this@AbstractRuleComponent) har eksekvert.
-             * Resultatet er en liste av Uttrykk som representerer eksekveringsstien.
-             */
-            hvorfor = root().hvorforAsUttrykk(target = this@AbstractRuleComponent)
+            hvorfor = getResourceOrNull(ExecutionTrace::class)?.currentPathAsUttrykk()
         )
     }
 

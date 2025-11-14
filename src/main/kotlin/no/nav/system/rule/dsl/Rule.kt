@@ -2,7 +2,9 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGEL
+import no.nav.system.rule.dsl.inspections.ExecutionTrace
 import no.nav.system.rule.dsl.pattern.Pattern
+import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import kotlin.experimental.ExperimentalTypeInference
@@ -152,32 +154,43 @@ open class Rule<T : Any>(
      * Rules that fire invoke their [actionStatement].
      */
     fun evaluate() {
-        fired = predicateFunctionList.isNotEmpty()
-        evaluated = true
-
-        run predLoop@{
-            predicateFunctionList.forEach { predicateFunction ->
-                val predicate = predicateFunction.invoke()
-
-                if (predicate is TrackablePredicate) {
-                    this.children.add(predicate)
-                }
-
-                /**
-                 * Predicate must be evaluated first or terminateEvaluation would not be set.
-                 */
-                fired = predicate.fired && fired
-
-                if (!fired && predicate.terminateEvaluation) {
-                    return@predLoop
-                }
-            }
+        val trace = try {
+            getResource(ExecutionTrace::class)
+        } catch (e: Exception) {
+            null
         }
 
-        if (fired) {
-            actionStatement.invoke()
-        } else {
-            elseStatement.invoke()
+        trace?.push(this)
+        try {
+            fired = predicateFunctionList.isNotEmpty()
+            evaluated = true
+
+            run predLoop@{
+                predicateFunctionList.forEach { predicateFunction ->
+                    val predicate = predicateFunction.invoke()
+
+                    if (predicate is TrackablePredicate) {
+                        this.children.add(predicate)
+                    }
+
+                    /**
+                     * Predicate must be evaluated first or terminateEvaluation would not be set.
+                     */
+                    fired = predicate.fired && fired
+
+                    if (!fired && predicate.terminateEvaluation) {
+                        return@predLoop
+                    }
+                }
+            }
+
+            if (fired) {
+                actionStatement.invoke()
+            } else {
+                elseStatement.invoke()
+            }
+        } finally {
+            trace?.pop()
         }
     }
 
@@ -203,6 +216,7 @@ open class Rule<T : Any>(
     override fun fired(): Boolean = fired
     override fun type(): RuleComponentType = REGEL
     override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
+    override fun toTraceUttrykk(): Uttrykk<*> = Const("regel: ${fired().svarord()} ${name()}")
 
 }
 
