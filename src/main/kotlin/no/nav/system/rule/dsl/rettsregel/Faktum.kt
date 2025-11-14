@@ -259,9 +259,8 @@ data class Faktum<T : Any>(
     override fun toString(): String = "'$navn' (${evaluer()})"
 
     override fun forklar(level: Int): String = buildString {
-            append("HVA\n")
-            indent(level+1).append("$navn = ${evaluer()}\n")
-        append("\n")
+        indent(level).append("HVA\n")
+        indent(level + 1).append("$navn = ${evaluer()}\n")
 
         hvorfor?.let { trace ->
             indent(level).append("HVORFOR\n")
@@ -275,8 +274,10 @@ data class Faktum<T : Any>(
             }
         }
 
-        append("\n")
-        indent(level + 1).append("${uttrykk.forklar(level + 2)}\n")
+        // Show formula/nested explanation if not a simple constant
+        if (uttrykk !is Const<*>) {
+            append(uttrykk.forklar(level))
+        }
     }
 }
 
