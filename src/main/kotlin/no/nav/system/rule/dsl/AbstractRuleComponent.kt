@@ -4,11 +4,9 @@ import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
 import no.nav.system.rule.dsl.inspections.ExecutionTrace
 import no.nav.system.rule.dsl.resource.Root
-import no.nav.system.rule.dsl.resource.root
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
-import sun.jvm.hotspot.HelloWorld.e
 import java.io.Serializable
 import kotlin.reflect.KClass
 

@@ -120,7 +120,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
-
+        println(slitertillegg.forklar())
         // ASSERT HVA
         assertEquals("HVA", forklaringIterator.next())
         assertEquals("slitertillegg = 509.2592592592592", forklaringIterator.next())
