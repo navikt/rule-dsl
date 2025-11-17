@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regelverkspesifikasjon & Uttrykkstre</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 50px;
+            font-size: 2.5em;
+        }
+
+        .dual-perspective {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .perspective {
+            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid;
+        }
+
+        .jurist {
+            border-left-color: #e63946;
+        }
+
+        .developer {
+            border-left-color: #06d6a0;
+        }
+
+        .perspective h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 1.5em;
+        }
+
+        .perspective p {
+            line-height: 1.8;
+            color: #4a5568;
+        }
+
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+
+        .flow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 150px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .step-content {
+            color: #718096;
+            font-size: 0.85em;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #a0aec0;
+            flex: 0;
+        }
+
+        .essence-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .essence-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .essence-box p {
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .code-example {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 25px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+
+        .code-comment {
+            color: #5c6370;
+        }
+
+        .code-keyword {
+            color: #c678dd;
+        }
+
+        .code-string {
+            color: #98c379;
+        }
+
+        .code-function {
+            color: #61afef;
+        }
+
+        .highlight {
+            background: rgba(255, 255, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Regelverkspesifikasjon & Uttrykkstre</h1>
+
+    <div class="dual-perspective">
+        <div class="perspective jurist">
+            <h2><span class="icon">⚖️</span> Juristperspektivet</h2>
+            <p>
+                <strong>Sikre sporbarhet og etterprøvbarhet:</strong><br><br>
+                Hver enkelt beregning må kunne forklares juridisk gyldig tilbake til lovens bokstav,
+                med referanser til konkrete lovhjemler (ID-ene som <span class="highlight">"SLITERTILLEGG-AVKORTING-TRYGDETID"</span>).
+            </p>
+        </div>
+
+        <div class="perspective developer">
+            <h2><span class="icon">💻</span> Utviklerperspektivet</h2>
+            <p>
+                <strong>Transformere lovtekst til eksekverbar kode:</strong><br><br>
+                Kode som både regner riktig OG produserer full dokumentasjon automatisk -
+                fra inngangsverdier via alle mellomberegninger til sluttresultat med hele uttrykk- og verdikjeden synlig.
+            </p>
+        </div>
+    </div>
+
+    <div class="flow-diagram">
+        <div class="flow-steps">
+            <div class="step">
+                <div class="step-title">📜 Lovtekst</div>
+                <div class="step-content">Folketrygdloven § 20-18</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="step">
+                <div class="step-title">🎯 Regelspesifikasjon</div>
+                <div class="step-content">etterlevelse 144.2 </div>
+                <div class="step-content">ID: SLITERTILLEGG-BEREGNET</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="step">
+                <div class="step-title">🔧 Eksekverbar Kode</div>
+                <div class="step-content">beregnSlitertillegg()</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="step">
+                <div class="step-title">📊 Resultat + Forklaring</div>
+                <div class="step-content">etterlevelse 115.1</div>
+                <div class="step-content">2291.67 kr + fullt uttrykkstre</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="essence-box">
+        <h3>✨ Essensen</h3>
+        <p>
+            Samme kodesystem gir både <strong>riktig tallsvar</strong> og <strong>juridisk forsvarlig forklaring</strong><br>
+            — ingen gap mellom juss og kode
+        </p>
+    </div>
+
+    <h3 style="margin-bottom: 20px; color: #2d3748;">Eksempel fra koden:</h3>
+    <div class="code-example">
+        <span class="code-comment">// Lovhjemmel: § 20-18 Beregning av slitertillegg</span>
+
+        <span class="code-keyword">fun</span> <span class="code-function">beregnSlitertillegg</span>(...) = tracked {
+        (fulltSlitertillegg() * trygdetidFaktor(...) * justeringsFaktor(...))
+        .<span class="code-function">navngi</span>(<span class="code-string">"slitertillegg"</span>)
+        .<span class="code-function">id</span>(<span class="code-string">"SLITERTILLEGG-BEREGNET"</span>)  <span class="code-comment">← Lovhjemmel-ID</span>
+        }
+
+        <span class="code-comment">// Gir automatisk:</span>
+        <span class="code-comment">// 1. Beregning: 2291.67 kr</span>
+        <span class="code-comment">// 2. Forklaring: "fulltSlitertillegg * trygdetidFaktor * justeringsFaktor"</span>
+        <span class="code-comment">// 3. Uttrykkstre: Hele verdikjeden visualisert</span>
+        <span class="code-comment">// 4. Sporbarhet: Referanse til SLITERTILLEGG-BEREGNET</span>
+    </div>
+</div>
+</body>
+</html>

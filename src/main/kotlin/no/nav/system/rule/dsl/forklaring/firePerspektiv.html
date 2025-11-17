@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slitertillegg - Fra Uttrykkstre til Perspektiver</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 10px 10px 0 0;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab-button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #2d3748;
+        }
+
+        .content-area {
+            background: white;
+            padding: 50px;
+            border-radius: 0 20px 20px 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            min-height: 600px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .persona-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
+            border-radius: 10px;
+        }
+
+        .persona-icon {
+            font-size: 3em;
+        }
+
+        .persona-info h2 {
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .persona-info p {
+            color: #718096;
+        }
+
+        .calculation-box {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid;
+        }
+
+        .tree-color { border-left-color: #6366f1; }
+        .jurist-color { border-left-color: #e63946; }
+        .saksbehandler-color { border-left-color: #06d6a0; }
+        .kari-color { border-left-color: #f77f00; }
+
+        .calculation-box h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h4 {
+            color: #4a5568;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .rule-reference {
+            background: #fff5e6;
+            border-left: 3px solid #f77f00;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 10px;
+            margin: 8px 0;
+            background: #e6f7f1;
+            border-radius: 5px;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 15px;
+            color: #06d6a0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .formula {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .formula-line {
+            margin: 5px 0;
+        }
+
+        .highlight-yellow {
+            background: rgba(255, 255, 0, 0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .highlight-green {
+            background: rgba(0, 255, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.3em;
+            margin-top: 20px;
+        }
+
+        .result-amount {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .info-box {
+            background: #e6f2ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .info-box strong {
+            color: #2c5282;
+        }
+
+        .simple-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #4a5568;
+        }
+
+        .simple-text strong {
+            color: #2d3748;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        /* Raw tree specific styles */
+        .raw-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 25px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            margin: 15px 0;
+            line-height: 1.6;
+            white-space: pre;
+        }
+
+        .tree-output {
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 25px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            margin: 15px 0;
+            line-height: 1.4;
+            white-space: pre;
+        }
+
+        .code-id {
+            color: #79c0ff;
+        }
+
+        .code-value {
+            color: #a5d6ff;
+        }
+
+        .code-operator {
+            color: #ff7b72;
+        }
+
+        .code-comment {
+            color: #8b949e;
+        }
+
+        .transformation-arrow {
+            text-align: center;
+            padding: 20px;
+            font-size: 2em;
+            color: #6366f1;
+        }
+
+        .transformation-label {
+            text-align: center;
+            color: #6366f1;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        .split-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .split-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .split-panel h4 {
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🌳 Fra Uttrykkstre til Perspektiver</h1>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="showTab('tree')">🌳 Uttrykkstre</button>
+        <button class="tab-button" onclick="showTab('jurist')">⚖️ Jurist</button>
+        <button class="tab-button" onclick="showTab('saksbehandler')">📋 Saksbehandler</button>
+        <button class="tab-button" onclick="showTab('kari')">👤 Kari Nordmann</button>
+    </div>
+
+    <div class="content-area">
+        <!-- UTTRYKKSTRE TAB -->
+        <div id="tree" class="tab-content active">
+            <div class="persona-header">
+                <div class="persona-icon">🌳</div>
+                <div class="persona-info">
+                    <h2>Råformat - Uttrykkstre</h2>
+                    <p>Den maskinelle representasjonen som transformeres til alle perspektiver</p>
+                </div>
+            </div>
+
+            <div class="calculation-box tree-color">
+                <h3>📊 Input: Grunnlagsdata</h3>
+                <div class="raw-output">faktiskTrygdetid = 40
+                    antallMånederEtterNedreAldersgrense = 0</div>
+            </div>
+
+            <div class="calculation-box tree-color">
+                <h3>🔍 Detaljert forklaring (maskingenerert)</h3>
+                <div class="raw-output">HVORDAN
+                    <span class="code-id">SLITERTILEGG-BEREGNET</span> (BeregnSlitertilleggKt.beregnSlitertillegg)
+                    slitertillegg <span class="code-operator">=</span> fulltSlitertillegg <span class="code-operator">*</span> trygdetidFaktor <span class="code-operator">*</span> justeringsFaktorUttak
+                    slitertillegg <span class="code-operator">=</span> <span class="code-value">2291.6666666666665</span> <span class="code-operator">*</span> <span class="code-value">1.0</span> <span class="code-operator">*</span> <span class="code-value">1.0</span>
+                    slitertillegg <span class="code-operator">=</span> <span class="code-value">2291.6666666666665</span>
+
+                    <span class="code-id">SLITERTILLEGG-BEREGNING-UAVKORTET</span> (BeregnSlitertilleggKt.fulltSlitertillegg)
+                    fulltSlitertillegg <span class="code-operator">=</span> <span class="code-value">0.25</span> <span class="code-operator">*</span> G <span class="code-operator">/</span> <span class="code-value">12</span>
+                    fulltSlitertillegg <span class="code-operator">=</span> <span class="code-value">0.25</span> <span class="code-operator">*</span> <span class="code-value">110000</span> <span class="code-operator">/</span> <span class="code-value">12</span>
+                    fulltSlitertillegg <span class="code-operator">=</span> <span class="code-value">2291.6666666666665</span>
+
+                    <span class="code-id">SLITERTILLEGG-AVKORTING-TRYGDETID</span> (BeregnSlitertilleggKt.trygdetidFaktor)
+                    trygdetidFaktor <span class="code-operator">=</span> min(faktiskTrygdetid,FULL_TRYGDETID) <span class="code-operator">/</span> FULL_TRYGDETID
+                    trygdetidFaktor <span class="code-operator">=</span> min(<span class="code-value">40</span>,<span class="code-value">40</span>) <span class="code-operator">/</span> <span class="code-value">40</span>
+                    trygdetidFaktor <span class="code-operator">=</span> <span class="code-value">1.0</span>
+
+                    <span class="code-id">SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT</span> (BeregnSlitertilleggKt.justeringsFaktorUttak)
+                    justeringsFaktorUttak <span class="code-operator">=</span> (UTTAKSGRENSE_MND <span class="code-operator">-</span> min(antallMånederEtterNedreAldersgrense,UTTAKSGRENSE_MND)) <span class="code-operator">/</span> UTTAKSGRENSE_MND
+                    justeringsFaktorUttak <span class="code-operator">=</span> (<span class="code-value">36</span> <span class="code-operator">-</span> min(<span class="code-value">0</span>,<span class="code-value">36</span>)) <span class="code-operator">/</span> <span class="code-value">36</span>
+                    justeringsFaktorUttak <span class="code-operator">=</span> <span class="code-value">1.0</span>
+
+                    <span class="code-comment">G = 110000 (BeregnSlitertilleggKt.G)
+    FULL_TRYGDETID = 40 (BeregnSlitertilleggKt.fullTrygdetid)
+    UTTAKSGRENSE_MND = 36 (BeregnSlitertilleggKt.uttaksgrense)
+    antallMånederEtterNedreAldersgrense = 0</span></div>
+            </div>
+
+            <div class="calculation-box tree-color">
+                <h3>🌲 Strukturtre (maskingenerert)</h3>
+                <div class="tree-output">Grunnlag(slitertillegg)
+                    │  └─ Memo (cached)
+                    │  │  └─ Mul
+                    │  │  │  ├─ Mul
+                    │  │  │  │  ├─ Grunnlag(fulltSlitertillegg)
+                    │  │  │  │  │  └─ Memo (cached)
+                    │  │  │  │  │  │  └─ Div
+                    │  │  │  │  │  │  │  ├─ Mul
+                    │  │  │  │  │  │  │  │  ├─  Const(0.25)
+                    │  │  │  │  │  │  │  │  └─ Grunnlag(G)
+                    │  │  │  │  │  │  │  │  │  └─  Const(110000)
+                    │  │  │  │  │  │  │  └─  Const(12)
+                    │  │  │  │  └─ Grunnlag(trygdetidFaktor)
+                    │  │  │  │  │  └─ Memo (cached)
+                    │  │  │  │  │  │  └─ Div
+                    │  │  │  │  │  │  │  ├─ Min
+                    │  │  │  │  │  │  │  │  ├─ Grunnlag(faktiskTrygdetid)
+                    │  │  │  │  │  │  │  │  │  └─ Grunnlag(FULL_TRYGDETID) [6]
+                    │  │  │  │  │  │  │  │  │  │  └─  Const(40)
+                    │  │  │  │  │  │  │  │  └─ FULL_TRYGDETID → [6]
+                    │  │  │  │  │  │  │  └─ FULL_TRYGDETID → [6]
+                    │  │  │  └─ Grunnlag(justeringsFaktorUttak)
+                    │  │  │  │  └─ Memo (cached)
+                    │  │  │  │  │  └─ Div
+                    │  │  │  │  │  │  ├─ Sub
+                    │  │  │  │  │  │  │  ├─ Grunnlag(UTTAKSGRENSE_MND) [8]
+                    │  │  │  │  │  │  │  │  └─  Const(36)
+                    │  │  │  │  │  │  │  └─ Min
+                    │  │  │  │  │  │  │  │  ├─ Grunnlag(antallMånederEtterNedreAldersgrense)
+                    │  │  │  │  │  │  │  │  │  └─  Const(0)
+                    │  │  │  │  │  │  │  │  └─ UTTAKSGRENSE_MND → [8]
+                    │  │  │  │  │  │  └─ UTTAKSGRENSE_MND → [8]
+
+                    ╔══ Appendix - Strukturelt Dedupliserte Uttrykk ═══╗
+
+                    [6] FULL_TRYGDETID (3 forekomster):
+                    │  ├─ Grunnlag(FULL_TRYGDETID)
+                    │  │  ├─  Const(40)
+                    [8] UTTAKSGRENSE_MND (3 forekomster):
+                    │  ├─ Grunnlag(UTTAKSGRENSE_MND)
+                    │  │  ├─  Const(36)</div>
+            </div>
+
+            <div class="transformation-arrow">⬇️</div>
+            <div class="transformation-label">TRANSFORMERES TIL ↓</div>
+
+            <div class="split-view">
+                <div class="split-panel">
+                    <h4>⚖️ Juristperspektiv</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>Lovhjemler fra ID-ene</li>
+                        <li>Subsumpsjon av vilkår</li>
+                        <li>Rettslig begrunnelse</li>
+                        <li>Sporbarhet til lov</li>
+                    </ul>
+                </div>
+
+                <div class="split-panel">
+                    <h4>📋 Saksbehandlerperspektiv</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>Sjekklister for kontroll</li>
+                        <li>Steg-for-steg prosess</li>
+                        <li>Praktiske handlinger</li>
+                        <li>Kvalitetssikring</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="split-view">
+                <div class="split-panel">
+                    <h4>👤 Borgerperspektiv</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>Hverdagsspråk</li>
+                        <li>Personlig relevans</li>
+                        <li>Enkle forklaringer</li>
+                        <li>Praktiske konsekvenser</li>
+                    </ul>
+                </div>
+
+                <div class="split-panel">
+                    <h4>🔮 Fremtidige perspektiver</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>Revisor-perspektiv</li>
+                        <li>Kontrollør-perspektiv</li>
+                        <li>Statistikk-perspektiv</li>
+                        <li>AI-forklaring</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Nøkkelen:</strong> Uttrykkstreet er den <strong>ene kilden til sannhet</strong>.
+                Det inneholder all informasjon som trengs for å generere alle perspektiver - både tall,
+                struktur, ID-referanser og beregningskjeder. Ingen manuell oversettelse, ingen informasjonstap,
+                ingen synkroniseringsproblemer.
+            </div>
+
+            <div class="result-box">
+                <div>🎯 En kilde – Uendelig mange perspektiver</div>
+                <div class="result-amount">2.291,67 kr/måned</div>
+                <div>Samme sannhet, forskjellige forklaringer</div>
+            </div>
+        </div>
+
+        <!-- JURIST TAB -->
+        <div id="jurist" class="tab-content">
+            <div class="persona-header">
+                <div class="persona-icon">⚖️</div>
+                <div class="persona-info">
+                    <h2>Juristperspektivet</h2>
+                    <p>Rettslig grunnlag, sporbarhet og lovfortolkning</p>
+                </div>
+            </div>
+
+            <div class="calculation-box jurist-color">
+                <h3>📜 Rettsgrunnlag og regelstruktur</h3>
+
+                <div class="section">
+                    <h4>Primære lovhjemler:</h4>
+                    <div class="rule-reference">
+                        ID: SLITERTILLEGG-BEREGNET<br>
+                        Hjemmel: Folketrygdloven § 20-18<br>
+                        Metode: beregnSlitertillegg()
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4>Regelverkets struktur:</h4>
+
+                    <p><strong>1. Grunnbeløpsbasert beregning</strong></p>
+                    <div class="rule-reference">
+                        ID: SLITERTILLEGG-BEREGNING-UAVKORTET<br>
+                        Formel: fulltSlitertillegg = 0,25 × G / 12<br>
+                        Resultat: 2.291,67 kr/måned (ved G = 110.000)
+                    </div>
+
+                    <p><strong>2. Trygdetidsavkorting</strong></p>
+                    <div class="rule-reference">
+                        ID: SLITERTILLEGG-AVKORTING-TRYGDETID<br>
+                        Formel: min(faktiskTrygdetid, 40) / 40<br>
+                        Anvendt: 40/40 = 1,0 (ingen avkorting)<br>
+                        Begrunnelse: Full opptjeningstid foreligger
+                    </div>
+
+                    <p><strong>3. Uttakstidspunktjustering</strong></p>
+                    <div class="rule-reference">
+                        ID: SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT<br>
+                        Formel: (36 - min(månederEtterGrense, 36)) / 36<br>
+                        Anvendt: (36 - 0) / 36 = 1,0 (ingen reduksjon)<br>
+                        Begrunnelse: Uttak ved nedre aldersgrense (0 mnd forsinkelse)
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4>Beregningskjede med sporbarhet:</h4>
+                    <div class="formula">
+                        <div class="formula-line">slitertillegg = fulltSlitertillegg × trygdetidFaktor × justeringsFaktor</div>
+                        <div class="formula-line">             = 2.291,67 × 1,0 × 1,0</div>
+                        <div class="formula-line">             = 2.291,67 kr/måned</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4>Juridisk vurdering:</h4>
+                    <div class="info-box">
+                        <strong>Subsumpsjon:</strong> Alle lovens vilkår er oppfylt:
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>Full trygdetid (40 år) ⇒ ingen proratisering jf. § 20-18 tredje ledd</li>
+                            <li>Uttak ved nedre aldersgrense ⇒ ingen reduksjon jf. § 20-18 fjerde ledd</li>
+                            <li>Grunnbeløp (G) anvendes korrekt jf. § 1-4</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <div>Rettslig konklusjon</div>
+                <div class="result-amount">2.291,67 kr/måned</div>
+                <div>Vedtaket er fullt sporbart til lovens bestemmelser</div>
+            </div>
+        </div>
+
+        <!-- SAKSBEHANDLER TAB -->
+        <div id="saksbehandler" class="tab-content">
+            <div class="persona-header">
+                <div class="persona-icon">📋</div>
+                <div class="persona-info">
+                    <h2>Saksbehandlerperspektivet</h2>
+                    <p>Praktisk veiledning for korrekt behandling</p>
+                </div>
+            </div>
+
+            <div class="calculation-box saksbehandler-color">
+                <h3>✅ Saksbehandlingsskjema</h3>
+
+                <div class="section">
+                    <h4>Steg 1: Kontroller inngangsdata</h4>
+                    <ul class="checklist">
+                        <li><strong>Faktisk trygdetid:</strong> 40 år (verifisert mot trygdetidsregister)</li>
+                        <li><strong>Uttakstidspunkt:</strong> 0 måneder etter nedre aldersgrense (bekreftet av bruker)</li>
+                        <li><strong>Gjeldende G:</strong> 110.000 kr (per 1. mai inneværende år)</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h4>Steg 2: Beregn grunnbeløp</h4>
+                    <table>
+                        <tr>
+                            <th>Element</th>
+                            <th>Beregning</th>
+                            <th>Resultat</th>
+                        </tr>
+                        <tr>
+                            <td>Årlig fullt tillegg</td>
+                            <td>0,25 × 110.000</td>
+                            <td>27.500 kr</td>
+                        </tr>
+                        <tr>
+                            <td>Månedlig fullt tillegg</td>
+                            <td>27.500 / 12</td>
+                            <td>2.291,67 kr</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h4>Steg 3: Vurder avkortinger</h4>
+
+                    <div class="info-box">
+                        <strong>Trygdetidsavkorting:</strong><br>
+                        ➤ Har bruker minst 40 års trygdetid? <span class="highlight-green">JA (40 år)</span><br>
+                        ➤ Avkortingsfaktor: 40/40 = 1,0<br>
+                        ➤ Konklusjon: Ingen avkorting
+                    </div>
+
+                    <div class="info-box">
+                        <strong>Uttakstidspunktjustering:</strong><br>
+                        ➤ Antall måneder etter nedre aldersgrense? <span class="highlight-green">0 måneder</span><br>
+                        ➤ Justeringsfaktor: (36-0)/36 = 1,0<br>
+                        ➤ Konklusjon: Ingen reduksjon
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4>Steg 4: Beregn endelig tillegg</h4>
+                    <div class="formula">
+                        <div class="formula-line">Slitertillegg = 2.291,67 × 1,0 × 1,0 = 2.291,67 kr/måned</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4>⚠️ Viktige kontrollpunkter:</h4>
+                    <ul class="checklist">
+                        <li>Verifiser at G-verdi er oppdatert (sjekk per 1. mai)</li>
+                        <li>Dobbelsjekk trygdetid mot folkeregisteret</li>
+                        <li>Bekreft uttaksdato mot pensjonssøknad</li>
+                        <li>Dokumenter alle beregningssteg i saksnotatet</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <div>Vedtak kan fattes</div>
+                <div class="result-amount">2.291,67 kr/måned</div>
+                <div>Alle kontroller gjennomført ✓</div>
+            </div>
+        </div>
+
+        <!-- KARI NORDMANN TAB -->
+        <div id="kari" class="tab-content">
+            <div class="persona-header">
+                <div class="persona-icon">👤</div>
+                <div class="persona-info">
+                    <h2>For deg som mottar pensjon</h2>
+                    <p>Forklaring i hverdagsspråk til Kari Nordmann, 62 år</p>
+                </div>
+            </div>
+
+            <div class="calculation-box kari-color">
+                <h3>💡 Hva er slitertillegg?</h3>
+
+                <div class="simple-text">
+                    <p>Slitertillegg er en ekstra utbetaling du kan få hvis du har jobbet lenge og slitt kroppen. Det er ment å kompensere for at du har hatt tungt fysisk arbeid over mange år.</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>💰 Ditt månedlige tillegg:</strong> 2.291,67 kr<br>
+                    <strong>📅 Per år:</strong> 27.500 kr<br>
+                    <strong>✅ Status:</strong> Du får fullt tillegg!
+                </div>
+            </div>
+
+            <div class="calculation-box kari-color">
+                <h3>🔍 Hvorfor får du dette beløpet?</h3>
+
+                <div class="simple-text">
+                    <p><strong>Tre ting bestemmer hvor mye du får:</strong></p>
+
+                    <p style="margin-top: 15px;"><strong>1. Grunnbeløpet fra staten</strong></p>
+                    <p>Staten har bestemt at fullt slitertillegg skal være en fjerdedel (25%) av grunnbeløpet (G) delt på 12 måneder. I år er grunnbeløpet 110.000 kr.</p>
+                    <p style="margin-left: 20px; color: #718096;">
+                        ➜ 110.000 kr × 0,25 = 27.500 kr i året<br>
+                        ➜ 27.500 kr / 12 måneder = 2.291,67 kr hver måned
+                    </p>
+
+                    <p style="margin-top: 15px;"><strong>2. Hvor lenge du har jobbet i Norge</strong></p>
+                    <p>For å få fullt tillegg må du ha jobbet i minst 40 år. Du har jobbet i <span class="highlight-green"><strong>40 år</strong></span>, så her får du full pott!</p>
+                    <p style="margin-left: 20px; color: #06d6a0;">
+                        ✓ Ingen trekk – du får 100% av tillegget
+                    </p>
+
+                    <p style="margin-top: 15px;"><strong>3. Når du tok ut pensjon</strong></p>
+                    <p>Jo tidligere du tar ut pensjon, desto mindre tillegg får du. Men du tok ut pensjon <span class="highlight-green"><strong>akkurat når du fikk lov</strong></span> (ved nedre aldersgrense), så også her får du 100%!</p>
+                    <p style="margin-left: 20px; color: #06d6a0;">
+                        ✓ Ingen reduksjon – du får fullt tillegg
+                    </p>
+                </div>
+            </div>
+
+            <div class="calculation-box kari-color">
+                <h3>📊 Enkel oversikt</h3>
+
+                <table>
+                    <tr>
+                        <th>Hva vi sjekker</th>
+                        <th>Din situasjon</th>
+                        <th>Betydning</th>
+                    </tr>
+                    <tr>
+                        <td>Grunnbeløp (G)</td>
+                        <td>110.000 kr</td>
+                        <td>Gir 2.291,67 kr/mnd</td>
+                    </tr>
+                    <tr>
+                        <td>Jobbet i Norge</td>
+                        <td>40 år (full tid)</td>
+                        <td>❌ Ingen trekk</td>
+                    </tr>
+                    <tr>
+                        <td>Uttakstidspunkt</td>
+                        <td>Ved nedre grense</td>
+                        <td>❌ Ingen reduksjon</td>
+                    </tr>
+                    <tr style="background: #e6f7f1; font-weight: bold;">
+                        <td>Totalt per måned</td>
+                        <td colspan="2" style="text-align: center;">2.291,67 kr</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="calculation-box kari-color">
+                <h3>❓ Vanlige spørsmål</h3>
+
+                <div class="simple-text">
+                    <p><strong>Får jeg dette hver måned?</strong><br>
+                        Ja, dette kommer som en del av din månedlige pensjon, resten av livet.</p>
+
+                    <p style="margin-top: 15px;"><strong>Endres beløpet?</strong><br>
+                        Ja, beløpet justeres hvert år 1. mai når grunnbeløpet (G) endres. Det følger vanligvis lønns- og prisveksten i samfunnet.</p>
+
+                    <p style="margin-top: 15px;"><strong>Må jeg søke på nytt?</strong><br>
+                        Nei, dette er automatisk. Du trenger ikke gjøre noe.</p>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <div>🎉 Gratulerer!</div>
+                <div class="result-amount">+ 2.291,67 kr</div>
+                <div>ekstra hver måned for resten av livet</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Remove active class from all buttons
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+
+        // Show selected tab
+        document.getElementById(tabName).classList.add('active');
+
+        // Activate clicked button
+        event.target.classList.add('active');
+    }
+</script>
+</body>
+</html>
