@@ -294,6 +294,6 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     override fun fired(): Boolean = true
     override fun type(): RuleComponentType = REGELSETT
     override fun toString(): String = "${type()}: $rulesetName"
-    override fun toTraceUttrykk(): Uttrykk<*> = Const("regelsett: $rulesetName")
+    override fun toUttrykk(): Uttrykk<*> = Const("regelsett: $rulesetName")
 
 }

@@ -216,7 +216,7 @@ open class Rule<T : Any>(
     override fun fired(): Boolean = fired
     override fun type(): RuleComponentType = REGEL
     override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
-    override fun toTraceUttrykk(): Uttrykk<*> = Const("regel: ${fired().svarord()} ${name()}")
+    override fun toUttrykk(): Uttrykk<*> = Const("regel: ${fired().svarord()} ${name()}")
 
 }
 

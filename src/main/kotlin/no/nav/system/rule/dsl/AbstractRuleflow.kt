@@ -85,7 +85,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
     override fun fired(): Boolean = true
     override fun type(): RuleComponentType = REGELFLYT
     override fun toString(): String = "${type()}: ${name()}"
-    override fun toTraceUttrykk(): Uttrykk<*> = Const("${type()}: ${name()}")
+    override fun toUttrykk(): Uttrykk<*> = Const("${type()}: ${name()}")
 
     /**
      * Represents a split in ruleflow logic. Each [Decision] can have multiple outcomes ([Branch]).
@@ -143,7 +143,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         override fun fired(): Boolean = true
         override fun type(): RuleComponentType = FORGRENING
         override fun toString(): String = "${type()}: ${name()}"
-        override fun toTraceUttrykk(): Uttrykk<*> = Const("forgrening: ${name()}")
+        override fun toUttrykk(): Uttrykk<*> = Const("forgrening: ${name()}")
 
         class Branch(
             defaultName: String,
@@ -189,7 +189,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
             override fun type(): RuleComponentType = GREN
 
             override fun toString(): String = "${type()}: ${fired().svarord()} ${condition.notasjon()} = ${condition.konkret()} "
-            override fun toTraceUttrykk(): Uttrykk<*> = condition
+            override fun toUttrykk(): Uttrykk<*> = condition
 
         }
     }

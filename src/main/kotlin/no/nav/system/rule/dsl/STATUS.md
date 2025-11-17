@@ -43,12 +43,13 @@ DEL 2
 
 3. [DONE] Uklart om Const skal være internal eller ikke. Hvis vi vil ha den eksponert, kan vi gjeninnføre navngi funksjon som gjør Const til Faktum. Bør være avklart nå at Const forblir internal.
 
-4. [????] Forklaring er nå basert på at rammeverket produserer String. Dette er greit mens vi utvikler mekansimene, men må byttes ut. Flere veier til mål men vurder:
+4. [DONE] Forklaring er nå basert på at rammeverket produserer String. Dette er greit mens vi utvikler mekansimene, men må byttes ut. Flere veier til mål men vurder:
 a) rådata er AST (Abstract Syntax Tree) av Uttrykk, og Uttrykk må skille seg ut fra Forklaring. Forklaring må være et eget objekt som bruker av rammeverket selv kan bestemme. Vi leverer noen enkle forslag på Forklaring med diverse String utgaver. I pensjon-regler har vi ytterligere en AST til GuiModel transformasjon som gjør at vi kan vise forklaringer i GUI.
 b) som a, men vi transformerer AST til et ForklaringsNode objekt som intermediary før man transformerer videre til hva nå man trenger.
 c) noe annet?
 
 5. Er vi tjent med å lage et Uttrykk til som kun har navn og en set-funksjon som tar i mot uttrykket og konverterer til Faktum? Det kan gjøre domene klassene i stand til å diktiere NAVN, men ikke verdien. Noe sånnt som "UinitsialisertFaktum". evaluer på denne kaster exception. Klassen kan kanskje også støtte akkumulering.
+--> Finner ingen praktisk løsning på dette. Det endrer opp med klønete casting eller halvfabrikater av Faktum som det ikke er opplagt om er initialisert eller ikke. Det hele blir enklere om vi har utviklerpattern på å initialisere Faktum med NaN verdier for Number typer. Andre typer har ingen løsning. Vi får ta opp tema på nytt om dette blir et smertepunkt.
 
 6. [DONE] DomainPredicate bør heller hete SporingsPredikat eller SporbartPredikat. Evt. TrackingPredicate/Trackable.
 

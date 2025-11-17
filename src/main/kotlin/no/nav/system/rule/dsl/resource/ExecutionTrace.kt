@@ -41,7 +41,7 @@ class ExecutionTrace : AbstractResource() {
      * via toTraceUttrykk(). Useful for debugging and full execution traces.
      */
     fun fullPath(): List<Uttrykk<*>> {
-        return stack.map { it.toTraceUttrykk() }
+        return stack.map { it.toUttrykk() }
     }
 
     /**
@@ -57,20 +57,20 @@ class ExecutionTrace : AbstractResource() {
                 RuleComponentType.REGEL -> {
                     buildList {
                         // Add rule name first
-                        add(arc.toTraceUttrykk())
+                        add(arc.toUttrykk())
 
                         // Then add predicates from rule's children
                         arc.children
                             .filterIsInstance<TrackablePredicate>()
                             .forEach { predicate ->
-                                add(predicate.toTraceUttrykk())
+                                add(predicate.toUttrykk())
                             }
                     }
                 }
 
                 RuleComponentType.GREN -> {
                     // Add branch condition
-                    listOf(arc.toTraceUttrykk())
+                    listOf(arc.toUttrykk())
                 }
 
                 else -> emptyList()

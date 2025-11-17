@@ -40,7 +40,7 @@ abstract class AbstractRuleComponent : Serializable {
      * Converts this component to an Uttrykk for trace representation.
      * Each component decides how to represent itself in execution traces.
      */
-    abstract fun toTraceUttrykk(): Uttrykk<*>
+    abstract fun toUttrykk(): Uttrykk<*>
 
     fun <T : AbstractResource> putResource(key: KClass<T>, service: T) {
         resourceMap[key] = service

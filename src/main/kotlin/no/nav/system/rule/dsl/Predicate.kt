@@ -32,7 +32,7 @@ open class Predicate(
     override fun type(): RuleComponentType = PREDIKAT
     override fun fired(): Boolean = fired
     override fun toString(): String = "${type()}: ${fired.svarord()}"
-    override fun toTraceUttrykk(): Uttrykk<*> = Const("${type()}: ${fired.svarord()}")
+    override fun toUttrykk(): Uttrykk<*> = Const("${type()}: ${fired.svarord()}")
 }
 
 /**
@@ -49,5 +49,5 @@ class TrackablePredicate(
     fun konkret(): String = uttrykk.konkret()
 
     override fun toString(): String = uttrykk.toString()
-    override fun toTraceUttrykk(): Uttrykk<*> = uttrykk
+    override fun toUttrykk(): Uttrykk<*> = uttrykk
 }

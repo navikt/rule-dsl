@@ -39,5 +39,5 @@ abstract class AbstractRuleService<out T> : AbstractRuleComponent() {
     override fun fired(): Boolean = true
     override fun type(): RuleComponentType = REGELTJENESTE
     override fun toString(): String = "${type()}: ${name()}"
-    override fun toTraceUttrykk(): Uttrykk<*> = Const("${type()}: ${name()}")
+    override fun toUttrykk(): Uttrykk<*> = Const("${type()}: ${name()}")
 }
