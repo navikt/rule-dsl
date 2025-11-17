@@ -41,7 +41,6 @@ class InspectionTest {
 
 
     @Test
-    @Disabled("Disabled in anticipation of new tracking mechanism") // TODO: Update test with results from new tracking mechanism
     fun `debug test`() {
         assertEquals(
             """
