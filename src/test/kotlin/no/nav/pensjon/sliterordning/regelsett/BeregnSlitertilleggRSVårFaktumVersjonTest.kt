@@ -30,7 +30,7 @@ class BeregnSlitertilleggRSVårFaktumVersjonTest {
 
         val fullt = 0.25 * grunnbeløp / 12
         val forventet = fullt * 1.0 * (20.0 / FULL_TRYGDETID)
-        assertEquals(forventet, resultat.slitertilleggBeregnet.evaluer(), 1e-9)
+        assertEquals(forventet, resultat.slitertilleggBeregnet.verdi, 1e-9)
     }
 
     @Test
@@ -49,7 +49,7 @@ class BeregnSlitertilleggRSVårFaktumVersjonTest {
         val fullt = 0.25 * grunnbeløp / 12
         val faktorMnd = (36.0 - 35.0) / 36.0
         val faktorTrygdetid = 40.0 / FULL_TRYGDETID
-        assertEquals(fullt * faktorMnd * faktorTrygdetid, resultat.slitertilleggBeregnet.evaluer(), 1e-9)
+        assertEquals(fullt * faktorMnd * faktorTrygdetid, resultat.slitertilleggBeregnet.verdi, 1e-9)
     }
 
     @Test
@@ -65,7 +65,7 @@ class BeregnSlitertilleggRSVårFaktumVersjonTest {
         )
         val resultat = rs.test()
 
-        assertEquals(0.0, resultat.slitertilleggBeregnet.evaluer(), 1e-9)
+        assertEquals(0.0, resultat.slitertilleggBeregnet.verdi, 1e-9)
     }
 
     @Test
@@ -81,7 +81,7 @@ class BeregnSlitertilleggRSVårFaktumVersjonTest {
         )
         val resultat = rs.test()
 
-        assertEquals(0.0, resultat.slitertilleggBeregnet.evaluer(), 1e-9)
+        assertEquals(0.0, resultat.slitertilleggBeregnet.verdi, 1e-9)
     }
 
     @Test
@@ -97,7 +97,7 @@ class BeregnSlitertilleggRSVårFaktumVersjonTest {
         )
         val resultat = rs.test()
 
-        assertEquals(0.0, resultat.slitertilleggBeregnet.evaluer(), 1e-9)
+        assertEquals(0.0, resultat.slitertilleggBeregnet.verdi, 1e-9)
     }
 
     @Test
@@ -122,7 +122,7 @@ class BeregnSlitertilleggRSVårFaktumVersjonTest {
         val resultat2 = rs2.test()
 
         // Resultat2 should be exactly double resultat1
-        assertEquals(resultat1.slitertilleggBeregnet.evaluer() * 2, resultat2.slitertilleggBeregnet.evaluer(), 1e-9)
+        assertEquals(resultat1.slitertilleggBeregnet.verdi * 2, resultat2.slitertilleggBeregnet.verdi, 1e-9)
     }
 
     @Test

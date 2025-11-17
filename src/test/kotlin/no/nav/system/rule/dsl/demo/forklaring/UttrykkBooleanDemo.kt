@@ -39,20 +39,20 @@ fun booleanSammenligninger() {
     val harRedusertTrygdetid = trygdetid erMindreEnn fullTrygdetid
     println("Mindre enn:")
     println("  Notasjon: ${harRedusertTrygdetid.notasjon()}")
-    println("  Resultat: ${harRedusertTrygdetid.evaluer()}")
+    println("  Resultat: ${harRedusertTrygdetid.verdi}")
     println()
 
     // Større eller lik med konstant
     val harHøyInntekt = inntekt erStørreEllerLik 300000
     println("Større eller lik (med konstant):")
     println("  Notasjon: ${harHøyInntekt.notasjon()}")
-    println("  Resultat: ${harHøyInntekt.evaluer()}")
+    println("  Resultat: ${harHøyInntekt.verdi}")
     println()
 
     // Lik
     val harFullTrygdetid = trygdetid erLik fullTrygdetid
     println("Lik:")
     println("  Notasjon: ${harFullTrygdetid.notasjon()}")
-    println("  Resultat: ${harFullTrygdetid.evaluer()}")
+    println("  Resultat: ${harFullTrygdetid.verdi}")
 }
 

@@ -23,7 +23,7 @@ class UttrykkErBlantTest {
         val uttrykk = Const(unntakType) erBlant aktuelleUnntakstyper
 
         // Test evaluering
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
 
         // Test notasjon
         assertEquals("JA 'FLYKT_ALDER' er blandt 'aktuelleUnntakstyper'", uttrykk.notasjon())
@@ -43,7 +43,7 @@ class UttrykkErBlantTest {
         val uttrykk = Const(unntakType) erBlant aktuelleUnntakstyper
 
         // Test evaluering
-        assertFalse(uttrykk.evaluer())
+        assertFalse(uttrykk.verdi)
     }
 
     @Test
@@ -57,7 +57,7 @@ class UttrykkErBlantTest {
         val uttrykk = Const(unntakType) erIkkeBlant aktuelleUnntakstyper
 
         // Test evaluering
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
 
         // Test notasjon
         assertEquals("JA 'FLYKT_GJENLEV' er ikke blandt 'aktuelleUnntakstyper'", uttrykk.notasjon())
@@ -69,7 +69,7 @@ class UttrykkErBlantTest {
         val uttrykk = unntakType erBlant listOf(FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP)
 
         // Test evaluering
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
 
         // Test notasjon
         assertEquals("JA 'unntakType' er blandt '[FLYKT_ALDER, FLYKT_BARNEP, FLYKT_GJENLEV, FLYKT_UFOREP]'", uttrykk.notasjon())
@@ -84,7 +84,7 @@ class UttrykkErBlantTest {
         val uttrykk = tall erBlant listOf(1, 2, 3, 4, 5)
 
         // Test evaluering
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
 
         // Test notasjon
         assertEquals("JA 'tall' er blandt '[1, 2, 3, 4, 5]'", uttrykk.notasjon())
@@ -99,7 +99,7 @@ class UttrykkErBlantTest {
         val uttrykk = tall erIkkeBlant listOf(1, 2, 3, 4, 5)
 
         // Test evaluering
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
 
         // Test notasjon
         assertEquals("JA 'tall' er ikke blandt '[1, 2, 3, 4, 5]'", uttrykk.notasjon())
@@ -114,7 +114,7 @@ class UttrykkErBlantTest {
         val uttrykk = tekst erBlant listOf("hei", "ha", "hallo")
 
         // Test evaluering
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
 
         // Test notasjon
         assertEquals("JA 'tekst' er blandt '[hei, ha, hallo]'", uttrykk.notasjon())

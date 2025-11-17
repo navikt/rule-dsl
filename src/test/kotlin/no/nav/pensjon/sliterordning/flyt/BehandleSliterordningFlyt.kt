@@ -25,7 +25,7 @@ class BehandleSliterordningFlyt(
 
         forgrening("innvilget?") {
             gren {
-                betingelse("JA") { innvilget }
+                betingelse("JA") { innvilget erLik true }
                 flyt {
                     sliterordning = Innvilget(
                         BeregnSlitertilleggRS(uttakstidspunkt, virkningstidspunkt, person).run(this)

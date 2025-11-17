@@ -42,7 +42,7 @@ class TrackablePredicate(
     val uttrykk: Uttrykk<Boolean>
 ) : Predicate(
     terminateEvaluation = false,
-    function = { uttrykk.evaluer() }
+    function = { uttrykk.verdi }
 ) {
     fun forklar(level: Int): String = uttrykk.forklar(level)
     fun notasjon(): String = uttrykk.notasjon()

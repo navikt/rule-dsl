@@ -36,7 +36,7 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
      */
     private val antallMånederEtterNedrePensjonsDato = Faktum(
         "antallMånederEtterNedrePensjonsDato",
-        ChronoUnit.MONTHS.between(nedrePensjonsDato.evaluer(), uttakstidspunkt.evaluer()).toInt().coerceAtMost(MND_36)
+        ChronoUnit.MONTHS.between(nedrePensjonsDato.verdi, uttakstidspunkt.verdi).toInt().coerceAtMost(MND_36)
     )
 
     private val G = Faktum("G", innGrunnbeløp)

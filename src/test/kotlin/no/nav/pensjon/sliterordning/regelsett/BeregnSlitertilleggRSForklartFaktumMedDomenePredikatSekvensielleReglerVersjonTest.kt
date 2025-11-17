@@ -22,7 +22,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
-        assertEquals(2291.67, slitertillegg.evaluer(), 0.01)
+        assertEquals(2291.67, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
@@ -98,7 +98,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
-        assertEquals(1718.75, slitertillegg.evaluer(), 0.01)
+        assertEquals(1718.75, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
@@ -174,7 +174,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT slitertillegg
         assertEquals("slitertillegg", slitertillegg.navn)
-        assertEquals(1018.52, slitertillegg.evaluer(), 0.01)
+        assertEquals(1018.52, slitertillegg.verdi, 0.01)
 
         // FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
@@ -250,7 +250,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
-        assertEquals(509.26, slitertillegg.evaluer(), 0.01)
+        assertEquals(509.26, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()

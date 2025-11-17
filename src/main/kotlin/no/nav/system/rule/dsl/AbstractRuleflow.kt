@@ -102,7 +102,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
             try {
                 val flowsToRun = mutableListOf<Branch>()
                 branchList.forEach {
-                    it.fired = it.condition.evaluer()
+                    it.fired = it.condition.verdi
                     if (it.fired) {
                         flowsToRun.add(it)
                     }

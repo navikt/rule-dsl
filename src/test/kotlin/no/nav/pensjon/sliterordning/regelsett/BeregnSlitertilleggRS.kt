@@ -43,7 +43,7 @@ class BeregnSlitertilleggRS(
             HVIS { antallMånederEtterNedreAldersgrense erMindreEnn MND_36 }
             SÅ {
                 justertSlitertillegg =
-                    fulltSlitertillegg * ((MND_36 - antallMånederEtterNedreAldersgrense.evaluer()) / MND_36.toDouble())
+                    fulltSlitertillegg * ((MND_36 - antallMånederEtterNedreAldersgrense.verdi) / MND_36.toDouble())
             }
             ELLERS {
                 justertSlitertillegg = 0.0
@@ -62,7 +62,7 @@ class BeregnSlitertilleggRS(
             HVIS { true }
             SÅ {
                 slitertilleggBeregnet =
-                    fulltSlitertillegg * ((MND_36 - antallMånederEtterNedreAldersgrense.evaluer()) / MND_36.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
+                    fulltSlitertillegg * ((MND_36 - antallMånederEtterNedreAldersgrense.verdi) / MND_36.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
             }
         }
 
@@ -72,7 +72,7 @@ class BeregnSlitertilleggRS(
                 RETURNER(
                     Slitertillegg(
                         grunnbeløp = grunnbeløp,
-                        antallMånederEtterNedreAldersgrense = antallMånederEtterNedreAldersgrense.evaluer(),
+                        antallMånederEtterNedreAldersgrense = antallMånederEtterNedreAldersgrense.verdi,
                         fulltSlitertillegg = fulltSlitertillegg,
                         justertSlitertillegg = justertSlitertillegg,
                         avkortetSlitertilleggEtterTrygdetid = avkortetSlitertilleggEtterTrygdetid,

@@ -31,7 +31,7 @@ class PersonenErFlyktningRSTest {
             this.returnValue
         }
 
-        assertEquals(IKKE_RELEVANT, flyktningUtfall.evaluer())
+        assertEquals(IKKE_RELEVANT, flyktningUtfall.verdi)
 //        assertTrue(flyktningUtfall.children[0].fired())
 
 //        val flyktningSubsum = flyktningUtfall.children[0].children.first() as ListSubsumtion
@@ -57,7 +57,7 @@ class PersonenErFlyktningRSTest {
             this.returnValue
         }
 
-        assertEquals(OPPFYLT, flyktningUtfall.evaluer())
+        assertEquals(OPPFYLT, flyktningUtfall.verdi)
 //        assertEquals(1, flyktningUtfall.children[0].children[0].children.size)
 //        assertEquals(1, flyktningUtfall.children[0].children[1].children.size)
     }
@@ -85,7 +85,7 @@ class PersonenErFlyktningRSTest {
 //        val regelOvergangsregelAP = flyktningUtfall.children[0].children[2].children[0]
 
 //        assertEquals(2, regelOvergangsregelAP.children.size)
-        assertEquals(IKKE_OPPFYLT, flyktningUtfall.evaluer())
+        assertEquals(IKKE_OPPFYLT, flyktningUtfall.verdi)
 //        assertTrue(flyktningUtfall.children[0].fired())
 //        assertEquals(3, flyktningUtfall.children[0].children.size)
     }
@@ -109,7 +109,7 @@ class PersonenErFlyktningRSTest {
             this.returnValue
         }
 
-        assertEquals(OPPFYLT, flyktningUtfall.evaluer())
+        assertEquals(OPPFYLT, flyktningUtfall.verdi)
 //        assertTrue(flyktningUtfall.children[0].fired())
 //        val overgangsregelTreSubsumsjon = flyktningUtfall.children[0].children[2] as ListSubsumtion
 //        assertEquals(MINST_EN_AV, overgangsregelTreSubsumsjon.comparator)
@@ -145,7 +145,7 @@ class PersonenErFlyktningRSTest {
             this.returnValue
         }
 
-        assertEquals(OPPFYLT, flyktningUtfall.evaluer())
+        assertEquals(OPPFYLT, flyktningUtfall.verdi)
 //        assertTrue(flyktningUtfall.children[0].fired())
 //        val overgangsregelTreSubsumsjon = flyktningUtfall.children[0].children[2] as ListSubsumtion
 //        assertEquals(MINST_EN_AV, overgangsregelTreSubsumsjon.comparator)

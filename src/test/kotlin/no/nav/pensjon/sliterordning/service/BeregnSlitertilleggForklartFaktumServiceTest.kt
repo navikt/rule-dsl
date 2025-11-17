@@ -44,7 +44,7 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         assertTrue(result is Response.SliterordningForklartFaktum.Innvilget, "Expected Innvilget result")
 
         val innvilget = result as Response.SliterordningForklartFaktum.Innvilget
-        assertTrue(innvilget.slitertillegg.evaluer() > 0.0, "Expected positive slitertillegg amount")
+        assertTrue(innvilget.slitertillegg.verdi > 0.0, "Expected positive slitertillegg amount")
 
         val txt = innvilget.slitertillegg.forklar()
         println(txt)

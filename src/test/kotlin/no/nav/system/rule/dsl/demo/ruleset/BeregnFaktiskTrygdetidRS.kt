@@ -32,7 +32,7 @@ class BeregnFaktiskTrygdetidRS(
      * Nytt Pattern [norskeBoperioder] opprettes på bakgrunn av liste [boperiodeListe] med et filter på land.
      */
     private val norskeBoperioder = boperiodeListe.createPattern { it.land == LandEnum.NOR }
-    private val dato16år = fødselsdato.evaluer().plusYears(16)
+    private val dato16år = fødselsdato.verdi.plusYears(16)
     private val dato1991 = Faktum("januar 1991", localDate(1991, 1, 1))
     private val svar = Trygdetid()
 
@@ -46,7 +46,7 @@ class BeregnFaktiskTrygdetidRS(
             HVIS { boperiode.fom < dato16år }
             SÅ {
                 val økning = ChronoUnit.MONTHS.between(dato16år, boperiode.tom)
-                svar.faktiskTrygdetidIMåneder = Faktum(svar.faktiskTrygdetidIMåneder.navn, svar.faktiskTrygdetidIMåneder.evaluer() + økning)
+                svar.faktiskTrygdetidIMåneder = Faktum(svar.faktiskTrygdetidIMåneder.navn, svar.faktiskTrygdetidIMåneder.verdi + økning)
             }
         }
 
@@ -57,7 +57,7 @@ class BeregnFaktiskTrygdetidRS(
             HVIS { boperiode.fom >= dato16år }
             SÅ {
                 val økning = ChronoUnit.MONTHS.between(boperiode.fom, boperiode.tom)
-                svar.faktiskTrygdetidIMåneder = Faktum(svar.faktiskTrygdetidIMåneder.navn, svar.faktiskTrygdetidIMåneder.evaluer() + økning)
+                svar.faktiskTrygdetidIMåneder = Faktum(svar.faktiskTrygdetidIMåneder.navn, svar.faktiskTrygdetidIMåneder.verdi + økning)
             }
         }
 
@@ -89,7 +89,7 @@ class BeregnFaktiskTrygdetidRS(
         regel("FastsettTrygdetid_ikkeFlyktning") {
             HVIS { flyktningUtfall erUlik OPPFYLT }
             SÅ {
-                svar.år = (svar.faktiskTrygdetidIMåneder.evaluer() / 12.0).roundToInt()
+                svar.år = (svar.faktiskTrygdetidIMåneder.verdi / 12.0).roundToInt()
             }
         }
         regel("FastsettTrygdetid_Flyktning") {

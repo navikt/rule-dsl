@@ -52,7 +52,7 @@ fun uttrykkDirekteFaktumSyntaks() {
 
     println("SYNTAKS (direkte Faktum):")
     println("  Kode: val uttrykk = sats * G / måneder")
-    println("  Resultat: ${uttrykk.evaluer()}")
+    println("  Resultat: ${uttrykk.verdi}")
     println()
 
     println("Kompakt forklaring:")
@@ -72,7 +72,7 @@ fun uttrykkEnkelBeregning() {
     // Direkte syntaks
     val uttrykk = G / måneder
 
-    println("Resultat: ${uttrykk.evaluer()}")
+    println("Resultat: ${uttrykk.verdi}")
     println()
     println("Kompakt forklaring:")
     println(uttrykk.notasjon())
@@ -94,7 +94,7 @@ fun uttrykkKompleksBeregning() {
 
     println("Symbolsk: ${uttrykk.notasjon()}")
     println("Konkret: ${uttrykk.konkret()}")
-    println("Resultat: ${uttrykk.evaluer()}")
+    println("Resultat: ${uttrykk.verdi}")
     println()
 
     println("Detaljert forklaring:")
@@ -117,7 +117,7 @@ fun uttrykkTreVisning() {
     val uttrykk = (a + b) * c
 
     println("Uttrykk: ${uttrykk.notasjon()}")
-    println("Resultat: ${uttrykk.evaluer()}")
+    println("Resultat: ${uttrykk.verdi}")
 }
 
 /**
@@ -135,5 +135,5 @@ fun uttrykkTransformasjoner() {
 
     println("Originalt uttrykk:")
     println("  Notasjon: ${uttrykk.notasjon()}")
-    println("  Resultat: ${uttrykk.evaluer()}")
+    println("  Resultat: ${uttrykk.verdi}")
 }

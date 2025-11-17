@@ -29,7 +29,7 @@ class UttrykkParityTest {
 
         assertEquals("1000 + Grunnbeløp", grunnbeløpPlussTusen.notasjon())
         assertEquals("1000 + 5000", grunnbeløpPlussTusen.konkret())
-        assertEquals(6000, grunnbeløpPlussTusen.evaluer())
+        assertEquals(6000, grunnbeløpPlussTusen.verdi)
     }
 
     @Test
@@ -39,7 +39,7 @@ class UttrykkParityTest {
 
         assertEquals("fem / 2", toOgEnHalv.notasjon())
         assertEquals("5 / 2", toOgEnHalv.konkret())
-        assertEquals(2.5, toOgEnHalv.evaluer())
+        assertEquals(2.5, toOgEnHalv.verdi)
     }
 
     @Test
@@ -50,10 +50,10 @@ class UttrykkParityTest {
         val brutto = G * SPT
 
         val plus200 = brutto + 200
-        assertEquals(2200.0, plus200.evaluer())
+        assertEquals(2200.0, plus200.verdi)
 
         val minus200 = brutto - 200
-        assertEquals(1800.0, minus200.evaluer())
+        assertEquals(1800.0, minus200.verdi)
     }
 
     @Test
@@ -61,12 +61,12 @@ class UttrykkParityTest {
         val desimal = Faktum("tiKommaTo", Const(10.2))
 
         // Original value should remain unchanged
-        assertEquals(10.2, desimal.evaluer())
+        assertEquals(10.2, desimal.verdi)
 
         // Operations create new expressions without modifying original
         val plusOne = desimal + 1
-        assertEquals(11.2, plusOne.evaluer())
-        assertEquals(10.2, desimal.evaluer()) // Original unchanged
+        assertEquals(11.2, plusOne.verdi)
+        assertEquals(10.2, desimal.verdi) // Original unchanged
     }
 
     @Test
@@ -74,13 +74,13 @@ class UttrykkParityTest {
         val brutto = Const(2000)
         var netto: Uttrykk<Int> = brutto
 
-        assertEquals(2000, brutto.evaluer())
-        assertEquals(2000, netto.evaluer())
+        assertEquals(2000, brutto.verdi)
+        assertEquals(2000, netto.verdi)
 
         netto = brutto - 500
 
-        assertEquals(2000, brutto.evaluer())
-        assertEquals(1500, netto.evaluer())
+        assertEquals(2000, brutto.verdi)
+        assertEquals(1500, netto.verdi)
     }
 
     @Test
@@ -88,9 +88,9 @@ class UttrykkParityTest {
         val a = Faktum("a", Const(1))
         val b = Faktum("b", Const(4))
 
-        assertEquals(0.25, (a / b).evaluer())
-        assertEquals(0.25, (a / 4).evaluer())
-        assertEquals(0.25, (1 / b).evaluer())
+        assertEquals(0.25, (a / b).verdi)
+        assertEquals(0.25, (a / 4).verdi)
+        assertEquals(0.25, (1 / b).verdi)
     }
 
     // ========================================================================
@@ -104,12 +104,12 @@ class UttrykkParityTest {
         val PÅ = Faktum("PÅ", Const(20))
 
         val formel1 = (SPT - OPT) * PÅ
-        assertEquals(40.0, formel1.evaluer())
+        assertEquals(40.0, formel1.verdi)
         assertEquals("(SPT - OPT) * PÅ", formel1.notasjon())
         assertEquals("(4.3 - 2.3) * 20", formel1.konkret())
 
         val formel2 = PÅ * (SPT - OPT)
-        assertEquals(40.0, formel2.evaluer())
+        assertEquals(40.0, formel2.verdi)
         assertEquals("PÅ * (SPT - OPT)", formel2.notasjon())
         assertEquals("20 * (4.3 - 2.3)", formel2.konkret())
     }
@@ -121,7 +121,7 @@ class UttrykkParityTest {
         val PÅ = Faktum("PÅ", Const(20))
 
         val formel1 = (SPT - OPT) * (PÅ) * PÅ
-        assertEquals(800.0, formel1.evaluer())
+        assertEquals(800.0, formel1.verdi)
         assertEquals("(SPT - OPT) * PÅ * PÅ", formel1.notasjon())
         assertEquals("(4.3 - 2.3) * 20 * 20", formel1.konkret())
     }
@@ -132,7 +132,7 @@ class UttrykkParityTest {
         val b = Faktum("b", Const(1))
         val f = 4 - (a + b)
 
-        assertEquals(5, f.evaluer())
+        assertEquals(5, f.verdi)
         assertEquals("4 - (a + b)", f.notasjon())
         assertEquals("4 - (-2 + 1)", f.konkret())
     }
@@ -143,7 +143,7 @@ class UttrykkParityTest {
         val b = Faktum("b", Const(1))
         val f = -4 - (a - b)
 
-        assertEquals(-1, f.evaluer())
+        assertEquals(-1, f.verdi)
         assertEquals("-4 - (a - b)", f.notasjon())
         assertEquals("-4 - (-2 - 1)", f.konkret())
     }
@@ -154,7 +154,7 @@ class UttrykkParityTest {
         val b = Faktum("b", Const(1))
         val f = 4 - (a + b)
 
-        assertEquals(1, f.evaluer())
+        assertEquals(1, f.verdi)
         assertEquals("4 - (a + b)", f.notasjon())
         assertEquals("4 - (2 + 1)", f.konkret())
     }
@@ -165,7 +165,7 @@ class UttrykkParityTest {
         val b = Faktum("b", Const(1))
         val f = (a + b) - 4
 
-        assertEquals(-5, f.evaluer())
+        assertEquals(-5, f.verdi)
         // Note: Left side of subtraction doesn't need parentheses (same precedence, left-to-right)
         assertEquals("a + b - 4", f.notasjon())
         assertEquals("-2 + 1 - 4", f.konkret())
@@ -177,7 +177,7 @@ class UttrykkParityTest {
         val b = Faktum("b", Const(1))
         val f = 4 - (a + b)
 
-        assertEquals(1, f.evaluer())
+        assertEquals(1, f.verdi)
         assertEquals("4 - (a + b)", f.notasjon())
         assertEquals("4 - (2 + 1)", f.konkret())
     }
@@ -196,7 +196,7 @@ class UttrykkParityTest {
 
         val tpPlus = tp + 1
 
-        assertEquals(300001.0, tpPlus.evaluer())
+        assertEquals(300001.0, tpPlus.verdi)
         assertEquals("tp + 1", tpPlus.notasjon())
         // Note: Uttrykk shows decimal notation for Double values
         assertEquals("300000.0 + 1", tpPlus.konkret())
@@ -220,7 +220,7 @@ class UttrykkParityTest {
 
         // Verify the calculation works
         val expected = (0.45 * 95000 * 4.23 * 25 / 40) + (0.45 * 95000 * 4.23 * 15 / 40)
-        assertEquals(expected, sum.evaluer(), 0.01)
+        assertEquals(expected, sum.verdi, 0.01)
     }
 
     // ========================================================================
@@ -239,7 +239,7 @@ class UttrykkParityTest {
 
         // Verify calculation
         val expected = 0.45 * 79216 * (2.47 * 16.0 / 20 + (2.47 - 2.47) * 16 / 40.0) * 1 / 12
-        assertEquals(expected, tpBrukerUtenPTBrutto.evaluer(), 0.01)
+        assertEquals(expected, tpBrukerUtenPTBrutto.verdi, 0.01)
 
         assertEquals("bruker_utenPT", tpBrukerUtenPTBrutto.notasjon())
 
@@ -254,7 +254,7 @@ class UttrykkParityTest {
         val tpAvdodBrutto = Faktum("avdød", 0.45 * G * (OPT * PÅ / OÅ + (SPT - OPT) * PÅ / 40) * UFG / 100 * 1 / 12 * tpPst)
 
         val expectedAvdod = 0.45 * 79216 * (4.0 * 17 / 20.0 + (6.46 - 4.0) * 17 / 40.0) * 100 / 100.0 * 1 / 12 * 0.55
-        assertEquals(expectedAvdod, tpAvdodBrutto.evaluer(), 0.01)
+        assertEquals(expectedAvdod, tpAvdodBrutto.verdi, 0.01)
 
     }
 
@@ -292,9 +292,9 @@ class UttrykkParityTest {
         val product: Uttrykk<Int> = a * b
         val difference: Uttrykk<Int> = a - b
 
-        assertEquals(30, sum.evaluer())
-        assertEquals(200, product.evaluer())
-        assertEquals(-10, difference.evaluer())
+        assertEquals(30, sum.verdi)
+        assertEquals(200, product.verdi)
+        assertEquals(-10, difference.verdi)
     }
 
     @Test
@@ -306,9 +306,9 @@ class UttrykkParityTest {
         val product: Uttrykk<Double> = a * b
         val difference: Uttrykk<Double> = a - b
 
-        assertEquals(31.0, sum.evaluer())
-        assertEquals(215.25, product.evaluer(), 0.001)
-        assertEquals(-10.0, difference.evaluer())
+        assertEquals(31.0, sum.verdi)
+        assertEquals(215.25, product.verdi, 0.001)
+        assertEquals(-10.0, difference.verdi)
     }
 
     @Test
@@ -317,7 +317,7 @@ class UttrykkParityTest {
         val intB = Faktum("b", Const(5))
 
         val div: Uttrykk<Double> = intA / intB
-        val result: Double = div.evaluer()
+        val result: Double = div.verdi
 
         assertEquals(2.0, result)
     }
@@ -331,9 +331,9 @@ class UttrykkParityTest {
         val mixed2 = intVal * doubleVal
         val mixed3 = doubleVal - intVal
 
-        assertEquals(12.5, mixed1.evaluer())
-        assertEquals(25.0, mixed2.evaluer())
-        assertEquals(-7.5, mixed3.evaluer())
+        assertEquals(12.5, mixed1.verdi)
+        assertEquals(25.0, mixed2.verdi)
+        assertEquals(-7.5, mixed3.verdi)
     }
 
     // ========================================================================
@@ -348,12 +348,12 @@ class UttrykkParityTest {
 
         // a + b * c should be a + (b * c) = 10 + 10 = 20
         val expr1 = a + b * c
-        assertEquals(20, expr1.evaluer())
+        assertEquals(20, expr1.verdi)
         assertEquals("a + b * c", expr1.notasjon())
 
         // a - b / c should be a - (b / c) = 10 - 2.5 = 7.5
         val expr2 = a - b / c
-        assertEquals(7.5, expr2.evaluer())
+        assertEquals(7.5, expr2.verdi)
     }
 
     @Test
@@ -364,7 +364,7 @@ class UttrykkParityTest {
 
         // a / b * c should be (a / b) * c = 5 * 2 = 10
         val expr = a / b * c
-        assertEquals(10.0, expr.evaluer())
+        assertEquals(10.0, expr.verdi)
     }
 
     // ========================================================================
@@ -380,7 +380,7 @@ class UttrykkParityTest {
 
         // ((a + b) * c) - d = (5 * 4) - 5 = 15
         val expr = ((a + b) * c) - d
-        assertEquals(15, expr.evaluer())
+        assertEquals(15, expr.verdi)
         assertEquals("(a + b) * c - d", expr.notasjon())
     }
 
@@ -388,7 +388,7 @@ class UttrykkParityTest {
     fun `expression with constants only`() {
         val expr = Const(5) + Const(10) * Const(2)
 
-        assertEquals(25, expr.evaluer())
+        assertEquals(25, expr.verdi)
         assertEquals("5 + 10 * 2", expr.notasjon())
         assertEquals("5 + 10 * 2", expr.konkret())
     }
@@ -398,9 +398,9 @@ class UttrykkParityTest {
         val zero = Faktum("zero", Const(0))
         val ten = Faktum("ten", Const(10))
 
-        assertEquals(10, (zero + ten).evaluer())
-        assertEquals(0, (zero * ten).evaluer())
-        assertEquals(-10, (zero - ten).evaluer())
+        assertEquals(10, (zero + ten).verdi)
+        assertEquals(0, (zero * ten).verdi)
+        assertEquals(-10, (zero - ten).verdi)
     }
 
     @Test
@@ -408,8 +408,8 @@ class UttrykkParityTest {
         val one = Faktum("one", Const(1))
         val ten = Faktum("ten", Const(10))
 
-        assertEquals(10, (one * ten).evaluer())
-        assertEquals(0.1, (one / ten).evaluer())
+        assertEquals(10, (one * ten).verdi)
+        assertEquals(0.1, (one / ten).verdi)
     }
 
     // ========================================================================
@@ -425,9 +425,9 @@ class UttrykkParityTest {
         val expr2 = subExpr - 5
         val expr3 = subExpr + subExpr
 
-        assertEquals(25, expr1.evaluer())
-        assertEquals(15, expr2.evaluer())
-        assertEquals(40, expr3.evaluer())
+        assertEquals(25, expr1.verdi)
+        assertEquals(15, expr2.verdi)
+        assertEquals(40, expr3.verdi)
 
         // All should still have correct notation
         assertEquals("base * 2 + 5", expr1.notasjon())

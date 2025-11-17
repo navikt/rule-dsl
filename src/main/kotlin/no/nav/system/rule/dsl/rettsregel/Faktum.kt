@@ -14,7 +14,7 @@ import java.io.Serializable
  *
  */
 interface Uttrykk<out T : Any> : Serializable {
-    fun evaluer(): T
+    val verdi: T
     fun notasjon(): String
     fun konkret(): String
 
@@ -35,10 +35,9 @@ internal data class MathOperation<T : Number>(
     val operator: MathOperator
 ) : Uttrykk<T> {
     @Suppress("UNCHECKED_CAST")
-    override fun evaluer(): T {
-        // Cache evalueringene for å unngå dobbel-evaluering
-        val vVerdi = venstre.evaluer()
-        val hVerdi = høyre.evaluer()
+    override val verdi: T by lazy {
+        val vVerdi = venstre.verdi
+        val hVerdi = høyre.verdi
         val v = vVerdi.toDouble()
         val h = hVerdi.toDouble()
 
@@ -53,7 +52,7 @@ internal data class MathOperation<T : Number>(
         }
 
         // Returner riktig type basert på input (DIV alltid Double)
-        return if (vVerdi is Int && hVerdi is Int && operator != MathOperator.DIV) {
+        if (vVerdi is Int && hVerdi is Int && operator != MathOperator.DIV) {
             resultat.toInt() as T
         } else {
             resultat as T
@@ -143,15 +142,15 @@ internal data class ComparisonOperation(
     val evaluator: () -> Boolean
 ) : Uttrykk<Boolean> {
 
-    override fun evaluer(): Boolean = evaluator()
+    override val verdi: Boolean by lazy { evaluator() }
 
-    override fun notasjon(): String = "${evaluer().svarord()} '${venstre.notasjon()}'${operatorText()}'${høyre.notasjon()}'"
+    override fun notasjon(): String = "${verdi.svarord()} '${venstre.notasjon()}'${operatorText()}'${høyre.notasjon()}'"
 
-    override fun konkret(): String = "${evaluer().svarord()} '${venstre.konkret()}'${operatorText()}'${høyre.konkret()}'"
+    override fun konkret(): String = "${verdi.svarord()} '${venstre.konkret()}'${operatorText()}'${høyre.konkret()}'"
 
-    override fun toString(): String = "${evaluer().svarord()} ${venstre}${operatorText()}${høyre}"
+    override fun toString(): String = "${verdi.svarord()} ${venstre}${operatorText()}${høyre}"
 
-    private fun operatorText(): String = if (evaluator()) operator.text else operator.negated()
+    private fun operatorText(): String = if (verdi) operator.text else operator.negated()
 
     override fun faktumSet(): Set<Faktum<*>> = venstre.faktumSet() + høyre.faktumSet()
 
@@ -173,19 +172,19 @@ internal data class ListOperation(
     private val evaluator: () -> Boolean
 ) : Uttrykk<Boolean> {
 
-    override fun evaluer(): Boolean = evaluator()
+    override val verdi: Boolean by lazy { evaluator() }
 
-    override fun notasjon(): String = "${evaluer().svarord()} '${uttrykk.notasjon()}'${operatorText()}'${mengdeUttrykk.notasjon()}'"
+    override fun notasjon(): String = "${verdi.svarord()} '${uttrykk.notasjon()}'${operatorText()}'${mengdeUttrykk.notasjon()}'"
 
-    override fun konkret(): String = "${evaluer().svarord()} '${uttrykk.konkret()}'${operatorText()}'${mengdeUttrykk.evaluer().map { it.toString() }}'"
+    override fun konkret(): String = "${verdi.svarord()} '${uttrykk.konkret()}'${operatorText()}'${mengdeUttrykk.verdi.map { it.toString() }}'"
 
-    override fun toString(): String = "${evaluer().svarord()} ${uttrykk}${operatorText()}${mengdeUttrykk}"
+    override fun toString(): String = "${verdi.svarord()} ${uttrykk}${operatorText()}${mengdeUttrykk}"
 
-    private fun operatorText(): String = if (evaluator()) operator.text else operator.negated()
+    private fun operatorText(): String = if (verdi) operator.text else operator.negated()
     override fun faktumSet(): Set<Faktum<*>> = uttrykk.faktumSet() + mengdeUttrykk.faktumSet()
 
     override fun forklar(level: Int): String = buildString {
-        val uttrykkItems = mengdeUttrykk.evaluer().map { "'${it.toString()}'" }
+        val uttrykkItems = mengdeUttrykk.verdi.map { "'${it.toString()}'" }
         indent(level).append("${notasjon()}\n")
         indent(level + 1).append("${konkret()}\n")
         uttrykkItems.forEach {
@@ -239,11 +238,11 @@ data class Faktum<T : Any>(
         rvsId = rvsId
     )
 
-    override fun evaluer(): T = uttrykk.evaluer()
+    override val verdi: T by lazy { uttrykk.verdi }
 
     override fun notasjon(): String = navn
 
-    override fun konkret(): String = evaluer().toString()
+    override fun konkret(): String = verdi.toString()
 
     /**
      * Returns this Faktum as the atomic unit.
@@ -256,18 +255,18 @@ data class Faktum<T : Any>(
      */
     override fun faktumSet(): Set<Faktum<*>> = setOf(this)
 
-    override fun toString(): String = "'$navn' (${evaluer()})"
+    override fun toString(): String = "'$navn' ($verdi)"
 
     override fun forklar(level: Int): String = buildString {
         indent(level).append("HVA\n")
-        indent(level + 1).append("$navn = ${evaluer()}\n")
+        indent(level + 1).append("$navn = $verdi\n")
 
         hvorfor?.let { trace ->
             indent(level).append("HVORFOR\n")
             trace.forEach { uttrykk ->
                 when (uttrykk) {
                     // Component names - simple string output
-                    is Const<*> -> indent(level + 1).append("${uttrykk.evaluer()}\n")
+                    is Const<*> -> indent(level + 1).append("${uttrykk.verdi}\n")
                     // Predicates - recursively explain (includes nested Faktum)
                     else -> append(uttrykk.forklar(level + 1))
                 }
@@ -286,10 +285,8 @@ data class Faktum<T : Any>(
  * This is can NOT be created by users.
  */
 internal data class Const<T : Any>(
-    val verdi: T
+    override val verdi: T
 ) : Uttrykk<T> {
-
-    override fun evaluer(): T = verdi
 
     override fun notasjon(): String = verdi.toString()
 

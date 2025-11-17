@@ -21,7 +21,7 @@ class UttrykkBooleanTest {
         val b = Faktum("b", Const(10))
         val uttrykk = a erLik b
 
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
         assertEquals("JA 'a' er lik 'b'", uttrykk.notasjon())
         assertEquals("JA '10' er lik '10'", uttrykk.konkret())
     }
@@ -32,7 +32,7 @@ class UttrykkBooleanTest {
         val b = Faktum("b", Const(20))
         val uttrykk = a erUlik b
 
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
         assertEquals("JA 'a' er ulik 'b'", uttrykk.notasjon())
     }
 
@@ -42,7 +42,7 @@ class UttrykkBooleanTest {
         val b = Faktum("b", Const(10))
         val uttrykk = a erStørreEnn b
 
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
         assertEquals("JA 'a' er større enn 'b'", uttrykk.notasjon())
     }
 
@@ -52,7 +52,7 @@ class UttrykkBooleanTest {
         val b = Faktum("b", Const(10))
         val uttrykk = a erMindreEnn b
 
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
         assertEquals("JA 'a' er mindre enn 'b'", uttrykk.notasjon())
     }
 
@@ -62,7 +62,7 @@ class UttrykkBooleanTest {
         val b = Faktum("b", Const(10))
         val uttrykk = a erStørreEllerLik b
 
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
         assertEquals("JA 'a' er større eller lik 'b'", uttrykk.notasjon())
     }
 
@@ -72,7 +72,7 @@ class UttrykkBooleanTest {
         val b = Faktum("b", Const(10))
         val uttrykk = a erMindreEllerLik b
 
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
         assertEquals("JA 'a' er mindre eller lik 'b'", uttrykk.notasjon())
     }
 
@@ -81,7 +81,7 @@ class UttrykkBooleanTest {
         val inntektsavvik = Faktum("inntektsavvik", Const(100))
         val uttrykk = inntektsavvik erMindreEnn 1000
 
-        assertTrue(uttrykk.evaluer())
+        assertTrue(uttrykk.verdi)
         assertEquals("JA 'inntektsavvik' er mindre enn '1000'", uttrykk.notasjon())
     }
 }

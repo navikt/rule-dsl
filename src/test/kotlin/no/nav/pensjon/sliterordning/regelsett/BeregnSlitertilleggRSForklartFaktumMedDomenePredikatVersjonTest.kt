@@ -22,7 +22,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
-        assertEquals(2291.67, slitertillegg.evaluer(), 0.01)
+        assertEquals(2291.67, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
@@ -50,7 +50,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
-        assertEquals(1718.75, slitertillegg.evaluer(), 0.01)
+        assertEquals(1718.75, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
@@ -83,7 +83,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
-        assertEquals(1018.51, slitertillegg.evaluer(), 0.01)
+        assertEquals(1018.51, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
@@ -116,7 +116,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
 
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
-        assertEquals(509.25, slitertillegg.evaluer(), 0.01)
+        assertEquals(509.25, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
