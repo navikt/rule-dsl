@@ -97,12 +97,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         private var branchList = mutableListOf<Branch>()
 
         fun run() {
-            val trace = try {
-                getResource(ExecutionTrace::class)
-            } catch (e: Exception) {
-                null
-            }
-
+            val trace = getResourceOrNull(ExecutionTrace::class)
             trace?.push(this)
             try {
                 val flowsToRun = mutableListOf<Branch>()
