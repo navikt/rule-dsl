@@ -32,32 +32,10 @@ interface Uttrykk<out T : Any> : Serializable {
 internal data class MathOperation<T : Number>(
     val venstre: Uttrykk<Number>,
     val høyre: Uttrykk<Number>,
-    val operator: MathOperator
+    val operator: MathOperator,
+    val evaluator: () -> T
 ) : Uttrykk<T> {
-    @Suppress("UNCHECKED_CAST")
-    override val verdi: T by lazy {
-        val vVerdi = venstre.verdi
-        val hVerdi = høyre.verdi
-        val v = vVerdi.toDouble()
-        val h = hVerdi.toDouble()
-
-        val resultat = when (operator) {
-            MathOperator.ADD -> v + h
-            MathOperator.SUB -> v - h
-            MathOperator.MUL -> v * h
-            MathOperator.DIV -> {
-                if (h == 0.0) throw ArithmeticException("Divisjon med null: $v / $h")
-                v / h
-            }
-        }
-
-        // Returner riktig type basert på input (DIV alltid Double)
-        if (vVerdi is Int && hVerdi is Int && operator != MathOperator.DIV) {
-            resultat.toInt() as T
-        } else {
-            resultat as T
-        }
-    }
+    override val verdi: T by lazy { evaluator() }
 
     override fun notasjon(): String {
         val (v, h) = medParenteserVedBehov(
