@@ -3,6 +3,7 @@ package no.nav.system.rule.dsl.rettsregel
 import no.nav.system.rule.dsl.enums.ListOperator
 import no.nav.system.rule.dsl.enums.MathOperator
 import no.nav.system.rule.dsl.enums.PairOperator
+import no.nav.system.rule.dsl.reference.Reference
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import java.io.Serializable
 
@@ -202,18 +203,18 @@ private fun StringBuilder.appendIf(level: Int, statement: () -> Boolean): String
 data class Faktum<T : Any>(
     val navn: String,
     val uttrykk: Uttrykk<T>,
-    val rvsId: String? = null,
+    val references: List<Reference> = emptyList(),
     private val hvorfor: List<Uttrykk<*>>? = null
 ) : Uttrykk<T> {
 
     constructor(
         navn: String,
         verdi: T,
-        rvsId: String? = null
+        references: List<Reference> = emptyList()
     ) : this(
         navn = navn,
         uttrykk = Const(verdi),
-        rvsId = rvsId
+        references = references
     )
 
     override val verdi: T by lazy { uttrykk.verdi }

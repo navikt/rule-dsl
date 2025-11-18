@@ -2,6 +2,7 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
+import no.nav.system.rule.dsl.reference.Reference
 import no.nav.system.rule.dsl.resource.ExecutionTrace
 import no.nav.system.rule.dsl.resource.Root
 import no.nav.system.rule.dsl.rettsregel.Const
@@ -22,6 +23,12 @@ import kotlin.reflect.KClass
 abstract class AbstractRuleComponent : Serializable {
     val children: MutableList<AbstractRuleComponent> = mutableListOf()
     internal var resourceMap: MutableMap<KClass<*>, AbstractResource> = mutableMapOf()
+
+    /**
+     * References to external documentation, legal sources, or other resources.
+     * Subclasses can override to provide specific references for rules, rulesets, etc.
+     */
+    open val references: List<Reference> = emptyList()
 
     init {
         if (!resourceMap.containsKey(Root::class)) {
