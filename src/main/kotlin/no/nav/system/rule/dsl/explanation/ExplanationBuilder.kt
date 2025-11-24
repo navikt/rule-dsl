@@ -62,20 +62,21 @@ class ExplanationBuilder internal constructor(
      */
     fun <T> transform(fn: (List<Pair<AbstractRuleComponent, Int>>) -> T): T {
         val nodes = when (direction) {
-            Direction.UP -> collectUp().mapIndexed { index, node -> node to index }
-            Direction.DOWN -> collectDown()
+            Direction.UP -> collectUp()     // Already returns pairs with depth
+            Direction.DOWN -> collectDown() // Already returns pairs with depth
         }
         return fn(nodes)
     }
 
 
     /**
-     * Traverse UP from start node towards root, collecting filtered nodes.
+     * Traverse UP from start node towards root, collecting filtered nodes with depth.
      */
-    private fun collectUp(): List<AbstractRuleComponent> {
-        val result = mutableListOf<AbstractRuleComponent>()
+    private fun collectUp(): List<Pair<AbstractRuleComponent, Int>> {
+        val result = mutableListOf<Pair<AbstractRuleComponent, Int>>()
         val visited = mutableSetOf<AbstractRuleComponent>()
         var current: AbstractRuleComponent? = startNode.parent
+        var depth = 0
 
         while (current != null) {
             // Cycle detection: if we've seen this node before, we have a cycle
@@ -90,14 +91,15 @@ class ExplanationBuilder internal constructor(
             if (perspective.includes(current)) {
                 // For rules in FUNCTIONAL perspective, also include predicates
                 if (current.type() == RuleComponentType.REGEL && perspective == Perspective.FUNCTIONAL) {
-                    // When prepending to result, add in reverse order to maintain natural order
+                    // When prepending, add predicates first (in reverse), then rule
+                    // This ensures when displayed: regel, pred1, pred2
                     val predicates = current.children.filterIsInstance<TrackablePredicate>()
-                    result.add(0, current)  // Add rule first
-                    // Add predicates in reverse (so they end up in correct order when prepended)
-                    predicates.reversed().forEach { result.add(0, it) }
+                    predicates.asReversed().forEach { result.add(0, it to (depth + 1)) }
+                    result.add(0, current to depth)  // Add rule at current depth
                 } else {
-                    result.add(0, current)
+                    result.add(0, current to depth)
                 }
+                depth++  // Increment depth after adding to result
             }
             current = current.parent
         }
@@ -291,8 +293,9 @@ fun <T : Any> Faktum<T>.forklar(perspective: Perspective = Perspective.FUNCTIONA
             if (trace.isNotEmpty()) {
                 appendLine()
                 appendLine("${indent}HVORFOR (decision path):")
-                trace.forEach { (arc, _) ->
-                    appendLine("$indent  - $arc")
+                trace.forEach { (arc, traceDepth) ->
+                    val traceIndent = "  ".repeat(depth + 1 + traceDepth)  // Base indent + "  " + trace depth
+                    appendLine("$traceIndent- $arc")
                 }
             }
         }
