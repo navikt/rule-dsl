@@ -2,7 +2,6 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.PREDIKAT
-import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 
@@ -43,7 +42,6 @@ class TrackablePredicate(
     terminateEvaluation = false,
     function = { uttrykk.verdi }
 ) {
-    fun forklar(level: Int): String = uttrykk.forklar(level)
     fun notasjon(): String = uttrykk.notasjon()
     fun konkret(): String = uttrykk.konkret()
 

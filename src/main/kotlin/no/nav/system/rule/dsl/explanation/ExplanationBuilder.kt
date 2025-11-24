@@ -246,14 +246,6 @@ fun <T : Any> Faktum<T>.forklar(perspective: Perspective = Perspective.FUNCTIONA
                 appendLine("HVORFOR (decision path):")
                 trace.forEach { arc ->
                     appendLine("  - $arc")
-
-                    // If it's also an Uttrykk, show details
-                    if (arc is Uttrykk<*>) {
-                        val details = arc.forklar(1)
-                        if (details.isNotBlank()) {
-                            append(details)
-                        }
-                    }
                 }
             }
         }
@@ -262,7 +254,8 @@ fun <T : Any> Faktum<T>.forklar(perspective: Perspective = Perspective.FUNCTIONA
         if (uttrykk !is no.nav.system.rule.dsl.rettsregel.Const<*>) {
             appendLine()
             appendLine("HVORDAN (calculation):")
-            append(uttrykk.forklar(0))
+            appendLine("  Formula: ${uttrykk.notasjon()}")
+            appendLine("  Result: ${uttrykk.konkret()}")
         }
     }
 }

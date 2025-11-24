@@ -23,7 +23,6 @@ interface Uttrykk<out T : Any> : Serializable {
      * Hvilke navngitte faktum bidrar til dette uttrykket.
      */
     fun faktumSet(): Set<Faktum<*>>
-    fun forklar(level: Int = 0): String
 }
 
 /**
@@ -58,18 +57,6 @@ internal data class MathOperation<T : Number>(
 
     override fun faktumSet(): Set<Faktum<*>> =
         venstre.faktumSet() + høyre.faktumSet()
-
-    override fun forklar(level: Int): String = buildString {
-        indent(level).append("HVORDAN\n")
-        indent(level + 1).append("${notasjon()}\n")
-        indent(level + 1).append("${konkret()}\n")
-
-        faktumSet().forEach { faktum ->
-            // Show full explanation for each contributing Faktum at the same level
-            // (only indent for named Faktum, not for intermediate AST nodes)
-            append(faktum.forklar(level))
-        }
-    }
 
     /**
      * Legger til parenteser rundt uttrykk ved behov basert på operator precedence.
@@ -132,11 +119,6 @@ internal data class ComparisonOperation(
     private fun operatorText(): String = if (verdi) operator.text else operator.negated()
 
     override fun faktumSet(): Set<Faktum<*>> = venstre.faktumSet() + høyre.faktumSet()
-
-    override fun forklar(level: Int): String = buildString {
-        indent(level).append("${notasjon()}\n")
-        indent(level).append("${konkret()}\n")
-    }
 }
 
 
@@ -161,19 +143,7 @@ internal data class ListOperation(
 
     private fun operatorText(): String = if (verdi) operator.text else operator.negated()
     override fun faktumSet(): Set<Faktum<*>> = uttrykk.faktumSet() + mengdeUttrykk.faktumSet()
-
-    override fun forklar(level: Int): String = buildString {
-        val uttrykkItems = mengdeUttrykk.verdi.map { "'${it.toString()}'" }
-        indent(level).append("${notasjon()}\n")
-        indent(level + 1).append("${konkret()}\n")
-        uttrykkItems.forEach {
-            indent(level + 1).append(it.toString())
-        }
-    }
 }
-
-private fun StringBuilder.indent(level: Int): StringBuilder = append(" ".repeat(level * 2))
-private fun StringBuilder.appendIf(level: Int, statement: () -> Boolean): StringBuilder = if (statement()) append(" ".repeat(level * 2)) else this
 
 
 /**
@@ -241,18 +211,6 @@ data class Faktum<T : Any>(
     override fun faktumSet(): Set<Faktum<*>> = setOf(this)
 
     override fun toString(): String = "'$navn' ($verdi)"
-
-    /**
-     * Internal implementation for Uttrykk interface.
-     * Users should use extension functions in ExplanationBuilder.kt for presentation.
-     */
-    override fun forklar(level: Int): String = buildString {
-        indent(level).append("$navn = $verdi\n")
-        // Show formula/nested explanation if not a simple constant
-        if (uttrykk !is Const<*>) {
-            append(uttrykk.forklar(level))
-        }
-    }
 }
 
 /**
@@ -270,5 +228,4 @@ internal data class Const<T : Any>(
     override fun faktumSet(): Set<Faktum<out Any>> = emptySet()
 
     override fun toString(): String = "'$verdi'"
-    override fun forklar(level: Int): String = ""
 }
