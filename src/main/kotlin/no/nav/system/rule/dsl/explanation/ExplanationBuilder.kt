@@ -67,7 +67,7 @@ class ExplanationBuilder internal constructor(
     }
 
     /**
-     * Built-in transform: Generate indented text output showing HVA for each node.
+     * Built-in transform: Generate indented text output showing toString() for each node.
      *
      * @return Formatted string with tree structure
      */
@@ -75,7 +75,7 @@ class ExplanationBuilder internal constructor(
         buildString {
             nodes.forEachIndexed { index, node ->
                 val indent = "  ".repeat(index)
-                appendLine("$indent${node.hva()}")
+                appendLine("$indent$node")
             }
         }
     }
@@ -210,7 +210,7 @@ private fun traverseWithLevel(
     var nextLevel = level
     if (perspective.includes(arc)) {
         val indent = "  ".repeat(level)
-        builder.appendLine("$indent$level: ${arc.hva()}")
+        builder.appendLine("$indent$level: $arc")
         nextLevel++
     }
     arc.children.forEach { child ->
@@ -245,7 +245,7 @@ fun <T : Any> Faktum<T>.forklar(perspective: Perspective = Perspective.FUNCTIONA
                 appendLine()
                 appendLine("HVORFOR (decision path):")
                 trace.forEach { arc ->
-                    appendLine("  - ${arc.hva()}")
+                    appendLine("  - $arc")
 
                     // If it's also an Uttrykk, show details
                     if (arc is Uttrykk<*>) {

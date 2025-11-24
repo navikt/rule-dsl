@@ -2,7 +2,6 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.error.ResourceAccessException
-import no.nav.system.rule.dsl.explanation.Hva
 import no.nav.system.rule.dsl.reference.Reference
 import no.nav.system.rule.dsl.resource.Root
 import no.nav.system.rule.dsl.rettsregel.Const
@@ -22,7 +21,7 @@ import kotlin.reflect.KClass
  * Resources are all classes that needs to be instantiated once per ruleService call, typically resources
  * are Rates (norsk "Sats"), Console-capture or anything else non-static.
  */
-abstract class AbstractRuleComponent : Hva, Serializable {
+abstract class AbstractRuleComponent : Serializable {
     private val _children: MutableList<AbstractRuleComponent> = mutableListOf()
 
     /**
@@ -69,12 +68,6 @@ abstract class AbstractRuleComponent : Hva, Serializable {
     abstract fun name(): String
     abstract fun type(): RuleComponentType
     abstract fun fired(): Boolean
-
-    /**
-     * HVA: Identity of this component.
-     * Default implementation returns "Type: Name"
-     */
-    override fun hva(): String = "${type()}: ${name()}"
 
     fun <T : AbstractResource> putResource(key: KClass<T>, service: T) {
         resourceMap[key] = service

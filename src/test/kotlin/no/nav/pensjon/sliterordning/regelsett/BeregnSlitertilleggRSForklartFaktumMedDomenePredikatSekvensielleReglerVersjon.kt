@@ -61,6 +61,11 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
          *    justeringsFaktor = (36 - 0) / 36
          *    justeringsFaktor = 1.0
          */
+
+
+        /**
+         * Uttaket er innen 36 måneder etter nedre pensjonsdato.
+         */
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG") {
             HVIS { antallMånederEtterNedrePensjonsDato erMindreEnn MND_36 }
             SÅ {
@@ -70,6 +75,9 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
             }
         }
 
+        /**
+         * Uttaket er fom 36 måneder etter nedre pensjonsdato.
+         */
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-SENT") {
             HVIS { antallMånederEtterNedrePensjonsDato erStørreEllerLik MND_36 }
             SÅ {

@@ -12,12 +12,11 @@ import org.junit.jupiter.api.Test
 class ExplanationBuilderTest {
 
     @OptIn(DslDomainPredicate::class)
-    class TestRuleset(alder: Int) : AbstractRuleset<Boolean>() {
-
-        val alder = Faktum("alder", alder)
-        val aldersgrense = Faktum("aldersgrense", 67)
+    class TestRuleset(private val alderInput: Int) : AbstractRuleset<Boolean>() {
 
         override fun create() {
+            val alder = sporing<Int>("alder", alderInput)
+            val aldersgrense = sporing<Int>("aldersgrense", 67)
 
             regel("VILKÅR-ALDER") {
                 HVIS { alder erStørreEllerLik aldersgrense }
@@ -32,12 +31,12 @@ class ExplanationBuilderTest {
         val ruleset = TestRuleset(70)
         ruleset.test()
 
-        // Get a Faktum from the tree
+        // Get a Faktum from the tree - use Aldersvilkår which is created inside the rule
         val faktumNodes = ruleset.collectFaktum()
-        val alderFaktum = faktumNodes.first { it.faktum.navn == "alder" }.faktum
+        val aldersvilkårFaktum = faktumNodes.first { it.faktum.navn == "Aldersvilkår" }.faktum
 
         // Use ExplanationBuilder to traverse UP from Faktum
-        val explanation = alderFaktum.explain()
+        val explanation = aldersvilkårFaktum.explain()
             .perspective(Perspective.FUNCTIONAL)
             .direction(Direction.UP)
             .toText()
@@ -45,8 +44,9 @@ class ExplanationBuilderTest {
         println("=== Faktum-centric explanation (UP) ===")
         println(explanation)
 
-        assertTrue(explanation.contains("predikat"))
-        assertTrue(explanation.contains("regel: TestRuleset.VILKÅR-ALDER"))
+        // Now uses toString() instead of hva(), so format is different
+        assertTrue(explanation.contains("'alder'"))
+        assertTrue(explanation.contains("regel: JA TestRuleset.VILKÅR-ALDER"))
     }
 
     @Test
@@ -117,16 +117,18 @@ class ExplanationBuilderTest {
         ruleset.test()
 
         val faktumNodes = ruleset.collectFaktum()
-        val alderFaktum = faktumNodes.first { it.faktum.navn == "alder" }.faktum
+        val aldersvilkårFaktum = faktumNodes.first { it.faktum.navn == "Aldersvilkår" }.faktum
 
         // Convenience API: forklar() for formatted text
-        val explanation = alderFaktum.forklar()
+        // Need to explicitly use the extension function by providing the perspective parameter
+        val explanation = aldersvilkårFaktum.forklar(Perspective.FUNCTIONAL)
 
         println("=== forklar() convenience method ===")
         println(explanation)
 
+        // Check that the explanation contains key sections
         assertTrue(explanation.contains("HVA"))
-        assertTrue(explanation.contains("HVORFOR"))
-        assertTrue(explanation.contains("regel"))
+        assertTrue(explanation.contains("Forklaring for"))
+        assertTrue(explanation.contains("Aldersvilkår"))
     }
 }

@@ -48,10 +48,8 @@ class TrackablePredicate(
     fun konkret(): String = uttrykk.konkret()
 
     /**
-     * Override hva() to show the predicate's expression.
-     * Shows the notasjon (formula with names) rather than just "PREDIKAT: "
+     * Override toString() to show the predicate's expression.
+     * Shows the uttrykk's representation rather than just "PREDIKAT: "
      */
-    override fun hva(): String = "${type()}: ${uttrykk.notasjon()}"
-
     override fun toString(): String = uttrykk.toString()
 }

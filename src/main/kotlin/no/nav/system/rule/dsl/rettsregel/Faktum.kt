@@ -3,9 +3,6 @@ package no.nav.system.rule.dsl.rettsregel
 import no.nav.system.rule.dsl.enums.ListOperator
 import no.nav.system.rule.dsl.enums.MathOperator
 import no.nav.system.rule.dsl.enums.PairOperator
-import no.nav.system.rule.dsl.explanation.Hva
-import no.nav.system.rule.dsl.explanation.Hvordan
-import no.nav.system.rule.dsl.explanation.Hvorfor
 import no.nav.system.rule.dsl.reference.Reference
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import java.io.Serializable
@@ -186,7 +183,7 @@ private fun StringBuilder.appendIf(level: Int, statement: () -> Boolean): String
  * It acts as the boundary between anonymous calculations (Const, MathOperation) and
  * named business facts that appear in rule explanations.
  *
- * Implements only Hva (identity) - presentation is handled separately via extension functions.
+ * Pure data class - presentation is handled separately via extension functions.
  * This separation allows users to write custom explanation/presentation logic.
  *
  * Example:
@@ -207,7 +204,7 @@ data class Faktum<T : Any>(
     val navn: String,
     val uttrykk: Uttrykk<T>,
     val references: List<Reference> = emptyList()
-) : Uttrykk<T>, Hva {
+) : Uttrykk<T> {
 
     constructor(
         navn: String,
@@ -247,7 +244,7 @@ data class Faktum<T : Any>(
 
     /**
      * Internal implementation for Uttrykk interface.
-     * Users should use extension functions in FaktumExplanation.kt for presentation.
+     * Users should use extension functions in ExplanationBuilder.kt for presentation.
      */
     override fun forklar(level: Int): String = buildString {
         indent(level).append("$navn = $verdi\n")
@@ -256,12 +253,6 @@ data class Faktum<T : Any>(
             append(uttrykk.forklar(level))
         }
     }
-
-    /**
-     * Hva: Identity of this Faktum.
-     * Returns "name = value"
-     */
-    override fun hva(): String = "$navn = $verdi"
 }
 
 /**
