@@ -7,7 +7,8 @@ enum class RuleComponentType {
     GREN,
     REGELSETT,
     REGEL,
-    PREDIKAT;
+    PREDIKAT,
+    FAKTUM;
 
     override fun toString(): String {
         return name.lowercase()

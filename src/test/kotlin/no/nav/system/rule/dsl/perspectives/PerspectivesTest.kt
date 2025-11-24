@@ -1,8 +1,10 @@
 package no.nav.system.rule.dsl.perspectives
 
 import no.nav.system.rule.dsl.AbstractRuleset
+import no.nav.system.rule.dsl.explanation.traverseHva
+import no.nav.system.rule.dsl.explanation.traverseFull
+import no.nav.system.rule.dsl.explanation.collectFaktum
 import no.nav.system.rule.dsl.reference.ref
-import no.nav.system.rule.dsl.resource.ExecutionTrace
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.operators.erStørreEllerLik
 import no.nav.system.rule.dsl.rettsregel.operators.times
@@ -11,7 +13,7 @@ import org.junit.jupiter.api.Assertions.*
 
 class PerspectivesTest {
 
-    // Simple test ruleset with ExecutionTrace
+    // Simple test ruleset
     class TestRuleset(private val alder: Int) : AbstractRuleset<Boolean>() {
         override fun create() {
             regel("VILKÅR-ALDER") {
@@ -23,44 +25,54 @@ class PerspectivesTest {
     }
 
     @Test
-    fun `skal kunne kalle toFullString() på ExecutionTrace`() {
-        val trace = ExecutionTrace()
+    fun `skal kunne kalle traverseHva() på ARC tree`() {
+        val ruleset = TestRuleset(70)
+        val result = ruleset.test()
 
-        // Note: ExecutionTrace is populated during actual service execution
-        // For now, just verify the API works (will show empty trace)
-        val output = trace.toFullString()
+        val output = ruleset.traverseHva()
 
         println(output)
         assertNotNull(output)
         assertTrue(output.isNotEmpty())
-        // Empty trace shows appropriate message
-        assertTrue(output.contains("Ingen kjøring") || output.contains("Full Execution Trace"))
+        assertTrue(output.contains("TestRuleset"))
     }
 
     @Test
-    fun `skal kunne kalle toFunctionalString() på ExecutionTrace`() {
-        val trace = ExecutionTrace()
+    fun `skal kunne kalle traverseFull() på ARC tree`() {
+        val ruleset = TestRuleset(70)
+        val result = ruleset.test()
 
-        // Note: ExecutionTrace is populated during actual service execution
-        // For now, just verify the API works (will show empty trace)
-        val output = trace.toFunctionalString()
+        val output = ruleset.traverseFull()
 
         println(output)
         assertNotNull(output)
         assertTrue(output.isNotEmpty())
-        // Empty trace shows appropriate message
-        assertTrue(output.contains("Ingen beslutninger") || output.contains("Functional Execution Path"))
+        assertTrue(output.contains("TestRuleset"))
+    }
+
+    @Test
+    fun `skal kunne kalle collectFaktum() på ARC tree`() {
+        val ruleset = TestRuleset(70)
+        val result = ruleset.test()
+
+        val faktumNodes = ruleset.collectFaktum()
+
+        println("Found ${faktumNodes.size} Faktum nodes")
+        faktumNodes.forEach { node ->
+            println("  - ${node.faktum.navn} = ${node.faktum.verdi}")
+        }
+
+        assertNotNull(faktumNodes)
+        assertTrue(faktumNodes.isNotEmpty())
     }
 
     @Test
     fun `skal kunne kalle toUttrykksTree() på Faktum`() {
-        val trace = ExecutionTrace()
-
         val sats = Faktum("sats", 1000)
         val faktor = Faktum("faktor", 2.5)
         val resultat = Faktum("resultat", sats * faktor)
 
-        val output = trace.toUttrykksTree(resultat)
+        val output = resultat.toUttrykksTree()
 
         println(output)
         assertTrue(output.contains("Formula Tree"))
@@ -70,11 +82,9 @@ class PerspectivesTest {
 
     @Test
     fun `skal kunne kalle toFaktumExplanation() på Faktum`() {
-        val trace = ExecutionTrace()
-
         val aldersgrense = Faktum("aldersgrense", 67)
 
-        val output = trace.toFaktumExplanation(aldersgrense)
+        val output = aldersgrense.toFaktumExplanation()
 
         println(output)
         assertTrue(output.contains("Explanation for 'aldersgrense'"))
@@ -82,36 +92,36 @@ class PerspectivesTest {
     }
 
     @Test
-    fun `toFullString() skal vise tom melding når trace er tom`() {
-        val trace = ExecutionTrace()
-
-        val output = trace.toFullString()
-
-        assertTrue(output.contains("Ingen kjøring registrert") || output.contains("Empty execution trace"))
-    }
-
-    @Test
-    fun `toFunctionalString() skal vise tom melding når ingen beslutninger`() {
-        val trace = ExecutionTrace()
-
-        val output = trace.toFunctionalString()
-
-        assertTrue(output.contains("Ingen beslutninger") || output.contains("No decisions recorded"))
-    }
-
-    @Test
     fun `perspektiver skal fungere med Faktum med referanser`() {
-        val trace = ExecutionTrace()
-
         val aldersgrense = Faktum("aldersgrense", 67)
             .ref("FTL-20-7", "https://lovdata.no/...")
 
-        val explanation = trace.toFaktumExplanation(aldersgrense)
+        val explanation = aldersgrense.toFaktumExplanation()
 
         println(explanation)
         assertTrue(explanation.contains("aldersgrense"))
         // References might not be shown in forklar() yet, but at least verify Faktum works
         assertNotNull(aldersgrense.references)
         assertEquals(1, aldersgrense.references.size)
+    }
+
+    @Test
+    fun `Faktum hvorfor skal traversere opp i ARC tree`() {
+        val ruleset = TestRuleset(70)
+        val result = ruleset.test()
+
+        // Collect all Faktum from the execution
+        val faktumNodes = ruleset.collectFaktum()
+
+        assertTrue(faktumNodes.isNotEmpty())
+
+        // Each Faktum should be able to compute its hvorfor path
+        faktumNodes.forEach { node ->
+            val hvorfor = node.faktum.hvorfor()
+            println("Faktum '${node.faktum.navn}' hvorfor path: ${hvorfor.map { it.hva() }}")
+
+            // Hvorfor might be empty for some Faktum, but the method should work
+            assertNotNull(hvorfor)
+        }
     }
 }

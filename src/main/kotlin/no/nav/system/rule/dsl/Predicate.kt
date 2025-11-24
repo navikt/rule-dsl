@@ -32,7 +32,6 @@ open class Predicate(
     override fun type(): RuleComponentType = PREDIKAT
     override fun fired(): Boolean = fired
     override fun toString(): String = "${type()}: ${fired.svarord()}"
-    override fun toUttrykk(): Uttrykk<*> = Const("${type()}: ${fired.svarord()}")
 }
 
 /**
@@ -48,6 +47,11 @@ class TrackablePredicate(
     fun notasjon(): String = uttrykk.notasjon()
     fun konkret(): String = uttrykk.konkret()
 
+    /**
+     * Override hva() to show the predicate's expression.
+     * Shows the notasjon (formula with names) rather than just "PREDIKAT: "
+     */
+    override fun hva(): String = "${type()}: ${uttrykk.notasjon()}"
+
     override fun toString(): String = uttrykk.toString()
-    override fun toUttrykk(): Uttrykk<*> = uttrykk
 }

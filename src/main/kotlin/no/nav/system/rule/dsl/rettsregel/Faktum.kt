@@ -3,6 +3,9 @@ package no.nav.system.rule.dsl.rettsregel
 import no.nav.system.rule.dsl.enums.ListOperator
 import no.nav.system.rule.dsl.enums.MathOperator
 import no.nav.system.rule.dsl.enums.PairOperator
+import no.nav.system.rule.dsl.explanation.Hva
+import no.nav.system.rule.dsl.explanation.Hvordan
+import no.nav.system.rule.dsl.explanation.Hvorfor
 import no.nav.system.rule.dsl.reference.Reference
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import java.io.Serializable
@@ -183,6 +186,11 @@ private fun StringBuilder.appendIf(level: Int, statement: () -> Boolean): String
  * It acts as the boundary between anonymous calculations (Const, MathOperation) and
  * named business facts that appear in rule explanations.
  *
+ * Implements Hva, Hvorfor, Hvordan for integration with ARC tree structure:
+ * - Hva: Identity (name = value)
+ * - Hvorfor: Execution context (why was this created?) - computed by traversing ARC tree
+ * - Hvordan: Computation details (formula tree if not constant)
+ *
  * Example:
  * ```
  * val alder = Faktum("Alder", 67)              // Named fact
@@ -195,17 +203,13 @@ private fun StringBuilder.appendIf(level: Int, statement: () -> Boolean): String
  * tillegg.uttrykk.faktumSet()  // → { alder, sats }  Contributing facts inside
  * ```
  *
- * @param hvorfor Execution trace as list of expressions. Contains Const<String> for component names
- *                and Uttrykk<Boolean> for predicates (ComparisonOperation, ListOperation, Faktum<Boolean>).
- *
  * This is can be created by users.
  */
 data class Faktum<T : Any>(
     val navn: String,
     val uttrykk: Uttrykk<T>,
-    val references: List<Reference> = emptyList(),
-    private val hvorfor: List<Uttrykk<*>>? = null
-) : Uttrykk<T> {
+    val references: List<Reference> = emptyList()
+) : Uttrykk<T>, Hva, Hvorfor, Hvordan {
 
     constructor(
         navn: String,
@@ -216,6 +220,13 @@ data class Faktum<T : Any>(
         uttrykk = Const(verdi),
         references = references
     )
+
+    /**
+     * Backlink to the FaktumNode wrapper when this Faktum is added to the ARC tree.
+     * Used to compute hvorfor by traversing up the tree.
+     */
+    @Transient
+    internal var wrapperNode: no.nav.system.rule.dsl.FaktumNode<T>? = null
 
     override val verdi: T by lazy { uttrykk.verdi }
 
@@ -240,14 +251,16 @@ data class Faktum<T : Any>(
         indent(level).append("HVA\n")
         indent(level + 1).append("$navn = $verdi\n")
 
-        hvorfor?.let { trace ->
+        val trace = hvorfor()
+        if (trace.isNotEmpty()) {
             indent(level).append("HVORFOR\n")
-            trace.forEach { uttrykk ->
-                when (uttrykk) {
-                    // Component names - simple string output
-                    is Const<*> -> indent(level + 1).append("${uttrykk.verdi}\n")
-                    // Predicates - recursively explain (includes nested Faktum)
-                    else -> append(uttrykk.forklar(level + 1))
+            trace.forEach { hva ->
+                // All items in trace are Hva (ARCs)
+                indent(level + 1).append("${hva.hva()}\n")
+
+                // If it's also an Uttrykk (e.g., from TrackablePredicate), show details
+                if (hva is Uttrykk<*>) {
+                    append(hva.forklar(level + 1))
                 }
             }
         }
@@ -255,6 +268,32 @@ data class Faktum<T : Any>(
         // Show formula/nested explanation if not a simple constant
         if (uttrykk !is Const<*>) {
             append(uttrykk.forklar(level))
+        }
+    }
+
+    /**
+     * Hva: Identity of this Faktum.
+     * Returns "name = value"
+     */
+    override fun hva(): String = "$navn = $verdi"
+
+    /**
+     * Hvorfor: Execution context - why was this Faktum created?
+     * Computed dynamically by traversing up the ARC tree from the FaktumNode wrapper.
+     */
+    override fun hvorfor(): List<Hva> {
+        return wrapperNode?.decisionPath() ?: emptyList()
+    }
+
+    /**
+     * Hvordan: Computation details - how is this calculated?
+     * Returns formula tree visualization if not a constant.
+     */
+    override fun hvordan(): String {
+        return if (uttrykk !is Const<*>) {
+            uttrykk.forklar(0)
+        } else {
+            ""
         }
     }
 }

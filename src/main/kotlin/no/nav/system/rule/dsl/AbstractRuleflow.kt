@@ -2,7 +2,6 @@ package no.nav.system.rule.dsl
 
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.*
-import no.nav.system.rule.dsl.resource.ExecutionTrace
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
@@ -27,41 +26,17 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
      */
     @TestOnly
     open fun test(): T {
-        val trace = try {
-            getResource(ExecutionTrace::class)
-        } catch (e: Exception) {
-            null
-        }
-
         branchNameStack.push(this.javaClass.simpleName)
-        trace?.push(this)
-        try {
-            return ruleflow.invoke()
-        } finally {
-            trace?.pop()
-        }
+        return ruleflow.invoke()
     }
 
     /**
      * Runs the ruleflow
      */
     open fun run(parent: AbstractRuleComponent): T {
-        this.resourceMap = parent.resourceMap
-        parent.children.add(this)
-
-        val trace = try {
-            getResource(ExecutionTrace::class)
-        } catch (e: Exception) {
-            null
-        }
-
+        parent.addChild(this)
         branchNameStack.push(this.javaClass.simpleName)
-        trace?.push(this)
-        try {
-            return ruleflow.invoke()
-        } finally {
-            trace?.pop()
-        }
+        return ruleflow.invoke()
     }
 
     protected abstract var ruleflow: () -> T
@@ -74,8 +49,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
     fun forgrening(name: String, init: Decision.() -> Unit) {
         branchNameStack.push(name)
         val d = Decision(branchName())
-        d.resourceMap = this.resourceMap
-        this.children.add(d)
+        addChild(d)
         d.init()
         d.run()
         branchNameStack.pop()
@@ -85,7 +59,6 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
     override fun fired(): Boolean = true
     override fun type(): RuleComponentType = REGELFLYT
     override fun toString(): String = "${type()}: ${name()}"
-    override fun toUttrykk(): Uttrykk<*> = Const("${type()}: ${name()}")
 
     /**
      * Represents a split in ruleflow logic. Each [Decision] can have multiple outcomes ([Branch]).
@@ -97,27 +70,15 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         private var branchList = mutableListOf<Branch>()
 
         fun run() {
-            val trace = getResourceOrNull(ExecutionTrace::class)
-            trace?.push(this)
-            try {
-                val flowsToRun = mutableListOf<Branch>()
-                branchList.forEach {
-                    it.fired = it.condition.verdi
-                    if (it.fired) {
-                        flowsToRun.add(it)
-                    }
+            val flowsToRun = mutableListOf<Branch>()
+            branchList.forEach {
+                it.fired = it.condition.verdi
+                if (it.fired) {
+                    flowsToRun.add(it)
                 }
-                flowsToRun.forEach { branch ->
-                    // Push branch before executing its flow
-                    trace?.push(branch)
-                    try {
-                        branch.flowFunction.invoke()
-                    } finally {
-                        trace?.pop()
-                    }
-                }
-            } finally {
-                trace?.pop()
+            }
+            flowsToRun.forEach { branch ->
+                branch.flowFunction.invoke()
             }
         }
 
@@ -127,8 +88,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
          */
         fun gren(init: Branch.() -> Unit): Branch {
             val b = Branch("$name/gren ${branchList.size}")
-            b.resourceMap = this.resourceMap
-            this.children.add(b)
+            addChild(b)
             b.init()
             branchList.add(b)
             return b
@@ -138,7 +98,6 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         override fun fired(): Boolean = true
         override fun type(): RuleComponentType = FORGRENING
         override fun toString(): String = "${type()}: ${name()}"
-        override fun toUttrykk(): Uttrykk<*> = Const("forgrening: ${name()}")
 
         class Branch(
             defaultName: String,
@@ -184,7 +143,6 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
             override fun type(): RuleComponentType = GREN
 
             override fun toString(): String = "${type()}: ${fired().svarord()} ${condition.notasjon()} = ${condition.konkret()} "
-            override fun toUttrykk(): Uttrykk<*> = condition
 
         }
     }

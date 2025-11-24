@@ -26,6 +26,44 @@ Se faktum-trace-options.md.
 
 
 
+## 2025-01-18: Phase 1-3 Complete - Reference System, Tree Visualization, and Perspectives
+
+**Phase 1: Reference Traceability System ✅**
+- Created simple `Reference(id, url)` data class
+- Added `references: List<Reference>` to both AbstractRuleComponent and Faktum
+- Implemented fluent `.ref()` API (only on Faktum to enforce explicit naming)
+- Removed deprecated `rvsId` parameter from Faktum
+- Files: reference/Reference.kt, reference/ReferenceExtensions.kt, tests
+
+**Phase 2: Tree Visualization ✅**
+- Implemented UttrykksTreePrinter with box-drawing characters
+- Deduplication tracking: first occurrence shows full subtree, subsequent show `[N]` reference
+- Extension function `Uttrykk<*>.printTree()` for easy usage
+- Files: inspections/UttrykksTreePrinter.kt, tests
+
+**Phase 3: Siloed Architecture & Perspectives ✅**
+- Established clean separation: Execution (ARC) → Tracing (ExecutionTrace) → Perspectives (viewing)
+- ExecutionTrace already perfect (no changes needed!)
+- Implemented 4 perspective functions as extensions on ExecutionTrace:
+  - `toFullString()` - complete audit trail
+  - `toFunctionalString()` - decisions only (uses pathForHvorfor())
+  - `toUttrykksTree(faktum)` - integrates UttrykksTreePrinter from Phase 2
+  - `toFaktumExplanation(faktum)` - uses existing forklar() method
+- Extension function pattern enables custom perspectives in client repos
+- Faktum.hvorfor already wired via sporing() methods (no changes needed!)
+- Files: perspectives/Perspectives.kt, tests
+- Kept forklar() (not deprecated) for gradual migration
+
+**Key Architectural Achievement:**
+- Clean siloed architecture with single ExecutionTrace
+- Multiple perspectives from same execution data
+- Backward compatible (all existing tests passing)
+- Extensible (client repos can add custom perspectives)
+- References from Phase 1 ready to be displayed in perspectives
+- Tree visualization from Phase 2 integrated as UttrykksTreePerspective
+
+**See:** src/main/doc/ProgressEvaluation.md for detailed documentation
+
 DEL 2
 1. [????] Akkumulering ble ikke like enkelt. Tidligere:
 
@@ -72,5 +110,8 @@ Eller en annen løsning.
 9. Caching må innføres i Uttrykk evalueringsmekanisme. Hver Uttrykk bør cache sitt evaluerte resultat slik at rekursive kall ikke påvirker ytelse.
 
 10. Hadde vært kjekt å kunne negere Faktum<Boolean>. Dvs skrive "!innvilget" istedenfor "innvilget erLik false".
+Hadde en forventning om at dette skulle føre til at Faktum("bool", true) ble det samme som !Faktum("bool", false), men fant ingen god løsning på dette. 
 
 11. Dobbeltsjekk at det ikke er fjere steder med unødvendig dobbel funksjonswrapping: "{ ogFunksjon() }".
+
+12. Reference -> Henvisning. .ref() -> .henvis

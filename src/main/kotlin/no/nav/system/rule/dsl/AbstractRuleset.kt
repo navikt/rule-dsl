@@ -6,8 +6,6 @@ import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
 import no.nav.system.rule.dsl.error.InvalidRulesetException
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.resource.ExecutionTrace
-import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListOperation
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
@@ -53,7 +51,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
         val sequence = nextSequence()
         ruleFunctionMap[sequence] = {
             val rule = Rule<T>("$rulesetName.$navn", sequence)
-            children.add(rule)
+            addChild(rule)
             rule.createRuleContent()
             listOf(rule)
         }
@@ -82,7 +80,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
                 }
                 pattern.registerRule(rule, patternElement)
                 rule.patternOffset = offset
-                children.add(rule)
+                addChild(rule)
                 rule.createRuleContent(patternElement)
                 offset++
                 rulesInPattern.add(rule)
@@ -94,7 +92,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
              */
             if (pattern.get().isEmpty()) {
                 val rule = Rule<T>("$rulesetName.$navn", sequence)
-                children.add(rule)
+                addChild(rule)
                 rulesInPattern.add(rule)
             }
 
@@ -104,8 +102,6 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
 
     @TestOnly
     open fun test(): T {
-        // Enable tracing for standalone tests
-        putResource(ExecutionTrace::class, ExecutionTrace())
         return internalRun()
     }
 
@@ -122,9 +118,7 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      * @return value T wrapped in Optional
      */
     fun run(parent: AbstractRuleComponent): T {
-        this.resourceMap = parent.resourceMap
-        parent.children.add(this)
-
+        parent.addChild(this)
         return internalRun()
     }
 
@@ -133,36 +127,25 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      */
     @Suppress("MemberVisibilityCanBePrivate")
     protected fun internalRun(): T {
-        val trace = try {
-            getResource(ExecutionTrace::class)
-        } catch (e: Exception) {
-            null
-        }
+        create()
 
-        trace?.push(this)
-        try {
-            create()
-
-            ruleFunctionMap.values.forEach { ruleSpawn ->
-                ruleSpawn.invoke().forEach {
-                    it.resourceMap = this.resourceMap
-                    it.evaluate()
-                    if (it.returnRule) {
-                        returnValue = it.returnValue
-                        return it.returnValue
-                    }
+        ruleFunctionMap.values.forEach { ruleSpawn ->
+            ruleSpawn.invoke().forEach {
+                it.resourceMap = this.resourceMap
+                it.evaluate()
+                if (it.returnRule) {
+                    returnValue = it.returnValue
+                    return it.returnValue
                 }
             }
-
-            /**
-             * Ruleset must be of type Unit if no rules have returned a value.
-             * If the ruleset is not of type Unit, a ClassCastException is thrown _when the value is used_.
-             */
-            @Suppress("UNCHECKED_CAST")
-            return Unit as T
-        } finally {
-            trace?.pop()
         }
+
+        /**
+         * Ruleset must be of type Unit if no rules have returned a value.
+         * If the ruleset is not of type Unit, a ClassCastException is thrown _when the value is used_.
+         */
+        @Suppress("UNCHECKED_CAST")
+        return Unit as T
     }
 
     /**
@@ -294,6 +277,5 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     override fun fired(): Boolean = true
     override fun type(): RuleComponentType = REGELSETT
     override fun toString(): String = "${type()}: $rulesetName"
-    override fun toUttrykk(): Uttrykk<*> = Const("regelsett: $rulesetName")
 
 }
