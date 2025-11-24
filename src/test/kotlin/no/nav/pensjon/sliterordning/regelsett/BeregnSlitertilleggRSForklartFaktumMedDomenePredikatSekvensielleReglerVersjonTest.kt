@@ -260,6 +260,8 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
         // ASSERT FORKLARING
         println(slitertilleggRS.explain().direction(d= Direction.DOWN).perspective(p=Perspective.FULL).transform(::toIndentedText))
+        println("===================")
+        println(slitertillegg.forklar())
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
 
         // ASSERT HVA

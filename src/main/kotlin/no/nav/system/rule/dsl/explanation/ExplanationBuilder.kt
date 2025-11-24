@@ -256,24 +256,28 @@ private fun traverseWithLevel(
 /**
  * Convenience: Complete explanation of a Faktum showing HVA/HVORFOR/HVORDAN.
  *
+ * Recursively explains all contributing Faktum used in the calculation.
+ *
+ * @param perspective Which nodes to include in decision path
+ * @param depth Indentation level (0 = root, 1 = first level, etc.)
+ *
  * Example:
  * ```
  * val explanation = faktum.forklar()
  * ```
  */
-fun <T : Any> Faktum<T>.forklar(perspective: Perspective = Perspective.FUNCTIONAL): String {
+fun <T : Any> Faktum<T>.forklar(perspective: Perspective = Perspective.FUNCTIONAL, depth: Int = 0): String {
+    val indent = "  ".repeat(depth)
     return buildString {
-        appendLine("=== Forklaring for '$navn' ===")
-        appendLine()
-        appendLine("HVA:")
-        appendLine("  $navn = $verdi")
+        appendLine("${indent}HVA:")
+        appendLine("$indent  $navn = $verdi")
 
         // Show formula if not constant
         if (uttrykk !is Const<*>) {
             appendLine()
-            appendLine("HVORDAN (calculation):")
-            appendLine("  Formula: ${uttrykk.notasjon()}")
-            appendLine("  Result: ${uttrykk.konkret()}")
+            appendLine("${indent}HVORDAN:")
+            appendLine("$indent  notasjon: ${uttrykk.notasjon()}")
+            appendLine("$indent  konkret: ${uttrykk.konkret()}")
         }
 
         // Get decision path using ExplanationBuilder
@@ -286,13 +290,20 @@ fun <T : Any> Faktum<T>.forklar(perspective: Perspective = Perspective.FUNCTIONA
 
             if (trace.isNotEmpty()) {
                 appendLine()
-                appendLine("HVORFOR (decision path):")
+                appendLine("${indent}HVORFOR (decision path):")
                 trace.forEach { (arc, _) ->
-                    appendLine("  - $arc")
+                    appendLine("$indent  - $arc")
                 }
             }
         }
 
-
+        // Recursively explain contributing Faktum
+        val contributingFaktum = uttrykk.faktumSet()
+        if (contributingFaktum.isNotEmpty()) {
+            contributingFaktum.forEach { faktum ->
+                appendLine()  // Separator
+                append(faktum.forklar(perspective, depth + 1))  // Recursive with depth+1
+            }
+        }
     }
 }
