@@ -28,17 +28,18 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
 
+        // ASSERT HEADER
+        assertEquals("=== Forklaring for 'slitertillegg' ===", forklaringIterator.next())
+
         // ASSERT HVA
-        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("HVA:", forklaringIterator.next())
         assertEquals("slitertillegg = 2291.6666666666665", forklaringIterator.next())
 
-        // ASSERT HVORFOR
-        assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-BEREGNING-UAVKORTET", forklaringIterator.next())
-        assertEquals("JA 'nedrePensjonsDato' er lik 'uttakstidspunkt'", forklaringIterator.next())
-        assertEquals("JA '2024-01' er lik '2024-01'", forklaringIterator.next())
-        assertEquals("JA 'faktiskTrygdetid' er lik 'fullTrygdetid'", forklaringIterator.next())
-        assertEquals("JA '40' er lik '40'", forklaringIterator.next())
+        // ASSERT HVORFOR (predicates in order they were defined: HVIS then OG)
+        assertEquals("HVORFOR (decision path):", forklaringIterator.next())
+        assertEquals("- JA 'nedrePensjonsDato' (2024-01) er lik 'uttakstidspunkt' (2024-01)", forklaringIterator.next())
+        assertEquals("- JA 'faktiskTrygdetid' (40) er lik 'fullTrygdetid' (40)", forklaringIterator.next())
+        assertEquals("- regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-BEREGNING-UAVKORTET", forklaringIterator.next())
     }
 
     @Test
@@ -56,22 +57,23 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
 
+        // ASSERT HEADER
+        assertEquals("=== Forklaring for 'slitertillegg' ===", forklaringIterator.next())
+
         // ASSERT HVA
-        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("HVA:", forklaringIterator.next())
         assertEquals("slitertillegg = 1718.75", forklaringIterator.next())
 
-        // ASSERT HVORFOR
-        assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-AVKORTING-TRYGDETID", forklaringIterator.next())
-        assertEquals("JA 'nedrePensjonsDato' er lik 'uttakstidspunkt'", forklaringIterator.next())
-        assertEquals("JA '2024-01' er lik '2024-01'", forklaringIterator.next())
-        assertEquals("JA 'faktiskTrygdetid' er mindre enn 'fullTrygdetid'", forklaringIterator.next())
-        assertEquals("JA '30' er mindre enn '40'", forklaringIterator.next())
+        // ASSERT HVORFOR (predicates in order they were defined: HVIS then OG)
+        assertEquals("HVORFOR (decision path):", forklaringIterator.next())
+        assertEquals("- JA 'nedrePensjonsDato' (2024-01) er lik 'uttakstidspunkt' (2024-01)", forklaringIterator.next())
+        assertEquals("- JA 'faktiskTrygdetid' (30) er mindre enn 'fullTrygdetid' (40)", forklaringIterator.next())
+        assertEquals("- regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-AVKORTING-TRYGDETID", forklaringIterator.next())
 
         // ASSERT HVORDAN
-        assertEquals("HVORDAN", forklaringIterator.next())
-        assertEquals("fulltSlitertillegg * trygdetidFaktor", forklaringIterator.next())
-        assertEquals("2291.6666666666665 * 0.75", forklaringIterator.next())
+        assertEquals("HVORDAN (calculation):", forklaringIterator.next())
+        assertEquals("Formula: fulltSlitertillegg * trygdetidFaktor", forklaringIterator.next())
+        assertEquals("Result: 2291.6666666666665 * 0.75", forklaringIterator.next())
     }
 
     @Test
@@ -89,22 +91,23 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
 
+        // ASSERT HEADER
+        assertEquals("=== Forklaring for 'slitertillegg' ===", forklaringIterator.next())
+
         // ASSERT HVA
-        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("HVA:", forklaringIterator.next())
         assertEquals("slitertillegg = 1018.5185185185184", forklaringIterator.next())
 
-        // ASSERT HVORFOR
-        assertEquals("HVORFOR", forklaringIterator.next())
-        assertEquals("regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", forklaringIterator.next())
-        assertEquals("JA 'nedrePensjonsDato' er før 'uttakstidspunkt'", forklaringIterator.next())
-        assertEquals("JA '2024-01' er før '2025-09'", forklaringIterator.next())
-        assertEquals("JA 'faktiskTrygdetid' er lik 'fullTrygdetid'", forklaringIterator.next())
-        assertEquals("JA '40' er lik '40'", forklaringIterator.next())
+        // ASSERT HVORFOR (predicates in order they were defined: HVIS then OG)
+        assertEquals("HVORFOR (decision path):", forklaringIterator.next())
+        assertEquals("- JA 'nedrePensjonsDato' (2024-01) er før 'uttakstidspunkt' (2025-09)", forklaringIterator.next())
+        assertEquals("- JA 'faktiskTrygdetid' (40) er lik 'fullTrygdetid' (40)", forklaringIterator.next())
+        assertEquals("- regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", forklaringIterator.next())
 
         // ASSERT HVORDAN
-        assertEquals("HVORDAN", forklaringIterator.next())
-        assertEquals("fulltSlitertillegg * justeringsFaktor", forklaringIterator.next())
-        assertEquals("2291.6666666666665 * 0.4444444444444444", forklaringIterator.next())
+        assertEquals("HVORDAN (calculation):", forklaringIterator.next())
+        assertEquals("Formula: fulltSlitertillegg * justeringsFaktor", forklaringIterator.next())
+        assertEquals("Result: 2291.6666666666665 * 0.4444444444444444", forklaringIterator.next())
     }
 
     @Test
@@ -122,24 +125,26 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
         // ASSERT FORKLARING
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
         println(slitertillegg.forklar())
+
+        // ASSERT HEADER
+        assertEquals("=== Forklaring for 'slitertillegg' ===", forklaringIterator.next())
+
         // ASSERT HVA
-        assertEquals("HVA", forklaringIterator.next())
+        assertEquals("HVA:", forklaringIterator.next())
         assertEquals("slitertillegg = 509.2592592592592", forklaringIterator.next())
 
-        // ASSERT HVORFOR
-        assertEquals("HVORFOR", forklaringIterator.next())
+        // ASSERT HVORFOR (predicates in order they were defined: HVIS then OG)
+        assertEquals("HVORFOR (decision path):", forklaringIterator.next())
+        assertEquals("- JA 'nedrePensjonsDato' (2024-01) er før 'uttakstidspunkt' (2025-09)", forklaringIterator.next())
+        assertEquals("- JA 'faktiskTrygdetid' (20) er mindre enn 'fullTrygdetid' (40)", forklaringIterator.next())
         assertEquals(
-            "regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
+            "- regel: JA BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
             forklaringIterator.next()
         )
-        assertEquals("JA 'nedrePensjonsDato' er før 'uttakstidspunkt'", forklaringIterator.next())
-        assertEquals("JA '2024-01' er før '2025-09'", forklaringIterator.next())
-        assertEquals("JA 'faktiskTrygdetid' er mindre enn 'fullTrygdetid'", forklaringIterator.next())
-        assertEquals("JA '20' er mindre enn '40'", forklaringIterator.next())
 
         // ASSERT HVORDAN
-        assertEquals("HVORDAN", forklaringIterator.next())
-        assertEquals("fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
-        assertEquals("2291.6666666666665 * 0.4444444444444444 * 0.5", forklaringIterator.next())
+        assertEquals("HVORDAN (calculation):", forklaringIterator.next())
+        assertEquals("Formula: fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
+        assertEquals("Result: 2291.6666666666665 * 0.4444444444444444 * 0.5", forklaringIterator.next())
     }
 }

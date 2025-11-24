@@ -3,7 +3,11 @@ package no.nav.pensjon.sliterordning.regelsett
 import no.nav.pensjon.sliterordning.grunnlag.NormertPensjonsalder
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.grunnlag.Trygdetid
+import no.nav.system.rule.dsl.explanation.Direction
+import no.nav.system.rule.dsl.explanation.explain
 import no.nav.system.rule.dsl.explanation.forklar
+import no.nav.system.rule.dsl.explanation.toIndentedText
+import no.nav.system.rule.dsl.perspectives.Perspective
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -243,17 +247,19 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
 
     @Test
     fun `SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID - uttak før virkning og redusert trygdetid`() {
-        val slitertillegg = BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
+        val slitertilleggRS = BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
             innUttakstidspunkt = YearMonth.of(2025, 9), // 20 måneder etter nedre pensjonsalder,
             innPerson = person(YearMonth.of(1961, 12), 20),// nedre pensjonsdato 2024-01,
             innGrunnbeløp = 110000
-        ).test()
+        )
+        val slitertillegg = slitertilleggRS.test()
 
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
         assertEquals(509.26, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
+        println(slitertilleggRS.explain().direction(d= Direction.DOWN).perspective(p=Perspective.FULL).transform(::toIndentedText))
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
 
         // ASSERT HVA

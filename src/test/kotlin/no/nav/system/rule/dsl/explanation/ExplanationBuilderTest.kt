@@ -39,7 +39,7 @@ class ExplanationBuilderTest {
         val explanation = aldersvilkårFaktum.explain()
             .perspective(Perspective.FUNCTIONAL)
             .direction(Direction.UP)
-            .toText()
+            .transform(::toIndentedText)
 
         println("=== Faktum-centric explanation (UP) ===")
         println(explanation)
@@ -58,7 +58,7 @@ class ExplanationBuilderTest {
         val trace = ruleset.explain()
             .perspective(Perspective.FUNCTIONAL)
             .direction(Direction.DOWN)
-            .toText()
+            .transform(::toIndentedText)
 
         println("=== Service-centric trace (DOWN) ===")
         println(trace)
@@ -77,7 +77,7 @@ class ExplanationBuilderTest {
             .perspective(Perspective.FUNCTIONAL)
             .direction(Direction.DOWN)
             .transform { nodes ->
-                nodes.map { it.name() }
+                nodes.map { (node, _) -> node.name() }
             }
 
         println("=== Custom transform (names only) ===")
@@ -101,7 +101,7 @@ class ExplanationBuilderTest {
         val faktumOnly = ruleset.explain()
             .perspective(OnlyFaktum)
             .direction(Direction.DOWN)
-            .toText()
+            .transform(::toIndentedText)
 
         println("=== Custom perspective (only Faktum) ===")
         println(faktumOnly)

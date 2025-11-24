@@ -9,6 +9,6 @@ abstract class AbstractDemoRuleset<Response : Any> : AbstractRuleset<Response>()
             GrunnbeløpSatsResource::class,
             GrunnbeløpSatsResource()
         )
-        return this.run(this)
+        return internalRun()
     }
 }
