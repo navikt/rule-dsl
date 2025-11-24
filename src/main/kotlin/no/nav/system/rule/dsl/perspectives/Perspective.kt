@@ -4,36 +4,45 @@ import no.nav.system.rule.dsl.AbstractRuleComponent
 import no.nav.system.rule.dsl.enums.RuleComponentType
 
 /**
- * Defines different perspectives for viewing the ARC tree execution trace.
+ * API for filtering which nodes are included when traversing the ARC tree.
  *
- * Perspectives control which nodes are included when traversing the tree,
- * allowing different levels of detail for different use cases.
+ * Functional interface allows users to create custom perspectives by implementing
+ * the includes() predicate function.
+ *
+ * Example - User-defined custom perspective:
+ * ```
+ * val OnlyFiredRules = Perspective { arc ->
+ *     arc.type() == RuleComponentType.REGEL && arc.fired()
+ * }
+ * ```
  */
-enum class Perspective {
-    /**
-     * FULL PERSPECTIVE: Complete audit trail showing every component.
-     * - Service-centric use case: Complete compliance audit
-     * - Shows: All nodes (services, flows, decisions, branches, rulesets, rules, predicates, faktum)
-     * - Use when: Need to see every step of execution
-     */
-    FULL,
-
-    /**
-     * FUNCTIONAL PERSPECTIVE: Only decision-making components.
-     * - Service-centric use case: Understanding business logic flow
-     * - Shows: Rules, branches, predicates, and faktum (the actual decisions and data)
-     * - Hides: Container nodes (services, flows, decisions, rulesets)
-     * - Use when: Focus on "what decisions were made" rather than structure
-     */
-    FUNCTIONAL;
-
+fun interface Perspective {
     /**
      * Determines if a given ARC node should be included in this perspective.
+     *
+     * @param arc The AbstractRuleComponent to evaluate
+     * @return true if the node should be included in traversal output
      */
-    fun includes(arc: AbstractRuleComponent): Boolean {
-        return when (this) {
-            FULL -> true  // Include everything
-            FUNCTIONAL -> when (arc.type()) {
+    fun includes(arc: AbstractRuleComponent): Boolean
+
+    companion object {
+        /**
+         * FULL PERSPECTIVE: Complete audit trail showing every component.
+         * - Service-centric use case: Complete compliance audit
+         * - Shows: All nodes (services, flows, decisions, branches, rulesets, rules, predicates, faktum)
+         * - Use when: Need to see every step of execution
+         */
+        val FULL = Perspective { true }
+
+        /**
+         * FUNCTIONAL PERSPECTIVE: Only decision-making components.
+         * - Service-centric use case: Understanding business logic flow
+         * - Shows: Rules, branches, predicates, and faktum (the actual decisions and data)
+         * - Hides: Container nodes (services, flows, decisions, rulesets)
+         * - Use when: Focus on "what decisions were made" rather than structure
+         */
+        val FUNCTIONAL = Perspective { arc ->
+            when (arc.type()) {
                 // Decision-making components
                 RuleComponentType.REGEL -> true
                 RuleComponentType.GREN -> true

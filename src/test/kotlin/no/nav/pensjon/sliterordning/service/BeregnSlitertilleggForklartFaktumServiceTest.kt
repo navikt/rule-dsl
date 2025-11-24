@@ -7,7 +7,9 @@ import no.nav.pensjon.sliterordning.grunnlag.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.Response
 import no.nav.system.rule.dsl.explanation.traverseHva
 import no.nav.system.rule.dsl.explanation.collectFaktum
+import no.nav.system.rule.dsl.explanation.forklar
 import no.nav.system.rule.dsl.inspections.printTree
+import no.nav.system.rule.dsl.perspectives.Perspective
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -142,12 +144,8 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         println()
 
         // Actually invoke the method and show output
-        val fullTrace = service.traverseHva(no.nav.system.rule.dsl.perspectives.Perspective.FULL)
-        val fullLines = fullTrace.lines().take(15)
-        println(fullLines.joinToString("\n"))
-        if (fullTrace.lines().size > 15) {
-            println("... (${fullTrace.lines().size - 15} more lines)")
-        }
+        val fullTrace = service.traverseHva(Perspective.FULL)
+        println(fullTrace)
         println()
 
         println("─".repeat(80))
@@ -161,7 +159,7 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         println()
 
         // Show functional perspective
-        val functionalTrace = service.traverseHva(no.nav.system.rule.dsl.perspectives.Perspective.FUNCTIONAL)
+        val functionalTrace = service.traverseHva(Perspective.FUNCTIONAL)
         println(functionalTrace)
         println()
 

@@ -186,10 +186,8 @@ private fun StringBuilder.appendIf(level: Int, statement: () -> Boolean): String
  * It acts as the boundary between anonymous calculations (Const, MathOperation) and
  * named business facts that appear in rule explanations.
  *
- * Implements Hva, Hvorfor, Hvordan for integration with ARC tree structure:
- * - Hva: Identity (name = value)
- * - Hvorfor: Execution context (why was this created?) - computed by traversing ARC tree
- * - Hvordan: Computation details (formula tree if not constant)
+ * Implements only Hva (identity) - presentation is handled separately via extension functions.
+ * This separation allows users to write custom explanation/presentation logic.
  *
  * Example:
  * ```
@@ -209,7 +207,7 @@ data class Faktum<T : Any>(
     val navn: String,
     val uttrykk: Uttrykk<T>,
     val references: List<Reference> = emptyList()
-) : Uttrykk<T>, Hva, Hvorfor, Hvordan {
+) : Uttrykk<T>, Hva {
 
     constructor(
         navn: String,
@@ -223,7 +221,7 @@ data class Faktum<T : Any>(
 
     /**
      * Backlink to the FaktumNode wrapper when this Faktum is added to the ARC tree.
-     * Used to compute hvorfor by traversing up the tree.
+     * Used by extension functions to compute hvorfor by traversing up the tree.
      */
     @Transient
     internal var wrapperNode: no.nav.system.rule.dsl.FaktumNode<T>? = null
@@ -247,24 +245,12 @@ data class Faktum<T : Any>(
 
     override fun toString(): String = "'$navn' ($verdi)"
 
+    /**
+     * Internal implementation for Uttrykk interface.
+     * Users should use extension functions in FaktumExplanation.kt for presentation.
+     */
     override fun forklar(level: Int): String = buildString {
-        indent(level).append("HVA\n")
-        indent(level + 1).append("$navn = $verdi\n")
-
-        val trace = hvorfor()
-        if (trace.isNotEmpty()) {
-            indent(level).append("HVORFOR\n")
-            trace.forEach { hva ->
-                // All items in trace are Hva (ARCs)
-                indent(level + 1).append("${hva.hva()}\n")
-
-                // If it's also an Uttrykk (e.g., from TrackablePredicate), show details
-                if (hva is Uttrykk<*>) {
-                    append(hva.forklar(level + 1))
-                }
-            }
-        }
-
+        indent(level).append("$navn = $verdi\n")
         // Show formula/nested explanation if not a simple constant
         if (uttrykk !is Const<*>) {
             append(uttrykk.forklar(level))
@@ -276,26 +262,6 @@ data class Faktum<T : Any>(
      * Returns "name = value"
      */
     override fun hva(): String = "$navn = $verdi"
-
-    /**
-     * Hvorfor: Execution context - why was this Faktum created?
-     * Computed dynamically by traversing up the ARC tree from the FaktumNode wrapper.
-     */
-    override fun hvorfor(): List<Hva> {
-        return wrapperNode?.decisionPath() ?: emptyList()
-    }
-
-    /**
-     * Hvordan: Computation details - how is this calculated?
-     * Returns formula tree visualization if not a constant.
-     */
-    override fun hvordan(): String {
-        return if (uttrykk !is Const<*>) {
-            uttrykk.forklar(0)
-        } else {
-            ""
-        }
-    }
 }
 
 /**
