@@ -36,13 +36,13 @@ class BeregnFaktiskTrygdetidRSTest {
         assertTrue(redFttRegel.evaluated)
         assertTrue(redFttRegel.fired())
         (redFttRegel.children[0] as? TrackablePredicate)?.let { pdp ->
-            assertEquals("JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)", pdp.toString())
+            assertEquals("predikat: JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)", pdp.toString())
             assertEquals("JA 'virkningstidspunkt' er etter eller lik 'januar 1991'", pdp.notasjon())
             assertEquals("JA '2000-01-01' er etter eller lik '1991-01-01'", pdp.konkret())
 
         }
         (redFttRegel.children[1] as? TrackablePredicate)?.let { pdp ->
-            assertEquals("JA 'faktisk trygdetid i måneder' (155) er mindre enn 'firefemtedelskrav' (480)", pdp.toString())
+            assertEquals("predikat: JA 'faktisk trygdetid i måneder' (155) er mindre enn 'firefemtedelskrav' (480)", pdp.toString())
             assertEquals("JA 'faktisk trygdetid i måneder' er mindre enn 'firefemtedelskrav'", pdp.notasjon())
             assertEquals("JA '155' er mindre enn '480'", pdp.konkret())
         }
@@ -69,12 +69,12 @@ class BeregnFaktiskTrygdetidRSTest {
         assertTrue(regelSkalHaRedusertFremtidigTrygdetid.evaluated)
         assertFalse(regelSkalHaRedusertFremtidigTrygdetid.fired())
         (regelSkalHaRedusertFremtidigTrygdetid.children[0] as? TrackablePredicate)?.let { pdp ->
-            assertEquals("JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)", pdp.toString())
+            assertEquals("predikat: JA 'virkningstidspunkt' (2000-01-01) er etter eller lik 'januar 1991' (1991-01-01)", pdp.toString())
             assertEquals("JA 'virkningstidspunkt' er etter eller lik 'januar 1991'", pdp.notasjon())
             assertEquals("JA '2000-01-01' er etter eller lik '1991-01-01'", pdp.konkret())
         }
         (regelSkalHaRedusertFremtidigTrygdetid.children[1] as? TrackablePredicate)?.let { pdp ->
-            assertEquals("NEI 'faktisk trygdetid i måneder' (515) må være mindre enn 'firefemtedelskrav' (480)", pdp.toString())
+            assertEquals("predikat: NEI 'faktisk trygdetid i måneder' (515) må være mindre enn 'firefemtedelskrav' (480)", pdp.toString())
             assertEquals("NEI 'faktisk trygdetid i måneder' må være mindre enn 'firefemtedelskrav'", pdp.notasjon())
             assertEquals("NEI '515' må være mindre enn '480'", pdp.konkret())
         }

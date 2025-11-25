@@ -44,7 +44,7 @@ private fun xmlDebug(arc: AbstractRuleComponent, debugString: StringBuilder, lev
 
         is TrackablePredicate -> {
             leafElement = true
-            openAndCloseContentTag(debugString, arc.type().toString(), arc.toString(), " fired=\"${arc.fired()}\"")
+            openAndCloseContentTag(debugString, arc.type().toString(), arc.notasjon(), " fired=\"${arc.fired()}\"")
         }
 
         is Predicate -> {}

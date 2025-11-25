@@ -49,5 +49,5 @@ class TrackablePredicate(
      * Override toString() to show the predicate's expression.
      * Shows the uttrykk's representation rather than just "PREDIKAT: "
      */
-    override fun toString(): String = uttrykk.toString()
+    override fun toString(): String = "predikat: $uttrykk"
 }

@@ -128,7 +128,9 @@ class ExplanationBuilderTest {
 
         // Check that the explanation contains key sections
         assertTrue(explanation.contains("HVA"))
-        assertTrue(explanation.contains("Forklaring for"))
-        assertTrue(explanation.contains("Aldersvilkår"))
+        assertTrue(explanation.contains("Aldersvilkår = true"))
+        assertTrue(explanation.contains("HVORFOR"))
+        assertTrue(explanation.contains("regel: JA TestRuleset.VILKÅR-ALDER"))
+        assertTrue(explanation.contains("predikat: JA 'alder' (70) er større eller lik 'aldersgrense' (67)"))
     }
 }

@@ -5,9 +5,12 @@ import no.nav.pensjon.sliterordning.grunnlag.NormertPensjonsalder
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.grunnlag.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.Response
-import no.nav.system.rule.dsl.explanation.traverseHva
+import no.nav.system.rule.dsl.explanation.Direction
 import no.nav.system.rule.dsl.explanation.collectFaktum
+import no.nav.system.rule.dsl.explanation.explain
 import no.nav.system.rule.dsl.explanation.forklar
+import no.nav.system.rule.dsl.explanation.toIndentedText
+import no.nav.system.rule.dsl.explanation.traverseHva
 import no.nav.system.rule.dsl.inspections.printTree
 import no.nav.system.rule.dsl.perspectives.Perspective
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -70,19 +73,21 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         )
 
         // Act: Run the service
-        val result = BeregnSlitertilleggForklartFaktumService(
+        val service = BeregnSlitertilleggForklartFaktumService(
             BeregnSlitertilleggRequest(
                 uttakstidspunkt = uttakstidspunkt,
                 virkningstidspunkt = virkningstidspunkt,
                 person = person
             )
-        ).run()
+        )
+        val result = service.run()
 
+        println(service.explain().direction(d= Direction.DOWN).perspective(p=Perspective.FULL).transform(::toIndentedText))
         // Assert
         assertTrue(result is Response.SliterordningForklartFaktum.Innvilget)
 
         val innvilget = result as Response.SliterordningForklartFaktum.Innvilget
-
+//        println(innvilget.forklar( ))
         // The slitertillegg Faktum's HVORFOR trace should include vilkårStatus with its origin
         val explanation = innvilget.slitertillegg.forklar()
         println("=== Explanation showing branch condition with recursive origin ===")
@@ -90,12 +95,18 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         println("=== End of explanation ===")
 
         // Verify that the trace recursively includes the vilkårStatus Faktum from the branch
-        assertTrue(explanation.contains("Vilkår Slitertillegg"),
-            "Should show the vilkårStatus Faktum in the HVORFOR trace (branch condition)")
-        assertTrue(explanation.contains("VilkårsprøvSlitertilleggRS"),
-            "Should recursively show the origin ruleset of vilkårStatus")
-        assertTrue(explanation.contains("ALLTID-INNVILGET"),
-            "Should show the specific rule that created vilkårStatus")
+        assertTrue(
+            explanation.contains("Vilkår Slitertillegg"),
+            "Should show the vilkårStatus Faktum in the HVORFOR trace (branch condition)"
+        )
+        assertTrue(
+            explanation.contains("VilkårsprøvSlitertilleggRS"),
+            "Should recursively show the origin ruleset of vilkårStatus"
+        )
+        assertTrue(
+            explanation.contains("ALLTID-INNVILGET"),
+            "Should show the specific rule that created vilkårStatus"
+        )
     }
 
     @Test

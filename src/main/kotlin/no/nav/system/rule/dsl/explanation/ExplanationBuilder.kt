@@ -7,7 +7,6 @@ import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.perspectives.Perspective
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.Uttrykk
 
 /**
  * Fluent builder for creating explanations from the ARC tree.
@@ -76,7 +75,7 @@ class ExplanationBuilder internal constructor(
         val result = mutableListOf<Pair<AbstractRuleComponent, Int>>()
         val visited = mutableSetOf<AbstractRuleComponent>()
         var current: AbstractRuleComponent? = startNode.parent
-        var depth = 0
+        var distance = 0
 
         while (current != null) {
             // Cycle detection: if we've seen this node before, we have a cycle
@@ -94,16 +93,28 @@ class ExplanationBuilder internal constructor(
                     // When prepending, add predicates first (in reverse), then rule
                     // This ensures when displayed: regel, pred1, pred2
                     val predicates = current.children.filterIsInstance<TrackablePredicate>()
-                    predicates.asReversed().forEach { result.add(0, it to (depth + 1)) }
-                    result.add(0, current to depth)  // Add rule at current depth
+                    predicates.asReversed().forEach { result.add(0, it to (distance + 1)) }
+                    result.add(0, current to distance)  // Add rule at current distance
                 } else {
-                    result.add(0, current to depth)
+                    result.add(0, current to distance)
                 }
-                depth++  // Increment depth after adding to result
+                distance++  // Increment distance after adding to result
             }
             current = current.parent
         }
-        return result
+
+        // Reverse depths: furthest ancestor should have depth=0, closest should have highest depth
+        // Special handling for predicates: they should be one level deeper than their parent regel
+        val maxDistance = if (result.isEmpty()) 0 else result.maxOf { it.second }
+        return result.map { (node, dist) ->
+            val reversedDepth = maxDistance - dist
+            val finalDepth = if (node is TrackablePredicate) {
+                reversedDepth + 2  // Adjust predicates: they should be regel_depth + 1
+            } else {
+                reversedDepth
+            }
+            node to finalDepth
+        }
     }
 
     /**
@@ -271,40 +282,42 @@ private fun traverseWithLevel(
 fun <T : Any> Faktum<T>.forklar(perspective: Perspective = Perspective.FUNCTIONAL, depth: Int = 0): String {
     val indent = "  ".repeat(depth)
     return buildString {
-        appendLine("${indent}HVA:")
-        appendLine("$indent  $navn = $verdi")
 
-        // Show formula if not constant
-        if (uttrykk !is Const<*>) {
-            appendLine()
+        val showHva = uttrykk !is Const<*> || depth == 0
+        val showHvordan = uttrykk !is Const<*>
+
+        if (showHva) {
+            appendLine("${indent}HVA:")
+            appendLine("$indent  $navn = $verdi")
+        }
+
+        if (showHvordan) {
             appendLine("${indent}HVORDAN:")
             appendLine("$indent  notasjon: ${uttrykk.notasjon()}")
             appendLine("$indent  konkret: ${uttrykk.konkret()}")
         }
 
         // Get decision path using ExplanationBuilder
-        val node = wrapperNode
-        if (node != null) {
-            val trace = node.explain()
+        wrapperNode?.let { wrapperNode ->
+            val trace = wrapperNode.explain()
                 .perspective(perspective)
                 .direction(Direction.UP)
                 .transform { it }
 
             if (trace.isNotEmpty()) {
-                appendLine()
-                appendLine("${indent}HVORFOR (decision path):")
+//                appendLine()
+                appendLine("${indent}HVORFOR:")
                 trace.forEach { (arc, traceDepth) ->
                     val traceIndent = "  ".repeat(depth + 1 + traceDepth)  // Base indent + "  " + trace depth
-                    appendLine("$traceIndent- $arc")
+                    appendLine("$traceIndent$arc")
                 }
             }
         }
-
         // Recursively explain contributing Faktum
         val contributingFaktum = uttrykk.faktumSet()
         if (contributingFaktum.isNotEmpty()) {
+            appendLine()  // Separator
             contributingFaktum.forEach { faktum ->
-                appendLine()  // Separator
                 append(faktum.forklar(perspective, depth + 1))  // Recursive with depth+1
             }
         }

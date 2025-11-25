@@ -142,7 +142,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
             override fun fired(): Boolean = fired
             override fun type(): RuleComponentType = GREN
 
-            override fun toString(): String = "${type()}: ${fired().svarord()} ${condition.notasjon()} = ${condition.konkret()} "
+            override fun toString(): String = "${type()}: $condition"
 
         }
     }
