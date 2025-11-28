@@ -5,14 +5,8 @@ import no.nav.pensjon.sliterordning.grunnlag.NormertPensjonsalder
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.grunnlag.Trygdetid
 import no.nav.system.rule.dsl.demo.domain.Response
-import no.nav.system.rule.dsl.explanation.Direction
-import no.nav.system.rule.dsl.explanation.collectFaktum
-import no.nav.system.rule.dsl.explanation.explain
-import no.nav.system.rule.dsl.explanation.forklar
-import no.nav.system.rule.dsl.explanation.toIndentedText
-import no.nav.system.rule.dsl.explanation.traverseHva
 import no.nav.system.rule.dsl.inspections.printTree
-import no.nav.system.rule.dsl.perspectives.Perspective
+import no.nav.system.rule.dsl.tracker.forklar
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -82,7 +76,7 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         )
         val result = service.run()
 
-        println(service.explain().direction(d= Direction.DOWN).perspective(p=Perspective.FULL).transform(::toIndentedText))
+//        println(service.explain().direction(Direction.DOWN).filter(Filters.ALL).buildExplanationModel().toIndentedText())
         // Assert
         assertTrue(result is Response.SliterordningForklartFaktum.Innvilget)
 
@@ -139,49 +133,13 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val innvilget = result as Response.SliterordningForklartFaktum.Innvilget
 
         println("┌─────────────────────────────────────────────────────────────────────┐")
-        println("│ SERVICE-CENTRIC PERSPECTIVES (Top-Down)                             │")
-        println("│ Question: What did the entire service do?                           │")
-        println("└─────────────────────────────────────────────────────────────────────┘")
-        println()
-
-        // NEW ARCHITECTURE: The ARC tree IS the execution trace!
-        println("1. FULL PERSPECTIVE (Complete Audit Trail)")
-        println("   - Shows: ALL nodes (services, flows, decisions, rulesets, rules, faktum)")
-        println("   - Use case: Compliance audit, debugging, complete execution trace")
-        println("   - API: service.traverseHva(Perspective.FULL)")
-        println()
-
-        // Actually invoke the method and show output
-        val fullTrace = service.traverseHva(Perspective.FULL)
-        println(fullTrace)
-        println()
-
-        println("─".repeat(80))
-        println()
-
-        println("2. FUNCTIONAL PERSPECTIVE (Decision Flow Only)")
-        println("   - Shows: Only decision nodes (rules, branches, predicates, faktum)")
-        println("   - Hides: Container nodes (services, flows, decisions, rulesets)")
-        println("   - Use case: Understanding business logic without structural noise")
-        println("   - API: service.traverseHva(Perspective.FUNCTIONAL)")
-        println()
-
-        // Show functional perspective
-        val functionalTrace = service.traverseHva(Perspective.FUNCTIONAL)
-        println(functionalTrace)
-        println()
-
-        println("─".repeat(80))
-        println()
-
-        println("┌─────────────────────────────────────────────────────────────────────┐")
         println("│ FAKTUM-CENTRIC PERSPECTIVES                                         │")
         println("│ (Bottom-up: Why does THIS specific value have this result?)         │")
         println("└─────────────────────────────────────────────────────────────────────┘")
         println()
 
         // FAKTUM PERSPECTIVE 1: Formula Tree Visualization
-        println("3. UTTRYKKS TREE PERSPECTIVE (Formula Structure)")
+        println("1. UTTRYKKS TREE PERSPECTIVE (Formula Structure)")
         println("   - Shows: Calculation tree with deduplication")
         println("   - Use case: Technical testers, formula verification")
         println("   - API: faktum.printTree()")
@@ -195,7 +153,7 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         println()
 
         // FAKTUM PERSPECTIVE 2: Complete Explanation
-        println("4. FAKTUM EXPLANATION PERSPECTIVE (WHAT/HOW/WHY)")
+        println("2. FAKTUM EXPLANATION PERSPECTIVE (WHAT/HOW/WHY)")
         println("   - Shows: Value, formula, AND execution context")
         println("   - Use case: Explaining specific calculation results")
         println("   - API: faktum.forklar()")
@@ -204,23 +162,6 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         // Use forklar() which shows WHAT/HOW/WHY
         val explanation = innvilget.slitertillegg.forklar()
         println(explanation)
-        println()
-
-        println("─".repeat(80))
-        println()
-
-        // BONUS: Show all Faktum created during execution
-        println("5. COLLECT ALL FAKTUM (Data Audit)")
-        println("   - Shows: All data/facts produced during execution")
-        println("   - Use case: Data lineage, debugging")
-        println("   - API: service.collectFaktum()")
-        println()
-
-        val allFaktum = service.collectFaktum()
-        println("Found ${allFaktum.size} Faktum nodes:")
-        allFaktum.forEach { node ->
-            println("  - ${node.faktum.navn} = ${node.faktum.verdi}")
-        }
         println()
 
         println("─".repeat(80))
@@ -237,19 +178,11 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         println("  - Single unified tree structure for everything")
         println()
         println("✓ TWO PERSPECTIVES FOR TRACING:")
-        println("  - FULL: Complete audit (all nodes including containers)")
         println("  - FUNCTIONAL: Decision flow (rules, branches, predicates, faktum only)")
         println("  - Both work top-down (service-centric) and bottom-up (faktum-centric)")
         println()
-        println("✓ Service-Centric (Top-Down): Answers \"What happened during execution?\"")
-        println("  - service.traverseHva(Perspective.FULL) - Complete component hierarchy")
-        println("  - service.traverseHva(Perspective.FUNCTIONAL) - Decision flow only")
-        println("  - service.traverseFull(perspective) - With HVORFOR/HVORDAN details")
-        println("  - service.collectFaktum() - Finds all data produced")
-        println()
         println("✓ Faktum-Centric (Bottom-Up): Answers \"Why does THIS value = ${innvilget.slitertillegg.verdi}?\"")
         println("  - faktum.forklar() - Shows WHAT/WHY/HOW for specific value")
-        println("  - faktum.hvorfor() - Traverses up tree using FUNCTIONAL perspective")
         println("  - faktum.printTree() - Shows formula structure")
         println()
         println("✓ Explanation via Interfaces:")

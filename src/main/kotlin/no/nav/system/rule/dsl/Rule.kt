@@ -6,6 +6,7 @@ import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
+import no.nav.system.rule.dsl.tracker.TrackerResource
 import kotlin.experimental.ExperimentalTypeInference
 
 /**
@@ -156,6 +157,9 @@ open class Rule<T : Any>(
         fired = predicateFunctionList.isNotEmpty()
         evaluated = true
 
+        // Notify tracker of rule evaluation start
+        getResourceOrNull(TrackerResource::class)?.onRuleEvaluationStart(this)
+
         run predLoop@{
             predicateFunctionList.forEach { predicateFunction ->
                 val predicate = predicateFunction.invoke()
@@ -167,7 +171,13 @@ open class Rule<T : Any>(
                 /**
                  * Predicate must be evaluated first or terminateEvaluation would not be set.
                  */
-                fired = predicate.fired && fired
+                val predicateResult = predicate.fired
+                fired = predicateResult && fired
+
+                // Notify tracker of predicate evaluation (domain predicates only)
+                if (predicate is TrackablePredicate) {
+                    getResourceOrNull(TrackerResource::class)?.onPredicateEvaluated(predicate, this, predicateResult)
+                }
 
                 if (!fired && predicate.terminateEvaluation) {
                     return@predLoop
@@ -180,6 +190,9 @@ open class Rule<T : Any>(
         } else {
             elseStatement.invoke()
         }
+
+        // Notify tracker of rule evaluation end
+        getResourceOrNull(TrackerResource::class)?.onRuleEvaluationEnd(this, fired)
     }
 
     /**

@@ -3,7 +3,7 @@ package no.nav.pensjon.sliterordning.regelsett
 import no.nav.pensjon.sliterordning.grunnlag.NormertPensjonsalder
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.grunnlag.Trygdetid
-import no.nav.system.rule.dsl.explanation.forklar
+import no.nav.system.rule.dsl.tracker.forklar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,8 +46,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
         assertEquals("predikat: JA 'nedrePensjonsDato' (2024-01) er lik 'uttakstidspunkt' (2024-01)", forklaringIterator.next())
         assertEquals("predikat: JA 'faktiskTrygdetid' (40) er lik 'fullTrygdetid' (40)", forklaringIterator.next())
 
-
-
         // ASSERT HVA fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
         assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
@@ -56,8 +54,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatVersjonTest {
         assertEquals("HVORDAN:", forklaringIterator.next())
         assertEquals("notasjon: 0.25 * G / 12", forklaringIterator.next())
         assertEquals("konkret: 0.25 * 110000 / 12", forklaringIterator.next())
-
-
 
         assertFalse(forklaringIterator.hasNext())
     }

@@ -7,13 +7,11 @@ import no.nav.system.rule.dsl.demo.domain.koder.LandEnum
 import no.nav.system.rule.dsl.demo.helper.localDate
 import no.nav.system.rule.dsl.demo.ruleservice.BeregnAlderspensjonService
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGELSETT
-import no.nav.system.rule.dsl.explanation.forklar
 import no.nav.system.rule.dsl.inspections.debug
 import no.nav.system.rule.dsl.inspections.find
 import no.nav.system.rule.dsl.inspections.xmlDebug
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class InspectionTest {

@@ -3,11 +3,7 @@ package no.nav.pensjon.sliterordning.regelsett
 import no.nav.pensjon.sliterordning.grunnlag.NormertPensjonsalder
 import no.nav.pensjon.sliterordning.grunnlag.Person
 import no.nav.pensjon.sliterordning.grunnlag.Trygdetid
-import no.nav.system.rule.dsl.explanation.Direction
-import no.nav.system.rule.dsl.explanation.explain
-import no.nav.system.rule.dsl.explanation.forklar
-import no.nav.system.rule.dsl.explanation.toIndentedText
-import no.nav.system.rule.dsl.perspectives.Perspective
+import no.nav.system.rule.dsl.tracker.forklar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
@@ -121,7 +117,6 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         )
 
 
-
         // ASSERT HVA (rekursjon) fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
         assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
@@ -186,14 +181,14 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals("HVORDAN:", forklaringIterator.next())
         assertEquals("notasjon: fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
         assertEquals("konkret: 2291.6666666666665 * 0.4444444444444444 * 1.0", forklaringIterator.next())
-        
+
         // ASSERT HVORFOR
         assertEquals("HVORFOR:", forklaringIterator.next())
         assertEquals(
             "regel: JA BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon.SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
             forklaringIterator.next()
         )
-        
+
         // ASSERT HVA (rekursjon) fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
         assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
@@ -248,7 +243,7 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
         assertEquals(509.26, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
-        println(slitertilleggRS.explain().direction(d= Direction.DOWN).perspective(p=Perspective.FULL).transform(::toIndentedText))
+//        println(slitertilleggRS.explain().direction(Direction.DOWN).filter(Filters.ALL).buildExplanationModel().toIndentedText())
         println("===================")
         println(slitertillegg.forklar())
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()

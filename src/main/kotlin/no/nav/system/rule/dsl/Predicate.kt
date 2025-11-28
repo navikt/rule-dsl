@@ -46,8 +46,8 @@ class TrackablePredicate(
     fun konkret(): String = uttrykk.konkret()
 
     /**
-     * Override toString() to show the predicate's expression.
-     * Shows the uttrykk's representation rather than just "PREDIKAT: "
+     * Override toString() to show the predicate's expression with type prefix.
+     * Shows "predikat: <uttrykk>"
      */
-    override fun toString(): String = "predikat: $uttrykk"
+    override fun toString(): String = "${type()}: $uttrykk"
 }

@@ -7,8 +7,10 @@ import no.nav.system.rule.dsl.resource.Root
 import no.nav.system.rule.dsl.rettsregel.Const
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
+import no.nav.system.rule.dsl.tracker.TrackerResource
 import java.io.Serializable
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 /**
  * Common functionality across all components of the DSL.
@@ -51,6 +53,10 @@ abstract class AbstractRuleComponent : Serializable {
              */
             putResource(Root::class, Root(arc = { this }))
         }
+        // Guarantee tracker is always present (defaults to NoOpTracker)
+        if (!resourceMap.containsKey(TrackerResource::class)) {
+            putResource(TrackerResource::class, no.nav.system.rule.dsl.tracker.NoOpTracker())
+        }
     }
 
     /**
@@ -69,8 +75,16 @@ abstract class AbstractRuleComponent : Serializable {
     abstract fun type(): RuleComponentType
     abstract fun fired(): Boolean
 
+    /**
+     * Adds a resource to the ARC-platform.
+     * Only a single instance of TrackerResource is maintained in the resourceMap.
+     * // TODO Add conflict check.
+     */
     fun <T : AbstractResource> putResource(key: KClass<T>, service: T) {
-        resourceMap[key] = service
+        if (key.isSubclassOf(TrackerResource::class))
+            resourceMap[TrackerResource::class] = service
+        else
+            resourceMap[key] = service
     }
 
     fun <T : AbstractResource> getResource(key: KClass<T>): T {
@@ -103,6 +117,14 @@ abstract class AbstractRuleComponent : Serializable {
     }
 
     /**
+     * Get the TrackerResource for this component.
+     * Always returns a tracker (defaults to NoOpTracker if none registered).
+     */
+    fun tracker(): TrackerResource<*> {
+        return getResource(TrackerResource::class)
+    }
+
+    /**
      * Produserer Faktum med hvorfor-sporing og angitt Uttrykk.
      *
      * Adds the Faktum to the component tree via FaktumNode wrapper.
@@ -115,6 +137,8 @@ abstract class AbstractRuleComponent : Serializable {
         ).also {
             // Add to tree via wrapper
             addChild(FaktumNode(it))
+            // Notify tracker
+            tracker().onFaktumCreated(it, this)
         }
     }
 
@@ -131,6 +155,8 @@ abstract class AbstractRuleComponent : Serializable {
         ).also {
             // Add to tree via wrapper
             addChild(FaktumNode(it))
+            // Notify tracker
+            tracker().onFaktumCreated(it, this)
         }
     }
 

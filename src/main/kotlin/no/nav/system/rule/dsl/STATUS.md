@@ -115,3 +115,5 @@ Hadde en forventning om at dette skulle føre til at Faktum("bool", true) ble de
 11. Dobbeltsjekk at det ikke er fjere steder med unødvendig dobbel funksjonswrapping: "{ ogFunksjon() }".
 
 12. Reference -> Henvisning. .ref() -> .henvis
+
+13. Det vil kunne oppstå tilsynelatende unødvendige HVORDAN-forklaringer når et faktum etableres på bakgrunn av et annet faktum uten noen transformasjon. F.eks: sporing("slitertillegg", fulltSlitertillegg) (ingen øvrige faktorer er i bruk).

@@ -9,6 +9,7 @@ import no.nav.system.rule.dsl.pattern.Pattern
 import no.nav.system.rule.dsl.rettsregel.Faktum
 import no.nav.system.rule.dsl.rettsregel.ListOperation
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
+import no.nav.system.rule.dsl.tracker.TrackerResource
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -127,6 +128,9 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      */
     @Suppress("MemberVisibilityCanBePrivate")
     protected fun internalRun(): T {
+        // Notify tracker of ruleset entry
+        getResourceOrNull(TrackerResource::class)?.onRulesetEnter(this)
+
         create()
 
         ruleFunctionMap.values.forEach { ruleSpawn ->
@@ -135,10 +139,15 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
                 it.evaluate()
                 if (it.returnRule) {
                     returnValue = it.returnValue
+                    // Notify tracker of ruleset exit (early return)
+                    getResourceOrNull(TrackerResource::class)?.onRulesetExit(this)
                     return it.returnValue
                 }
             }
         }
+
+        // Notify tracker of ruleset exit (normal case)
+        getResourceOrNull(TrackerResource::class)?.onRulesetExit(this)
 
         /**
          * Ruleset must be of type Unit if no rules have returned a value.
