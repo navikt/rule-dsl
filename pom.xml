@@ -6,7 +6,7 @@
 
     <groupId>no.nav.system</groupId>
     <artifactId>rule.dsl</artifactId>
-    <version>1.6.4</version>
+    <version>1.7.0-beta</version>
     <packaging>jar</packaging>
     <name>rule-dsl</name>
 
@@ -20,6 +20,7 @@
         <jupiter.version>5.11.3</jupiter.version>
         <surefire.plugin.version>3.5.2</surefire.plugin.version>
         <maven.source.plugin.version>3.3.1</maven.source.plugin.version>
+        <crunch.version>2.0</crunch.version>
     </properties>
 
     <dependencies>
@@ -38,6 +39,11 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
             <version>${jupiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Redempt</groupId>
+            <artifactId>Crunch</artifactId>
+            <version>${crunch.version}</version>
         </dependency>
     </dependencies>
 
@@ -90,6 +96,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>redempt.dev</id>
+            <url>https://redempt.dev</url>
+        </repository>
+    </repositories>
 
     <distributionManagement>
         <repository>
