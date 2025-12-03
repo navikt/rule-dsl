@@ -42,9 +42,8 @@ abstract class AbstractRuleComponent : Serializable {
 
     /**
      * References to external documentation, legal sources, or other resources.
-     * Subclasses can override to provide specific references for rules, rulesets, etc.
      */
-    open val references: List<Reference> = emptyList()
+    val references: MutableList<Reference> = mutableListOf()
 
     init {
         if (!resourceMap.containsKey(Root::class)) {

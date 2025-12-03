@@ -3,7 +3,7 @@ package no.nav.system.rule.dsl
 import no.nav.system.rule.dsl.enums.RuleComponentType
 import no.nav.system.rule.dsl.enums.RuleComponentType.REGEL
 import no.nav.system.rule.dsl.pattern.Pattern
-import no.nav.system.rule.dsl.rettsregel.Const
+import no.nav.system.rule.dsl.reference.Reference
 import no.nav.system.rule.dsl.rettsregel.Uttrykk
 import no.nav.system.rule.dsl.rettsregel.helper.svarord
 import no.nav.system.rule.dsl.tracker.TrackerResource
@@ -147,6 +147,15 @@ open class Rule<T : Any>(
      */
     fun kommentar(kommentar: String) {
         comment = kommentar
+    }
+
+    /**
+     * DSL: Attach a reference to legal source, documentation, or other resource.
+     * Can be called multiple times to add multiple references.
+     *
+     */
+    fun REF(id: String, url: String) {
+        references.add(Reference(id, url))
     }
 
     /**

@@ -73,6 +73,7 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
                     "justeringsFaktor", (MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36
                 )
             }
+            REF("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", "https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering")
         }
 
         /**
@@ -85,6 +86,7 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
                     "justeringsFaktor", 0.0
                 )
             }
+            REF("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", "https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering")
         }
 
         /**
@@ -122,6 +124,7 @@ class BeregnSlitertilleggRSFaktumMedDomenePredikatSekvensielleReglerVersjon(
                     sporing("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
                 )
             }
+            REF("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID", "https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering")
         }
     }
 }

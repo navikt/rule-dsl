@@ -1,7 +1,11 @@
 package no.nav.system.rule.dsl.reference
 
+import no.nav.system.rule.dsl.AbstractRuleset
+import no.nav.system.rule.dsl.DslDomainPredicate
 import no.nav.system.rule.dsl.rettsregel.Faktum
+import no.nav.system.rule.dsl.rettsregel.operators.erStørreEllerLik
 import no.nav.system.rule.dsl.rettsregel.operators.times
+import no.nav.system.rule.dsl.tracker.forklar
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 
@@ -124,5 +128,172 @@ class ReferenceTest {
         assertEquals(2, faktum2.references.size)
         assertEquals("REF-1", faktum2.references[0].id)
         assertEquals("REF-2", faktum2.references[1].id)
+    }
+
+    // ========================================
+    // Rule Reference Tests
+    // ========================================
+
+    @OptIn(DslDomainPredicate::class)
+    @Test
+    fun `skal kunne legge til reference på Rule via REF DSL`() {
+        class TestRuleset : AbstractRuleset<Unit>() {
+            override fun create() {
+                val alder = sporing("alder", 70)
+                val aldersgrense = sporing("aldersgrense", 67)
+
+                regel("VILKÅR-ALDER") {
+                    REF("FTL-20-18", "https://lovdata.no/forskrift/2014-12-19-1819/§20-18")
+                    HVIS { alder erStørreEllerLik aldersgrense }
+                    SÅ { sporing("aldersvilkår", true) }
+                }
+            }
+        }
+
+        val ruleset = TestRuleset()
+        ruleset.test()
+
+        // Find the rule
+        val rule = ruleset.children.first { it.name() == "TestRuleset.VILKÅR-ALDER" }
+
+        // Verify reference was added
+        assertEquals(1, rule.references.size)
+        assertEquals("FTL-20-18", rule.references[0].id)
+        assertEquals("https://lovdata.no/forskrift/2014-12-19-1819/§20-18", rule.references[0].url)
+    }
+
+    @OptIn(DslDomainPredicate::class)
+    @Test
+    fun `skal kunne legge til flere references på samme Rule`() {
+        class TestRuleset : AbstractRuleset<Unit>() {
+            override fun create() {
+                val alder = sporing("alder", 70)
+                val aldersgrense = sporing("aldersgrense", 67)
+
+                regel("VILKÅR-ALDER") {
+                    REF("FTL-20-18", "https://lovdata.no/forskrift/2014-12-19-1819/§20-18")
+                    REF("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", "https://confluence.nav.no/sliter")
+                    REF("RUNDSKRIV-2024", "https://nav.no/rundskriv")
+                    HVIS { alder erStørreEllerLik aldersgrense }
+                    SÅ { sporing("aldersvilkår", true) }
+                }
+            }
+        }
+
+        val ruleset = TestRuleset()
+        ruleset.test()
+
+        // Find the rule
+        val rule = ruleset.children.first { it.name() == "TestRuleset.VILKÅR-ALDER" }
+
+        // Verify all three references were added
+        assertEquals(3, rule.references.size)
+        assertEquals("FTL-20-18", rule.references[0].id)
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", rule.references[1].id)
+        assertEquals("RUNDSKRIV-2024", rule.references[2].id)
+    }
+
+    @OptIn(DslDomainPredicate::class)
+    @Test
+    fun `Rule uten REF skal ha tom referanseliste`() {
+        class TestRuleset : AbstractRuleset<Unit>() {
+            override fun create() {
+                val alder = sporing("alder", 70)
+                val aldersgrense = sporing("aldersgrense", 67)
+
+                regel("VILKÅR-ALDER") {
+                    HVIS { alder erStørreEllerLik aldersgrense }
+                    SÅ { sporing("aldersvilkår", true) }
+                }
+            }
+        }
+
+        val ruleset = TestRuleset()
+        ruleset.test()
+
+        // Find the rule
+        val rule = ruleset.children.first { it.name() == "TestRuleset.VILKÅR-ALDER" }
+
+        // Verify no references
+        assertTrue(rule.references.isEmpty())
+    }
+
+    // ========================================
+    // Tracker Integration Tests
+    // ========================================
+
+    @OptIn(DslDomainPredicate::class)
+    @Test
+    fun `forklar skal vise REFERENCES i HVORFOR section`() {
+        class TestRulesetWithTracker : AbstractRuleset<Unit>() {
+            lateinit var aldersvilkår: Faktum<Boolean>
+
+            override fun test(): Unit {
+                putResource(no.nav.system.rule.dsl.tracker.TrackerResource::class, no.nav.system.rule.dsl.tracker.IndentedTextTracker())
+                return internalRun()
+            }
+
+            override fun create() {
+                val alder = sporing("alder", 70)
+                val aldersgrense = sporing("aldersgrense", 67)
+
+                regel("VILKÅR-ALDER") {
+                    REF("FTL-20-18", "https://lovdata.no/forskrift/2014-12-19-1819/§20-18")
+                    REF("SLITERTILLEGG-JUSTERING", "https://confluence.nav.no/sliter")
+                    HVIS { alder erStørreEllerLik aldersgrense }
+                    SÅ { aldersvilkår = sporing("aldersvilkår", true) }
+                }
+            }
+        }
+
+        val ruleset = TestRulesetWithTracker()
+        ruleset.test()
+
+        val explanation = ruleset.aldersvilkår.forklar()
+
+        println("=== Explanation with REFERENCES ===")
+        println(explanation)
+        println("=== End ===")
+
+        // Verify the explanation contains REFERENCES section
+        assertTrue(explanation.contains("REFERENCES:"), "Should contain REFERENCES header")
+        assertTrue(explanation.contains("FTL-20-18: https://lovdata.no/forskrift/2014-12-19-1819/§20-18"), "Should contain first reference")
+        assertTrue(explanation.contains("SLITERTILLEGG-JUSTERING: https://confluence.nav.no/sliter"), "Should contain second reference")
+    }
+
+    @OptIn(DslDomainPredicate::class)
+    @Test
+    fun `forklar skal IKKE vise REFERENCES section når regel mangler references`() {
+        class TestRulesetNoReferences : AbstractRuleset<Unit>() {
+            lateinit var aldersvilkår: Faktum<Boolean>
+
+            override fun test(): Unit {
+                putResource(no.nav.system.rule.dsl.tracker.TrackerResource::class, no.nav.system.rule.dsl.tracker.IndentedTextTracker())
+                return internalRun()
+            }
+
+            override fun create() {
+                val alder = sporing("alder", 70)
+                val aldersgrense = sporing("aldersgrense", 67)
+
+                regel("VILKÅR-ALDER") {
+                    // NO REF() calls
+                    HVIS { alder erStørreEllerLik aldersgrense }
+                    SÅ { aldersvilkår = sporing("aldersvilkår", true) }
+                }
+            }
+        }
+
+        val ruleset = TestRulesetNoReferences()
+        ruleset.test()
+
+        val explanation = ruleset.aldersvilkår.forklar()
+
+        println("=== Explanation without REFERENCES ===")
+        println(explanation)
+        println("=== End ===")
+
+        // Verify the explanation does NOT contain REFERENCES section
+        assertFalse(explanation.contains("REFERENCES:"), "Should NOT contain REFERENCES header when no references exist")
     }
 }

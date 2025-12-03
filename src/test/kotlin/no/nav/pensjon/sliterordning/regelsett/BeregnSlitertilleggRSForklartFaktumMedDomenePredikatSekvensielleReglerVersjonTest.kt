@@ -45,6 +45,10 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             forklaringIterator.next()
         )
 
+        // ASSERT REFERENCES
+        assertEquals("REFERENCES:", forklaringIterator.next())
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering", forklaringIterator.next())
+
         // ASSERT HVA fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
         assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
@@ -72,6 +76,10 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             forklaringIterator.next()
         )
         assertEquals("predikat: JA 'antallMånederEtterNedrePensjonsDato' (0) er mindre enn '36'", forklaringIterator.next())
+
+        // ASSERT REFERENCES
+        assertEquals("REFERENCES:", forklaringIterator.next())
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering", forklaringIterator.next())
 
         // ASSERT HVA trygdetidFaktor
         assertEquals("HVA:", forklaringIterator.next())
@@ -116,6 +124,9 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             forklaringIterator.next()
         )
 
+        // ASSERT REFERENCES
+        assertEquals("REFERENCES:", forklaringIterator.next())
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering", forklaringIterator.next())
 
         // ASSERT HVA (rekursjon) fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
@@ -142,6 +153,10 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             forklaringIterator.next()
         )
         assertEquals("predikat: JA 'antallMånederEtterNedrePensjonsDato' (0) er mindre enn '36'", forklaringIterator.next())
+
+        // ASSERT REFERENCES
+        assertEquals("REFERENCES:", forklaringIterator.next())
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering", forklaringIterator.next())
 
         // antallMånederEtterNedrePensjonsDato forklares ikke her.
 
@@ -189,6 +204,10 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             forklaringIterator.next()
         )
 
+        // ASSERT REFERENCES
+        assertEquals("REFERENCES:", forklaringIterator.next())
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering", forklaringIterator.next())
+
         // ASSERT HVA (rekursjon) fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
         assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
@@ -216,6 +235,10 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             forklaringIterator.next()
         )
         assertEquals("predikat: JA 'antallMånederEtterNedrePensjonsDato' (20) er mindre enn '36'", forklaringIterator.next())
+
+        // ASSERT REFERENCES
+        assertEquals("REFERENCES:", forklaringIterator.next())
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering", forklaringIterator.next())
 
         // antallMånederEtterNedrePensjonsDato forklares ikke her.
 
@@ -264,6 +287,9 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             forklaringIterator.next()
         )
 
+        // ASSERT REFERENCES
+        assertEquals("REFERENCES:", forklaringIterator.next())
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering", forklaringIterator.next())
 
         // ASSERT HVA (rekursjon) fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
@@ -292,6 +318,10 @@ class BeregnSlitertilleggRSForklartFaktumMedDomenePredikatSekvensielleReglerVers
             forklaringIterator.next()
         )
         assertEquals("predikat: JA 'antallMånederEtterNedrePensjonsDato' (20) er mindre enn '36'", forklaringIterator.next())
+
+        // ASSERT REFERENCES
+        assertEquals("REFERENCES:", forklaringIterator.next())
+        assertEquals("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT: https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering", forklaringIterator.next())
 
         // Forklaring for "antallMånederEtterNedrePensjonsDato" skal ikke skje her.
 

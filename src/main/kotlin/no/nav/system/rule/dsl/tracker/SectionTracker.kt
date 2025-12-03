@@ -171,6 +171,14 @@ class SectionTracker : TrackerResource<ExplanationModel>() {
             predicates.forEach { evaluation ->
                 lines.add("  ${evaluation.predicate}")
             }
+
+            // Add references for this rule (if any)
+            if (rule.references.isNotEmpty()) {
+                lines.add("  REFERENCES:")
+                rule.references.forEach { ref ->
+                    lines.add("    ${ref.id}: ${ref.url}")
+                }
+            }
         }
 
         return lines
