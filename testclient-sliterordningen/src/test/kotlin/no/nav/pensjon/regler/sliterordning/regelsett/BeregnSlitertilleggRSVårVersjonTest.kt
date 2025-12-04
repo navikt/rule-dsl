@@ -1,0 +1,103 @@
+package no.nav.pensjon.regler.sliterordning.regelsett
+
+import no.nav.pensjon.regler.sliterordning.domain.NormertPensjonsalder
+import no.nav.pensjon.regler.sliterordning.domain.Person
+import no.nav.pensjon.regler.sliterordning.domain.SlitertilleggVårVersjon
+import no.nav.pensjon.regler.sliterordning.domain.Trygdetid
+import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
+import no.nav.system.ruledsl.core.model.Rule
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import java.time.YearMonth
+
+class BeregnSlitertilleggRSVårVersjonTest {
+
+    private fun person(fodselsdato: YearMonth, trygdetidMnd: Int): Person =
+        Person(fodselsdato, Trygdetid(trygdetidMnd), NormertPensjonsalder.default())
+
+    @Test
+    fun `beregning ved uttak på nedre aldersgrense - full faktor og 50pct trygdetid`() {
+        val virkningstidspunkt = YearMonth.of(2002,2)
+        val person = person(YearMonth.of(1940,1), 20)
+        val rs = BeregnSlitertilleggRSVårVersjon(
+            uttakstidspunkt = virkningstidspunkt,
+            virkningstidspunkt = virkningstidspunkt,
+            person = person
+        )
+        val resultat = rs.test()
+
+        val fullt = 0.25 * 110000 / 12
+        val forventet = fullt * 1.0 * (20.0 / FULL_TRYGDETID)
+        assertEquals(forventet, resultat.slitertilleggBeregnet, 1e-9)
+    }
+
+    @Test
+    fun `beregning 35 mnd etter nedre aldersgrense - faktor 1_36`() {
+        val virkningstidspunkt = YearMonth.of(2005,1) // 35 måneder etter
+        val person = person(YearMonth.of(1940,1), 40)
+        val rs = BeregnSlitertilleggRSVårVersjon(
+            uttakstidspunkt = virkningstidspunkt,
+            virkningstidspunkt = virkningstidspunkt,
+            person = person
+        )
+        val resultat = rs.test()
+
+        val fullt = 0.25 * 110000 / 12
+        val faktorMnd = (36.0 - 35.0) / 36.0
+        assertEquals(fullt * faktorMnd, resultat.slitertilleggBeregnet, 1e-9)
+    }
+
+    @Test
+    fun `beregning 36 mnd etter nedre aldersgrense - faktor 0 og beregnet 0`() {
+        val virkningstidspunkt = YearMonth.of(2005,2) // 36 måneder etter
+        val person = person(YearMonth.of(1940,1), 40)
+        val rs = BeregnSlitertilleggRSVårVersjon(
+            uttakstidspunkt = virkningstidspunkt,
+            virkningstidspunkt = virkningstidspunkt,
+            person = person
+        )
+        val resultat = rs.test()
+
+        assertEquals(0.0, resultat.slitertilleggBeregnet, 1e-9)
+    }
+
+    @Test
+    fun `beregning 50 mnd etter nedre aldersgrense - faktor 0 og beregnet 0`() {
+        val virkningstidspunkt = YearMonth.of(2006,4) // 50 måneder etter
+        val person = person(YearMonth.of(1940,1), 40)
+        val rs = BeregnSlitertilleggRSVårVersjon(
+            uttakstidspunkt = virkningstidspunkt,
+            virkningstidspunkt = virkningstidspunkt,
+            person = person
+        )
+        val resultat = rs.test()
+
+        assertEquals(0.0, resultat.slitertilleggBeregnet, 1e-9)
+    }
+
+    @Test
+    fun `trygdetid 0 gir beregnet 0 selv om tidsfaktor 1`() {
+        val virkningstidspunkt = YearMonth.of(2002,2)
+        val person = person(YearMonth.of(1940,1), 0)
+        val rs = BeregnSlitertilleggRSVårVersjon(
+            uttakstidspunkt = virkningstidspunkt,
+            virkningstidspunkt = virkningstidspunkt,
+            person = person
+        )
+        val resultat = rs.test()
+
+        assertEquals(0.0, resultat.slitertilleggBeregnet, 1e-9)
+    }
+
+    @Test
+    fun `alle regler evaluerer og har fired`() {
+        val rs = BeregnSlitertilleggRSVårVersjon(
+            uttakstidspunkt = YearMonth.of(2002, 2),
+            virkningstidspunkt = YearMonth.of(2002, 2),
+            person = person(YearMonth.of(1940, 1), 40)
+        )
+        rs.test()
+        assertTrue(rs.children.filterIsInstance<Rule<SlitertilleggVårVersjon>>().all { it.fired() })
+    }
+}

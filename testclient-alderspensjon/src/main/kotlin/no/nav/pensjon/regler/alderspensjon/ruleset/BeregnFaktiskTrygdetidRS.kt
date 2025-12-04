@@ -1,0 +1,107 @@
+package no.nav.pensjon.regler.alderspensjon.ruleset
+
+import no.nav.pensjon.regler.alderspensjon.config.AbstractDemoRuleset
+import no.nav.pensjon.regler.alderspensjon.domain.Boperiode
+import no.nav.pensjon.regler.alderspensjon.domain.Trygdetid
+import no.nav.pensjon.regler.alderspensjon.domain.koder.LandEnum
+import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
+import no.nav.system.ruledsl.core.model.DslDomainPredicate
+import no.nav.system.ruledsl.core.pattern.createPattern
+import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.rettsregel.operators.erEtterEllerLik
+import no.nav.system.ruledsl.core.rettsregel.operators.erLik
+import no.nav.system.ruledsl.core.rettsregel.operators.erMindreEnn
+import no.nav.system.ruledsl.core.rettsregel.operators.erUlik
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import kotlin.math.roundToInt
+
+/**
+ * Demo regelsett viser bruk av Pattern og regelsporing.
+ */
+class BeregnFaktiskTrygdetidRS(
+    fødselsdato: Faktum<LocalDate>,
+    private val virkningstidspunkt: Faktum<LocalDate>,
+    private val boperiodeListe: List<Boperiode>,
+    private val flyktningUtfall: Faktum<UtfallType>,
+) : AbstractDemoRuleset<Trygdetid>() {
+
+    /**
+     * Nytt Pattern [norskeBoperioder] opprettes på bakgrunn av liste [boperiodeListe] med et filter på land.
+     */
+    private val norskeBoperioder = boperiodeListe.createPattern { it.land == LandEnum.NOR }
+    private val dato16år = fødselsdato.verdi.plusYears(16)
+    private val dato1991 = Faktum("januar 1991", LocalDate.of(1991, 1, 1))
+    private val svar = Trygdetid()
+
+    @OptIn(DslDomainPredicate::class)
+    override fun create() {
+
+        /**
+         * En regel for hvert innslag i pattern [norskeBoperioder] vil bli opprettet, evaluert og evt. kjørt.
+         */
+        regel("BoPeriodeStartFør16år", norskeBoperioder) { boperiode ->
+            HVIS { boperiode.fom < dato16år }
+            SÅ {
+                val økning = ChronoUnit.MONTHS.between(dato16år, boperiode.tom)
+                svar.faktiskTrygdetidIMåneder = Faktum(svar.faktiskTrygdetidIMåneder.navn, svar.faktiskTrygdetidIMåneder.verdi + økning)
+            }
+        }
+
+        /**
+         * En regel for hvert innslag i pattern [norskeBoperioder] vil bli opprettet, evaluert og evt. kjørt.
+         */
+        regel("BoPeriodeStartFom16år", norskeBoperioder) { boperiode ->
+            HVIS { boperiode.fom >= dato16år }
+            SÅ {
+                val økning = ChronoUnit.MONTHS.between(boperiode.fom, boperiode.tom)
+                svar.faktiskTrygdetidIMåneder = Faktum(svar.faktiskTrygdetidIMåneder.navn, svar.faktiskTrygdetidIMåneder.verdi + økning)
+            }
+        }
+
+        regel("SettFireFemtedelskrav") {
+            HVIS { true }
+            SÅ {
+                svar.firefemtedelskrav = Faktum("firefemtedelskrav", 480)
+            }
+        }
+
+        /**
+         * Rettsregel med sporing på predikatnivå (subsumsjoner).
+         */
+        regel("Skal ha redusert fremtidig trygdetid") {
+            HVIS { virkningstidspunkt erEtterEllerLik dato1991 }
+            OG { svar.faktiskTrygdetidIMåneder erMindreEnn svar.firefemtedelskrav }
+            SÅ {
+                svar.redusertFremtidigTrygdetid = Faktum(svar.redusertFremtidigTrygdetid.navn, UtfallType.OPPFYLT)
+            }
+            ELLERS {
+                svar.redusertFremtidigTrygdetid = Faktum(svar.redusertFremtidigTrygdetid.navn, UtfallType.IKKE_OPPFYLT)
+            }
+            kommentar(
+                """Dersom faktisk trygdetid i Norge er mindre enn 4/5 av
+                     opptjeningstiden skal den framtidige trygdetiden være redusert."""
+            )
+        }
+
+        regel("FastsettTrygdetid_ikkeFlyktning") {
+            HVIS { flyktningUtfall erUlik UtfallType.OPPFYLT }
+            SÅ {
+                svar.år = (svar.faktiskTrygdetidIMåneder.verdi / 12.0).roundToInt()
+            }
+        }
+        regel("FastsettTrygdetid_Flyktning") {
+            HVIS { flyktningUtfall erLik UtfallType.OPPFYLT }
+            SÅ {
+                svar.år = 40
+            }
+        }
+
+        regel("ReturnRegel") {
+            HVIS { true }
+            SÅ {
+                RETURNER(svar)
+            }
+        }
+    }
+}
