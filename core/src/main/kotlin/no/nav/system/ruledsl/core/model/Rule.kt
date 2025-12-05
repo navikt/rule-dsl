@@ -164,9 +164,6 @@ open class Rule<T : Any>(
         fired = predicateFunctionList.isNotEmpty()
         evaluated = true
 
-        // Notify tracker of rule evaluation start
-        tracker().onRuleEvaluationStart(this)
-
         run predLoop@{
             predicateFunctionList.forEach { predicateFunction ->
                 val predicate = predicateFunction.invoke()
@@ -181,11 +178,6 @@ open class Rule<T : Any>(
                 val predicateResult = predicate.fired
                 fired = predicateResult && fired
 
-                // Notify tracker of predicate evaluation (domain predicates only)
-                if (predicate is TrackablePredicate) {
-                    tracker().onPredicateEvaluated(predicate, this, predicateResult)
-                }
-
                 if (!fired && predicate.terminateEvaluation) {
                     return@predLoop
                 }
@@ -197,9 +189,6 @@ open class Rule<T : Any>(
         } else {
             elseStatement.invoke()
         }
-
-        // Notify tracker of rule evaluation end
-        tracker().onRuleEvaluationEnd(this, fired)
     }
 
     /**

@@ -1,27 +1,18 @@
 package no.nav.system.rule.dsl.tracker
 
-import no.nav.system.rule.dsl.AbstractRuleset
-import no.nav.system.rule.dsl.DslDomainPredicate
-import no.nav.system.rule.dsl.rettsregel.Faktum
-import no.nav.system.rule.dsl.rettsregel.operators.erStørreEllerLik
-import no.nav.system.rule.dsl.rettsregel.operators.plus
+import no.nav.system.ruledsl.core.model.AbstractRuleset
+import no.nav.system.ruledsl.core.model.DslDomainPredicate
+import no.nav.system.ruledsl.core.resource.tracker.forklar
+import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.rettsregel.operators.erStørreEllerLik
+import no.nav.system.ruledsl.core.rettsregel.operators.plus
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-
-/**
- * Base test ruleset that registers IndentedTextTracker
- */
-abstract class AbstractTrackedRuleset<Response : Any> : AbstractRuleset<Response>() {
-    override fun test(): Response {
-        putResource(TrackerResource::class, IndentedTextTracker())
-        return internalRun()
-    }
-}
 
 class TrackerExtensionsTest {
 
     @OptIn(DslDomainPredicate::class)
-    class TestRuleset(private val alderInput: Int) : AbstractTrackedRuleset<Unit>() {
+    class TestRuleset(private val alderInput: Int) : AbstractRuleset<Unit>() {
         lateinit var aldersvilkår: Faktum<Boolean>
 
         override fun create() {

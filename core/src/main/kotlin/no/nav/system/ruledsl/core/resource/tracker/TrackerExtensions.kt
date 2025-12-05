@@ -1,29 +1,23 @@
 package no.nav.system.ruledsl.core.resource.tracker
 
+import no.nav.system.ruledsl.core.format.IndentedTextFormatter
 import no.nav.system.ruledsl.core.rettsregel.Faktum
 
 
 /**
  * Generate complete explanation of a Faktum showing HVA/HVORDAN/HVORFOR.
  *
- * Works with any registered TrackerResource:
- * ```
- * override fun run(): Response {
- *     putResource(TrackerResource::class, IndentedTextTracker())
- *     return super.run()
- * }
- * ```
- *
- * If no tracker is registered, uses NoOpTracker which returns an informative message.
+ * Walks the ARC tree to build the explanation. The ARC tree is the complete execution trace -
+ * all information needed (rules, predicates, values, parent relationships) is already stored in the tree.
  *
  * @param filter Which components to include (default: FUNCTIONAL)
  * @return Formatted explanation string
  * @throws IllegalStateException if Faktum not in ARC tree
  */
 fun <T : Any> Faktum<T>.forklar(filter: Filter = Filters.FUNCTIONAL): String {
-    val node = wrapperNode ?: throw IllegalStateException(
+    wrapperNode ?: throw IllegalStateException(
         "Faktum '$navn' is not in the ARC tree. Only Faktum created via sporing() can be explained."
     )
 
-    return node.tracker().explainFaktumAsString(this, filter)
+    return IndentedTextFormatter.format(this, filter)
 }

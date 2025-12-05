@@ -5,8 +5,6 @@ import no.nav.system.ruledsl.core.error.ResourceAccessException
 import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.AbstractResource
 import no.nav.system.ruledsl.core.resource.Root
-import no.nav.system.ruledsl.core.resource.tracker.NoOpTracker
-import no.nav.system.ruledsl.core.resource.tracker.TrackerResource
 import no.nav.system.ruledsl.core.rettsregel.Const
 import no.nav.system.ruledsl.core.rettsregel.Faktum
 import no.nav.system.ruledsl.core.rettsregel.Uttrykk
@@ -53,10 +51,6 @@ abstract class AbstractRuleComponent : Serializable {
              */
             putResource(Root::class, Root(arc = { this }))
         }
-        // Guarantee tracker is always present (defaults to NoOpTracker)
-        if (!resourceMap.containsKey(TrackerResource::class)) {
-            putResource(TrackerResource::class, NoOpTracker())
-        }
     }
 
     /**
@@ -77,14 +71,9 @@ abstract class AbstractRuleComponent : Serializable {
 
     /**
      * Adds a resource to the ARC-platform.
-     * Only a single instance of TrackerResource is maintained in the resourceMap.
-     * // TODO Add conflict check.
      */
     fun <T : AbstractResource> putResource(key: KClass<T>, service: T) {
-        if (key.isInstance(TrackerResource::class))
-            resourceMap[TrackerResource::class] = service
-        else
-            resourceMap[key] = service
+        resourceMap[key] = service
     }
 
     fun <T : AbstractResource> getResource(key: KClass<T>): T {
@@ -117,14 +106,6 @@ abstract class AbstractRuleComponent : Serializable {
     }
 
     /**
-     * Get the TrackerResource for this component.
-     * Always returns a tracker (defaults to NoOpTracker if none registered).
-     */
-    fun tracker(): TrackerResource<*> {
-        return getResource(TrackerResource::class)
-    }
-
-    /**
      * Produserer Faktum med hvorfor-sporing og angitt Uttrykk.
      *
      * Adds the Faktum to the component tree via FaktumNode wrapper.
@@ -135,10 +116,8 @@ abstract class AbstractRuleComponent : Serializable {
             navn = navn,
             uttrykk = uttrykk
         ).also {
-            // Add to tree via wrapper
+            // Add to tree via wrapper - the tree IS the execution trace
             addChild(FaktumNode(it))
-            // Notify tracker
-            tracker().onFaktumCreated(it, this)
         }
     }
 
@@ -153,10 +132,8 @@ abstract class AbstractRuleComponent : Serializable {
             navn = navn,
             uttrykk = Const(verdi)
         ).also {
-            // Add to tree via wrapper
+            // Add to tree via wrapper - the tree IS the execution trace
             addChild(FaktumNode(it))
-            // Notify tracker
-            tracker().onFaktumCreated(it, this)
         }
     }
 

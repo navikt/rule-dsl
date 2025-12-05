@@ -126,9 +126,6 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      */
     @Suppress("MemberVisibilityCanBePrivate")
     protected fun internalRun(): T {
-        // Notify tracker of ruleset entry
-        tracker().onRulesetEnter(this)
-
         create()
 
         ruleFunctionMap.values.forEach { ruleSpawn ->
@@ -137,15 +134,10 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
                 it.evaluate()
                 if (it.returnRule) {
                     returnValue = it.returnValue
-                    // Notify tracker of ruleset exit (early return)
-                    tracker().onRulesetExit(this)
                     return it.returnValue
                 }
             }
         }
-
-        // Notify tracker of ruleset exit (normal case)
-        tracker().onRulesetExit(this)
 
         /**
          * Ruleset must be of type Unit if no rules have returned a value.

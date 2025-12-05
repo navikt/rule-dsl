@@ -2,8 +2,6 @@ package no.nav.system.ruledsl.core.reference
 
 import no.nav.system.ruledsl.core.model.AbstractRuleset
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
-import no.nav.system.ruledsl.core.resource.tracker.IndentedTextTracker
-import no.nav.system.ruledsl.core.resource.tracker.TrackerResource
 import no.nav.system.ruledsl.core.resource.tracker.forklar
 import no.nav.system.ruledsl.core.rettsregel.Faktum
 import no.nav.system.ruledsl.core.rettsregel.operators.erStørreEllerLik
@@ -230,13 +228,8 @@ class ReferenceTest {
     @OptIn(DslDomainPredicate::class)
     @Test
     fun `forklar skal vise REFERENCES i HVORFOR section`() {
-        class TestRulesetWithTracker : AbstractRuleset<Unit>() {
+        class TestRulesetWithReferences : AbstractRuleset<Unit>() {
             lateinit var aldersvilkår: Faktum<Boolean>
-
-            override fun test(): Unit {
-                putResource(TrackerResource::class, IndentedTextTracker())
-                return internalRun()
-            }
 
             override fun create() {
                 val alder = sporing("alder", 70)
@@ -253,7 +246,7 @@ class ReferenceTest {
             }
         }
 
-        val ruleset = TestRulesetWithTracker()
+        val ruleset = TestRulesetWithReferences()
         ruleset.test()
 
         val explanation = ruleset.aldersvilkår.forklar()
@@ -273,11 +266,6 @@ class ReferenceTest {
     fun `forklar skal IKKE vise REFERENCES section når regel mangler references`() {
         class TestRulesetNoReferences : AbstractRuleset<Unit>() {
             lateinit var aldersvilkår: Faktum<Boolean>
-
-            override fun test(): Unit {
-                putResource(TrackerResource::class, IndentedTextTracker())
-                return internalRun()
-            }
 
             override fun create() {
                 val alder = sporing("alder", 70)
