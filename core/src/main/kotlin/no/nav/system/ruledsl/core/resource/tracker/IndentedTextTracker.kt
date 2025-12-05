@@ -1,6 +1,7 @@
 package no.nav.system.ruledsl.core.resource.tracker
 
 import no.nav.system.ruledsl.core.model.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.AbstractRuleflow
 import no.nav.system.ruledsl.core.model.Rule
 import no.nav.system.ruledsl.core.model.TrackablePredicate
 import no.nav.system.ruledsl.core.rettsregel.Const
@@ -139,6 +140,32 @@ class IndentedTextTracker : TrackerResource<String>() {
                 rule.references.forEach { ref ->
                     lines.add("    ${ref.id}: ${ref.url}")
                 }
+            }
+
+            // Walk up the ARC tree to find Branch ancestors
+            var ancestor = rule.parent
+            while (ancestor != null) {
+                if (ancestor is AbstractRuleflow.Decision.Branch) {
+                    val condition = ancestor.condition
+
+                    // Extract all Faktum objects from the condition expression
+                    val faktumInCondition = condition.faktumSet()
+
+                    // Recursively explain each Faktum in the branch condition
+                    faktumInCondition.forEach { conditionFaktum ->
+                        lines.add("  gren betingelse: ${conditionFaktum.navn} = ${conditionFaktum.verdi}")
+                        val conditionExplanation = buildExplanation(conditionFaktum, filter, depth = 1)
+                        if (conditionExplanation.isNotBlank()) {
+                            // Indent each line of the recursive explanation
+                            conditionExplanation.lines().forEach { line ->
+                                if (line.isNotBlank()) {
+                                    lines.add("  $line")
+                                }
+                            }
+                        }
+                    }
+                }
+                ancestor = ancestor.parent
             }
         }
 

@@ -82,7 +82,6 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val innvilget = result as Response.SliterordningForklartFaktum.Innvilget
         // The slitertillegg Faktum's HVORFOR trace should include vilkårStatus with its origin
         val explanation = innvilget.slitertillegg.forklar()
-
         println(explanation)
 
         // Verify that the trace recursively includes the vilkårStatus Faktum from the branch
