@@ -2,10 +2,10 @@ package no.nav.system.ruledsl.core.reference
 
 import no.nav.system.ruledsl.core.model.AbstractRuleset
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
+import no.nav.system.ruledsl.core.operators.times
 import no.nav.system.ruledsl.core.resource.tracker.forklar
 import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.operators.erStørreEllerLik
-import no.nav.system.ruledsl.core.rettsregel.operators.times
+import no.nav.system.ruledsl.core.operators.erStørreEllerLik
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

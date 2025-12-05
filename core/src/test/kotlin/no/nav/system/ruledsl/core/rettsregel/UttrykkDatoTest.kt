@@ -1,9 +1,9 @@
 package no.nav.system.ruledsl.core.rettsregel
 
-import no.nav.system.ruledsl.core.rettsregel.operators.erEtter
-import no.nav.system.ruledsl.core.rettsregel.operators.erEtterEllerLik
-import no.nav.system.ruledsl.core.rettsregel.operators.erFør
-import no.nav.system.ruledsl.core.rettsregel.operators.erFørEllerLik
+import no.nav.system.ruledsl.core.operators.erEtter
+import no.nav.system.ruledsl.core.operators.erEtterEllerLik
+import no.nav.system.ruledsl.core.operators.erFør
+import no.nav.system.ruledsl.core.operators.erFørEllerLik
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

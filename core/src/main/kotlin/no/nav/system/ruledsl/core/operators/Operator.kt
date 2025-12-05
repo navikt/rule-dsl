@@ -1,4 +1,4 @@
-package no.nav.system.ruledsl.core.rettsregel.operators
+package no.nav.system.ruledsl.core.operators
 
 /**
  * Base interface for all operators (pair-, list and math operations).

@@ -1,6 +1,7 @@
 package no.nav.system.ruledsl.core.resource.tracker
 
-import no.nav.system.ruledsl.core.format.IndentedTextFormatter
+import no.nav.system.ruledsl.core.forklaring.FaktumTransformer
+import no.nav.system.ruledsl.core.forklaring.IndentedTextFormatter
 import no.nav.system.ruledsl.core.rettsregel.Faktum
 
 
@@ -10,14 +11,22 @@ import no.nav.system.ruledsl.core.rettsregel.Faktum
  * Walks the ARC tree to build the explanation. The ARC tree is the complete execution trace -
  * all information needed (rules, predicates, values, parent relationships) is already stored in the tree.
  *
+ * Uses the default IndentedTextFormatter to produce text output.
+ *
  * @param filter Which components to include (default: FUNCTIONAL)
  * @return Formatted explanation string
  * @throws IllegalStateException if Faktum not in ARC tree
  */
 fun <T : Any> Faktum<T>.forklar(filter: Filter = Filters.FUNCTIONAL): String {
+    return forklarMed(IndentedTextFormatter, filter)
+}
+
+
+
+fun <T : Any> Faktum<*>.forklarMed(faktumTransformer : FaktumTransformer<T>, filter: Filter = Filters.FUNCTIONAL): T {
     wrapperNode ?: throw IllegalStateException(
         "Faktum '$navn' is not in the ARC tree. Only Faktum created via sporing() can be explained."
     )
 
-    return IndentedTextFormatter.format(this, filter)
+    return faktumTransformer.transform(this, filter)
 }

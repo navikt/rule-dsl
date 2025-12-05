@@ -1,4 +1,4 @@
-package no.nav.system.ruledsl.core.rettsregel.operators
+package no.nav.system.ruledsl.core.operators
 
 import no.nav.system.ruledsl.core.rettsregel.ComparisonOperation
 import no.nav.system.ruledsl.core.rettsregel.Const

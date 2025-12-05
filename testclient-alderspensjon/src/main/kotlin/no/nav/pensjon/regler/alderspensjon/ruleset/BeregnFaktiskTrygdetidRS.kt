@@ -8,10 +8,10 @@ import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
 import no.nav.system.ruledsl.core.pattern.createPattern
 import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.operators.erEtterEllerLik
-import no.nav.system.ruledsl.core.rettsregel.operators.erLik
-import no.nav.system.ruledsl.core.rettsregel.operators.erMindreEnn
-import no.nav.system.ruledsl.core.rettsregel.operators.erUlik
+import no.nav.system.ruledsl.core.operators.erEtterEllerLik
+import no.nav.system.ruledsl.core.operators.erLik
+import no.nav.system.ruledsl.core.operators.erMindreEnn
+import no.nav.system.ruledsl.core.operators.erUlik
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt

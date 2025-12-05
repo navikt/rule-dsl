@@ -1,7 +1,7 @@
 package no.nav.system.ruledsl.core.rettsregel
 
-import no.nav.system.ruledsl.core.rettsregel.operators.erBlant
-import no.nav.system.ruledsl.core.rettsregel.operators.erIkkeBlant
+import no.nav.system.ruledsl.core.operators.erBlant
+import no.nav.system.ruledsl.core.operators.erIkkeBlant
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

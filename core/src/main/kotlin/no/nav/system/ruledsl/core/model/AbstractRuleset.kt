@@ -7,7 +7,7 @@ import no.nav.system.ruledsl.core.pattern.Pattern
 import no.nav.system.ruledsl.core.rettsregel.Faktum
 import no.nav.system.ruledsl.core.rettsregel.ListOperation
 import no.nav.system.ruledsl.core.rettsregel.Uttrykk
-import no.nav.system.ruledsl.core.rettsregel.operators.ListOperator
+import no.nav.system.ruledsl.core.operators.ListOperator
 import org.jetbrains.annotations.TestOnly
 
 /**

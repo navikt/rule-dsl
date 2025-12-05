@@ -8,7 +8,7 @@ import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
 import no.nav.pensjon.regler.alderspensjon.domain.koder.YtelseEnum
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
 import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.operators.*
+import no.nav.system.ruledsl.core.operators.*
 import java.time.LocalDate
 import java.time.Period
 

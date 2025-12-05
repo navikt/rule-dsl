@@ -2,7 +2,7 @@ package no.nav.system.rule.dsl.demo.forklaring
 
 import no.nav.system.ruledsl.core.rettsregel.Const
 import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.operators.*
+import no.nav.system.ruledsl.core.operators.*
 
 /**
  * Demonstrasjon av Boolean-uttrykk, sammenligninger og Hvis-logikk.

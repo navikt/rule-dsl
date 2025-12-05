@@ -1,16 +1,15 @@
-package no.nav.system.ruledsl.core.format
+package no.nav.system.ruledsl.core.forklaring
 
 import no.nav.system.ruledsl.core.model.AbstractRuleComponent
 import no.nav.system.ruledsl.core.model.AbstractRuleflow
 import no.nav.system.ruledsl.core.model.Rule
 import no.nav.system.ruledsl.core.model.TrackablePredicate
 import no.nav.system.ruledsl.core.resource.tracker.Filter
-import no.nav.system.ruledsl.core.rettsregel.Const
 import no.nav.system.ruledsl.core.rettsregel.Faktum
 import kotlin.collections.isNotEmpty
 
 /**
- * Stateless formatter that walks the ARC tree to produce indented text explanations.
+ * Built-in transformer that produces indented text explanations.
  *
  * The ARC tree is the complete execution trace - all information needed for explanation
  * is already stored in the tree structure:
@@ -20,18 +19,17 @@ import kotlin.collections.isNotEmpty
  * - Parent pointers enable upward traversal
  * - Branch conditions and fired status are in the tree
  */
-object IndentedTextFormatter {
+object IndentedTextFormatter : FaktumTransformer<String> {
 
     /**
-     * Format a Faktum as indented text explanation.
+     * Transform a Faktum into indented text explanation.
      */
-    fun format(faktum: Faktum<*>, filter: Filter): String {
+    override fun transform(faktum: Faktum<*>, filter: Filter): String {
         return buildExplanation(faktum, filter, depth = 0)
     }
 
     private fun buildExplanation(faktum: Faktum<*>, filter: Filter, depth: Int): String {
-        val isConst = faktum.uttrykk is Const<*>
-        val showHva = !isConst || depth == 0
+        val showHva = !faktum.isConstant || depth == 0
 
         return buildString {
             val indent = "  ".repeat(depth)
@@ -46,7 +44,7 @@ object IndentedTextFormatter {
             }
 
             // HVORDAN section (if not constant)
-            if (!isConst) {
+            if (!faktum.isConstant) {
                 if (isNotEmpty() && !endsWith("\n\n")) {
                     appendLine()
                 }
@@ -56,7 +54,7 @@ object IndentedTextFormatter {
             }
 
             // HVORFOR section - walk up the tree to find the Rule that created this Faktum
-            if (!isConst || depth == 0) {
+            if (!faktum.isConstant || depth == 0) {
                 val hvorforLines = collectDecisionPath(faktum, filter)
                 if (hvorforLines.isNotEmpty()) {
                     if (isNotEmpty() && !endsWith("\n\n")) {

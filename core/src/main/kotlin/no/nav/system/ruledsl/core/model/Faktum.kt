@@ -2,10 +2,10 @@ package no.nav.system.ruledsl.core.rettsregel
 
 import no.nav.system.ruledsl.core.model.FaktumNode
 import no.nav.system.ruledsl.core.reference.Reference
-import no.nav.system.ruledsl.core.rettsregel.helper.svarord
-import no.nav.system.ruledsl.core.rettsregel.operators.ListOperator
-import no.nav.system.ruledsl.core.rettsregel.operators.MathOperator
-import no.nav.system.ruledsl.core.rettsregel.operators.PairOperator
+import no.nav.system.ruledsl.core.helper.svarord
+import no.nav.system.ruledsl.core.operators.ListOperator
+import no.nav.system.ruledsl.core.operators.MathOperator
+import no.nav.system.ruledsl.core.operators.PairOperator
 import java.io.Serializable
 
 /**
@@ -189,10 +189,18 @@ data class Faktum<T : Any>(
 
     /**
      * Backlink to the FaktumNode wrapper when this Faktum is added to the ARC tree.
-     * Used by extension functions to compute hvorfor by traversing up the tree.
+     * Used by transformers to walk up the tree for HVORFOR explanations.
      */
     @Transient
-    internal var wrapperNode: FaktumNode<T>? = null
+    var wrapperNode: FaktumNode<T>? = null
+        internal set
+
+    /**
+     * True if this Faktum holds a constant value (not a calculated expression).
+     * Useful for transformers to determine if HVORDAN section should be shown.
+     */
+    val isConstant: Boolean
+        get() = uttrykk is Const<*>
 
     override val verdi: T by lazy { uttrykk.verdi }
 

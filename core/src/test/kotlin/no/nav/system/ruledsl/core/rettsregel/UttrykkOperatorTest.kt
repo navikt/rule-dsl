@@ -1,10 +1,10 @@
 package no.nav.system.ruledsl.core.rettsregel
 
 
-import no.nav.system.ruledsl.core.rettsregel.operators.div
-import no.nav.system.ruledsl.core.rettsregel.operators.minus
-import no.nav.system.ruledsl.core.rettsregel.operators.plus
-import no.nav.system.ruledsl.core.rettsregel.operators.times
+import no.nav.system.ruledsl.core.operators.div
+import no.nav.system.ruledsl.core.operators.minus
+import no.nav.system.ruledsl.core.operators.plus
+import no.nav.system.ruledsl.core.operators.times
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

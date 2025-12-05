@@ -6,7 +6,7 @@ import no.nav.pensjon.regler.sliterordning.regelsett.VilkårsprøvSlitertilleggR
 import no.nav.pensjon.regler.sliterordning.to.Response
 import no.nav.system.ruledsl.core.model.AbstractRuleflow
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
-import no.nav.system.ruledsl.core.rettsregel.operators.erLik
+import no.nav.system.ruledsl.core.operators.erLik
 
 import java.time.YearMonth
 

@@ -2,9 +2,9 @@ package no.nav.system.rule.dsl.demo.forklaring
 
 import no.nav.system.ruledsl.core.rettsregel.Const
 import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.operators.div
-import no.nav.system.ruledsl.core.rettsregel.operators.plus
-import no.nav.system.ruledsl.core.rettsregel.operators.times
+import no.nav.system.ruledsl.core.operators.div
+import no.nav.system.ruledsl.core.operators.plus
+import no.nav.system.ruledsl.core.operators.times
 
 /**
  * Demonstrasjon av rekursiv Uttrykk-struktur for regelsporing.

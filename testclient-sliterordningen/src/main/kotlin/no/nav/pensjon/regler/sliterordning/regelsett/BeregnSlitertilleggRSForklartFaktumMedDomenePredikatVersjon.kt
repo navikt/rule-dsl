@@ -4,13 +4,13 @@ import no.nav.pensjon.regler.sliterordning.config.AbstractDemoRuleset
 import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
+import no.nav.system.ruledsl.core.operators.div
+import no.nav.system.ruledsl.core.operators.times
 import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.operators.div
-import no.nav.system.ruledsl.core.rettsregel.operators.erFør
-import no.nav.system.ruledsl.core.rettsregel.operators.erLik
-import no.nav.system.ruledsl.core.rettsregel.operators.erMindreEnn
-import no.nav.system.ruledsl.core.rettsregel.operators.minus
-import no.nav.system.ruledsl.core.rettsregel.operators.times
+import no.nav.system.ruledsl.core.operators.erFør
+import no.nav.system.ruledsl.core.operators.erLik
+import no.nav.system.ruledsl.core.operators.erMindreEnn
+import no.nav.system.ruledsl.core.operators.minus
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 

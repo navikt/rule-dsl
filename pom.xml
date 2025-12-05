@@ -28,7 +28,6 @@
         <module>core</module>
         <module>testclient-alderspensjon</module>
         <module>testclient-sliterordningen</module>
-        <module>testclient-common</module>
     </modules>
 
     <dependencyManagement>
