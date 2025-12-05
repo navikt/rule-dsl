@@ -9,7 +9,7 @@ import no.nav.system.ruledsl.core.enums.RuleComponentType
 import no.nav.system.ruledsl.core.inspections.debug
 import no.nav.system.ruledsl.core.inspections.find
 import no.nav.system.ruledsl.core.inspections.xmlDebug
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

@@ -1,9 +1,6 @@
 package no.nav.system.ruledsl.core.model
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
-import no.nav.system.ruledsl.core.rettsregel.Const
-import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.Uttrykk
 import org.jetbrains.annotations.TestOnly
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference

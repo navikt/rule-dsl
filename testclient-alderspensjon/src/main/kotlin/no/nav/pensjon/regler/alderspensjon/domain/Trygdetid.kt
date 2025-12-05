@@ -1,7 +1,7 @@
 package no.nav.pensjon.regler.alderspensjon.domain
 
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 data class Trygdetid(
     var år: Int = 0,

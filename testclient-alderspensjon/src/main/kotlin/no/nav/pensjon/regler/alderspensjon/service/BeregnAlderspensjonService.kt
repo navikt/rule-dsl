@@ -4,7 +4,7 @@ import no.nav.pensjon.regler.alderspensjon.config.AbstractDemoRuleService
 import no.nav.pensjon.regler.alderspensjon.domain.Request
 import no.nav.pensjon.regler.alderspensjon.domain.Response
 import no.nav.pensjon.regler.alderspensjon.flyt.BeregnAlderspensjonFlyt
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 class BeregnAlderspensjonService(
     private val request: Request,

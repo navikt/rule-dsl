@@ -1,11 +1,11 @@
 package no.nav.system.ruledsl.core.inspections
 
-import no.nav.system.ruledsl.core.rettsregel.ComparisonOperation
-import no.nav.system.ruledsl.core.rettsregel.Const
-import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.ListOperation
-import no.nav.system.ruledsl.core.rettsregel.MathOperation
-import no.nav.system.ruledsl.core.rettsregel.Uttrykk
+import no.nav.system.ruledsl.core.model.ComparisonOperation
+import no.nav.system.ruledsl.core.model.Const
+import no.nav.system.ruledsl.core.model.Faktum
+import no.nav.system.ruledsl.core.model.ListOperation
+import no.nav.system.ruledsl.core.model.MathOperation
+import no.nav.system.ruledsl.core.model.Uttrykk
 
 /**
  * Visualizes an Uttrykk (expression tree) as a hierarchical tree structure

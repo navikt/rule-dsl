@@ -8,7 +8,7 @@ import no.nav.pensjon.regler.alderspensjon.ruleset.BeregnFaktiskTrygdetidRS
 import no.nav.pensjon.regler.alderspensjon.ruleset.BeregnGrunnpensjonRS
 import no.nav.pensjon.regler.alderspensjon.ruleset.PersonenErFlyktningRS
 import no.nav.system.ruledsl.core.model.AbstractRuleflow
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import java.time.LocalDate
 
 class BeregnAlderspensjonFlyt(

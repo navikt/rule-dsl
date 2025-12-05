@@ -5,7 +5,7 @@ import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
 import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.operators.div
 import no.nav.system.ruledsl.core.operators.erMindreEnn
 import no.nav.system.ruledsl.core.operators.minus

@@ -1,6 +1,6 @@
 package no.nav.system.ruledsl.core.operators
 
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

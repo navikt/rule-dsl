@@ -6,7 +6,7 @@ import no.nav.system.ruledsl.core.model.AbstractRuleflow
 import no.nav.system.ruledsl.core.model.Rule
 import no.nav.system.ruledsl.core.model.TrackablePredicate
 import no.nav.system.ruledsl.core.resource.tracker.Filter
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 /**
  * Example custom transformer that produces structured sections.

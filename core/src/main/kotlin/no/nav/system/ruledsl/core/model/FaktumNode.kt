@@ -1,7 +1,6 @@
 package no.nav.system.ruledsl.core.model
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
-import no.nav.system.ruledsl.core.rettsregel.Faktum
 
 /**
  * Minimal adapter that allows Faktum (pure data) to participate in the ARC tree.
@@ -32,8 +31,6 @@ class FaktumNode<T : Any>(val faktum: Faktum<T>) : AbstractRuleComponent() {
     override fun fired(): Boolean = true
 
     override fun type(): RuleComponentType = RuleComponentType.FAKTUM
-
-    // hva() inherited from AbstractRuleComponent: "${type()}: ${name()}"
 
     override fun toString(): String = "faktum: ${faktum.navn} = ${faktum.verdi}"
 }

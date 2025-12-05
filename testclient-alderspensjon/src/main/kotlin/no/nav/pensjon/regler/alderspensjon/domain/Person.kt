@@ -1,6 +1,6 @@
 package no.nav.pensjon.regler.alderspensjon.domain
 
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import java.time.LocalDate
 
 data class Person(

@@ -3,7 +3,7 @@ package no.nav.system.rule.dsl.tracker
 import no.nav.system.ruledsl.core.model.AbstractRuleset
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
 import no.nav.system.ruledsl.core.resource.tracker.forklar
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.operators.erStørreEllerLik
 import no.nav.system.ruledsl.core.operators.plus
 import org.junit.jupiter.api.Assertions.*

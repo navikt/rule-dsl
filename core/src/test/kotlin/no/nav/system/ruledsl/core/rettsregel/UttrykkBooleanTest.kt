@@ -1,4 +1,4 @@
-package no.nav.system.ruledsl.core.rettsregel
+package no.nav.system.ruledsl.core.model
 
 import no.nav.system.ruledsl.core.operators.*
 import org.junit.jupiter.api.Assertions.assertEquals

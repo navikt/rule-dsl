@@ -7,7 +7,7 @@ import no.nav.pensjon.regler.alderspensjon.ruleset.BeregnFaktiskTrygdetidRS
 import no.nav.system.ruledsl.core.inspections.find
 import no.nav.system.ruledsl.core.model.Rule
 import no.nav.system.ruledsl.core.model.TrackablePredicate
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

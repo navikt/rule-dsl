@@ -1,10 +1,9 @@
 package no.nav.system.ruledsl.core.model
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
+import no.nav.system.ruledsl.core.helper.svarord
 import no.nav.system.ruledsl.core.pattern.Pattern
 import no.nav.system.ruledsl.core.reference.Reference
-import no.nav.system.ruledsl.core.rettsregel.Uttrykk
-import no.nav.system.ruledsl.core.helper.svarord
 import kotlin.experimental.ExperimentalTypeInference
 
 /**

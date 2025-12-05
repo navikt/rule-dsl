@@ -1,9 +1,8 @@
 package no.nav.system.ruledsl.core.operators
 
-import no.nav.system.ruledsl.core.rettsregel.Const
-import no.nav.system.ruledsl.core.rettsregel.MathOperation
-import no.nav.system.ruledsl.core.rettsregel.Uttrykk
-import no.nav.system.ruledsl.core.operators.MathOperator
+import no.nav.system.ruledsl.core.model.Const
+import no.nav.system.ruledsl.core.model.MathOperation
+import no.nav.system.ruledsl.core.model.Uttrykk
 
 /**
  * Plus

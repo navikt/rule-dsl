@@ -6,7 +6,7 @@ import no.nav.pensjon.regler.alderspensjon.domain.Request
 import no.nav.pensjon.regler.alderspensjon.domain.koder.LandEnum
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
 import no.nav.pensjon.regler.alderspensjon.service.BeregnAlderspensjonService
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

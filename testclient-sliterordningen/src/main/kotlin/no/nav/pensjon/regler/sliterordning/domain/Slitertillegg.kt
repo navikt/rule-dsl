@@ -1,6 +1,6 @@
 package no.nav.pensjon.regler.sliterordning.domain
 
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 data class Slitertillegg(
     val grunnbeløp: Int,

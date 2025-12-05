@@ -7,7 +7,7 @@ import no.nav.pensjon.regler.alderspensjon.domain.Trygdetid
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
 import no.nav.pensjon.regler.alderspensjon.domain.koder.YtelseEnum
 import no.nav.pensjon.regler.alderspensjon.ruleset.PersonenErFlyktningRS
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

@@ -1,6 +1,6 @@
 package no.nav.pensjon.regler.alderspensjon.domain
 
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 data class Tilleggspensjon(
     var netto: Faktum<Int> = Faktum("netto", 0),

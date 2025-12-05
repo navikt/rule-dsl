@@ -1,7 +1,7 @@
 package no.nav.pensjon.regler.sliterordning.regelsett
 
 import no.nav.pensjon.regler.sliterordning.config.AbstractDemoRuleset
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 /**
  * Vilkårsprøving for slitertillegg.

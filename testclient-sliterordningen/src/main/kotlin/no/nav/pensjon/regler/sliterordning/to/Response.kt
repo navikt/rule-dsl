@@ -1,7 +1,7 @@
 package no.nav.pensjon.regler.sliterordning.to
 
 import no.nav.pensjon.regler.sliterordning.domain.Slitertillegg
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 sealed class Response {
     sealed class Sliterordning() : Response() {

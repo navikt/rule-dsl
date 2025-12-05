@@ -2,7 +2,7 @@ package no.nav.system.ruledsl.core.resource.tracker
 
 import no.nav.system.ruledsl.core.forklaring.FaktumTransformer
 import no.nav.system.ruledsl.core.forklaring.IndentedTextFormatter
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 
 /**

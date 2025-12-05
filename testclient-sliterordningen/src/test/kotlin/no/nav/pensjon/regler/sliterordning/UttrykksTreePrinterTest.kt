@@ -1,7 +1,7 @@
 package no.nav.pensjon.regler.sliterordning
 
 import no.nav.system.ruledsl.core.inspections.printTree
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.operators.erLik
 import no.nav.system.ruledsl.core.operators.plus
 import no.nav.system.ruledsl.core.operators.times

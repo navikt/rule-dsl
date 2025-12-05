@@ -1,7 +1,7 @@
 package no.nav.system.ruledsl.core.model
 
 import no.nav.system.ruledsl.core.pattern.createPattern
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

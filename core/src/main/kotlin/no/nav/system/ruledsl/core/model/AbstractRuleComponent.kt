@@ -5,9 +5,6 @@ import no.nav.system.ruledsl.core.error.ResourceAccessException
 import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.AbstractResource
 import no.nav.system.ruledsl.core.resource.Root
-import no.nav.system.ruledsl.core.rettsregel.Const
-import no.nav.system.ruledsl.core.rettsregel.Faktum
-import no.nav.system.ruledsl.core.rettsregel.Uttrykk
 import java.io.Serializable
 import kotlin.reflect.KClass
 

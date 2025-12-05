@@ -1,6 +1,6 @@
 package no.nav.system.ruledsl.core.reference
 
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 
 /**

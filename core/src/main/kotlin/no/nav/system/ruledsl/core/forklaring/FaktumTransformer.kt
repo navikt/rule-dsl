@@ -1,7 +1,7 @@
 package no.nav.system.ruledsl.core.forklaring
 
 import no.nav.system.ruledsl.core.resource.tracker.Filter
-import no.nav.system.ruledsl.core.rettsregel.Faktum
+import no.nav.system.ruledsl.core.model.Faktum
 
 /**
  * Generic transformer interface for converting Faktum explanations to different output types.

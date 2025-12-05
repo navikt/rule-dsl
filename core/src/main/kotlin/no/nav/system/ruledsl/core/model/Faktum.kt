@@ -1,11 +1,10 @@
-package no.nav.system.ruledsl.core.rettsregel
+package no.nav.system.ruledsl.core.model
 
-import no.nav.system.ruledsl.core.model.FaktumNode
-import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.helper.svarord
 import no.nav.system.ruledsl.core.operators.ListOperator
 import no.nav.system.ruledsl.core.operators.MathOperator
 import no.nav.system.ruledsl.core.operators.PairOperator
+import no.nav.system.ruledsl.core.reference.Reference
 import java.io.Serializable
 
 /**
