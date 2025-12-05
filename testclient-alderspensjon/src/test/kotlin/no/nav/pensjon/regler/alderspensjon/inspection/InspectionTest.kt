@@ -1,4 +1,4 @@
-package no.nav.system.rule.dsl.demo.inspection
+package no.nav.pensjon.regler.alderspensjon.inspection
 
 import no.nav.pensjon.regler.alderspensjon.domain.Boperiode
 import no.nav.pensjon.regler.alderspensjon.domain.Person
@@ -10,7 +10,7 @@ import no.nav.system.ruledsl.core.inspections.debug
 import no.nav.system.ruledsl.core.inspections.find
 import no.nav.system.ruledsl.core.inspections.xmlDebug
 import no.nav.system.ruledsl.core.model.Faktum
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -35,13 +35,13 @@ class InspectionTest {
     @Test
     fun `find test`() {
         val result = service.find { arc -> arc.type() == RuleComponentType.REGELSETT }
-        assertEquals(3, result.size)
+        Assertions.assertEquals(3, result.size)
     }
 
 
     @Test
     fun `debug test`() {
-        assertEquals(
+        Assertions.assertEquals(
             """
 regeltjeneste: BeregnAlderspensjonService
   regelflyt: BeregnAlderspensjonFlyt
@@ -98,7 +98,7 @@ regeltjeneste: BeregnAlderspensjonService
 
     @Test
     fun `XML debug test`() {
-        assertEquals(
+        Assertions.assertEquals(
             """
 <BeregnAlderspensjonService>
   <BeregnAlderspensjonFlyt>

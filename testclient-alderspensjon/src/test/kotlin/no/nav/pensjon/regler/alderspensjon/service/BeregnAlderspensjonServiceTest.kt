@@ -1,13 +1,12 @@
-package no.nav.system.rule.dsl.demo.ruleservice
+package no.nav.pensjon.regler.alderspensjon.service
 
 import no.nav.pensjon.regler.alderspensjon.domain.Boperiode
 import no.nav.pensjon.regler.alderspensjon.domain.Person
 import no.nav.pensjon.regler.alderspensjon.domain.Request
 import no.nav.pensjon.regler.alderspensjon.domain.koder.LandEnum
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
-import no.nav.pensjon.regler.alderspensjon.service.BeregnAlderspensjonService
 import no.nav.system.ruledsl.core.model.Faktum
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -29,13 +28,13 @@ class BeregnAlderspensjonServiceTest {
 
         val response = BeregnAlderspensjonService(params).run()
 
-        assertEquals(3, response.anvendtTrygdetid?.år)
-        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
-        assertEquals(UtfallType.OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.verdi)
+        Assertions.assertEquals(3, response.anvendtTrygdetid?.år)
+        Assertions.assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
+        Assertions.assertEquals(UtfallType.OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.verdi)
 
-        assertEquals(9000, response.grunnpensjon?.netto)
-        assertEquals(1.0, response.grunnpensjon?.prosentsats)
-        assertEquals(120000, response.grunnpensjon?.grunnbeløp)
+        Assertions.assertEquals(9000, response.grunnpensjon?.netto)
+        Assertions.assertEquals(1.0, response.grunnpensjon?.prosentsats)
+        Assertions.assertEquals(120000, response.grunnpensjon?.grunnbeløp)
     }
 
     @Test
@@ -57,13 +56,13 @@ class BeregnAlderspensjonServiceTest {
 
         val response = BeregnAlderspensjonService(params).run()
 
-        assertEquals(19, response.anvendtTrygdetid?.år)
-        assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
-        assertEquals(UtfallType.IKKE_OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.verdi)
+        Assertions.assertEquals(19, response.anvendtTrygdetid?.år)
+        Assertions.assertEquals(480, response.anvendtTrygdetid?.firefemtedelskrav!!.verdi)
+        Assertions.assertEquals(UtfallType.IKKE_OPPFYLT, response.anvendtTrygdetid.redusertFremtidigTrygdetid.verdi)
 
-        assertEquals(42750, response.grunnpensjon?.netto)
-        assertEquals(0.9, response.grunnpensjon?.prosentsats)
-        assertEquals(100000, response.grunnpensjon?.grunnbeløp)
+        Assertions.assertEquals(42750, response.grunnpensjon?.netto)
+        Assertions.assertEquals(0.9, response.grunnpensjon?.prosentsats)
+        Assertions.assertEquals(100000, response.grunnpensjon?.grunnbeløp)
     }
 
 }

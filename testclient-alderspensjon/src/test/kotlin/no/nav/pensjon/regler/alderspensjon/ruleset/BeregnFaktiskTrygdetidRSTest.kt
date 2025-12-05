@@ -1,4 +1,4 @@
-package no.nav.system.rule.dsl.demo.ruleset
+package no.nav.pensjon.regler.alderspensjon.ruleset
 
 import no.nav.pensjon.regler.alderspensjon.domain.Boperiode
 import no.nav.pensjon.regler.alderspensjon.domain.koder.LandEnum
