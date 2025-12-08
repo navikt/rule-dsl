@@ -35,7 +35,13 @@ internal data class MathOperation<T : Number>(
     val operator: MathOperator,
     val evaluator: () -> T
 ) : Uttrykk<T> {
-    override val verdi: T by lazy { evaluator() }
+    override val verdi: T by lazy {
+        // Prevent silent NaN/Infinity from division by zero
+        if (operator == MathOperator.DIV && høyre.verdi.toDouble() == 0.0) {
+            throw ArithmeticException("Divisjon med null")
+        }
+        evaluator()
+    }
 
     override fun notasjon(): String {
         val (v, h) = medParenteserVedBehov(
