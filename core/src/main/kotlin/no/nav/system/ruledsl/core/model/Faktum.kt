@@ -104,6 +104,35 @@ internal data class MathOperation<T : Number>(
 }
 
 /**
+ * Unary mathematical function for single-argument operations.
+ *
+ * This is the unary equivalent of MathOperation, used for functions like floor, ceil, abs, etc.
+ * Clients can create custom unary functions using this class.
+ *
+ * Example:
+ * ```kotlin
+ * fun roundTo2Decimals(value: Uttrykk<Number>): Uttrykk<Double> =
+ *     UnaryFunction(value, "roundTo2Decimals") {
+ *         (value.verdi.toDouble() * 100).roundToLong() / 100.0
+ *     }
+ * ```
+ */
+data class UnaryFunction<T : Number>(
+    val input: Uttrykk<Number>,
+    val functionName: String,
+    val evaluator: () -> T
+) : Uttrykk<T> {
+
+    override val verdi: T by lazy { evaluator() }
+
+    override fun notasjon(): String = "$functionName(${input.notasjon()})"
+
+    override fun konkret(): String = "$functionName(${input.konkret()})"
+
+    override fun faktumSet(): Set<Faktum<*>> = input.faktumSet()
+}
+
+/**
  * Comparison operation for pair comparisons (erLik, erMindreEnn, erFør, etc.).
  * Pure boolean expression without Predicate machinery.
  */

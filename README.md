@@ -25,7 +25,7 @@ A set of classes inheriting **[AbstractRuleComponent](src/main/kotlin/no/nav/sys
 
 ### Treestructure
 All [AbstractRuleComponent](src/main/kotlin/no/nav/system/rule/dsl/AbstractRuleComponent.kt) are organized in a visitor-accepting tree structure. This tree enables tracking of the context a rulecomponent was executed in.
-```kotlin
+```
 regeltjeneste: BeregnAlderspensjonService
   regelflyt: BeregnAlderspensjonFlyt
     regelsett: BeregnFaktiskTrygdetidRS
@@ -90,6 +90,10 @@ regel("Trygdetid") {
   }
 }
 ```
+
+### Math
+TODO: Document Uttrykk, Math operations
+Document how integer division must use floor.
 
 ### Pattern
 Optional feature for writing rules on lists. A [Pattern](src/main/kotlin/no/nav/system/rule/dsl/pattern/Pattern.kt) object wraps a List and ensures a Rule instance is created for each item in the list.

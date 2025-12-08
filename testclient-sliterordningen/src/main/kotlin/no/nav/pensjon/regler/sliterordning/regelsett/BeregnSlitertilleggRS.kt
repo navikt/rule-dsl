@@ -3,11 +3,10 @@ package no.nav.pensjon.regler.sliterordning.regelsett
 import no.nav.pensjon.regler.sliterordning.config.AbstractDemoRuleset
 import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.MND_36
+import no.nav.pensjon.regler.sliterordning.functions.avrund2desimal
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
 import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.operators.*
-import no.nav.system.ruledsl.core.operators.erMindreEnn
-import no.nav.system.ruledsl.core.operators.erStørreEllerLik
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -42,7 +41,7 @@ class BeregnSlitertilleggRS(
     )
 
     private val G = Faktum("G", innGrunnbeløp)
-    private val fulltSlitertillegg = Faktum("fulltSlitertillegg", 0.25 * G / 12)
+    private val fulltSlitertillegg = Faktum("fulltSlitertillegg", avrund2desimal(0.25 * G / 12))
     private var justeringsFaktor = Faktum("justeringsFaktor", 0.0)
     private val trygdetidFaktor = Faktum("trygdetidFaktor", faktiskTrygdetid / fullTrygdetid)
 
@@ -123,7 +122,7 @@ class BeregnSlitertilleggRS(
             HVIS { true }
             SÅ {
                 RETURNER(
-                    sporing("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
+                    sporing("slitertillegg", avrund2desimal(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor))
                 )
             }
             REF(

@@ -22,6 +22,8 @@ class BeregnSlitertilleggRSTest {
             innGrunnbeløp = 110000
         ).test()
 
+        println(slitertillegg.forklar())
+
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
         assertEquals(2291.67, slitertillegg.verdi, 0.01)
@@ -31,12 +33,12 @@ class BeregnSlitertilleggRSTest {
 
         // ASSERT HVA
         assertEquals("HVA:", forklaringIterator.next())
-        assertEquals("slitertillegg = 2291.6666666666665", forklaringIterator.next())
+        assertEquals("slitertillegg = 2291.67", forklaringIterator.next())
 
         // ASSERT HVORDAN
         assertEquals("HVORDAN:", forklaringIterator.next())
-        assertEquals("notasjon: fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
-        assertEquals("konkret: 2291.6666666666665 * 1.0 * 1.0", forklaringIterator.next())
+        assertEquals("notasjon: avrund2desimal(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)", forklaringIterator.next())
+        assertEquals("konkret: avrund2desimal(2291.67 * 1.0 * 1.0)", forklaringIterator.next())
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR:", forklaringIterator.next())
@@ -51,12 +53,12 @@ class BeregnSlitertilleggRSTest {
 
         // ASSERT HVA fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
-        assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
+        assertEquals("fulltSlitertillegg = 2291.67", forklaringIterator.next())
 
         // ASSERT HVORDAN fulltSlitertillegg
         assertEquals("HVORDAN:", forklaringIterator.next())
-        assertEquals("notasjon: 0.25 * G / 12", forklaringIterator.next())
-        assertEquals("konkret: 0.25 * 110000 / 12", forklaringIterator.next())
+        assertEquals("notasjon: avrund2desimal(0.25 * G / 12)", forklaringIterator.next())
+        assertEquals("konkret: avrund2desimal(0.25 * 110000 / 12)", forklaringIterator.next())
 
         // G skal ikke forklares her.
 
@@ -101,6 +103,8 @@ class BeregnSlitertilleggRSTest {
             innGrunnbeløp = 110000
         ).test()
 
+        println(slitertillegg.forklar())
+
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
         assertEquals(1718.75, slitertillegg.verdi, 0.01)
@@ -114,8 +118,8 @@ class BeregnSlitertilleggRSTest {
 
         // ASSERT HVORDAN slitertillegg
         assertEquals("HVORDAN:", forklaringIterator.next())
-        assertEquals("notasjon: fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
-        assertEquals("konkret: 2291.6666666666665 * 1.0 * 0.75", forklaringIterator.next())
+        assertEquals("notasjon: avrund2desimal(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)", forklaringIterator.next())
+        assertEquals("konkret: avrund2desimal(2291.67 * 1.0 * 0.75)", forklaringIterator.next())
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR:", forklaringIterator.next())
@@ -130,12 +134,12 @@ class BeregnSlitertilleggRSTest {
 
         // ASSERT HVA (rekursjon) fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
-        assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
+        assertEquals("fulltSlitertillegg = 2291.67", forklaringIterator.next())
 
         // ASSERT HVORDAN fulltSlitertillegg
         assertEquals("HVORDAN:", forklaringIterator.next())
-        assertEquals("notasjon: 0.25 * G / 12", forklaringIterator.next())
-        assertEquals("konkret: 0.25 * 110000 / 12", forklaringIterator.next())
+        assertEquals("notasjon: avrund2desimal(0.25 * G / 12)", forklaringIterator.next())
+        assertEquals("konkret: avrund2desimal(0.25 * 110000 / 12)", forklaringIterator.next())
 
         // ASSERT HVA justeringsFaktor
         assertEquals("HVA:", forklaringIterator.next())
@@ -169,7 +173,6 @@ class BeregnSlitertilleggRSTest {
         assertEquals("notasjon: faktiskTrygdetid / fullTrygdetid", forklaringIterator.next())
         assertEquals("konkret: 30 / 40", forklaringIterator.next())
 
-
         assertFalse(forklaringIterator.hasNext())
     }
 
@@ -181,6 +184,8 @@ class BeregnSlitertilleggRSTest {
             innGrunnbeløp = 110000
         ).test()
 
+        println(slitertillegg.forklar())
+
         // ASSERT slitertillegg
         assertEquals("slitertillegg", slitertillegg.navn)
         assertEquals(1018.52, slitertillegg.verdi, 0.01)
@@ -190,12 +195,12 @@ class BeregnSlitertilleggRSTest {
 
         // ASSERT HVA
         assertEquals("HVA:", forklaringIterator.next())
-        assertEquals("slitertillegg = 1018.5185185185184", forklaringIterator.next())
+        assertEquals("slitertillegg = 1018.52", forklaringIterator.next())
 
         // ASSERT HVORDAN slitertillegg
         assertEquals("HVORDAN:", forklaringIterator.next())
-        assertEquals("notasjon: fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
-        assertEquals("konkret: 2291.6666666666665 * 0.4444444444444444 * 1.0", forklaringIterator.next())
+        assertEquals("notasjon: avrund2desimal(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)", forklaringIterator.next())
+        assertEquals("konkret: avrund2desimal(2291.67 * 0.4444444444444444 * 1.0)", forklaringIterator.next())
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR:", forklaringIterator.next())
@@ -210,12 +215,12 @@ class BeregnSlitertilleggRSTest {
 
         // ASSERT HVA (rekursjon) fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
-        assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
+        assertEquals("fulltSlitertillegg = 2291.67", forklaringIterator.next())
 
         // ASSERT HVORDAN fulltSlitertillegg
         assertEquals("HVORDAN:", forklaringIterator.next())
-        assertEquals("notasjon: 0.25 * G / 12", forklaringIterator.next())
-        assertEquals("konkret: 0.25 * 110000 / 12", forklaringIterator.next())
+        assertEquals("notasjon: avrund2desimal(0.25 * G / 12)", forklaringIterator.next())
+        assertEquals("konkret: avrund2desimal(0.25 * 110000 / 12)", forklaringIterator.next())
 
         // G skal ikke være forklart her.
 
@@ -250,6 +255,8 @@ class BeregnSlitertilleggRSTest {
         assertEquals("HVORDAN:", forklaringIterator.next())
         assertEquals("notasjon: faktiskTrygdetid / fullTrygdetid", forklaringIterator.next())
         assertEquals("konkret: 40 / 40", forklaringIterator.next())
+
+        assertFalse(forklaringIterator.hasNext())
     }
 
     @Test
@@ -261,24 +268,23 @@ class BeregnSlitertilleggRSTest {
         )
         val slitertillegg = slitertilleggRS.test()
 
+        println(slitertillegg.forklar())
+
         // ASSERT FAKTUM
         assertEquals("slitertillegg", slitertillegg.navn)
         assertEquals(509.26, slitertillegg.verdi, 0.01)
 
         // ASSERT FORKLARING
-//        println(slitertilleggRS.explain().direction(Direction.DOWN).filter(Filters.ALL).buildExplanationModel().toIndentedText())
-        println("===================")
-        println(slitertillegg.forklar())
         val forklaringIterator = slitertillegg.forklar().split("\n").map { it.trim() }.filter { it.isNotBlank() }.iterator()
 
         // ASSERT HVA
         assertEquals("HVA:", forklaringIterator.next())
-        assertEquals("slitertillegg = 509.2592592592592", forklaringIterator.next())
+        assertEquals("slitertillegg = 509.26", forklaringIterator.next())
 
         // ASSERT HVORDAN slitertillegg
         assertEquals("HVORDAN:", forklaringIterator.next())
-        assertEquals("notasjon: fulltSlitertillegg * justeringsFaktor * trygdetidFaktor", forklaringIterator.next())
-        assertEquals("konkret: 2291.6666666666665 * 0.4444444444444444 * 0.5", forklaringIterator.next())
+        assertEquals("notasjon: avrund2desimal(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)", forklaringIterator.next())
+        assertEquals("konkret: avrund2desimal(2291.67 * 0.4444444444444444 * 0.5)", forklaringIterator.next())
 
         // ASSERT HVORFOR
         assertEquals("HVORFOR:", forklaringIterator.next())
@@ -293,12 +299,12 @@ class BeregnSlitertilleggRSTest {
 
         // ASSERT HVA (rekursjon) fulltSlitertillegg
         assertEquals("HVA:", forklaringIterator.next())
-        assertEquals("fulltSlitertillegg = 2291.6666666666665", forklaringIterator.next())
+        assertEquals("fulltSlitertillegg = 2291.67", forklaringIterator.next())
 
         // ASSERT HVORDAN fulltSlitertillegg
         assertEquals("HVORDAN:", forklaringIterator.next())
-        assertEquals("notasjon: 0.25 * G / 12", forklaringIterator.next())
-        assertEquals("konkret: 0.25 * 110000 / 12", forklaringIterator.next())
+        assertEquals("notasjon: avrund2desimal(0.25 * G / 12)", forklaringIterator.next())
+        assertEquals("konkret: avrund2desimal(0.25 * 110000 / 12)", forklaringIterator.next())
 
         // Forklaring for "G" skal ikke skje her.
 
@@ -333,5 +339,7 @@ class BeregnSlitertilleggRSTest {
         assertEquals("HVORDAN:", forklaringIterator.next())
         assertEquals("notasjon: faktiskTrygdetid / fullTrygdetid", forklaringIterator.next())
         assertEquals("konkret: 20 / 40", forklaringIterator.next())
+
+        assertFalse(forklaringIterator.hasNext())
     }
 }
