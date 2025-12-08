@@ -28,8 +28,6 @@ class FaktumNode<T : Any>(val faktum: Faktum<T>) : AbstractRuleComponent() {
 
     override fun name(): String = faktum.navn
 
-    override fun fired(): Boolean = true
-
     override fun type(): RuleComponentType = RuleComponentType.FAKTUM
 
     override fun toString(): String = "faktum: ${faktum.navn} = ${faktum.verdi}"

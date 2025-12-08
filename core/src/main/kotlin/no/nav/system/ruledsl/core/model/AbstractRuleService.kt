@@ -19,7 +19,6 @@ abstract class AbstractRuleService<out T> : AbstractRuleComponent() {
     }
 
     override fun name(): String = this.javaClass.simpleName
-    override fun fired(): Boolean = true
     override fun type(): RuleComponentType = RuleComponentType.REGELTJENESTE
     override fun toString(): String = "${type()}: ${name()}"
 }

@@ -51,7 +51,6 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
     }
 
     override fun name(): String = this.javaClass.simpleName
-    override fun fired(): Boolean = true
     override fun type(): RuleComponentType = RuleComponentType.REGELFLYT
     override fun toString(): String = "${type()}: ${name()}"
 

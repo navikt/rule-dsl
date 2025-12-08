@@ -64,7 +64,7 @@ abstract class AbstractRuleComponent : Serializable {
 
     abstract fun name(): String
     abstract fun type(): RuleComponentType
-    abstract fun fired(): Boolean
+    open fun fired(): Boolean = true
 
     /**
      * Adds a resource to the ARC-platform.
@@ -87,19 +87,6 @@ abstract class AbstractRuleComponent : Serializable {
 
         @Suppress("UNCHECKED_CAST")
         return resource as T
-    }
-
-    fun <T : AbstractResource> getResourceOrNull(key: KClass<T>): T? {
-        val resource = resourceMap[key]
-
-        if (resource != null && !key.isInstance(resource)) {
-            throw ResourceAccessException(
-                "Type mismatch for resource key $key. Expected: ${key.qualifiedName}, Found: ${resource.javaClass.name}"
-            )
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        return resource as T?
     }
 
     /**

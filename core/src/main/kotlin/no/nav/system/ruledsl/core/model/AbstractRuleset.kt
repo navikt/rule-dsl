@@ -270,7 +270,6 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     }
 
     override fun name(): String = rulesetName
-    override fun fired(): Boolean = true
     override fun type(): RuleComponentType = RuleComponentType.REGELSETT
     override fun toString(): String = "${type()}: $rulesetName"
 
