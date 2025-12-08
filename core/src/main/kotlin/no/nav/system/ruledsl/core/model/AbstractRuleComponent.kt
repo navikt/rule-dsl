@@ -7,6 +7,7 @@ import no.nav.system.ruledsl.core.resource.AbstractResource
 import no.nav.system.ruledsl.core.resource.Root
 import java.io.Serializable
 import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
 /**
  * Common functionality across all components of the DSL.
@@ -28,7 +29,7 @@ abstract class AbstractRuleComponent : Serializable {
      */
     val children: List<AbstractRuleComponent> get() = _children
 
-    internal var resourceMap: MutableMap<KClass<*>, AbstractResource> = mutableMapOf()
+    internal var resourceMap: MutableMap<KClass<out AbstractResource>, AbstractResource> = mutableMapOf()
 
     /**
      * Parent component in the ARC tree.
@@ -79,14 +80,7 @@ abstract class AbstractRuleComponent : Serializable {
         val resource = resourceMap[key]
             ?: throw ResourceAccessException("No resource found for $key.")
 
-        if (!key.isInstance(resource)) {
-            throw ResourceAccessException(
-                "Type mismatch for resource key $key. Expected: ${key.qualifiedName}, Found: ${resource.javaClass.name}"
-            )
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        return resource as T
+        return key.cast(resource)
     }
 
     /**
