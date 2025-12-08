@@ -9,9 +9,9 @@ import no.nav.pensjon.regler.sliterordning.format.renderAsHtml
 import no.nav.pensjon.regler.sliterordning.format.renderAsJson
 import no.nav.pensjon.regler.sliterordning.format.renderAsMarkdown
 import no.nav.pensjon.regler.sliterordning.format.renderAsText
-import no.nav.pensjon.regler.sliterordning.service.BeregnSlitertilleggForklartFaktumService
-import no.nav.pensjon.regler.sliterordning.to.BeregnSlitertilleggRequest
-import no.nav.pensjon.regler.sliterordning.to.Response
+import no.nav.pensjon.regler.sliterordning.service.SliterordningService
+import no.nav.pensjon.regler.sliterordning.to.SliterordningRequest
+import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse
 import no.nav.system.ruledsl.core.forklaring.IndentedTextFormatter
 import no.nav.system.ruledsl.core.resource.tracker.Filters
 import no.nav.system.ruledsl.core.resource.tracker.forklar
@@ -27,7 +27,7 @@ class TransformerDemo {
 
     fun `demonstrate built-in IndentedTextFormatter`() {
         val result = createTestResult()
-        val slitertillegg = (result as Response.SliterordningForklartFaktum.Innvilget).slitertillegg
+        val slitertillegg = (result as SliterordningResponse.Innvilget).slitertillegg
 
         println("═".repeat(80))
         println("BUILT-IN TRANSFORMER: IndentedTextFormatter")
@@ -53,7 +53,7 @@ class TransformerDemo {
 
     fun `demonstrate custom SectionTransformer with multiple renderers`() {
         val result = createTestResult()
-        val slitertillegg = (result as Response.SliterordningForklartFaktum.Innvilget).slitertillegg
+        val slitertillegg = (result as SliterordningResponse.Innvilget).slitertillegg
 
         println("═".repeat(80))
         println("CUSTOM TRANSFORMER: SectionTransformer")
@@ -106,7 +106,7 @@ class TransformerDemo {
 
     fun `demonstrate section structure inspection`() {
         val result = createTestResult()
-        val slitertillegg = (result as Response.SliterordningForklartFaktum.Innvilget).slitertillegg
+        val slitertillegg = (result as SliterordningResponse.Innvilget).slitertillegg
 
         val sections = SectionTransformer.transform(slitertillegg, Filters.FUNCTIONAL)
 
@@ -138,7 +138,7 @@ class TransformerDemo {
         }
     }
 
-    private fun createTestResult(): Response.SliterordningForklartFaktum {
+    private fun createTestResult(): SliterordningResponse {
         val fødselsdato = YearMonth.of(1958, 1)
         val uttakstidspunkt = YearMonth.of(2020, 2)
         val virkningstidspunkt = YearMonth.of(2020, 2)
@@ -149,8 +149,8 @@ class TransformerDemo {
             normertPensjonsalder = NormertPensjonsalder.Companion.default()
         )
 
-        return BeregnSlitertilleggForklartFaktumService(
-            BeregnSlitertilleggRequest(
+        return SliterordningService(
+            SliterordningRequest(
                 uttakstidspunkt = uttakstidspunkt,
                 virkningstidspunkt = virkningstidspunkt,
                 person = person

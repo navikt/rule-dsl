@@ -1,41 +1,46 @@
 package no.nav.pensjon.regler.sliterordning.flyt
 
+import no.nav.pensjon.regler.sliterordning.config.grunnbeløpByYearMonth
 import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.regelsett.BeregnSlitertilleggRS
 import no.nav.pensjon.regler.sliterordning.regelsett.VilkårsprøvSlitertilleggRS
-import no.nav.pensjon.regler.sliterordning.to.Response
+import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse
+import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse.*
 import no.nav.system.ruledsl.core.model.AbstractRuleflow
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
 import no.nav.system.ruledsl.core.operators.erLik
-
 import java.time.YearMonth
 
 class BehandleSliterordningFlyt(
     val uttakstidspunkt: YearMonth,
     val virkningstidspunkt: YearMonth,
     val person: Person
-) : AbstractRuleflow<Response.Sliterordning>() {
+) : AbstractRuleflow<SliterordningResponse>() {
     @OptIn(DslDomainPredicate::class)
-    override var ruleflow: () -> Response.Sliterordning = {
+    override var ruleflow: () -> SliterordningResponse = {
 
-        val innvilget = VilkårsprøvSlitertilleggRS().run(this)
+        val vilkårStatus = VilkårsprøvSlitertilleggRS().run(this)
+        var sliterordning: SliterordningResponse? = null
 
-        var sliterordning: Response.Sliterordning? = null
+        forgrening("Vilkår status?") {
 
-        forgrening("innvilget?") {
             gren {
-                betingelse("JA") { innvilget erLik true }
+                betingelse("Innvilget") { vilkårStatus erLik true }
                 flyt {
-                    sliterordning = Response.Sliterordning.Innvilget(
-                        BeregnSlitertilleggRS(uttakstidspunkt, virkningstidspunkt, person).run(this)
+                    sliterordning = Innvilget(
+                        slitertillegg = BeregnSlitertilleggRS(
+                            uttakstidspunkt,
+                            person,
+                            grunnbeløpByYearMonth(virkningstidspunkt)
+                        ).run(this)
                     )
                 }
             }
 
             gren {
-                betingelse("NEI") { innvilget erLik false }
+                betingelse("Avslag") { vilkårStatus erLik false }
                 flyt {
-                    sliterordning = Response.Sliterordning.Avslag("avslag")
+                    sliterordning = Avslag("avslag")
                 }
             }
         }

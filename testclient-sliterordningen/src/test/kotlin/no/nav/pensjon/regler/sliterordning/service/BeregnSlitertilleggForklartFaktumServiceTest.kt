@@ -3,8 +3,8 @@ package no.nav.pensjon.regler.sliterordning.service
 import no.nav.pensjon.regler.sliterordning.domain.NormertPensjonsalder
 import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.domain.Trygdetid
-import no.nav.pensjon.regler.sliterordning.to.BeregnSlitertilleggRequest
-import no.nav.pensjon.regler.sliterordning.to.Response
+import no.nav.pensjon.regler.sliterordning.to.SliterordningRequest
+import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse
 import no.nav.system.ruledsl.core.inspections.printTree
 import no.nav.system.ruledsl.core.resource.tracker.forklar
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -34,8 +34,8 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         )
 
         // Act: Run the ruleflow through the service (which provides necessary resources)
-        val result = BeregnSlitertilleggForklartFaktumService(
-            BeregnSlitertilleggRequest(
+        val result = SliterordningService(
+            SliterordningRequest(
                 uttakstidspunkt = uttakstidspunkt,
                 virkningstidspunkt = virkningstidspunkt,
                 person = person
@@ -43,9 +43,9 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         ).run()
 
         // Assert: Verify result is Innvilget (since VilkårsprøvSlitertilleggRS always returns true)
-        assertTrue(result is Response.SliterordningForklartFaktum.Innvilget, "Expected Innvilget result")
+        assertTrue(result is SliterordningResponse.Innvilget, "Expected Innvilget result")
 
-        val innvilget = result as Response.SliterordningForklartFaktum.Innvilget
+        val innvilget = result as SliterordningResponse.Innvilget
         assertTrue(innvilget.slitertillegg.verdi > 0.0, "Expected positive slitertillegg amount")
 
         val txt = innvilget.slitertillegg.forklar()
@@ -67,8 +67,8 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         )
 
         // Act: Run the service
-        val service = BeregnSlitertilleggForklartFaktumService(
-            BeregnSlitertilleggRequest(
+        val service = SliterordningService(
+            SliterordningRequest(
                 uttakstidspunkt = uttakstidspunkt,
                 virkningstidspunkt = virkningstidspunkt,
                 person = person
@@ -77,9 +77,9 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val result = service.run()
 
         // Assert
-        assertTrue(result is Response.SliterordningForklartFaktum.Innvilget)
+        assertTrue(result is SliterordningResponse.Innvilget)
 
-        val innvilget = result as Response.SliterordningForklartFaktum.Innvilget
+        val innvilget = result as SliterordningResponse.Innvilget
         // The slitertillegg Faktum's HVORFOR trace should include vilkårStatus with its origin
         val explanation = innvilget.slitertillegg.forklar()
         println(explanation)
@@ -119,8 +119,8 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         )
 
         // Act: Run the service
-        val service = BeregnSlitertilleggForklartFaktumService(
-            BeregnSlitertilleggRequest(
+        val service = SliterordningService(
+            SliterordningRequest(
                 uttakstidspunkt = uttakstidspunkt,
                 virkningstidspunkt = virkningstidspunkt,
                 person = person
@@ -129,8 +129,8 @@ class BeregnSlitertilleggForklartFaktumServiceTest {
         val result = service.run()
 
         // Assert: Verify we got an Innvilget response
-        assertTrue(result is Response.SliterordningForklartFaktum.Innvilget)
-        val innvilget = result as Response.SliterordningForklartFaktum.Innvilget
+        assertTrue(result is SliterordningResponse.Innvilget)
+        val innvilget = result as SliterordningResponse.Innvilget
 
         println("┌─────────────────────────────────────────────────────────────────────┐")
         println("│ FAKTUM-CENTRIC PERSPECTIVES                                         │")

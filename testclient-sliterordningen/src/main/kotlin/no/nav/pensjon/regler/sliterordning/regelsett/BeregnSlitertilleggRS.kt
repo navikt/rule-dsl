@@ -1,87 +1,135 @@
 package no.nav.pensjon.regler.sliterordning.regelsett
 
-
 import no.nav.pensjon.regler.sliterordning.config.AbstractDemoRuleset
-import no.nav.pensjon.regler.sliterordning.config.grunnbeløpByYearMonth
 import no.nav.pensjon.regler.sliterordning.domain.Person
-import no.nav.pensjon.regler.sliterordning.domain.Slitertillegg
-import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.FULL_TRYGDETID
-import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.MND_12
 import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.system.ruledsl.core.model.DslDomainPredicate
 import no.nav.system.ruledsl.core.model.Faktum
+import no.nav.system.ruledsl.core.operators.*
 import no.nav.system.ruledsl.core.operators.erMindreEnn
-
+import no.nav.system.ruledsl.core.operators.erStørreEllerLik
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
+/**
+ *
+ * Regelsett for beregning av slitertillegg
+ *
+ * Denne versjonen legger mer vekt på Domenepredikatene, dvs reglene er spisset mot den aktuelle formel.
+ *
+ * https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering#
+ *
+ */
 class BeregnSlitertilleggRS(
-    val uttakstidspunkt: YearMonth,
-    val virkningstidspunkt: YearMonth,
-    val person: Person
-) : AbstractDemoRuleset<Slitertillegg>() {
+    innUttakstidspunkt: YearMonth,
+    innPerson: Person,
+    innGrunnbeløp: Int
+) : AbstractDemoRuleset<Faktum<Double>>() {
+    /**
+     * Faktum
+     */
+    private val faktiskTrygdetid = Faktum("faktiskTrygdetid", innPerson.trygdetid.faktiskTrygdetid)
+    private val uttakstidspunkt = Faktum("uttakstidspunkt", innUttakstidspunkt)
+    private val nedrePensjonsDato = Faktum("nedrePensjonsDato", innPerson.nedrePensjonsDato())
+    private val fullTrygdetid = Faktum("fullTrygdetid", 40)
 
-    private val grunnbeløp by lazy { grunnbeløpByYearMonth(virkningstidspunkt) }
-    private val antallMånederEtterNedreAldersgrense = Faktum(
-        "antallMånederEtterNedreAldersgrense",
-        ChronoUnit.MONTHS.between(person.nedrePensjonsDato(), uttakstidspunkt)
+    /**
+     * Formler
+     */
+    private val antallMånederEtterNedrePensjonsDato = Faktum(
+        "antallMånederEtterNedrePensjonsDato",
+        ChronoUnit.MONTHS.between(nedrePensjonsDato.verdi, uttakstidspunkt.verdi).toInt().coerceAtMost(MND_36)
     )
 
-    private var fulltSlitertillegg: Double = 0.0
-    private var justertSlitertillegg: Double = 0.0
-    private var avkortetSlitertilleggEtterTrygdetid: Double = 0.0
-    private var slitertilleggBeregnet: Double = 0.0
+    private val G = Faktum("G", innGrunnbeløp)
+    private val fulltSlitertillegg = Faktum("fulltSlitertillegg", 0.25 * G / 12)
+    private var justeringsFaktor = Faktum("justeringsFaktor", 0.0)
+    private val trygdetidFaktor = Faktum("trygdetidFaktor", faktiskTrygdetid / fullTrygdetid)
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
-        regel("SLITERTILLEGG-BEREGNING-UAVKORTET") {
-            HVIS { true }
+
+        /**
+         * justeringsFaktor.forklar():
+         * HVA
+         *    justeringsFaktor = 1.0
+         *
+         * HVORFOR
+         *    antallMånederEtterNedrePensjonsDato erMindreEnn 36
+         *    0 erMindreEnn 36
+         *
+         * HVORDAN
+         *    justeringsFaktor = (36 - antallMånederEtterNedrePensjonsDato) / 36
+         *    justeringsFaktor = (36 - 0) / 36
+         *    justeringsFaktor = 1.0
+         */
+
+
+        /**
+         * Uttaket er innen 36 måneder etter nedre pensjonsdato.
+         */
+        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG") {
+            HVIS { antallMånederEtterNedrePensjonsDato erMindreEnn MND_36 }
             SÅ {
-                fulltSlitertillegg = 0.25 * grunnbeløp / MND_12
+                justeringsFaktor = sporing(
+                    "justeringsFaktor", (MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36
+                )
             }
+            REF("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", "https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering")
         }
 
-        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT") {
-            HVIS { antallMånederEtterNedreAldersgrense erMindreEnn MND_36 }
+        /**
+         * Uttaket er fom 36 måneder etter nedre pensjonsdato.
+         */
+        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-SENT") {
+            HVIS { antallMånederEtterNedrePensjonsDato erStørreEllerLik MND_36 }
             SÅ {
-                justertSlitertillegg =
-                    fulltSlitertillegg * ((MND_36 - antallMånederEtterNedreAldersgrense.verdi) / MND_36.toDouble())
+                justeringsFaktor = sporing(
+                    "justeringsFaktor", 0.0
+                )
             }
-            ELLERS {
-                justertSlitertillegg = 0.0
-            }
+            REF("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT", "https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering")
         }
 
-        regel("SLITERTILLEGG-AVKORTING-TRYGDETID") {
-            HVIS { true }
-            SÅ {
-                avkortetSlitertilleggEtterTrygdetid =
-                    fulltSlitertillegg * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
-            }
-        }
-
-        regel("SLITERTILEGG-BEREGNET") {
-            HVIS { true }
-            SÅ {
-                slitertilleggBeregnet =
-                    fulltSlitertillegg * ((MND_36 - antallMånederEtterNedreAldersgrense.verdi) / MND_36.toDouble()) * (person.trygdetid.faktiskTrygdetid / FULL_TRYGDETID.toDouble())
-            }
-        }
-
-        regel("SLITERTILLEGG-RESULTAT") {
+        /**
+         * Forklaring:
+         *      HVA
+         *          slitertillegg = 954.86
+         *
+         *      REFERANSE
+         *          SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID
+         *
+         *      HVORDAN
+         *          slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
+         *          slitertillegg = 5 * 5 * 5
+         *
+         *          HVORDAN
+         *              fulltSlitertillegg = 0.25 * G / 12
+         *              fulltSlitertillegg = 0.25 * 110000 / 12
+         *
+         *          HVORDAN
+         *              justeringsFaktor = (36 - antallMånederEtterNedrePensjonsDato) / 36
+         *              justeringsFaktor = (36 - 0) / 36
+         *
+         *              HVORFOR
+         *                  antallMånederEtterNedrePensjonsDato erMindreEnn 36
+         *                  0 erMindreEnn 36
+         *
+         *          HVORDAN
+         *              trygdetidFaktor = faktiskTrygdetid / fullTrygdetid
+         *              trygdetidFaktor = 30 / 40
+         */
+        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID") {
             HVIS { true }
             SÅ {
                 RETURNER(
-                    Slitertillegg(
-                        grunnbeløp = grunnbeløp,
-                        antallMånederEtterNedreAldersgrense = antallMånederEtterNedreAldersgrense.verdi,
-                        fulltSlitertillegg = fulltSlitertillegg,
-                        justertSlitertillegg = justertSlitertillegg,
-                        avkortetSlitertilleggEtterTrygdetid = avkortetSlitertilleggEtterTrygdetid,
-                        slitertilleggBeregnet = slitertilleggBeregnet
-                    )
+                    sporing("slitertillegg", fulltSlitertillegg * justeringsFaktor * trygdetidFaktor)
                 )
             }
+            REF(
+                "SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID",
+                "https://confluence.adeo.no/spaces/PEN/pages/658103196/Regelverkspesifisering"
+            )
         }
     }
 }
