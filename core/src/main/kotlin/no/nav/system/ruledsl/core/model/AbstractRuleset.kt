@@ -121,7 +121,6 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
     /**
      * Creates, sorts and evaluates the rules of the ruleset.
      */
-    @Suppress("MemberVisibilityCanBePrivate")
     protected fun internalRun(): T {
         create()
 
