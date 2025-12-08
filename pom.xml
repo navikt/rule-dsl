@@ -15,11 +15,11 @@
         <jupiter.version>5.11.3</jupiter.version>
         <surefire.plugin.version>3.5.2</surefire.plugin.version>
         <maven.source.plugin.version>3.3.1</maven.source.plugin.version>
+        <build-helper-maven-plugin.version>3.5.0</build-helper-maven-plugin.version>
 
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.source>21</maven.compiler.source>
         <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
