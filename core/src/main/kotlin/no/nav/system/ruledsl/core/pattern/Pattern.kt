@@ -1,7 +1,6 @@
 package no.nav.system.ruledsl.core.pattern
 
-import no.nav.system.ruledsl.core.model.Rule
-
+import no.nav.system.ruledsl.core.model.arc.Rule
 
 /**
  * Patterns enable rules to evaluate for each element in the pattern.

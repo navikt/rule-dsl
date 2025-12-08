@@ -1,7 +1,7 @@
 package no.nav.pensjon.regler.sliterordning.functions
 
-import no.nav.system.ruledsl.core.model.UnaryFunction
 import no.nav.system.ruledsl.core.model.Uttrykk
+import no.nav.system.ruledsl.core.model.uttrykk.math.UnaryOperation
 import kotlin.math.roundToLong
 
 /**
@@ -32,6 +32,6 @@ import kotlin.math.roundToLong
  * ```
  */
 fun avrund2desimal(value: Uttrykk<Number>): Uttrykk<Double> =
-    UnaryFunction(value, "avrund2desimal") {
+    UnaryOperation(value, "avrund2desimal") {
         (value.verdi.toDouble() * 100).roundToLong() / 100.0
     }

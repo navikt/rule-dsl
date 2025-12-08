@@ -3,7 +3,7 @@ package no.nav.pensjon.regler.sliterordning.regelsett
 import no.nav.pensjon.regler.sliterordning.domain.NormertPensjonsalder
 import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.domain.Trygdetid
-import no.nav.system.ruledsl.core.resource.tracker.forklar
+import no.nav.system.ruledsl.core.forklaring.forklar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test

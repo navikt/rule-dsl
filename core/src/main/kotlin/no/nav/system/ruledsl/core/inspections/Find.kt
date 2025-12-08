@@ -1,6 +1,6 @@
 package no.nav.system.ruledsl.core.inspections
 
-import no.nav.system.ruledsl.core.model.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
 
 /**
  * Searches the ruleComponent tree for target [AbstractRuleComponent]s matching [target].

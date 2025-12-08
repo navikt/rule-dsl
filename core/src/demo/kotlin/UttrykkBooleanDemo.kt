@@ -1,6 +1,5 @@
 package no.nav.system.rule.dsl.demo.forklaring
 
-import no.nav.system.ruledsl.core.model.Const
 import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.operators.*
 
@@ -29,9 +28,9 @@ fun booleanSammenligninger() {
     println("2. SAMMENLIGNINGER")
     println("-".repeat(80))
 
-    val trygdetid = Faktum("trygdetid", Const(35))
-    val fullTrygdetid = Faktum("fullTrygdetid", Const(40))
-    val inntekt = Faktum("inntekt", Const(500000))
+    val trygdetid = Faktum("trygdetid", 35)
+    val fullTrygdetid = Faktum("fullTrygdetid", 40)
+    val inntekt = Faktum("inntekt", 500000)
 
     // Mindre enn
     val harRedusertTrygdetid = trygdetid erMindreEnn fullTrygdetid

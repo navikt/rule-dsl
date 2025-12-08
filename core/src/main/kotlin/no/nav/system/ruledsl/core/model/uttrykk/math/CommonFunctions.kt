@@ -1,6 +1,5 @@
-package no.nav.system.ruledsl.core.functions
+package no.nav.system.ruledsl.core.model.uttrykk.math
 
-import no.nav.system.ruledsl.core.model.UnaryFunction
 import no.nav.system.ruledsl.core.model.Uttrykk
 import kotlin.math.abs as kotlinAbs
 import kotlin.math.ceil as kotlinCeil
@@ -31,7 +30,7 @@ import kotlin.math.min as kotlinMin
  * ```
  */
 fun floor(value: Uttrykk<Number>): Uttrykk<Double> =
-    UnaryFunction(value, "floor") { kotlinFloor(value.verdi.toDouble()) }
+    UnaryOperation(value, "floor") { kotlinFloor(value.verdi.toDouble()) }
 
 /**
  * Ceiling function - returns the smallest integer greater than or equal to the value.
@@ -39,7 +38,7 @@ fun floor(value: Uttrykk<Number>): Uttrykk<Double> =
  * Example: `ceil(37.2)` returns `38.0`
  */
 fun ceil(value: Uttrykk<Number>): Uttrykk<Double> =
-    UnaryFunction(value, "ceil") { kotlinCeil(value.verdi.toDouble()) }
+    UnaryOperation(value, "ceil") { kotlinCeil(value.verdi.toDouble()) }
 
 /**
  * Absolute value function - returns the non-negative value.
@@ -47,7 +46,7 @@ fun ceil(value: Uttrykk<Number>): Uttrykk<Double> =
  * Example: `abs(-5)` returns `5.0`, `abs(5)` returns `5.0`
  */
 fun abs(value: Uttrykk<Number>): Uttrykk<Double> =
-    UnaryFunction(value, "abs") { kotlinAbs(value.verdi.toDouble()) }
+    UnaryOperation(value, "abs") { kotlinAbs(value.verdi.toDouble()) }
 
 /**
  * Minimum of two values.
@@ -61,13 +60,13 @@ fun abs(value: Uttrykk<Number>): Uttrykk<Double> =
  * ```
  */
 fun min(a: Uttrykk<Number>, b: Number): Uttrykk<Double> =
-    UnaryFunction(a, "min") { kotlinMin(a.verdi.toDouble(), b.toDouble()) }
+    UnaryOperation(a, "min") { kotlinMin(a.verdi.toDouble(), b.toDouble()) }
 
 fun min(a: Number, b: Uttrykk<Number>): Uttrykk<Double> =
-    UnaryFunction(b, "min") { kotlinMin(a.toDouble(), b.verdi.toDouble()) }
+    UnaryOperation(b, "min") { kotlinMin(a.toDouble(), b.verdi.toDouble()) }
 
 fun min(a: Uttrykk<Number>, b: Uttrykk<Number>): Uttrykk<Double> =
-    UnaryFunction(a, "min") { kotlinMin(a.verdi.toDouble(), b.verdi.toDouble()) }
+    UnaryOperation(a, "min") { kotlinMin(a.verdi.toDouble(), b.verdi.toDouble()) }
 
 /**
  * Maximum of two values.
@@ -81,10 +80,10 @@ fun min(a: Uttrykk<Number>, b: Uttrykk<Number>): Uttrykk<Double> =
  * ```
  */
 fun max(a: Uttrykk<Number>, b: Number): Uttrykk<Double> =
-    UnaryFunction(a, "max") { kotlinMax(a.verdi.toDouble(), b.toDouble()) }
+    UnaryOperation(a, "max") { kotlinMax(a.verdi.toDouble(), b.toDouble()) }
 
 fun max(a: Number, b: Uttrykk<Number>): Uttrykk<Double> =
-    UnaryFunction(b, "max") { kotlinMax(a.toDouble(), b.verdi.toDouble()) }
+    UnaryOperation(b, "max") { kotlinMax(a.toDouble(), b.verdi.toDouble()) }
 
 fun max(a: Uttrykk<Number>, b: Uttrykk<Number>): Uttrykk<Double> =
-    UnaryFunction(a, "max") { kotlinMax(a.verdi.toDouble(), b.verdi.toDouble()) }
+    UnaryOperation(a, "max") { kotlinMax(a.verdi.toDouble(), b.verdi.toDouble()) }

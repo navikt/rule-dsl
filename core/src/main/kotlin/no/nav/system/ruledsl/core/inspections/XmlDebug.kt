@@ -1,10 +1,10 @@
 package no.nav.system.ruledsl.core.inspections
 
-import no.nav.system.ruledsl.core.model.AbstractRuleComponent
-import no.nav.system.ruledsl.core.model.AbstractRuleflow
-import no.nav.system.ruledsl.core.model.Predicate
-import no.nav.system.ruledsl.core.model.Rule
-import no.nav.system.ruledsl.core.model.TrackablePredicate
+import no.nav.system.ruledsl.core.model.arc.Predicate
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleflow
+import no.nav.system.ruledsl.core.model.arc.Rule
+import no.nav.system.ruledsl.core.model.arc.TrackablePredicate
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.

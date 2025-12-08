@@ -1,7 +1,6 @@
-package no.nav.system.ruledsl.core.model
+package no.nav.system.ruledsl.core.model.arc
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
-
 
 /**
  * Top level ruleComponent encapusaltes a complete ruleservice.

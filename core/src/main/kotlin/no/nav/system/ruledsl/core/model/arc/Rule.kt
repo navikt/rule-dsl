@@ -1,7 +1,8 @@
-package no.nav.system.ruledsl.core.model
+package no.nav.system.ruledsl.core.model.arc
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
 import no.nav.system.ruledsl.core.helper.svarord
+import no.nav.system.ruledsl.core.model.Uttrykk
 import no.nav.system.ruledsl.core.pattern.Pattern
 import no.nav.system.ruledsl.core.reference.Reference
 import kotlin.experimental.ExperimentalTypeInference
@@ -214,4 +215,3 @@ open class Rule<T : Any>(
     override fun toString(): String = "${type()}: ${fired().svarord()} ${name()}"
 
 }
-

@@ -1,10 +1,12 @@
 package no.nav.system.ruledsl.core.operators
 
-import no.nav.system.ruledsl.core.model.ComparisonOperation
-import no.nav.system.ruledsl.core.model.Const
 import no.nav.system.ruledsl.core.model.Faktum
-import no.nav.system.ruledsl.core.model.ListOperation
 import no.nav.system.ruledsl.core.model.Uttrykk
+import no.nav.system.ruledsl.core.model.uttrykk.Const
+import no.nav.system.ruledsl.core.model.uttrykk.boolean.ListOperator
+import no.nav.system.ruledsl.core.model.uttrykk.boolean.Sammenligning
+import no.nav.system.ruledsl.core.model.uttrykk.boolean.MengdeRelasjon
+import no.nav.system.ruledsl.core.model.uttrykk.boolean.PairOperator
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -16,7 +18,7 @@ private inline fun <T : Any> comparison(
     right: Uttrykk<T>,
     operator: PairOperator,
     crossinline eval: () -> Boolean
-): Uttrykk<Boolean> = ComparisonOperation(left, right, operator) { eval() }
+): Uttrykk<Boolean> = Sammenligning(left, right, operator) { eval() }
 
 private inline fun <T : Any> faktumValue(
     faktum: Faktum<T>,
@@ -95,46 +97,46 @@ infix fun Faktum<LocalDate>.erEtter(other: Faktum<LocalDate>): Uttrykk<Boolean> 
  */
 @JvmName("faktum_yearmonth_erFørEllerLik_faktum_localdate")
 infix fun Faktum<YearMonth>.erFørEllerLik(other: Faktum<LocalDate>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.FØR_ELLER_LIK) { this.verdi.atDay(1) <= other.verdi }
+    Sammenligning(this, other, PairOperator.FØR_ELLER_LIK) { this.verdi.atDay(1) <= other.verdi }
 
 @JvmName("faktum_yearmonth_erFør_faktum_localdate")
 infix fun Faktum<YearMonth>.erFør(other: Faktum<LocalDate>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.FØR) { verdi.atDay(1) < other.verdi }
+    Sammenligning(this, other, PairOperator.FØR) { verdi.atDay(1) < other.verdi }
 
 @JvmName("faktum_yearmonth_erFør_localdate")
 infix fun Faktum<YearMonth>.erFør(other: LocalDate): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.FØR) { verdi.atDay(1) < other }
+    Sammenligning(this, Const(other), PairOperator.FØR) { verdi.atDay(1) < other }
 
 @JvmName("faktum_yearmonth_erEtterEllerLik_faktum_localdate")
 infix fun Faktum<YearMonth>.erEtterEllerLik(other: Faktum<LocalDate>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.ETTER_ELLER_LIK) { verdi.atDay(1) >= other.verdi }
+    Sammenligning(this, other, PairOperator.ETTER_ELLER_LIK) { verdi.atDay(1) >= other.verdi }
 
 @JvmName("faktum_yearmonth_erEtter_faktum_localdate")
 infix fun Faktum<YearMonth>.erEtter(other: Faktum<LocalDate>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.ETTER) { verdi.atDay(1) > other.verdi }
+    Sammenligning(this, other, PairOperator.ETTER) { verdi.atDay(1) > other.verdi }
 
 /**
  * LocalDate -> YearMonth cross-type comparison operators
  */
 @JvmName("faktum_localdate_erFørEllerLik_faktum_yearmonth")
 infix fun Faktum<LocalDate>.erFørEllerLik(other: Faktum<YearMonth>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.FØR_ELLER_LIK) { this.verdi <= other.verdi.atDay(1) }
+    Sammenligning(this, other, PairOperator.FØR_ELLER_LIK) { this.verdi <= other.verdi.atDay(1) }
 
 @JvmName("faktum_localdate_erFør_faktum_yearmonth")
 infix fun Faktum<LocalDate>.erFør(other: Faktum<YearMonth>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.FØR) { verdi < other.verdi.atDay(1) }
+    Sammenligning(this, other, PairOperator.FØR) { verdi < other.verdi.atDay(1) }
 
 @JvmName("faktum_localdate_erFør_yearmonth")
 infix fun Faktum<LocalDate>.erFør(other: YearMonth): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.FØR) { verdi < other.atDay(1) }
+    Sammenligning(this, Const(other), PairOperator.FØR) { verdi < other.atDay(1) }
 
 @JvmName("faktum_localdate_erEtterEllerLik_faktum_yearmonth")
 infix fun Faktum<LocalDate>.erEtterEllerLik(other: Faktum<YearMonth>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.ETTER_ELLER_LIK) { verdi >= other.verdi.atDay(1) }
+    Sammenligning(this, other, PairOperator.ETTER_ELLER_LIK) { verdi >= other.verdi.atDay(1) }
 
 @JvmName("faktum_localdate_erEtter_faktum_yearmonth")
 infix fun Faktum<LocalDate>.erEtter(other: Faktum<YearMonth>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.ETTER) { verdi > other.verdi.atDay(1) }
+    Sammenligning(this, other, PairOperator.ETTER) { verdi > other.verdi.atDay(1) }
 
 /**
  * YearMonth comparison operators
@@ -164,83 +166,83 @@ infix fun Faktum<YearMonth>.erEtter(other: Faktum<YearMonth>): Uttrykk<Boolean> 
  */
 @JvmName("faktum_number_erMindreEllerLik_faktum_number")
 infix fun Faktum<out Number>.erMindreEllerLik(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.MINDRE_ELLER_LIK) { verdi.toDouble() <= other.verdi.toDouble() }
+    Sammenligning(this, other, PairOperator.MINDRE_ELLER_LIK) { verdi.toDouble() <= other.verdi.toDouble() }
 
 @JvmName("faktum_number_erMindreEllerLik_number")
 infix fun Faktum<out Number>.erMindreEllerLik(other: Number): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.MINDRE_ELLER_LIK) { verdi.toDouble() <= other.toDouble() }
+    Sammenligning(this, Const(other), PairOperator.MINDRE_ELLER_LIK) { verdi.toDouble() <= other.toDouble() }
 
 @JvmName("number_erMindreEllerLik_faktum_number")
 infix fun Number.erMindreEllerLik(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), other, PairOperator.MINDRE_ELLER_LIK) { toDouble() <= other.verdi.toDouble() }
+    Sammenligning(Const(this), other, PairOperator.MINDRE_ELLER_LIK) { toDouble() <= other.verdi.toDouble() }
 
 @JvmName("number_erMindreEllerLik_number")
 infix fun Number.erMindreEllerLik(other: Number): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), Const(other), PairOperator.MINDRE_ELLER_LIK) { toDouble() <= other.toDouble() }
+    Sammenligning(Const(this), Const(other), PairOperator.MINDRE_ELLER_LIK) { toDouble() <= other.toDouble() }
 
 @JvmName("faktum_number_erMindreEnn_faktum_number")
 infix fun Faktum<out Number>.erMindreEnn(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.MINDRE) { verdi.toDouble() < other.verdi.toDouble() }
+    Sammenligning(this, other, PairOperator.MINDRE) { verdi.toDouble() < other.verdi.toDouble() }
 
 @JvmName("faktum_number_erMindreEnn_number")
 infix fun Faktum<out Number>.erMindreEnn(other: Number): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.MINDRE) { verdi.toDouble() < other.toDouble() }
+    Sammenligning(this, Const(other), PairOperator.MINDRE) { verdi.toDouble() < other.toDouble() }
 
 @JvmName("number_erMindreEnn_faktum_number")
 infix fun Number.erMindreEnn(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), other, PairOperator.MINDRE) { toDouble() < other.verdi.toDouble() }
+    Sammenligning(Const(this), other, PairOperator.MINDRE) { toDouble() < other.verdi.toDouble() }
 
 @JvmName("number_erMindreEnn_number")
 infix fun Number.erMindreEnn(other: Number): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), Const(other), PairOperator.MINDRE) { toDouble() < other.toDouble() }
+    Sammenligning(Const(this), Const(other), PairOperator.MINDRE) { toDouble() < other.toDouble() }
 
 @JvmName("faktum_number_erStørreEllerLik_faktum_number")
 infix fun Faktum<out Number>.erStørreEllerLik(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.STØRRE_ELLER_LIK) { verdi.toDouble() >= other.verdi.toDouble() }
+    Sammenligning(this, other, PairOperator.STØRRE_ELLER_LIK) { verdi.toDouble() >= other.verdi.toDouble() }
 
 @JvmName("faktum_number_erStørreEnn_faktum_number")
 infix fun Faktum<out Number>.erStørreEnn(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(this, other, PairOperator.STØRRE) { verdi.toDouble() > other.verdi.toDouble() }
+    Sammenligning(this, other, PairOperator.STØRRE) { verdi.toDouble() > other.verdi.toDouble() }
 
 @JvmName("faktum_number_erStørreEllerLik_number")
 infix fun Faktum<out Number>.erStørreEllerLik(other: Number): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.STØRRE_ELLER_LIK) { verdi.toDouble() >= other.toDouble() }
+    Sammenligning(this, Const(other), PairOperator.STØRRE_ELLER_LIK) { verdi.toDouble() >= other.toDouble() }
 
 @JvmName("faktum_number_erStørreEnn_number")
 infix fun Faktum<out Number>.erStørreEnn(other: Number): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.STØRRE) { verdi.toDouble() > other.toDouble() }
+    Sammenligning(this, Const(other), PairOperator.STØRRE) { verdi.toDouble() > other.toDouble() }
 
 @JvmName("number_erStørreEllerLik_faktum_number")
 infix fun Number.erStørreEllerLik(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), other, PairOperator.STØRRE_ELLER_LIK) { toDouble() >= other.verdi.toDouble() }
+    Sammenligning(Const(this), other, PairOperator.STØRRE_ELLER_LIK) { toDouble() >= other.verdi.toDouble() }
 
 @JvmName("number_erStørreEnn_faktum_number")
 infix fun Number.erStørreEnn(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), other, PairOperator.STØRRE) { toDouble() > other.verdi.toDouble() }
+    Sammenligning(Const(this), other, PairOperator.STØRRE) { toDouble() > other.verdi.toDouble() }
 
 @JvmName("number_erStørreEllerLik_number")
 infix fun Number.erStørreEllerLik(other: Number): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), Const(other), PairOperator.STØRRE_ELLER_LIK) { toDouble() >= other.toDouble() }
+    Sammenligning(Const(this), Const(other), PairOperator.STØRRE_ELLER_LIK) { toDouble() >= other.toDouble() }
 
 @JvmName("number_erStørreEnn_number")
 infix fun Number.erStørreEnn(other: Number): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), Const(other), PairOperator.STØRRE) { toDouble() > other.toDouble() }
+    Sammenligning(Const(this), Const(other), PairOperator.STØRRE) { toDouble() > other.toDouble() }
 
 /**
  * LocalDate -> Number comparison operators
  * TODO: These appear imprecise. Consider removing or renaming to erÅrTidligereEllerLik, etc.
  */
 infix fun Faktum<out LocalDate>.erMindreEllerLik(other: Int): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.MINDRE_ELLER_LIK) { verdi.year <= other }
+    Sammenligning(this, Const(other), PairOperator.MINDRE_ELLER_LIK) { verdi.year <= other }
 
 infix fun Faktum<out LocalDate>.erMindreEnn(other: Int): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.MINDRE) { verdi.year < other }
+    Sammenligning(this, Const(other), PairOperator.MINDRE) { verdi.year < other }
 
 infix fun Faktum<out LocalDate>.erStørreEllerLik(other: Int): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.STØRRE_ELLER_LIK) { verdi.year >= other }
+    Sammenligning(this, Const(other), PairOperator.STØRRE_ELLER_LIK) { verdi.year >= other }
 
 infix fun Faktum<out LocalDate>.erStørreEnn(other: Int): Uttrykk<Boolean> =
-    ComparisonOperation(this, Const(other), PairOperator.STØRRE) { verdi.year > other }
+    Sammenligning(this, Const(other), PairOperator.STØRRE) { verdi.year > other }
 
 /**
  * Generic equality operators (work for any type)
@@ -270,7 +272,7 @@ infix fun Number.erLik(other: Number): Uttrykk<Boolean> =
 
 @JvmName("number_erLik_faktum_number")
 infix fun Number.erLik(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), other, PairOperator.LIK) { this == other.verdi }
+    Sammenligning(Const(this), other, PairOperator.LIK) { this == other.verdi }
 
 @JvmName("number_erUlik_number")
 infix fun Number.erUlik(other: Number): Uttrykk<Boolean> =
@@ -278,49 +280,49 @@ infix fun Number.erUlik(other: Number): Uttrykk<Boolean> =
 
 @JvmName("number_erUlik_faktum_number")
 infix fun Number.erUlik(other: Faktum<out Number>): Uttrykk<Boolean> =
-    ComparisonOperation(Const(this), other, PairOperator.ULIK) { this != other.verdi }
+    Sammenligning(Const(this), other, PairOperator.ULIK) { this != other.verdi }
 
 /**
  * List membership operators
  */
 @JvmName("uttrykk_erBlant_list")
-infix fun <T : Any> Uttrykk<T>.erBlant(others: List<T>): Uttrykk<Boolean> = ListOperation(
+infix fun <T : Any> Uttrykk<T>.erBlant(others: List<T>): Uttrykk<Boolean> = MengdeRelasjon(
     operator = ListOperator.ER_BLANDT,
     uttrykk = this,
-    mengdeUttrykk = Const(others)
+    mengde = Const(others)
 ) { this.verdi in others }
 
 @JvmName("uttrykk_erBlant_list_faktum")
-infix fun <T : Any> Uttrykk<T>.erBlant(others: List<Faktum<T>>): Uttrykk<Boolean> = ListOperation(
+infix fun <T : Any> Uttrykk<T>.erBlant(others: List<Faktum<T>>): Uttrykk<Boolean> = MengdeRelasjon(
     operator = ListOperator.ER_BLANDT,
     uttrykk = this,
-    mengdeUttrykk = Const(others.map { faktum -> faktum.verdi })
+    mengde = Const(others.map { faktum -> faktum.verdi })
 ) { this.verdi in others.map { it.verdi } }
 
 @JvmName("uttrykk_erBlant_faktum_list")
-infix fun <T : Any> Uttrykk<T>.erBlant(other: Faktum<List<T>>): Uttrykk<Boolean> = ListOperation(
+infix fun <T : Any> Uttrykk<T>.erBlant(other: Faktum<List<T>>): Uttrykk<Boolean> = MengdeRelasjon(
     operator = ListOperator.ER_BLANDT,
     uttrykk = this,
-    mengdeUttrykk = other
+    mengde = other
 ) { this.verdi in other.verdi }
 
 @JvmName("uttrykk_erIkkeBlant_list")
-infix fun <T : Any> Uttrykk<T>.erIkkeBlant(others: List<T>): Uttrykk<Boolean> = ListOperation(
+infix fun <T : Any> Uttrykk<T>.erIkkeBlant(others: List<T>): Uttrykk<Boolean> = MengdeRelasjon(
     operator = ListOperator.ER_IKKE_BLANDT,
     uttrykk = this,
-    mengdeUttrykk = Const(others)
+    mengde = Const(others)
 ) { this.verdi !in others }
 
 @JvmName("uttrykk_erIkkeBlant_list_faktum")
-infix fun <T : Any> Uttrykk<T>.erIkkeBlant(others: List<Faktum<T>>): Uttrykk<Boolean> = ListOperation(
+infix fun <T : Any> Uttrykk<T>.erIkkeBlant(others: List<Faktum<T>>): Uttrykk<Boolean> = MengdeRelasjon(
     operator = ListOperator.ER_IKKE_BLANDT,
     uttrykk = this,
-    mengdeUttrykk = Const(others.map { faktum -> faktum.verdi })
+    mengde = Const(others.map { faktum -> faktum.verdi })
 ) { this.verdi !in others.map { it.verdi } }
 
 @JvmName("uttrykk_erIkkeBlant_faktum_list")
-infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: Faktum<List<T>>): Uttrykk<Boolean> = ListOperation(
+infix fun <T : Any> Uttrykk<T>.erIkkeBlant(other: Faktum<List<T>>): Uttrykk<Boolean> = MengdeRelasjon(
     operator = ListOperator.ER_IKKE_BLANDT,
     uttrykk = this,
-    mengdeUttrykk = other
+    mengde = other
 ) { this.verdi !in other.verdi }

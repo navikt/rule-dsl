@@ -1,5 +1,6 @@
 package no.nav.system.ruledsl.core.model
 
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleset
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

@@ -1,7 +1,7 @@
 package no.nav.pensjon.regler.alderspensjon.config
 
-import no.nav.system.ruledsl.core.model.AbstractRuleComponent
-import no.nav.system.ruledsl.core.model.AbstractRuleService
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleService
 import java.time.LocalDate
 
 abstract class AbstractDemoRuleService<Response> : AbstractRuleService<Response>() {

@@ -1,11 +1,10 @@
 package no.nav.system.ruledsl.core.forklaring
 
-import no.nav.system.ruledsl.core.model.AbstractRuleComponent
-import no.nav.system.ruledsl.core.model.AbstractRuleflow
-import no.nav.system.ruledsl.core.model.Rule
-import no.nav.system.ruledsl.core.model.TrackablePredicate
-import no.nav.system.ruledsl.core.resource.tracker.Filter
+import no.nav.system.ruledsl.core.model.arc.TrackablePredicate
 import no.nav.system.ruledsl.core.model.Faktum
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleflow
+import no.nav.system.ruledsl.core.model.arc.Rule
 import kotlin.collections.isNotEmpty
 
 /**

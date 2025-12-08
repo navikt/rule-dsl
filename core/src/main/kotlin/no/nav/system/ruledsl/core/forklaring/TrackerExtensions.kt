@@ -1,9 +1,6 @@
-package no.nav.system.ruledsl.core.resource.tracker
+package no.nav.system.ruledsl.core.forklaring
 
-import no.nav.system.ruledsl.core.forklaring.FaktumTransformer
-import no.nav.system.ruledsl.core.forklaring.IndentedTextFormatter
 import no.nav.system.ruledsl.core.model.Faktum
-
 
 /**
  * Generate complete explanation of a Faktum showing HVA/HVORDAN/HVORFOR.

@@ -6,7 +6,7 @@ import no.nav.pensjon.regler.alderspensjon.domain.Trygdetid
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UnntakEnum
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
 import no.nav.pensjon.regler.alderspensjon.domain.koder.YtelseEnum
-import no.nav.system.ruledsl.core.model.DslDomainPredicate
+import no.nav.system.ruledsl.core.model.arc.DslDomainPredicate
 import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.operators.*
 import java.time.LocalDate

@@ -1,6 +1,6 @@
 package no.nav.system.ruledsl.core.inspections
 
-import no.nav.system.ruledsl.core.model.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
 
 fun AbstractRuleComponent.debug(): String {
     val debugString = StringBuilder()

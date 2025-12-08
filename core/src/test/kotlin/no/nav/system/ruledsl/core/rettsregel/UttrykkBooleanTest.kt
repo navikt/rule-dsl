@@ -1,5 +1,6 @@
 package no.nav.system.ruledsl.core.model
 
+import no.nav.system.ruledsl.core.model.uttrykk.Const
 import no.nav.system.ruledsl.core.operators.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

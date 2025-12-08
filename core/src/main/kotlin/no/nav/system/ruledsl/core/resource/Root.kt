@@ -1,6 +1,6 @@
 package no.nav.system.ruledsl.core.resource
 
-import no.nav.system.ruledsl.core.model.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
 
 /**
  * Global resource.

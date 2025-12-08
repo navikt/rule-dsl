@@ -1,5 +1,6 @@
 package no.nav.system.ruledsl.core.model
 
+import no.nav.system.ruledsl.core.model.uttrykk.Const
 import no.nav.system.ruledsl.core.operators.erBlant
 import no.nav.system.ruledsl.core.operators.erIkkeBlant
 import org.junit.jupiter.api.Assertions.*

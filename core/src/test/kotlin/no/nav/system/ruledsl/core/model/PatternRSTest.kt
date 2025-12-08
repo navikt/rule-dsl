@@ -1,5 +1,6 @@
 package no.nav.system.ruledsl.core.model
 
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleset
 import no.nav.system.ruledsl.core.pattern.Pattern
 import no.nav.system.ruledsl.core.pattern.createPattern
 import no.nav.system.ruledsl.core.pattern.pairItemsByFunction

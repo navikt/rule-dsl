@@ -1,5 +1,6 @@
 package no.nav.system.ruledsl.core.model
 
+import no.nav.system.ruledsl.core.model.uttrykk.Const
 import no.nav.system.ruledsl.core.operators.erEtter
 import no.nav.system.ruledsl.core.operators.erEtterEllerLik
 import no.nav.system.ruledsl.core.operators.erFør

@@ -3,11 +3,10 @@ package no.nav.pensjon.regler.alderspensjon.ruleset
 import no.nav.pensjon.regler.alderspensjon.domain.Boperiode
 import no.nav.pensjon.regler.alderspensjon.domain.koder.LandEnum
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
-import no.nav.pensjon.regler.alderspensjon.ruleset.BeregnFaktiskTrygdetidRS
 import no.nav.system.ruledsl.core.inspections.find
-import no.nav.system.ruledsl.core.model.Rule
-import no.nav.system.ruledsl.core.model.TrackablePredicate
+import no.nav.system.ruledsl.core.model.arc.TrackablePredicate
 import no.nav.system.ruledsl.core.model.Faktum
+import no.nav.system.ruledsl.core.model.arc.Rule
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

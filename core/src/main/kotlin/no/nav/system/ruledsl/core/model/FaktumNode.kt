@@ -1,6 +1,7 @@
 package no.nav.system.ruledsl.core.model
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
 
 /**
  * Minimal adapter that allows Faktum (pure data) to participate in the ARC tree.

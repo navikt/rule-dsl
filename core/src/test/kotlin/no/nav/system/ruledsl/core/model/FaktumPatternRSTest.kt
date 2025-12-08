@@ -1,7 +1,8 @@
 package no.nav.system.ruledsl.core.model
 
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleset
 import no.nav.system.ruledsl.core.pattern.createPattern
-import no.nav.system.ruledsl.core.model.Faktum
+import no.nav.system.ruledsl.core.model.arc.DslDomainPredicate
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

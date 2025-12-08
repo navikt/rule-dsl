@@ -1,7 +1,11 @@
-package no.nav.system.ruledsl.core.model
+package no.nav.system.ruledsl.core.model.arc
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
 import no.nav.system.ruledsl.core.error.ResourceAccessException
+import no.nav.system.ruledsl.core.model.Faktum
+import no.nav.system.ruledsl.core.model.FaktumNode
+import no.nav.system.ruledsl.core.model.Uttrykk
+import no.nav.system.ruledsl.core.model.uttrykk.Const
 import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.AbstractResource
 import no.nav.system.ruledsl.core.resource.Root

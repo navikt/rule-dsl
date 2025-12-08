@@ -1,7 +1,7 @@
-package no.nav.system.ruledsl.core.resource.tracker
+package no.nav.system.ruledsl.core.forklaring
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
-import no.nav.system.ruledsl.core.model.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
 
 /**
  * Determines which ARC components to include during explanation building.

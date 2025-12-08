@@ -1,9 +1,12 @@
-package no.nav.system.ruledsl.core.model
+package no.nav.system.ruledsl.core.model.arc
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
 import no.nav.system.ruledsl.core.error.InvalidRulesetException
 import no.nav.system.ruledsl.core.inspections.debug
-import no.nav.system.ruledsl.core.operators.ListOperator
+import no.nav.system.ruledsl.core.model.Faktum
+import no.nav.system.ruledsl.core.model.Uttrykk
+import no.nav.system.ruledsl.core.model.uttrykk.boolean.ListOperator
+import no.nav.system.ruledsl.core.model.uttrykk.boolean.MengdeRelasjon
 import no.nav.system.ruledsl.core.pattern.Pattern
 import org.jetbrains.annotations.TestOnly
 
@@ -162,9 +165,9 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
 
     protected fun String.minstEnHarTruffet(): Uttrykk<Boolean> {
         val list = findRulesByNameStartsWith(this)
-        return ListOperation(
+        return MengdeRelasjon(
             uttrykk = Faktum("Regelreferanse", this),
-            mengdeUttrykk = Faktum(
+            mengde = Faktum(
                 "uaktuelle regler",
                 list.map { it.shortName() }
             ),
@@ -182,9 +185,9 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
      */
     protected fun String.alleHarTruffet(): Uttrykk<Boolean> {
         val list = findRulesByNameStartsWith(this)
-        return ListOperation(
+        return MengdeRelasjon(
             uttrykk = Faktum("Regelreferanse", this),
-            mengdeUttrykk = Faktum(
+            mengde = Faktum(
                 "uaktuelle regler",
                 list.map { it.shortName() }
             ),
@@ -195,9 +198,9 @@ abstract class AbstractRuleset<T : Any> : AbstractRuleComponent() {
 
     protected fun String.ingenHarTruffet(): Uttrykk<Boolean> {
         val list = findRulesByNameStartsWith(this)
-        return ListOperation(
+        return MengdeRelasjon(
             uttrykk = Faktum("Regelreferanse", this),
-            mengdeUttrykk = Faktum(
+            mengde = Faktum(
                 "uaktuelle regler",
                 list.map { it.shortName() }
             ),

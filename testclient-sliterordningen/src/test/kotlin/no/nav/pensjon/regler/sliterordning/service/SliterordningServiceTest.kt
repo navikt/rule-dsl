@@ -5,8 +5,8 @@ import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.domain.Trygdetid
 import no.nav.pensjon.regler.sliterordning.to.SliterordningRequest
 import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse
+import no.nav.system.ruledsl.core.forklaring.forklar
 import no.nav.system.ruledsl.core.inspections.printTree
-import no.nav.system.ruledsl.core.resource.tracker.forklar
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -14,7 +14,7 @@ import java.time.YearMonth
 /**
  * WIP
  */
-class BeregnSlitertilleggForklartFaktumServiceTest {
+class SliterordningServiceTest {
 
     private fun person(fodselsdato: YearMonth, trygdetidMnd: Int): Person =
         Person(fodselsdato, Trygdetid(trygdetidMnd), NormertPensjonsalder.default())

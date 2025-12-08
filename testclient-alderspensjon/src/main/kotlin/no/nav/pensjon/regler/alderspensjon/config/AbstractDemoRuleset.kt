@@ -1,6 +1,6 @@
 package no.nav.pensjon.regler.alderspensjon.config
 
-import no.nav.system.ruledsl.core.model.AbstractRuleset
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleset
 
 abstract class AbstractDemoRuleset<Response : Any> : AbstractRuleset<Response>() {
 

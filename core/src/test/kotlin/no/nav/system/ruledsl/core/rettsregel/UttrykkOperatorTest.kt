@@ -1,6 +1,7 @@
 package no.nav.system.ruledsl.core.model
 
 
+import no.nav.system.ruledsl.core.model.uttrykk.Const
 import no.nav.system.ruledsl.core.operators.div
 import no.nav.system.ruledsl.core.operators.minus
 import no.nav.system.ruledsl.core.operators.plus

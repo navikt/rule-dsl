@@ -1,19 +1,20 @@
 package no.nav.system.ruledsl.core.operators
 
-import no.nav.system.ruledsl.core.model.Const
-import no.nav.system.ruledsl.core.model.MathOperation
 import no.nav.system.ruledsl.core.model.Uttrykk
+import no.nav.system.ruledsl.core.model.uttrykk.Const
+import no.nav.system.ruledsl.core.model.uttrykk.Operator
+import no.nav.system.ruledsl.core.model.uttrykk.math.BinaryOperation
 
 /**
  * Internal helper functions to reduce boilerplate in math operator definitions.
- * These functions handle the creation of MathOperation objects with appropriate wrapping of constants.
+ * These functions handle the creation of BinaryOperation objects with appropriate wrapping of constants.
  */
 private inline fun <T : Number> binaryMathOp(
     left: Uttrykk<Number>,
     right: Uttrykk<Number>,
     operator: MathOperator,
     crossinline eval: () -> T
-): Uttrykk<T> = MathOperation(left, right, operator) { eval() }
+): Uttrykk<T> = BinaryOperation(left, right, operator) { eval() }
 
 private inline fun <T : Number> numberUttrykk(
     num: Number,
@@ -28,6 +29,13 @@ private inline fun <T : Number> uttrykkNumber(
     operator: MathOperator,
     crossinline eval: () -> T
 ): Uttrykk<T> = binaryMathOp(uttrykk, Const(num), operator, eval)
+
+enum class MathOperator(override val text: String) : Operator {
+    ADD(" + "),
+    SUB(" - "),
+    MUL(" * "),
+    DIV(" / ");
+}
 
 /**
  * Plus operators
@@ -185,7 +193,7 @@ operator fun Uttrykk<Double>.times(right: Double): Uttrykk<Double> =
 /**
  * Division operators
  * Note: Division always returns Double to preserve precision.
- * Division-by-zero is checked centrally in MathOperation to prevent silent NaN/Infinity.
+ * Division-by-zero is checked centrally in BinaryOperation to prevent silent NaN/Infinity.
  */
 @JvmName("divIntFaktumInt")
 operator fun Int.div(right: Uttrykk<Int>): Uttrykk<Double> =

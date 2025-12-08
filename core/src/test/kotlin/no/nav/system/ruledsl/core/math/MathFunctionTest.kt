@@ -1,7 +1,7 @@
 package no.nav.system.ruledsl.core.math
 
-import no.nav.system.ruledsl.core.functions.ceil
-import no.nav.system.ruledsl.core.functions.floor
+import no.nav.system.ruledsl.core.model.uttrykk.math.ceil
+import no.nav.system.ruledsl.core.model.uttrykk.math.floor
 import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.operators.div
 import org.junit.jupiter.api.Assertions.assertEquals

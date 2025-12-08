@@ -1,11 +1,11 @@
 package no.nav.system.ruledsl.core.inspections
 
-import no.nav.system.ruledsl.core.model.ComparisonOperation
-import no.nav.system.ruledsl.core.model.Const
 import no.nav.system.ruledsl.core.model.Faktum
-import no.nav.system.ruledsl.core.model.ListOperation
-import no.nav.system.ruledsl.core.model.MathOperation
 import no.nav.system.ruledsl.core.model.Uttrykk
+import no.nav.system.ruledsl.core.model.uttrykk.Const
+import no.nav.system.ruledsl.core.model.uttrykk.math.BinaryOperation
+import no.nav.system.ruledsl.core.model.uttrykk.boolean.Sammenligning
+import no.nav.system.ruledsl.core.model.uttrykk.boolean.MengdeRelasjon
 
 /**
  * Visualizes an Uttrykk (expression tree) as a hierarchical tree structure
@@ -90,9 +90,9 @@ class UttrykksTreePrinter {
         // Display the node
         val nodeLabel = when (uttrykk) {
             is Faktum<*> -> "${uttrykk.navn} = ${uttrykk.konkret()}"
-            is MathOperation<*> -> uttrykk.operator.name
-            is ComparisonOperation -> "${uttrykk.operator.name} = ${uttrykk.konkret()}"
-            is ListOperation -> "${uttrykk.operator.name} = ${uttrykk.konkret()}"
+            is BinaryOperation<*> -> uttrykk.operator.name
+            is Sammenligning -> "${uttrykk.operator.name} = ${uttrykk.konkret()}"
+            is MengdeRelasjon -> "${uttrykk.operator.name} = ${uttrykk.konkret()}"
             is Const<*> -> uttrykk.konkret()
             else -> uttrykk.notasjon()
         }
@@ -101,9 +101,9 @@ class UttrykksTreePrinter {
 
         // Determine children for recursive traversal
         val children = when (uttrykk) {
-            is MathOperation<*> -> listOf(uttrykk.venstre, uttrykk.høyre)
-            is ComparisonOperation -> listOf(uttrykk.venstre, uttrykk.høyre)
-            is ListOperation -> listOf(uttrykk.uttrykk, uttrykk.mengdeUttrykk)
+            is BinaryOperation<*> -> listOf(uttrykk.venstre, uttrykk.høyre)
+            is Sammenligning -> listOf(uttrykk.venstre, uttrykk.høyre)
+            is MengdeRelasjon -> listOf(uttrykk.uttrykk, uttrykk.mengde)
             is Faktum<*> -> if (uttrykk.uttrykk !is Const<*>) listOf(uttrykk.uttrykk) else emptyList()
             else -> emptyList()
         }

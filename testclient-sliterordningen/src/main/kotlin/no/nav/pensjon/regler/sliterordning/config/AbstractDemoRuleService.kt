@@ -1,7 +1,7 @@
 package no.nav.pensjon.regler.sliterordning.config
 
-import no.nav.system.ruledsl.core.model.AbstractRuleComponent
-import no.nav.system.ruledsl.core.model.AbstractRuleService
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
+import no.nav.system.ruledsl.core.model.arc.AbstractRuleService
 import java.time.YearMonth
 
 abstract class AbstractDemoRuleService<Response> : AbstractRuleService<Response>() {

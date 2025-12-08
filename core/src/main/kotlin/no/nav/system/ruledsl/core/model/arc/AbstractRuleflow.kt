@@ -1,8 +1,11 @@
-package no.nav.system.ruledsl.core.model
+package no.nav.system.ruledsl.core.model.arc
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
+import no.nav.system.ruledsl.core.model.Faktum
+import no.nav.system.ruledsl.core.model.Uttrykk
+import no.nav.system.ruledsl.core.model.uttrykk.Const
 import org.jetbrains.annotations.TestOnly
-import java.util.*
+import java.util.Stack
 import kotlin.experimental.ExperimentalTypeInference
 
 /**
@@ -141,8 +144,3 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
         }
     }
 }
-
-
-
-
-

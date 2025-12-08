@@ -1,6 +1,5 @@
 package no.nav.system.ruledsl.core.forklaring
 
-import no.nav.system.ruledsl.core.resource.tracker.Filter
 import no.nav.system.ruledsl.core.model.Faktum
 
 /**

@@ -1,6 +1,6 @@
 package no.nav.system.ruledsl.core.pattern
 
-import no.nav.system.ruledsl.core.model.Rule
+import no.nav.system.ruledsl.core.model.arc.Rule
 
 /**
  * The [SinglePattern] class facilitates evaluating a [Rule] object on every element [P] in [innListe].

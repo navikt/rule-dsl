@@ -12,9 +12,9 @@ import no.nav.pensjon.regler.sliterordning.format.renderAsText
 import no.nav.pensjon.regler.sliterordning.service.SliterordningService
 import no.nav.pensjon.regler.sliterordning.to.SliterordningRequest
 import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse
+import no.nav.system.ruledsl.core.forklaring.Filters
 import no.nav.system.ruledsl.core.forklaring.IndentedTextFormatter
-import no.nav.system.ruledsl.core.resource.tracker.Filters
-import no.nav.system.ruledsl.core.resource.tracker.forklar
+import no.nav.system.ruledsl.core.forklaring.forklar
 import java.time.YearMonth
 
 /**

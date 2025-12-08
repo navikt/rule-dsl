@@ -1,7 +1,8 @@
-package no.nav.system.ruledsl.core.model
+package no.nav.system.ruledsl.core.model.arc
 
 import no.nav.system.ruledsl.core.enums.RuleComponentType
 import no.nav.system.ruledsl.core.helper.svarord
+import no.nav.system.ruledsl.core.model.Uttrykk
 
 /**
  * A single boolean statement used in evaluation of a rule.

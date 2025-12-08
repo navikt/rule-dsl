@@ -4,7 +4,7 @@ import no.nav.pensjon.regler.sliterordning.config.AbstractDemoRuleset
 import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.fagdata.FagKonstanter.MND_36
 import no.nav.pensjon.regler.sliterordning.functions.avrund2desimal
-import no.nav.system.ruledsl.core.model.DslDomainPredicate
+import no.nav.system.ruledsl.core.model.arc.DslDomainPredicate
 import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.operators.*
 import java.time.YearMonth
