@@ -18,8 +18,6 @@ fun <T : Any> Faktum<T>.forklar(filter: Filter = Filters.FUNCTIONAL): String {
     return forklarMed(IndentedTextFormatter, filter)
 }
 
-
-
 fun <T : Any> Faktum<*>.forklarMed(faktumTransformer : FaktumTransformer<T>, filter: Filter = Filters.FUNCTIONAL): T {
     wrapperNode ?: throw IllegalStateException(
         "Faktum '$navn' is not in the ARC tree. Only Faktum created via sporing() can be explained."

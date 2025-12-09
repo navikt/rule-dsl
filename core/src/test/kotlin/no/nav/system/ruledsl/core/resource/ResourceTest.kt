@@ -1,7 +1,6 @@
 package no.nav.system.ruledsl.core.resource
 
 import no.nav.system.ruledsl.core.error.ResourceAccessException
-import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
 import no.nav.system.ruledsl.core.model.arc.AbstractRuleset
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
@@ -165,28 +164,6 @@ class ResourceTest {
     }
 
     /**
-     * Test that Root resource is automatically created
-     */
-    @Test
-    fun `Root resource is automatically available`() {
-        class RootAccessRS : AbstractRuleset<String>() {
-            override fun create() {
-                regel("accessRoot") {
-                    HVIS { true }
-                    SÅ {
-                        val root = getResource(Root::class)
-                        RETURNER(root.arc().name())
-                    }
-                }
-            }
-        }
-
-        val rs = RootAccessRS()
-        val result = rs.test()
-        assertEquals("RootAccessRS", result)
-    }
-
-    /**
      * Test that same resource instance is shared across tree
      */
     @Test
@@ -310,5 +287,35 @@ class ResourceTest {
 
         val result = OuterRS().test()
         assertEquals(777, result, "Deeply nested component should access resource")
+    }
+
+    /**
+     * Test that root() returns initial rulecomponent from sub-rulecomponent.
+     */
+    @Test
+    fun `root() returns same instance from all tree levels`() {
+        class SubRS : AbstractRuleset<String>() {
+            override fun create() {
+                regel("sub") {
+                    HVIS { true }
+                    SÅ {
+                        RETURNER(root().name())
+                    }
+                }
+            }
+        }
+
+        class MainRS : AbstractRuleset<String>() {
+            override fun create() {
+                regel("main") {
+                    HVIS { true }
+                    SÅ {
+                        RETURNER(SubRS().run(this))
+                    }
+                }
+            }
+        }
+
+        assertEquals("MainRS", MainRS().test())
     }
 }

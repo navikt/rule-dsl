@@ -6,7 +6,6 @@ import no.nav.pensjon.regler.sliterordning.domain.Trygdetid
 import no.nav.pensjon.regler.sliterordning.to.SliterordningRequest
 import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse
 import no.nav.system.ruledsl.core.forklaring.forklar
-import no.nav.system.ruledsl.core.inspections.printTree
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -100,102 +99,4 @@ class SliterordningServiceTest {
 //        )
     }
 
-    @Test
-    fun `DEMO - Perspectives - Service-Centric vs Faktum-Centric Views`() {
-        println("═".repeat(80))
-        println("DEMO: Service-Centric vs Faktum-Centric Perspectives")
-        println("═".repeat(80))
-        println()
-
-        // Arrange: Create test data
-        val fødselsdato = YearMonth.of(1958, 1)
-        val uttakstidspunkt = YearMonth.of(2025, 9)  // Early withdrawal
-        val virkningstidspunkt = YearMonth.of(2024, 1)
-
-        val person = Person(
-            fødselsdato = fødselsdato,
-            trygdetid = Trygdetid(faktiskTrygdetid = 20),  // Partial insurance period
-            normertPensjonsalder = NormertPensjonsalder.default()
-        )
-
-        // Act: Run the service
-        val service = SliterordningService(
-            SliterordningRequest(
-                uttakstidspunkt = uttakstidspunkt,
-                virkningstidspunkt = virkningstidspunkt,
-                person = person
-            )
-        )
-        val result = service.run()
-
-        // Assert: Verify we got an Innvilget response
-        assertTrue(result is SliterordningResponse.Innvilget)
-        val innvilget = result as SliterordningResponse.Innvilget
-
-        println("┌─────────────────────────────────────────────────────────────────────┐")
-        println("│ FAKTUM-CENTRIC PERSPECTIVES                                         │")
-        println("│ (Bottom-up: Why does THIS specific value have this result?)         │")
-        println("└─────────────────────────────────────────────────────────────────────┘")
-        println()
-
-        // FAKTUM PERSPECTIVE 1: Formula Tree Visualization
-        println("1. UTTRYKKS TREE PERSPECTIVE (Formula Structure)")
-        println("   - Shows: Calculation tree with deduplication")
-        println("   - Use case: Technical testers, formula verification")
-        println("   - API: faktum.printTree()")
-        println()
-
-        // Show formula tree directly from Faktum
-        println(innvilget.slitertillegg.printTree())
-        println()
-
-        println("─".repeat(80))
-        println()
-
-        // FAKTUM PERSPECTIVE 2: Complete Explanation
-        println("2. FAKTUM EXPLANATION PERSPECTIVE (WHAT/HOW/WHY)")
-        println("   - Shows: Value, formula, AND execution context")
-        println("   - Use case: Explaining specific calculation results")
-        println("   - API: faktum.forklar()")
-        println()
-
-        // Use forklar() which shows WHAT/HOW/WHY
-        val explanation = innvilget.slitertillegg.forklar()
-        println(explanation)
-        println()
-
-        println("─".repeat(80))
-        println()
-
-        println("┌─────────────────────────────────────────────────────────────────────┐")
-        println("│ KEY INSIGHTS - NEW ARCHITECTURE                                     │")
-        println("└─────────────────────────────────────────────────────────────────────┘")
-        println()
-        println("✓ THE ARC TREE IS THE EXECUTION TRACE!")
-        println("  - No more ExecutionTrace with runtime stack")
-        println("  - FaktumNode adds data (Faktum) directly to the ARC tree")
-        println("  - Parent pointers enable upward traversal for Faktum.hvorfor()")
-        println("  - Single unified tree structure for everything")
-        println()
-        println("✓ TWO PERSPECTIVES FOR TRACING:")
-        println("  - FUNCTIONAL: Decision flow (rules, branches, predicates, faktum only)")
-        println("  - Both work top-down (service-centric) and bottom-up (faktum-centric)")
-        println()
-        println("✓ Faktum-Centric (Bottom-Up): Answers \"Why does THIS value = ${innvilget.slitertillegg.verdi}?\"")
-        println("  - faktum.forklar() - Shows WHAT/WHY/HOW for specific value")
-        println("  - faktum.printTree() - Shows formula structure")
-        println()
-        println("✓ Explanation via Interfaces:")
-        println("  - Hva: Every ARC and Faktum can identify itself")
-        println("  - Hvorfor: Components explain why they were created (via tree traversal)")
-        println("  - Hvordan: Components explain how they calculated results")
-        println()
-        println("✓ Extensible: Add custom traversals as extension functions:")
-        println("  - fun AbstractRuleComponent.toJSON(Perspective): JsonObject")
-        println("  - fun AbstractRuleComponent.toHTML(Perspective): String")
-        println("  - fun AbstractRuleComponent.toMarkdown(Perspective): String")
-        println()
-
-        println("═".repeat(80))
-    }
 }
