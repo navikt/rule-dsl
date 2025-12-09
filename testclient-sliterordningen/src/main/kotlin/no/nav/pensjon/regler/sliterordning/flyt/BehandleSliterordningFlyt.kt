@@ -25,7 +25,7 @@ class BehandleSliterordningFlyt(
         forgrening("Vilkår status?") {
 
             gren {
-                betingelse("Innvilget") { vilkårStatus erLik true }
+                betingelse("Innvilget") { vilkårStatus }
                 flyt {
                     sliterordning = Innvilget(
                         slitertillegg = BeregnSlitertilleggRS(

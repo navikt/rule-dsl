@@ -20,6 +20,7 @@ object Filters {
             RuleComponentType.REGEL,
             RuleComponentType.GREN,
             RuleComponentType.PREDIKAT,
+            RuleComponentType.BETINGELSE,
             RuleComponentType.FAKTUM -> true
             else -> false
         }

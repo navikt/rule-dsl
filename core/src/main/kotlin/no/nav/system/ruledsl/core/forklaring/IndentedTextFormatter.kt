@@ -1,6 +1,7 @@
 package no.nav.system.ruledsl.core.forklaring
 
 import no.nav.system.ruledsl.core.model.arc.TrackablePredicate
+import no.nav.system.ruledsl.core.model.arc.TrackableCondition
 import no.nav.system.ruledsl.core.model.Faktum
 import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
 import no.nav.system.ruledsl.core.model.arc.AbstractRuleflow
@@ -53,7 +54,9 @@ object IndentedTextFormatter : FaktumTransformer<String> {
             }
 
             // HVORFOR section - walk up the tree to find the Rule that created this Faktum
-            if (!faktum.isConstant || depth == 0) {
+            // Always show HVORFOR if: not constant, at root level (depth==0), or created by a Rule
+            val isCreatedByRule = faktum.wrapperNode?.parent is Rule<*>
+            if (!faktum.isConstant || depth == 0 || isCreatedByRule) {
                 val hvorforLines = collectDecisionPath(faktum, filter)
                 if (hvorforLines.isNotEmpty()) {
                     if (isNotEmpty() && !endsWith("\n\n")) {
@@ -126,20 +129,23 @@ object IndentedTextFormatter : FaktumTransformer<String> {
         var ancestor = rule.parent
         while (ancestor != null) {
             if (ancestor is AbstractRuleflow.Decision.Branch) {
-                val condition = ancestor.condition
+                // Find the TrackableCondition child instead of accessing the property directly
+                val trackableCondition = ancestor.children.filterIsInstance<TrackableCondition>().firstOrNull()
 
-                // Extract all Faktum objects from the condition expression
-                val faktumInCondition = condition.faktumSet()
+                if (trackableCondition != null) {
+                    // Extract all Faktum objects from the condition expression
+                    val faktumInCondition = trackableCondition.uttrykk.faktumSet()
 
-                // Recursively explain each Faktum in the branch condition
-                faktumInCondition.forEach { conditionFaktum ->
-                    lines.add("  gren betingelse: ${conditionFaktum.navn} = ${conditionFaktum.verdi}")
-                    val conditionExplanation = buildExplanation(conditionFaktum, filter, depth = 1)
-                    if (conditionExplanation.isNotBlank()) {
-                        // Indent each line of the recursive explanation
-                        conditionExplanation.lines().forEach { line ->
-                            if (line.isNotBlank()) {
-                                lines.add("  $line")
+                    // Recursively explain each Faktum in the branch condition
+                    faktumInCondition.forEach { conditionFaktum ->
+                        lines.add("  gren betingelse: ${conditionFaktum.navn} = ${conditionFaktum.verdi}")
+                        val conditionExplanation = buildExplanation(conditionFaktum, filter, depth = 1)
+                        if (conditionExplanation.isNotBlank()) {
+                            // Indent each line of the recursive explanation
+                            conditionExplanation.lines().forEach { line ->
+                                if (line.isNotBlank()) {
+                                    lines.add("  $line")
+                                }
                             }
                         }
                     }

@@ -51,5 +51,21 @@ class TrackablePredicate(
     override fun toString(): String = "${type()}: $uttrykk"
 }
 
+/**
+ * Tracks a branch condition (betingelse) in the ARC tree.
+ * Similar to TrackablePredicate, but for branch decision points instead of rule predicates.
+ */
+class TrackableCondition(
+    val uttrykk: Uttrykk<Boolean>
+) : AbstractRuleComponent() {
+    fun notasjon(): String = uttrykk.notasjon()
+    fun konkret(): String = uttrykk.konkret()
+
+    override fun name(): String = "betingelse"
+    override fun type(): RuleComponentType = RuleComponentType.BETINGELSE
+    override fun fired(): Boolean = uttrykk.verdi
+    override fun toString(): String = "${type()}: $uttrykk"
+}
+
 @RequiresOptIn(message = "Domain predicate entries are currently experimental.", level = RequiresOptIn.Level.WARNING)
 annotation class DslDomainPredicate

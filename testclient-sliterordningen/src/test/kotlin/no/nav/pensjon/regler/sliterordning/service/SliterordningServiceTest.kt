@@ -83,20 +83,20 @@ class SliterordningServiceTest {
         val explanation = innvilget.slitertillegg.forklar()
         println(explanation)
 
+
         // Verify that the trace recursively includes the vilkårStatus Faktum from the branch
         assertTrue(
             explanation.contains("Vilkår Slitertillegg"),
             "Should show the vilkårStatus Faktum in the HVORFOR trace (branch condition)"
         )
-        // TODO missing complete recursive forklaring from branch (branch does condition.toString, should be condition.forklar()?)
-//        assertTrue(
-//            explanation.contains("VilkårsprøvSlitertilleggRS"),
-//            "Should recursively show the origin ruleset of vilkårStatus"
-//        )
-//        assertTrue(
-//            explanation.contains("ALLTID-INNVILGET"),
-//            "Should show the specific rule that created vilkårStatus"
-//        )
+        assertTrue(
+            explanation.contains("VilkårsprøvSlitertilleggRS"),
+            "Should recursively show the origin ruleset of vilkårStatus"
+        )
+        assertTrue(
+            explanation.contains("ALLTID-INNVILGET"),
+            "Should show the specific rule that created vilkårStatus"
+        )
     }
 
 }

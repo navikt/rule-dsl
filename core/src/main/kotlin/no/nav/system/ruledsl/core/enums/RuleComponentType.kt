@@ -8,6 +8,7 @@ enum class RuleComponentType {
     REGELSETT,
     REGEL,
     PREDIKAT,
+    BETINGELSE,
     FAKTUM;
 
     override fun toString(): String {

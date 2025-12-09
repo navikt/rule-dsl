@@ -111,10 +111,12 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
              */
             fun betingelse(booleanFunction: () -> Boolean) {
                 condition = Const(booleanFunction.invoke())
+                addChild(TrackableCondition(condition))
             }
 
             fun betingelse(name: String, booleanFunction: () -> Boolean) {
                 condition = Faktum(name, booleanFunction())
+                addChild(TrackableCondition(condition))
                 betingelseName = name
             }
 
@@ -124,6 +126,7 @@ abstract class AbstractRuleflow<T : Any> : AbstractRuleComponent() {
             @DslDomainPredicate
             fun betingelse(name: String, uttrykkFunction: () -> Uttrykk<Boolean>) {
                 condition = uttrykkFunction()
+                addChild(TrackableCondition(condition))
                 betingelseName = name
             }
 

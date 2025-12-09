@@ -5,6 +5,7 @@ import no.nav.system.ruledsl.core.model.arc.AbstractRuleComponent
 import no.nav.system.ruledsl.core.model.arc.AbstractRuleflow
 import no.nav.system.ruledsl.core.model.arc.Rule
 import no.nav.system.ruledsl.core.model.arc.TrackablePredicate
+import no.nav.system.ruledsl.core.model.arc.TrackableCondition
 
 /**
  * Lists the complete tree of [AbstractRuleComponent] in XML format.
@@ -19,7 +20,8 @@ fun AbstractRuleComponent.xmlDebug(): String {
 private fun xmlDebug(arc: AbstractRuleComponent, debugString: StringBuilder, level: Int) {
     debugString.append(" ".repeat(level * 2))
     var tagName = arc.name()
-    val relevantChildren = arc.children
+    // Filter out TrackableCondition children since they're internal implementation details
+    val relevantChildren = arc.children.filterNot { it is TrackableCondition }
     var leafElement = relevantChildren.isEmpty()
 
     when (arc) {
@@ -27,7 +29,7 @@ private fun xmlDebug(arc: AbstractRuleComponent, debugString: StringBuilder, lev
             if (leafElement) {
                 openAndCloseContentTag(debugString, tagName, "", " fired=\"${arc.fired()}\"")
             } else {
-                openTag(debugString, tagName, " fired=${arc.fired()}")
+                openTag(debugString, tagName, " fired=\"${arc.fired()}\"")
             }
         }
 
@@ -45,6 +47,12 @@ private fun xmlDebug(arc: AbstractRuleComponent, debugString: StringBuilder, lev
         is TrackablePredicate -> {
             leafElement = true
             openAndCloseContentTag(debugString, arc.type().toString(), arc.notasjon(), " fired=\"${arc.fired()}\"")
+        }
+
+        is TrackableCondition -> {
+            // Skip TrackableCondition in XML output - it's an internal implementation detail
+            // for the forklaring system, not part of the user-visible ARC tree structure
+            return
         }
 
         is Predicate -> {}
