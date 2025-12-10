@@ -104,11 +104,6 @@ object IndentedTextFormatter : FaktumTransformer<String> {
 
         val rule = foundRule
 
-        // Check if this rule passes the filter
-        if (!filter.includes(rule)) {
-            return emptyList()
-        }
-
         // Add the rule
         lines.add("$rule")
 
