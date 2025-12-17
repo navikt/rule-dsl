@@ -1,0 +1,157 @@
+# Feature Parity: core-trace vs core
+
+This document compares the features of the new `core-trace` module against the original `core` module.
+
+## Available Features ✅
+
+| Feature | core | core-trace | Notes |
+|---------|------|------------|-------|
+| `regel()` with `HVIS`/`OG` | ✅ | ✅ | Identical DSL |
+| `SÅ` for side-effects | ✅ | ✅ | Returns Unit |
+| `RETURNER` for values | ✅ | ✅ | Must return `Faktum<T>` |
+| Technical predicates (guard) | ✅ | ✅ | Short-circuits on false |
+| Domain predicates (`erLik`, `erMindreEnn`, etc.) | ✅ | ✅ | Traced for explanation |
+| List predicates (`erBlant`, `erIkkeBlant`) | ✅ | ✅ | |
+| `Faktum` for named values | ✅ | ✅ | Same concept, different package |
+| Math expressions (`+`, `-`, `*`, `/`) | ✅ | ✅ | Traced in formula output |
+| Resource system | ✅ | ✅ | Via `ResourceAccessor` interface |
+| Extension functions for resources | ✅ | ✅ | Works on `ResourceAccessor` |
+| Execution tracing | ✅ | ✅ | Different approach (Trace context) |
+| Nested rule calls | ✅ | ✅ | Via function calls with context parameter |
+| `SPOR` for explicit tracing | ❌ | ✅ | New feature for SÅ blocks |
+
+## Missing Features ❌
+
+### 1. Pattern System
+**Impact: HIGH**
+
+The old system had `createPattern` for list-based rule evaluation:
+```kotlin
+val norskeBoperioder = boperiodeListe.createPattern { it.land == LandEnum.NOR }
+
+regel("BoPeriode", norskeBoperioder) { boperiode ->
+    HVIS { boperiode.fom < dato16år }
+    SÅ { ... }
+}
+```
+
+Each list element created its own rule instance with individual tracing.
+
+**Workaround:** Manual iteration with regular code, but loses per-item tracing.
+
+### 2. ELLERS (Else branch)
+**Impact: MEDIUM**
+
+```kotlin
+regel("Example") {
+    HVIS { condition }
+    SÅ { ... }
+    ELLERS { ... }  // Not available
+}
+```
+
+**Workaround:** Create a second rule with inverted condition.
+
+### 3. Rule Introspection
+**Impact: HIGH**
+
+The old system allowed querying whether rules had fired:
+```kotlin
+HVIS { "AngittFlyktning".minstEnHarTruffet() }
+HVIS { "Overgangsregel".ingenHarTruffet() }
+```
+
+**Workaround:** Manual boolean flag tracking, but loses traceability.
+
+### 4. kommentar() - Rule Documentation
+**Impact: LOW**
+
+```kotlin
+regel("Example") {
+    HVIS { ... }
+    kommentar("Legal reference: Ftrl § 3-2")
+}
+```
+
+**Workaround:** Use code comments. No trace output for documentation.
+
+### 5. sporing() Helper Function
+**Impact: LOW**
+
+The old `sporing("name", value)` convenience function:
+```kotlin
+RETURNER(sporing("Anvendt flyktning", UtfallType.OPPFYLT))
+```
+
+**Workaround:** Use `Faktum("name", value)` directly.
+
+### 6. AbstractRuleService / AbstractRuleflow / AbstractRuleset Classes
+**Impact: MEDIUM**
+
+Class-based organization with inheritance:
+```kotlin
+class MyRuleset : AbstractRuleset<Response>() {
+    override fun create() { ... }
+}
+```
+
+**core-trace approach:** Function-based with context parameters:
+```kotlin
+context(trace: Trace)
+fun myRuleset(): Faktum<Response> = traced { ... }
+```
+
+### 7. forgrening/gren/betingelse/flyt (Decision branching DSL)
+**Impact: MEDIUM**
+
+```kotlin
+forgrening("Sivilstand?") {
+    gren {
+        betingelse("Gift") { person.erGift }
+        flyt { ... }
+    }
+    gren {
+        betingelse("Ugift") { !person.erGift }
+        flyt { ... }
+    }
+}
+```
+
+**Workaround:** Use regular Kotlin `if`/`when` statements, but loses semantic tracing of decisions.
+
+### 8. Domain Predicate Eager Evaluation Issue
+**Impact: HIGH (Design Issue)**
+
+When using domain predicates after a null-guard:
+```kotlin
+HVIS { obj != null }                    // Guard - OK
+OG { obj!!.field erLik value }          // Domain predicate - NPE at build time!
+```
+
+The domain predicate's infix operator is evaluated when building the predicate list,
+not when evaluating the rule. The null-guard doesn't protect it.
+
+**Workaround:** Use technical predicates for nullable value comparisons:
+```kotlin
+HVIS { obj != null }
+OG { obj!!.field.value == value }      // Technical predicate - safe
+```
+
+## Architecture Differences
+
+| Aspect | core | core-trace |
+|--------|------|------------|
+| Entry point | Class extending `AbstractRuleService` | Function with `Trace` context |
+| Rule organization | Class extending `AbstractRuleset` | Function returning `Faktum<T>` |
+| Flow logic | Class extending `AbstractRuleflow` | Regular Kotlin functions |
+| Resource propagation | Automatic via component tree | Manual via `Trace.putResource` |
+| Trace output | Via `debug()`, `xmlDebug()` methods | Via `Trace.debugTree()` |
+| Context mechanism | Implicit via parent-child relationships | Explicit via Kotlin context parameters |
+
+## Recommendations
+
+1. **Implement Pattern system** - Critical for list-based rule evaluation with tracing
+2. **Add ELLERS support** - Common requirement, relatively simple to add
+3. **Add rule introspection** - Required for complex rule dependencies
+4. **Fix domain predicate eager evaluation** - Fundamental design issue affecting usability
+5. **Consider forgrening DSL** - Nice for semantic decision tree tracing

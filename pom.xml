@@ -29,6 +29,7 @@
         <module>testclient-alderspensjon</module>
         <module>testclient-sliterordningen</module>
         <module>core-trace</module>
+        <module>testclient-trace-alderspensjon</module>
     </modules>
 
     <dependencyManagement>
