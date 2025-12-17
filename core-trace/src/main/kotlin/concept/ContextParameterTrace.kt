@@ -1,6 +1,5 @@
 package concept
 
-import no.nav.system.ruledsl.core.trace.User
 
 class TraceNode(
     val name: String,
@@ -33,40 +32,43 @@ inline fun <T> traced(
     }
 }
 
+
+data class Bruker(val name: String, val age: Int, val trygdetid: Int, val limitOptions: Int?)
+
 fun main() {
     val sliterROOT = TraceNode("sliterordning")
     val sliterRootContext = TraceContext(sliterROOT)
 
     with(sliterRootContext) {
-        val tillegg = sliterordning(User("Nola", 65, 24, null))
+        val tillegg = sliterordning(Bruker("Nola", 65, 24, null))
         println("tillegg: $tillegg")
     }
     sliterROOT.print()
 }
 
 context(tc: TraceContext)
-fun sliterordning(user: User): Int = traced("sliterordning") {
-    val innvilget = vilkår(user)
+fun sliterordning(bruker: Bruker): Int = traced("sliterordning") {
+    val innvilget = vilkår(bruker)
 
-    emptyFuncton(user)
+    emptyFuncton(bruker)
 
     if (innvilget)
-        beregnSlitertillegg(user)
+        beregnSlitertillegg(bruker)
     else
         0
 }
 
 context(tc: TraceContext)
-fun emptyFuncton(user: User) = traced<Unit>("emptyFuncton") {
+fun emptyFuncton(bruker: Bruker) = traced<Unit>("emptyFuncton") {
     // Emptyness
 }
 
 context(tc: TraceContext)
-fun vilkår(user: User): Boolean = traced<Boolean>("vilkår") {
-    return user.age > 62
+fun vilkår(bruker: Bruker): Boolean = traced<Boolean>("vilkår") {
+    return bruker.age > 62
 }
 
 context(tc: TraceContext)
-fun beregnSlitertillegg(user: User): Int = traced<Int>("beregnSlitertillegg") {
-    return 4000 * user.trygdetid / 40
+fun beregnSlitertillegg(bruker: Bruker): Int = traced<Int>("beregnSlitertillegg") {
+    return 4000 * bruker.trygdetid / 40
 }
