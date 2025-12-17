@@ -11,7 +11,7 @@
     <name>rule-dsl</name>
 
     <properties>
-        <kotlin.version>2.1.0</kotlin.version>
+        <kotlin.version>2.2.21</kotlin.version>
         <jupiter.version>5.11.3</jupiter.version>
         <surefire.plugin.version>3.5.2</surefire.plugin.version>
         <maven.source.plugin.version>3.3.1</maven.source.plugin.version>
@@ -28,6 +28,7 @@
         <module>core</module>
         <module>testclient-alderspensjon</module>
         <module>testclient-sliterordningen</module>
+        <module>core-trace</module>
     </modules>
 
     <dependencyManagement>
