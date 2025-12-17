@@ -3,10 +3,15 @@ package no.nav.system.ruledsl.core.trace
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.expression.boolean.GuardExpression
+import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.reflect.KClass
 
 /**
  * Rule supporting both side-effects (SÅ) and value-producing (RETURNER).
+ *
+ * Implements ResourceAccessor to allow extension functions for resource access
+ * to be called directly within SÅ/RETURNER blocks.
  *
  * DSL keywords:
  * - HVIS / OG: Define predicates (technical or domain)
@@ -17,11 +22,15 @@ import kotlin.experimental.ExperimentalTypeInference
  * Cannot use both SÅ and RETURNER in the same rule.
  */
 @OptIn(ExperimentalTypeInference::class)
-class Rule<T>(private val trace: Trace) {
+class Rule<T>(private val trace: Trace) : ResourceAccessor {
     private val predicates = mutableListOf<Expression<Boolean>>()
-    private var action: (context(Trace) () -> Unit)? = null
-    private var resultBlock: (context(Trace) () -> Faktum<out Any>)? = null
+    private var action: (Rule<T>.() -> Unit)? = null
+    private var resultBlock: (Rule<T>.() -> Faktum<out Any>)? = null
     private var resultFaktum: Faktum<out Any>? = null
+
+    // ResourceAccessor delegation to Trace
+    override fun <T : Any> getResource(key: KClass<T>): T = trace.getResource(key)
+    override fun <T : Any> putResource(key: KClass<T>, resource: T) = trace.putResource(key, resource)
 
     /**
      * HVIS - technical predicate (null checks, validations).
@@ -58,8 +67,9 @@ class Rule<T>(private val trace: Trace) {
     /**
      * SÅ - side-effect action (no return value).
      * Use SPOR inside to trace Faktum calculations.
+     * Extension functions on ResourceAccessor are available in this block.
      */
-    fun SÅ(block: context(Trace) () -> Unit) {
+    fun SÅ(block: Rule<T>.() -> Unit) {
         action = block
     }
 
@@ -79,10 +89,11 @@ class Rule<T>(private val trace: Trace) {
      * RETURNER - value-producing action. Returns Faktum<R>.
      * The returned Faktum is automatically traced.
      * Stores the block for deferred execution (after trace context is pushed).
+     * Extension functions on ResourceAccessor are available in this block.
      *
      * @param block Lambda that produces the Faktum result
      */
-    fun <R : Any> RETURNER(block: context(Trace) () -> Faktum<R>) {
+    fun <R : Any> RETURNER(block: Rule<T>.() -> Faktum<R>) {
         resultBlock = block
     }
 
@@ -111,11 +122,7 @@ class Rule<T>(private val trace: Trace) {
     fun hasAction(): Boolean = action != null
 
     fun executeAction() {
-        action?.let { 
-            with(trace) {
-                it()
-            }
-        }
+        action?.invoke(this)
     }
 
     fun hasReturner(): Boolean = resultBlock != null
@@ -126,10 +133,8 @@ class Rule<T>(private val trace: Trace) {
      */
     fun executeReturner(): Faktum<out Any>? {
         resultBlock?.let { block ->
-            with(trace) {
-                resultFaktum = block()
-                resultFaktum?.let { trace.recordFaktum(it) }
-            }
+            resultFaktum = block()
+            resultFaktum?.let { trace.recordFaktum(it) }
         }
         return resultFaktum
     }

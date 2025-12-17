@@ -1,16 +1,25 @@
 package no.nav.system.ruledsl.core.trace
 
+import no.nav.system.ruledsl.core.resource.ResourceAccessor
+import kotlin.reflect.KClass
+
 /**
- * Regelsett - collects results from rules, implements first-match-wins semantics.
+ * Ruleset - collects results from rules, implements first-match-wins semantics.
  *
  * Rules are evaluated in sequence. The first rule that fires and produces a result
  * (via RETURNER) stops further evaluation. Side-effect rules (via SÅ) do not stop evaluation.
+ *
+ * Implements ResourceAccessor to allow extension functions for resource access.
  */
-class Ruleset<T>(private val trace: Trace) {
+class Ruleset<T>(private val trace: Trace) : ResourceAccessor {
     var result: T? = null
         private set
     var hasResult = false
         private set
+
+    // ResourceAccessor delegation to Trace
+    override fun <T : Any> getResource(key: KClass<T>): T = trace.getResource(key)
+    override fun <T : Any> putResource(key: KClass<T>, resource: T) = trace.putResource(key, resource)
 
     /**
      * Define a rule that supports both side-effects (SÅ) and value-producing (RETURNER).
@@ -20,13 +29,11 @@ class Ruleset<T>(private val trace: Trace) {
      * @param name The rule name (used in trace output)
      * @param builder DSL builder for the rule content (HVIS, OG, SÅ, RETURNER)
      */
-    fun regel(name: String, builder: context(Trace) Rule<T>.() -> Unit) {
+    fun regel(name: String, builder: Rule<T>.() -> Unit) {
         if (hasResult) return
 
         val rule = Rule<T>(trace)
-        with(trace) {
-            rule.builder()
-        }
+        rule.builder()
 
         val ruleFired = rule.evaluate()
         val execution = trace.recordRule(name, ruleFired, rule.expressions())
@@ -65,11 +72,9 @@ class Ruleset<T>(private val trace: Trace) {
  * @return The result from the first matching rule with RETURNER
  */
 context(trace: Trace)
-inline fun <reified T> traced(block: context(Trace) Ruleset<T>.() -> Unit): T {
+inline fun <reified T> traced(block: Ruleset<T>.() -> Unit): T {
     val scope = Ruleset<T>(trace)
-    with(trace) {
-        scope.block()
-    }
+    scope.block()
 
     return when {
         scope.hasResult -> scope.result!!

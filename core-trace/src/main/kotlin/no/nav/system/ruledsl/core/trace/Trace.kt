@@ -3,6 +3,9 @@ package no.nav.system.ruledsl.core.trace
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.helper.checkmark
+import no.nav.system.ruledsl.core.resource.ResourceAccessor
+import no.nav.system.ruledsl.core.resource.ResourceMap
+import kotlin.reflect.KClass
 
 /**
  * Tree-based execution trace - captures rule evaluations with composition hierarchy.
@@ -16,15 +19,27 @@ class TraceNode(
     val formulas: MutableList<Faktum<*>> = mutableListOf()
 )
 
-class Trace(name: String) {
+/**
+ * Execution context for rule evaluation.
+ *
+ * Combines tracing (WHY/HOW) with resource management (plugin capabilities).
+ * Resources registered here are accessible via ResourceAccessor interface
+ * on Rule and Regelsett.
+ */
+class Trace(name: String) : ResourceAccessor {
     val root = TraceNode(name, fired = true)
     private val stack = mutableListOf(root)
+    private val resources = ResourceMap()
 
     /**
      * Current context in the execution tree.
      */
     private val currentContext: TraceNode
         get() = stack.last()
+
+    // ResourceAccessor delegation
+    override fun <T : Any> getResource(key: KClass<T>): T = resources.getResource(key)
+    override fun <T : Any> putResource(key: KClass<T>, resource: T) = resources.putResource(key, resource)
 
     /**
      * Record a rule execution and attach it to the current context.

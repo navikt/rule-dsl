@@ -252,4 +252,72 @@ class RulesetTest {
             }
         }
     }
+
+    // Resource test support
+    class TestRateResource(val rate: Int)
+
+    @Test
+    fun `resources can be registered and accessed in SÅ block`() {
+        val trace = Trace("test")
+        trace.putResource(TestRateResource::class, TestRateResource(1000))
+        
+        var accessedRate = 0
+
+        with(trace) {
+            traced<Unit> {
+                regel("resource access") {
+                    HVIS { true }
+                    SÅ {
+                        accessedRate = getResource(TestRateResource::class).rate
+                    }
+                }
+            }
+        }
+
+        assertEquals(1000, accessedRate)
+    }
+
+    @Test
+    fun `resources can be accessed in RETURNER block`() {
+        val trace = Trace("test")
+        trace.putResource(TestRateResource::class, TestRateResource(500))
+
+        val result = with(trace) {
+            traced<Faktum<Int>> {
+                regel("resource calculation") {
+                    HVIS { true }
+                    RETURNER {
+                        val rate = getResource(TestRateResource::class).rate
+                        Faktum("calculated", rate * 2)
+                    }
+                }
+            }
+        }
+
+        assertEquals(1000, result.value)
+    }
+
+    @Test
+    fun `extension functions on ResourceAccessor work in SÅ block`() {
+        val trace = Trace("test")
+        trace.putResource(TestRateResource::class, TestRateResource(750))
+        
+        // Extension function on ResourceAccessor
+        fun Rule<*>.testRate(): Int = getResource(TestRateResource::class).rate
+        
+        var accessedRate = 0
+
+        with(trace) {
+            traced<Unit> {
+                regel("extension access") {
+                    HVIS { true }
+                    SÅ {
+                        accessedRate = testRate()
+                    }
+                }
+            }
+        }
+
+        assertEquals(750, accessedRate)
+    }
 }
