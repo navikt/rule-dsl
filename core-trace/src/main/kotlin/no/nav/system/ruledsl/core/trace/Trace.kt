@@ -39,9 +39,13 @@ class Trace(name: String) {
     /**
      * Record a Faktum (formula) to the current context.
      * Called by SPOR and RETURNER to trace calculations.
+     * Skips if already traced (prevents duplicates in nested calls).
      */
     fun recordFaktum(faktum: Faktum<*>) {
-        currentContext.formulas.add(faktum)
+        if (!faktum.traced) {
+            faktum.traced = true
+            currentContext.formulas.add(faktum)
+        }
     }
 
     /**

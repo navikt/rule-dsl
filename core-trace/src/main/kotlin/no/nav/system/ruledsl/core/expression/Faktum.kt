@@ -32,6 +32,11 @@ data class Faktum<T : Any>(
     val references: List<Reference> = emptyList()
 ) : Expression<T> {
 
+    /**
+     * Flag to prevent duplicate tracing when Faktum is passed through nested calls.
+     */
+    internal var traced: Boolean = false
+
     constructor(
         name: String,
         value: T,
