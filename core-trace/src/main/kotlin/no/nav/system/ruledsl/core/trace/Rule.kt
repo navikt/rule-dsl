@@ -61,6 +61,7 @@ private class GuardPredicate(
 @OptIn(ExperimentalTypeInference::class)
 class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
     private val predicates = mutableListOf<Expression<Boolean>>()
+    private val evaluatedPredicates = mutableListOf<Expression<Boolean>>()
     private var action: (Rule<T>.() -> Unit)? = null
     
     /**
@@ -149,11 +150,19 @@ class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
      *   to prevent NPE in subsequent predicates that depend on the checked value.
      * - Functional predicates (domain logic): continue evaluating even if false,
      *   so all functional predicate results are available for explanation/tracing.
+     *
+     * Only DomainPredicates that are actually evaluated are recorded to evaluatedPredicates.
+     * GuardPredicates are excluded since they are technical checks without trace value.
      */
     fun evaluate(): Boolean {
+        evaluatedPredicates.clear()
         var result = true
         for (predicate in predicates) {
             result = result && predicate.value
+
+            if (predicate is DomainPredicate) {
+                evaluatedPredicates.add(predicate)
+            }
 
             if (!result && predicate is GuardPredicate) {
                 return false
@@ -187,7 +196,8 @@ class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
     }
 
     /**
-     * Returns domain predicates (non-guard expressions) for tracing.
+     * Returns domain predicates that were actually evaluated.
+     * Predicates after a short-circuiting guard are excluded.
      */
-    fun expressions(): List<Expression<Boolean>> = predicates.filterNot { it is GuardPredicate }
+    fun expressions(): List<Expression<Boolean>> = evaluatedPredicates
 }

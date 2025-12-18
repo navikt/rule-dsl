@@ -36,6 +36,13 @@ data class Faktum<T : Any>(
      * Flag to prevent duplicate tracing when Faktum is passed through nested calls.
      */
     internal var traced: Boolean = false
+    
+    /**
+     * Reference to the TraceNode that produced this Faktum.
+     * Set by Trace.recordFaktum() when SPOR or RETURNER is called.
+     * Used for inverse explanation traversal (starting from result, walking back).
+     */
+    internal var sourceNode: no.nav.system.ruledsl.core.trace.TraceNode? = null
 
     constructor(
         name: String,

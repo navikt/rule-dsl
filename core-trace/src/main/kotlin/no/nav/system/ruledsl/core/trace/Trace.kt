@@ -8,6 +8,16 @@ import no.nav.system.ruledsl.core.resource.ResourceMap
 import kotlin.reflect.KClass
 
 /**
+ * Filter for trace traversal.
+ */
+enum class TraceFilter {
+    /** Include all rules (fired and not fired) */
+    ALL,
+    /** Include only rules that fired (functional explanation) */
+    FUNCTIONAL
+}
+
+/**
  * Tree-based execution trace - captures rule evaluations with composition hierarchy.
  * Preserves function nesting structure for complete AST.
  */
@@ -16,8 +26,35 @@ class TraceNode(
     val fired: Boolean,
     val predicates: List<Expression<Boolean>> = emptyList(),
     val children: MutableList<TraceNode> = mutableListOf(),
-    val formulas: MutableList<Faktum<*>> = mutableListOf()
-)
+    val formulas: MutableList<Faktum<*>> = mutableListOf(),
+    var parent: TraceNode? = null
+) {
+    /**
+     * Walk up the tree to collect the path from root to this node.
+     * Returns list from root (first) to this node (last).
+     */
+    fun pathFromRoot(): List<TraceNode> {
+        val path = mutableListOf<TraceNode>()
+        var current: TraceNode? = this
+        while (current != null) {
+            path.add(0, current)
+            current = current.parent
+        }
+        return path
+    }
+    
+    /**
+     * Find the rule that produced a given Faktum by searching this node's formulas.
+     */
+    fun findProducingRule(faktum: Faktum<*>): TraceNode? {
+        if (formulas.contains(faktum)) return this
+        for (child in children) {
+            val found = child.findProducingRule(faktum)
+            if (found != null) return found
+        }
+        return null
+    }
+}
 
 /**
  * Execution context for rule evaluation.
@@ -46,7 +83,7 @@ class Trace(name: String) : ResourceAccessor {
      * Returns the created TraceNode for stack tracking.
      */
     fun recordRule(name: String, fired: Boolean, predicates: List<Expression<Boolean>>): TraceNode {
-        val execution = TraceNode(name, fired, predicates, mutableListOf())
+        val execution = TraceNode(name, fired, predicates, mutableListOf(), mutableListOf(), parent = currentContext)
         currentContext.children.add(execution)
         return execution
     }
@@ -55,10 +92,12 @@ class Trace(name: String) : ResourceAccessor {
      * Record a Faktum (formula) to the current context.
      * Called by SPOR and RETURNER to trace calculations.
      * Skips if already traced (prevents duplicates in nested calls).
+     * Sets the sourceNode on the Faktum for inverse explanation traversal.
      */
     fun recordFaktum(faktum: Faktum<*>) {
         if (!faktum.traced) {
             faktum.traced = true
+            faktum.sourceNode = currentContext
             currentContext.formulas.add(faktum)
         }
     }

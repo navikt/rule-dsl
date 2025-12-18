@@ -502,4 +502,105 @@ class RulesetTest {
 
         assertEquals("no items over 10", result.value)
     }
+
+    @Test
+    fun `forklar produces inverse explanation from result Faktum`() {
+        val trace = Trace("test")
+        val user = TestUser(age = 25, trygdetid = 30)
+
+        val result = with(trace) {
+            traced<Faktum<Double>> {
+                val factor = Faktum("factor", user.trygdetid / 40.0)
+                val base = Faktum("base", 1000)
+
+                regel("calculate pension") {
+                    HVIS { user.age erMindreEnn 70 }
+                    RETURNER {
+                        Faktum("pension", base * factor)
+                    }
+                }
+            }
+        }
+
+        val explanation = result.forklar()
+        println("=== Inverse Explanation ===")
+        println(explanation)
+
+        // Should contain HVA section with result
+        assertTrue(explanation.contains("HVA"), "Should have HVA section")
+        assertTrue(explanation.contains("pension"), "Should show result name")
+
+        // Should contain HVORFOR section with fired rules
+        assertTrue(explanation.contains("HVORFOR"), "Should have HVORFOR section")
+        assertTrue(explanation.contains("calculate pension"), "Should show rule that produced result")
+
+        // Should contain HVORDAN section with formula
+        assertTrue(explanation.contains("HVORDAN"), "Should have HVORDAN section")
+        assertTrue(explanation.contains("base * factor"), "Should show formula notation")
+    }
+
+    @Test
+    fun `forklar with nested rules shows full decision path`() {
+        val trace = Trace("test")
+
+        val result = with(trace) {
+            traced<Faktum<String>> {
+                val eligibility = regel("check eligibility") {
+                    HVIS { true }
+                    SÅ { }
+                }
+
+                regel("grant benefit") {
+                    HVIS { eligibility }
+                    RETURNER {
+                        Faktum("benefit", "granted")
+                    }
+                }
+            }
+        }
+
+        val explanation = result.forklar()
+        println("=== Nested Rules Explanation ===")
+        println(explanation)
+
+        // Should show the dependency chain
+        assertTrue(explanation.contains("check eligibility"), "Should show prerequisite rule")
+        assertTrue(explanation.contains("grant benefit"), "Should show producing rule")
+    }
+
+    @Test
+    fun `forklar with TraceFilter ALL shows non-fired rules too`() {
+        val trace = Trace("test")
+
+        val result = with(trace) {
+            traced<Faktum<String>> {
+                regel("first option") {
+                    HVIS { false }  // Won't fire
+                    RETURNER {
+                        Faktum("result", "first")
+                    }
+                }
+
+                regel("second option") {
+                    HVIS { true }  // Will fire
+                    RETURNER {
+                        Faktum("result", "second")
+                    }
+                }
+            }
+        }
+
+        val functionalExplanation = result.forklar(TraceFilter.FUNCTIONAL)
+        val allExplanation = result.forklar(TraceFilter.ALL)
+
+        println("=== FUNCTIONAL filter ===")
+        println(functionalExplanation)
+        println("=== ALL filter ===")
+        println(allExplanation)
+
+        // FUNCTIONAL should not show the non-fired rule in HVORFOR
+        // ALL should include more detail
+        assertTrue(allExplanation.length >= functionalExplanation.length, 
+            "ALL filter should produce at least as much output")
+    }
 }
