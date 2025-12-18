@@ -119,23 +119,19 @@ forgrening("Sivilstand?") {
 
 **Workaround:** Use regular Kotlin `if`/`when` statements, but loses semantic tracing of decisions.
 
-### 8. Domain Predicate Eager Evaluation Issue
-**Impact: HIGH (Design Issue)**
+## Resolved Issues ✅
 
-When using domain predicates after a null-guard:
+### Domain Predicate Eager Evaluation (FIXED)
+Previously, domain predicates after a null-guard would cause NPE at build time:
 ```kotlin
 HVIS { obj != null }                    // Guard - OK
-OG { obj!!.field erLik value }          // Domain predicate - NPE at build time!
+OG { obj!!.field erLik value }          // Was: NPE at build time
 ```
 
-The domain predicate's infix operator is evaluated when building the predicate list,
-not when evaluating the rule. The null-guard doesn't protect it.
+**Fix:** Domain predicates are now wrapped in `LazyDomainPredicate` which defers evaluation
+until the predicate's value is accessed. Guards short-circuit before lazy predicates are evaluated.
 
-**Workaround:** Use technical predicates for nullable value comparisons:
-```kotlin
-HVIS { obj != null }
-OG { obj!!.field.value == value }      // Technical predicate - safe
-```
+If a guard short-circuits, the trace output shows `- (not evaluated)` for subsequent predicates.
 
 ## Architecture Differences
 
@@ -153,5 +149,4 @@ OG { obj!!.field.value == value }      // Technical predicate - safe
 1. **Implement Pattern system** - Critical for list-based rule evaluation with tracing
 2. **Add ELLERS support** - Common requirement, relatively simple to add
 3. **Add rule introspection** - Required for complex rule dependencies
-4. **Fix domain predicate eager evaluation** - Fundamental design issue affecting usability
-5. **Consider forgrening DSL** - Nice for semantic decision tree tracing
+4. **Consider forgrening DSL** - Nice for semantic decision tree tracing
