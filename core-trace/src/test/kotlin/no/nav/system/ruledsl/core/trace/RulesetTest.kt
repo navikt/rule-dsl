@@ -384,4 +384,122 @@ class RulesetTest {
 
         assertEquals(42, totalMonths)
     }
+
+    @Test
+    fun `RuleResult can be used for introspection in subsequent rules`() {
+        val trace = Trace("test")
+
+        val result = with(trace) {
+            traced<Faktum<String>> {
+                val r1 = regel("check condition") {
+                    HVIS { true }
+                    SÅ { }
+                }
+
+                regel("uses r1") {
+                    HVIS { r1 }  // RuleResult as Expression<Boolean>
+                    RETURNER {
+                        Faktum("result", "r1 fired")
+                    }
+                }
+            }
+        }
+
+        assertEquals("r1 fired", result.value)
+        // Check trace contains the introspection info
+        val debugOutput = trace.debugTree()
+        assertTrue(debugOutput.contains("regel 'check condition'"))
+    }
+
+    @Test
+    fun `RuleResult shows not fired when rule condition fails`() {
+        val trace = Trace("test")
+
+        val result = with(trace) {
+            traced<Faktum<String>> {
+                val r1 = regel("check condition") {
+                    HVIS { false }  // Will not fire
+                    SÅ { }
+                }
+
+                regel("uses r1") {
+                    HVIS { r1 }  // r1 didn't fire, so this is false
+                    RETURNER {
+                        Faktum("result", "r1 fired")
+                    }
+                }
+
+                regel("fallback") {
+                    HVIS { true }
+                    RETURNER {
+                        Faktum("result", "fallback")
+                    }
+                }
+            }
+        }
+
+        assertEquals("fallback", result.value)
+    }
+
+    @Test
+    fun `pattern rules can be introspected with minstEnHarTruffet`() {
+        val trace = Trace("test")
+        val items = listOf(1, 2, 3, 10, 20)
+
+        val result = with(trace) {
+            traced<Faktum<String>> {
+                val overTen = regel("over ten", items) { item ->
+                    HVIS { item > 10 }
+                    SÅ { }
+                }
+
+                regel("decision") {
+                    HVIS { overTen.minstEnHarTruffet() }
+                    RETURNER {
+                        Faktum("result", "found items over 10")
+                    }
+                }
+
+                regel("fallback") {
+                    HVIS { true }
+                    RETURNER {
+                        Faktum("result", "none over 10")
+                    }
+                }
+            }
+        }
+
+        assertEquals("found items over 10", result.value)
+    }
+
+    @Test
+    fun `pattern rules can be introspected with ingenHarTruffet`() {
+        val trace = Trace("test")
+        val items = listOf(1, 2, 3, 5)  // None over 10
+
+        val result = with(trace) {
+            traced<Faktum<String>> {
+                val overTen = regel("over ten", items) { item ->
+                    HVIS { item > 10 }
+                    SÅ { }
+                }
+
+                regel("none found") {
+                    HVIS { overTen.ingenHarTruffet() }
+                    RETURNER {
+                        Faktum("result", "no items over 10")
+                    }
+                }
+
+                regel("fallback") {
+                    HVIS { true }
+                    RETURNER {
+                        Faktum("result", "some over 10")
+                    }
+                }
+            }
+        }
+
+        assertEquals("no items over 10", result.value)
+    }
 }

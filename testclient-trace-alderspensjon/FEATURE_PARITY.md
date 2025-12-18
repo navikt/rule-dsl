@@ -52,18 +52,7 @@ regel("Example") {
 
 **Workaround:** Create a second rule with inverted condition.
 
-### 3. Rule Introspection
-**Impact: HIGH**
-
-The old system allowed querying whether rules had fired:
-```kotlin
-HVIS { "AngittFlyktning".minstEnHarTruffet() }
-HVIS { "Overgangsregel".ingenHarTruffet() }
-```
-
-**Workaround:** Manual boolean flag tracking, but loses traceability.
-
-### 4. kommentar() - Rule Documentation
+### 3. kommentar() - Rule Documentation
 **Impact: LOW**
 
 ```kotlin
@@ -128,10 +117,46 @@ HVIS { obj != null }                    // Guard - OK
 OG { obj!!.field erLik value }          // Was: NPE at build time
 ```
 
-**Fix:** Domain predicates are now wrapped in `LazyDomainPredicate` which defers evaluation
+**Fix:** Domain predicates are now wrapped in `DomainPredicate` which defers evaluation
 until the predicate's value is accessed. Guards short-circuit before lazy predicates are evaluated.
 
 If a guard short-circuits, the trace output shows `- (not evaluated)` for subsequent predicates.
+
+### Pattern System (FIXED)
+Now supported via overloaded `regel`:
+```kotlin
+val boperioder = listOf(Boperiode(...), Boperiode(...))
+
+regel("process boperiode", boperioder) { boperiode ->
+    HVIS { boperiode.land == LandEnum.NOR }
+    SÅ { totalMonths += boperiode.months }
+}
+```
+
+Each element gets its own traced rule (e.g., "process boperiode.1", "process boperiode.2").
+
+### Rule Introspection (FIXED)
+Rules now return `RuleResult` which implements `Expression<Boolean>`:
+```kotlin
+val r1 = regel("AngittFlyktning") { ... }
+val r2 = regel("HarUnntak") { ... }
+
+regel("Decision") {
+    HVIS { r1 }  // Traces as "regel 'AngittFlyktning' har truffet"
+    ...
+}
+```
+
+For pattern rules, use `minstEnHarTruffet()` or `ingenHarTruffet()`:
+```kotlin
+val overgangsregler = regel("Overgang", items) { item -> ... }
+
+regel("Decision") {
+    HVIS { overgangsregler.minstEnHarTruffet() }  // At least one fired
+    HVIS { overgangsregler.ingenHarTruffet() }    // None fired
+    ...
+}
+```
 
 ## Architecture Differences
 
@@ -146,7 +171,5 @@ If a guard short-circuits, the trace output shows `- (not evaluated)` for subseq
 
 ## Recommendations
 
-1. **Implement Pattern system** - Critical for list-based rule evaluation with tracing
-2. **Add ELLERS support** - Common requirement, relatively simple to add
-3. **Add rule introspection** - Required for complex rule dependencies
-4. **Consider forgrening DSL** - Nice for semantic decision tree tracing
+1. **Add ELLERS support** - Common requirement, relatively simple to add
+2. **Consider forgrening DSL** - Nice for semantic decision tree tracing
