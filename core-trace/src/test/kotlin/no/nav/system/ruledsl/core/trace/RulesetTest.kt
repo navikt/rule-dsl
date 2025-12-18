@@ -318,4 +318,70 @@ class RulesetTest {
 
         assertEquals(750, accessedRate)
     }
+
+    @Test
+    fun `regel with pattern creates rule per element`() {
+        val trace = Trace("test")
+        val items = listOf("A", "B", "C")
+        val processedItems = mutableListOf<String>()
+
+        with(trace) {
+            traced<Unit> {
+                regel("process item", items) { item ->
+                    HVIS { true }
+                    SÅ {
+                        processedItems.add(item)
+                    }
+                }
+            }
+        }
+
+        assertEquals(listOf("A", "B", "C"), processedItems)
+        // Trace should show process item.1, process item.2, process item.3
+        val debugOutput = trace.debugTree()
+        assertTrue(debugOutput.contains("process item.1"))
+        assertTrue(debugOutput.contains("process item.2"))
+        assertTrue(debugOutput.contains("process item.3"))
+    }
+
+    @Test
+    fun `regel with pattern and RETURNER stops at first match`() {
+        val trace = Trace("test")
+        val numbers = listOf(5, 10, 15, 20)
+
+        val result = with(trace) {
+            traced<Faktum<Int>> {
+                regel("find first over 10", numbers) { num ->
+                    HVIS { num > 10 }
+                    RETURNER {
+                        Faktum("found", num)
+                    }
+                }
+            }
+        }
+
+        // Should find 15 (first > 10)
+        assertEquals(15, result.value)
+    }
+
+    @Test
+    fun `regel with pattern accumulates values`() {
+        val trace = Trace("test")
+        data class Period(val months: Int)
+        val periods = listOf(Period(12), Period(24), Period(6))
+        var totalMonths = 0
+
+        with(trace) {
+            traced<Unit> {
+                regel("sum periods", periods) { period ->
+                    HVIS { true }
+                    SÅ {
+                        totalMonths += period.months
+                    }
+                }
+            }
+        }
+
+        assertEquals(42, totalMonths)
+    }
 }

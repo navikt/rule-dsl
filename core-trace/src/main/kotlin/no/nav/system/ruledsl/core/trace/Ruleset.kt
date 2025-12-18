@@ -61,6 +61,22 @@ class Ruleset<T : Any>(private val trace: Trace) : ResourceAccessor {
 
         trace.popContext()
     }
+
+    /**
+     * Define a rule that applies to each element in a list (pattern).
+     * Each element creates a separate rule with indexed naming (e.g., "RuleName.1", "RuleName.2").
+     * 
+     * @param name The base rule name
+     * @param pattern List of elements to apply the rule to
+     * @param builder DSL builder that receives the current element
+     */
+    fun <P> regel(name: String, pattern: List<P>, builder: Rule<T>.(P) -> Unit) {
+        pattern.forEachIndexed { index, element ->
+            regel("$name.${index + 1}") {
+                builder(element)
+            }
+        }
+    }
 }
 
 /**
