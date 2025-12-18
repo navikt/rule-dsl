@@ -54,6 +54,7 @@ fun calculatePension(user: User): Faktum<Int> = traced<Faktum<Int>> {
     regel("set age limit from options") {
         HVIS { user.limitOptions != null }
         OG { user.limitOptions!! >= 0 }
+        OG { user.limitOptions!! erStørreEllerLik  0 }
         SÅ {
             ageLimit = 67 + user.limitOptions!!
         }

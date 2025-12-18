@@ -90,8 +90,13 @@ class Trace(name: String) : ResourceAccessor {
                 val ruleStatus = node.fired.checkmark()
                 appendLine("${indent}regel: $ruleStatus ${node.name}")
                 node.predicates.forEach { predicate ->
-                    val predicateStatus = predicate.value.checkmark()
-                    appendLine("$indent  $predicateStatus $predicate")
+                    try {
+                        val predicateStatus = predicate.value.checkmark()
+                        appendLine("$indent  $predicateStatus $predicate")
+                    } catch (e: Exception) {
+                        // Predicate was not evaluated (guard short-circuited before it)
+                        appendLine("$indent  - (not evaluated)")
+                    }
                 }
                 node.formulas.forEach { faktum ->
                     appendLine("$indent  → ${faktum.name} = ${faktum.value}")
