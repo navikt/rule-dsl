@@ -3,11 +3,9 @@ package no.nav.system.ruledsl.core.trace
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
 import no.nav.system.ruledsl.core.expression.math.times
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 
 class RulesetTest {
 
@@ -229,7 +227,7 @@ class RulesetTest {
 
         val outerRule = trace.root.children.first()
         assertEquals("outer rule", outerRule.name)
-        
+
         val innerRule = outerRule.children.first()
         assertEquals("inner rule", innerRule.name)
     }
@@ -260,7 +258,7 @@ class RulesetTest {
     fun `resources can be registered and accessed in SÅ block`() {
         val trace = Trace("test")
         trace.putResource(TestRateResource::class, TestRateResource(1000))
-        
+
         var accessedRate = 0
 
         with(trace) {
@@ -301,10 +299,10 @@ class RulesetTest {
     fun `extension functions on ResourceAccessor work in SÅ block`() {
         val trace = Trace("test")
         trace.putResource(TestRateResource::class, TestRateResource(750))
-        
+
         // Extension function on ResourceAccessor
         fun Rule<*>.testRate(): Int = getResource(TestRateResource::class).rate
-        
+
         var accessedRate = 0
 
         with(trace) {

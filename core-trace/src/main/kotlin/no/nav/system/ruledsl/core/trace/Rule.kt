@@ -54,27 +54,26 @@ private class GuardPredicate(
  * - SPOR: Explicitly trace a Faktum within SÅ block
  *
  * Cannot use both SÅ and RETURNER in the same rule.
+ *
+ * Type parameter T represents the result type. Can be any type.
+ * If T is a Faktum, it will be automatically recorded to the trace.
  */
 @OptIn(ExperimentalTypeInference::class)
-class Rule<T>(private val trace: Trace) : ResourceAccessor {
+class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
     private val predicates = mutableListOf<Expression<Boolean>>()
     private var action: (Rule<T>.() -> Unit)? = null
     
     /**
-     * Block that produces the rule's result Faktum.
+     * Block that produces the rule's result of type T.
      * Stored for deferred execution after trace context is pushed.
-     * 
-     * Note: Uses Faktum<out Any> because the Rule's type parameter T represents
-     * the full result type (which is typically Faktum<X>), not the inner value type.
-     * This allows flexibility in what RETURNER can return while still working
-     * with the traced/Ruleset infrastructure.
+     * If result is a Faktum, it will be automatically recorded to the trace.
      */
-    private var resultBlock: (Rule<T>.() -> Faktum<out Any>)? = null
-    private var resultFaktum: Faktum<out Any>? = null
+    private var resultBlock: (Rule<T>.() -> T)? = null
+    private var resultValue: T? = null
 
     // ResourceAccessor delegation to Trace
-    override fun <T : Any> getResource(key: KClass<T>): T = trace.getResource(key)
-    override fun <T : Any> putResource(key: KClass<T>, resource: T) = trace.putResource(key, resource)
+    override fun <R : Any> getResource(key: KClass<R>): R = trace.getResource(key)
+    override fun <R : Any> putResource(key: KClass<R>, resource: R) = trace.putResource(key, resource)
 
     /**
      * HVIS - technical predicate (null checks, validations).
@@ -131,14 +130,14 @@ class Rule<T>(private val trace: Trace) : ResourceAccessor {
     }
 
     /**
-     * RETURNER - value-producing action. Returns Faktum<R>.
-     * The returned Faktum is automatically traced.
+     * RETURNER - value-producing action. Returns T.
+     * If T is a Faktum, it is automatically recorded to the trace.
      * Stores the block for deferred execution (after trace context is pushed).
      * Extension functions on ResourceAccessor are available in this block.
      *
-     * @param block Lambda that produces the Faktum result
+     * @param block Lambda that produces the result of type T
      */
-    fun <R : Any> RETURNER(block: Rule<T>.() -> Faktum<R>) {
+    fun RETURNER(block: Rule<T>.() -> T) {
         resultBlock = block
     }
 
@@ -174,16 +173,17 @@ class Rule<T>(private val trace: Trace) : ResourceAccessor {
 
     /**
      * Executes the RETURNER block. Must be called after trace context is pushed.
-     * Automatically records the returned Faktum to the trace.
+     * If the result is a Faktum, it is automatically recorded to the trace.
      * 
-     * @return The Faktum containing the rule's result
+     * @return The result of type T
      */
-    fun executeReturner(): Faktum<out Any>? {
+    fun executeReturner(): T? {
         resultBlock?.let { block ->
-            resultFaktum = block()
-            resultFaktum?.let { trace.recordFaktum(it) }
+            resultValue = block()
+            // Record to trace if result is a Faktum
+            (resultValue as? Faktum<*>)?.let { trace.recordFaktum(it) }
         }
-        return resultFaktum
+        return resultValue
     }
 
     /**

@@ -1,29 +1,33 @@
 package no.nav.system.ruledsl.core.trace
 
+import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import kotlin.reflect.KClass
 
 /**
  * Ruleset - collects results from rules, implements first-match-wins semantics.
  *
+ * Type parameter T represents the result type. Can be any type.
+ * If T is a Faktum, it will be automatically recorded to the trace.
+ *
  * Rules are evaluated in sequence. The first rule that fires and produces a result
  * (via RETURNER) stops further evaluation. Side-effect rules (via SÅ) do not stop evaluation.
  *
  * Implements ResourceAccessor to allow extension functions for resource access.
  */
-class Ruleset<T>(private val trace: Trace) : ResourceAccessor {
+class Ruleset<T : Any>(private val trace: Trace) : ResourceAccessor {
     var result: T? = null
         private set
     var hasResult = false
         private set
 
     // ResourceAccessor delegation to Trace
-    override fun <T : Any> getResource(key: KClass<T>): T = trace.getResource(key)
-    override fun <T : Any> putResource(key: KClass<T>, resource: T) = trace.putResource(key, resource)
+    override fun <R : Any> getResource(key: KClass<R>): R = trace.getResource(key)
+    override fun <R : Any> putResource(key: KClass<R>, resource: R) = trace.putResource(key, resource)
 
     /**
      * Define a rule that supports both side-effects (SÅ) and value-producing (RETURNER).
-     * Use SÅ for side-effects, RETURNER for returning Faktum<T>.
+     * Use SÅ for side-effects, RETURNER for returning a value of type T.
      * Cannot use both in the same rule.
      *
      * @param name The rule name (used in trace output)
@@ -45,9 +49,7 @@ class Ruleset<T>(private val trace: Trace) : ResourceAccessor {
                     throw IllegalStateException("regel '$name' cannot have both SÅ and RETURNER")
                 
                 rule.hasReturner() -> {
-                    val expression = rule.executeReturner()!!
-                    @Suppress("UNCHECKED_CAST")
-                    result = expression as T
+                    result = rule.executeReturner()
                     hasResult = true
                 }
                 
@@ -65,14 +67,17 @@ class Ruleset<T>(private val trace: Trace) : ResourceAccessor {
  * Entry point for traced rule evaluation.
  * Evaluates rules in sequence, returns first match.
  *
- * For non-Unit types: throws IllegalStateException if no rule matched.
- * For Unit: returns without throwing.
+ * Type parameter T is the result type. Can be any type.
+ * If T is a Faktum, it will be automatically recorded to the trace.
+ *
+ * For Unit type: returns Unit without throwing if no rule matched.
  *
  * @param block DSL block containing regel definitions
  * @return The result from the first matching rule with RETURNER
+ * @throws IllegalStateException if no rule matched (except for Unit)
  */
 context(trace: Trace)
-inline fun <reified T> traced(block: Ruleset<T>.() -> Unit): T {
+inline fun <reified T : Any> traced(block: Ruleset<T>.() -> Unit): T {
     val scope = Ruleset<T>(trace)
     scope.block()
 

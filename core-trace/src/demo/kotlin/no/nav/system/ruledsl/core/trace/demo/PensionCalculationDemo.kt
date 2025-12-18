@@ -40,7 +40,7 @@ fun main() {
  * Determines age limit and routes to appropriate calculation.
  */
 context(trace: Trace)
-fun calculatePension(user: User): Faktum<Int> = traced<Faktum<Int>> {
+fun calculatePension(user: User): Faktum<Double> = traced<Faktum<Double>> {
     var ageLimit = 67
 
     regel("set default age limit") {
@@ -80,7 +80,7 @@ fun calculatePension(user: User): Faktum<Int> = traced<Faktum<Int>> {
  * Uses higher rate, reduced by trygdetid if less than 40 years.
  */
 context(trace: Trace)
-fun earlyRetirementCalculation(user: User): Faktum<Int> = traced<Faktum<Int>> {
+fun earlyRetirementCalculation(user: User): Faktum<Double> = traced<Faktum<Double>> {
     val sats = Faktum("høy sats", 7000)
 
     regel("reduced by trygdetid") {
@@ -93,7 +93,7 @@ fun earlyRetirementCalculation(user: User): Faktum<Int> = traced<Faktum<Int>> {
     regel("full trygdetid") {
         HVIS { user.trygdetid erLik 40 }
         RETURNER {
-            Faktum("tidlig pensjon", sats)
+            Faktum("tidlig pensjon", sats.value.toDouble())
         }
     }
 }
@@ -103,7 +103,7 @@ fun earlyRetirementCalculation(user: User): Faktum<Int> = traced<Faktum<Int>> {
  * Uses lower rate, reduced by trygdetid if less than 40 years.
  */
 context(trace: Trace)
-fun normalRetirementCalculation(user: User): Faktum<Int> = traced<Faktum<Int>> {
+fun normalRetirementCalculation(user: User): Faktum<Double> = traced<Faktum<Double>> {
     val sats = Faktum("lav sats", 4000)
 
     regel("reduced by trygdetid") {
@@ -116,7 +116,7 @@ fun normalRetirementCalculation(user: User): Faktum<Int> = traced<Faktum<Int>> {
     regel("full trygdetid") {
         HVIS { user.trygdetid erLik 40 }
         RETURNER {
-            Faktum("normal pensjon", sats)
+            Faktum("normal pensjon", sats.value.toDouble())
         }
     }
 }
