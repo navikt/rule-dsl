@@ -1,58 +1,8 @@
 package no.nav.system.ruledsl.core.trace
 
-import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import kotlin.reflect.KClass
-
-/**
- * Result of a rule evaluation, usable as an Expression<Boolean> for introspection.
- * 
- * Can be used directly in HVIS/OG predicates of subsequent rules:
- * ```
- * val r1 = regel("First") { ... }
- * regel("Second") {
- *     HVIS { r1 }  // Traces as "regel 'First' har truffet" or "har ikke truffet"
- * }
- * ```
- */
-class RuleResult internal constructor(
-    private val name: String,
-    private val fired: Boolean
-) : Expression<Boolean> {
-    override val value: Boolean get() = fired
-    override fun notation() = "regel '$name'"
-    override fun concrete() = if (fired) "har truffet" else "har ikke truffet"
-    override fun faktumSet(): Set<Faktum<*>> = emptySet()
-    override fun toString() = "${notation()} ${concrete()}"
-    
-    fun harTruffet() = fired
-    fun harIkkeTruffet() = !fired
-}
-
-/**
- * Extension for checking if at least one rule in a group fired.
- * Usable as Expression<Boolean> in HVIS/OG predicates.
- */
-fun List<RuleResult>.minstEnHarTruffet(): Expression<Boolean> = object : Expression<Boolean> {
-    override val value: Boolean get() = this@minstEnHarTruffet.any { it.harTruffet() }
-    override fun notation() = "minst én av $size regler"
-    override fun concrete() = if (value) "har truffet" else "ingen har truffet"
-    override fun faktumSet(): Set<Faktum<*>> = emptySet()
-    override fun toString() = "${notation()} ${concrete()}"
-}
-
-/**
- * Extension for checking if no rules in a group fired.
- * Usable as Expression<Boolean> in HVIS/OG predicates.
- */
-fun List<RuleResult>.ingenHarTruffet(): Expression<Boolean> = object : Expression<Boolean> {
-    override val value: Boolean get() = this@ingenHarTruffet.none { it.harTruffet() }
-    override fun notation() = "ingen av $size regler"
-    override fun concrete() = if (value) "har truffet" else "minst én har truffet"
-    override fun faktumSet(): Set<Faktum<*>> = emptySet()
-    override fun toString() = "${notation()} ${concrete()}"
-}
 
 /**
  * Ruleset - collects results from rules, implements first-match-wins semantics.
