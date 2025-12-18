@@ -42,7 +42,7 @@ data class Faktum<T : Any>(
      * Set by Trace.recordFaktum() when SPOR or RETURNER is called.
      * Used for inverse explanation traversal (starting from result, walking back).
      */
-    internal var sourceNode: no.nav.system.ruledsl.core.trace.TraceNode? = null
+    internal var sourceNode: no.nav.system.ruledsl.core.trace.RuleTrace? = null
 
     constructor(
         name: String,

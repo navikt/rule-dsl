@@ -1,6 +1,6 @@
 package no.nav.system.ruledsl.core.expression.boolean
 
-import no.nav.system.ruledsl.core.helper.yesNo
+import no.nav.system.ruledsl.core.helper.jaNei
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.NegatableOperator
@@ -17,11 +17,11 @@ internal data class ListOperation(
 
     override val value: Boolean by lazy { evaluator() }
 
-    override fun notation(): String = "${value.yesNo()} '${expression.notation()}'${operatorText()}'${list.notation()}'"
+    override fun notation(): String = "${value.jaNei()} '${expression.notation()}'${operatorText()}'${list.notation()}'"
 
-    override fun concrete(): String = "${value.yesNo()} '${expression.concrete()}'${operatorText()}'${list.value.map { it.toString() }}'"
+    override fun concrete(): String = "${value.jaNei()} '${expression.concrete()}'${operatorText()}'${list.value.map { it.toString() }}'"
 
-    override fun toString(): String = "${value.yesNo()} ${expression}${operatorText()}${list}"
+    override fun toString(): String = "${value.jaNei()} ${expression}${operatorText()}${list}"
 
     private fun operatorText(): String = if (value) operator.text else operator.negated()
 

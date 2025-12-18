@@ -2,43 +2,47 @@ package no.nav.system.ruledsl.core.trace
 
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import kotlin.experimental.ExperimentalTypeInference
 import kotlin.reflect.KClass
 
 /**
- * Lazy wrapper for domain predicates.
- * Defers evaluation of the producer lambda until value is accessed,
- * allowing guards to short-circuit before nullable expressions are evaluated.
+ * Sealed interface for rule predicates.
+ * Enables exhaustive when-matching and clear type hierarchy.
  *
- * Internal to Rule - not exposed to users.
+ * Two variants:
+ * - Guard: Technical predicates (null-checks) that short-circuit on false
+ * - Domain: Functional predicates (business logic) that are traced
  */
-private class DomainPredicate(
-    private val producer: () -> Expression<Boolean>
-) : Expression<Boolean> {
-    private val inner: Expression<Boolean> by lazy { producer() }
-    override val value: Boolean get() = inner.value
-    override fun notation(): String = inner.notation()
-    override fun concrete(): String = inner.concrete()
-    override fun toString(): String = inner.toString()
-    override fun faktumSet(): Set<Faktum<*>> = inner.faktumSet()
-}
-/**
- * Lazy wrapper for guard predicates.
- * Typically for technical evaluations (null-checks).
- * An evaluation to false short-circuits the evaluationchain and prevents
- * further evaluation of any remaining predicates.
- *
- * Internal to Rule - not exposed to users.
- */
-private class GuardPredicate(
-    private val evaluator: () -> Boolean
-) : Expression<Boolean> {
-    override val value: Boolean by lazy { evaluator() }
-    override fun notation() = value.toString()
-    override fun concrete() = value.toString()
-    override fun toString(): String = value.toString()
-    override fun faktumSet() = emptySet<Faktum<*>>()
+private sealed interface Predicate : Expression<Boolean> {
+    
+    /**
+     * Guard predicate for technical evaluations (null-checks, validations).
+     * An evaluation to false short-circuits the evaluation chain and prevents
+     * further evaluation of any remaining predicates.
+     */
+    class Guard(private val evaluator: () -> Boolean) : Predicate {
+        override val value: Boolean by lazy { evaluator() }
+        override fun notation() = value.toString()
+        override fun concrete() = value.toString()
+        override fun toString(): String = value.toString()
+        override fun faktumSet() = emptySet<Faktum<*>>()
+    }
+    
+    /**
+     * Domain predicate for functional business logic.
+     * Defers evaluation of the producer lambda until value is accessed,
+     * allowing guards to short-circuit before nullable expressions are evaluated.
+     */
+    class Domain(private val producer: () -> Expression<Boolean>) : Predicate {
+        private val inner: Expression<Boolean> by lazy { producer() }
+        override val value: Boolean get() = inner.value
+        override fun notation(): String = inner.notation()
+        override fun concrete(): String = inner.concrete()
+        override fun toString(): String = inner.toString()
+        override fun faktumSet(): Set<Faktum<*>> = inner.faktumSet()
+    }
 }
 
 /**
@@ -59,9 +63,10 @@ private class GuardPredicate(
  * If T is a Faktum, it will be automatically recorded to the trace.
  */
 @OptIn(ExperimentalTypeInference::class)
-class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
+class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
     private val predicates = mutableListOf<Expression<Boolean>>()
     private val evaluatedPredicates = mutableListOf<Expression<Boolean>>()
+    private val references = mutableListOf<Reference>()
     private var action: (Rule<T>.() -> Unit)? = null
     
     /**
@@ -73,15 +78,28 @@ class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
     private var resultValue: T? = null
 
     // ResourceAccessor delegation to Trace
-    override fun <R : Any> getResource(key: KClass<R>): R = trace.getResource(key)
-    override fun <R : Any> putResource(key: KClass<R>, resource: R) = trace.putResource(key, resource)
+    override fun <R : Any> getResource(key: KClass<R>): R = ruleContext.getResource(key)
+    override fun <R : Any> putResource(key: KClass<R>, resource: R) = ruleContext.putResource(key, resource)
+
+    /**
+     * REF - attach a reference to legal source, documentation, or other resource.
+     * Can be called multiple times to add multiple references.
+     */
+    fun REF(id: String, url: String) {
+        references.add(Reference(id, url))
+    }
+
+    /**
+     * Returns all references attached to this rule.
+     */
+    fun references(): List<Reference> = references.toList()
 
     /**
      * HVIS - technical predicate (null checks, validations).
      * Terminates evaluation on false to prevent NPE in subsequent predicates.
      */
     fun HVIS(booleanFunction: () -> Boolean) {
-        predicates.add(GuardPredicate(booleanFunction))
+        predicates.add(Predicate.Guard(booleanFunction))
     }
 
     /**
@@ -98,7 +116,7 @@ class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
     @JvmName("HVIS_domain")
     @OverloadResolutionByLambdaReturnType
     fun HVIS(predicateFunction: () -> Expression<Boolean>) {
-        predicates.add(DomainPredicate(predicateFunction))
+        predicates.add(Predicate.Domain(predicateFunction))
     }
 
     /**
@@ -126,7 +144,7 @@ class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
      * @return The same Faktum (for chaining)
      */
     fun <R : Any> SPOR(faktum: Faktum<R>): Faktum<R> {
-        trace.recordFaktum(faktum)
+        ruleContext.recordFaktum(faktum)
         return faktum
     }
 
@@ -160,12 +178,9 @@ class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
         for (predicate in predicates) {
             result = result && predicate.value
 
-            if (predicate is DomainPredicate) {
-                evaluatedPredicates.add(predicate)
-            }
-
-            if (!result && predicate is GuardPredicate) {
-                return false
+            when (predicate) {
+                is Predicate.Domain -> evaluatedPredicates.add(predicate)
+                is Predicate.Guard -> if (!result) return false
             }
         }
 
@@ -190,7 +205,7 @@ class Rule<T : Any>(private val trace: Trace) : ResourceAccessor {
         resultBlock?.let { block ->
             resultValue = block()
             // Record to trace if result is a Faktum
-            (resultValue as? Faktum<*>)?.let { trace.recordFaktum(it) }
+            (resultValue as? Faktum<*>)?.let { ruleContext.recordFaktum(it) }
         }
         return resultValue
     }

@@ -2,7 +2,7 @@ package no.nav.system.ruledsl.core.expression.boolean
 
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
-import no.nav.system.ruledsl.core.helper.yesNo
+import no.nav.system.ruledsl.core.helper.jaNei
 
 // The expression that captures the comparison structure (for tracing)
 class Comparison(
@@ -12,11 +12,11 @@ class Comparison(
     private val evaluator: () -> Boolean
 ) : Expression<Boolean> {
     override val value: Boolean by lazy { evaluator() }
-    override fun notation(): String = "${value.yesNo()} '${left.notation()}'${operatorText()}'${right.notation()}'"
-    override fun concrete(): String = "${value.yesNo()} '${left.concrete()}'${operatorText()}'${right.concrete()}'"
+    override fun notation(): String = "${value.jaNei()} '${left.notation()}'${operatorText()}'${right.notation()}'"
+    override fun concrete(): String = "${value.jaNei()} '${left.concrete()}'${operatorText()}'${right.concrete()}'"
     override fun faktumSet(): Set<Faktum<*>> = left.faktumSet() + right.faktumSet()
     override fun toString(): String = buildString {
-        append(value.yesNo()).append(" ")
+        append(value.jaNei()).append(" ")
         if (left.notation() == left.concrete())
             append(left.notation())
         else

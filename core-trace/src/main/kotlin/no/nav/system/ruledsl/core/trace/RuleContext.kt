@@ -3,50 +3,42 @@ package no.nav.system.ruledsl.core.trace
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.helper.checkmark
+import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import no.nav.system.ruledsl.core.resource.ResourceMap
 import kotlin.reflect.KClass
 
 /**
- * Filter for trace traversal.
- */
-enum class TraceFilter {
-    /** Include all rules (fired and not fired) */
-    ALL,
-    /** Include only rules that fired (functional explanation) */
-    FUNCTIONAL
-}
-
-/**
  * Tree-based execution trace - captures rule evaluations with composition hierarchy.
  * Preserves function nesting structure for complete AST.
  */
-class TraceNode(
+class RuleTrace(
     val name: String,
     val fired: Boolean,
     val predicates: List<Expression<Boolean>> = emptyList(),
-    val children: MutableList<TraceNode> = mutableListOf(),
+    val children: MutableList<RuleTrace> = mutableListOf(),
     val formulas: MutableList<Faktum<*>> = mutableListOf(),
-    var parent: TraceNode? = null
+    val references: List<Reference> = emptyList(),
+    var parent: RuleTrace? = null
 ) {
     /**
      * Walk up the tree to collect the path from root to this node.
      * Returns list from root (first) to this node (last).
      */
-    fun pathFromRoot(): List<TraceNode> {
-        val path = mutableListOf<TraceNode>()
-        var current: TraceNode? = this
+    fun pathFromRoot(): List<RuleTrace> {
+        val path = mutableListOf<RuleTrace>()
+        var current: RuleTrace? = this
         while (current != null) {
             path.add(0, current)
             current = current.parent
         }
         return path
     }
-    
+
     /**
      * Find the rule that produced a given Faktum by searching this node's formulas.
      */
-    fun findProducingRule(faktum: Faktum<*>): TraceNode? {
+    fun findProducingRule(faktum: Faktum<*>): RuleTrace? {
         if (formulas.contains(faktum)) return this
         for (child in children) {
             val found = child.findProducingRule(faktum)
@@ -63,15 +55,15 @@ class TraceNode(
  * Resources registered here are accessible via ResourceAccessor interface
  * on Rule and Regelsett.
  */
-class Trace(name: String) : ResourceAccessor {
-    val root = TraceNode(name, fired = true)
+class RuleContext(name: String) : ResourceAccessor {
+    val root = RuleTrace(name, fired = true)
     private val stack = mutableListOf(root)
     private val resources = ResourceMap()
 
     /**
      * Current context in the execution tree.
      */
-    private val currentContext: TraceNode
+    private val currentContext: RuleTrace
         get() = stack.last()
 
     // ResourceAccessor delegation
@@ -82,8 +74,8 @@ class Trace(name: String) : ResourceAccessor {
      * Record a rule execution and attach it to the current context.
      * Returns the created TraceNode for stack tracking.
      */
-    fun recordRule(name: String, fired: Boolean, predicates: List<Expression<Boolean>>): TraceNode {
-        val execution = TraceNode(name, fired, predicates, mutableListOf(), mutableListOf(), parent = currentContext)
+    fun recordRule(name: String, fired: Boolean, predicates: List<Expression<Boolean>>, references: List<Reference> = emptyList()): RuleTrace {
+        val execution = RuleTrace(name, fired, predicates, mutableListOf(), mutableListOf(), references, parent = currentContext)
         currentContext.children.add(execution)
         return execution
     }
@@ -106,7 +98,7 @@ class Trace(name: String) : ResourceAccessor {
      * Push an execution context onto the stack.
      * Called before executing a rule's action block.
      */
-    fun pushContext(execution: TraceNode) {
+    fun pushContext(execution: RuleTrace) {
         stack.add(execution)
     }
 
@@ -124,18 +116,16 @@ class Trace(name: String) : ResourceAccessor {
      */
     fun debugTree(): String = buildString {
         appendLine("TRACE: ${root.name}")
-        fun walk(nodes: List<TraceNode>, indent: String = "  ") {
+        fun walk(nodes: List<RuleTrace>, indent: String = "  ") {
             nodes.forEach { node ->
                 val ruleStatus = node.fired.checkmark()
                 appendLine("${indent}regel: $ruleStatus ${node.name}")
+                node.references.forEach { ref ->
+                    appendLine("$indent  📖 ${ref.id}: ${ref.url}")
+                }
                 node.predicates.forEach { predicate ->
-                    try {
-                        val predicateStatus = predicate.value.checkmark()
-                        appendLine("$indent  $predicateStatus $predicate")
-                    } catch (e: Exception) {
-                        // Predicate was not evaluated (guard short-circuited before it)
-                        appendLine("$indent  - (not evaluated)")
-                    }
+                    val predicateStatus = predicate.value.checkmark()
+                    appendLine("$indent  $predicateStatus $predicate")
                 }
                 node.formulas.forEach { faktum ->
                     appendLine("$indent  → ${faktum.name} = ${faktum.value}")

@@ -6,12 +6,11 @@ import no.nav.pensjon.regler.alderspensjon.domain.koder.UnntakEnum
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
 import no.nav.pensjon.regler.alderspensjon.domain.koder.YtelseEnum
 import no.nav.system.ruledsl.core.expression.Faktum
-import no.nav.system.ruledsl.core.expression.boolean.erBlant
 import no.nav.system.ruledsl.core.expression.boolean.erEtterEllerLik
 import no.nav.system.ruledsl.core.expression.boolean.erLik
 import no.nav.system.ruledsl.core.expression.boolean.erMindreEllerLik
 import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
-import no.nav.system.ruledsl.core.trace.Trace
+import no.nav.system.ruledsl.core.trace.RuleContext
 import no.nav.system.ruledsl.core.trace.traced
 import java.time.LocalDate
 import java.time.Period
@@ -25,7 +24,7 @@ import java.time.Period
  *
  * Workaround: Use boolean flags to track rule firing status manually.
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 fun personenErFlyktning(
     innPersongrunnlag: Person,
     innYtelseType: Faktum<YtelseEnum>,

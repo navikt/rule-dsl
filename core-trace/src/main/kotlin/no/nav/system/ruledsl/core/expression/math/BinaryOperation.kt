@@ -7,14 +7,14 @@ import no.nav.system.ruledsl.core.expression.Expression
  * Matematisk operasjon for beregning (pluss, minus, gange, dele).
  */
 internal data class BinaryOperation<T : Number>(
-    val venstre: Expression<Number>,
-    val høyre: Expression<Number>,
+    val left: Expression<Number>,
+    val right: Expression<Number>,
     val operator: MathOperator,
     val evaluator: () -> T
 ) : Expression<T> {
     override val value: T by lazy {
         // Prevent silent NaN/Infinity from division by zero
-        if (operator == MathOperator.DIV && høyre.value.toDouble() == 0.0)
+        if (operator == MathOperator.DIV && right.value.toDouble() == 0.0)
             throw ArithmeticException("Divisjon med null")
 
         evaluator()
@@ -22,24 +22,24 @@ internal data class BinaryOperation<T : Number>(
 
     override fun notation(): String {
         val (v, h) = checkAndApplyParenthesis(
-            venstre.notation(), venstre,
+            left.notation(), left,
             operator,
-            høyre.notation(), høyre
+            right.notation(), right
         )
         return "$v${operator.text}$h"
     }
 
     override fun concrete(): String {
         val (v, h) = checkAndApplyParenthesis(
-            venstre.concrete(), venstre,
+            left.concrete(), left,
             operator,
-            høyre.concrete(), høyre
+            right.concrete(), right
         )
         return "$v${operator.text}$h"
     }
 
     override fun faktumSet(): Set<Faktum<*>> =
-        venstre.faktumSet() + høyre.faktumSet()
+        left.faktumSet() + right.faktumSet()
 
     /**
      * Legger til parenteser rundt uttrykk ved behov basert på operator precedence.

@@ -9,7 +9,7 @@ import no.nav.system.ruledsl.core.expression.boolean.erEtterEllerLik
 import no.nav.system.ruledsl.core.expression.boolean.erLik
 import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
 import no.nav.system.ruledsl.core.expression.boolean.erUlik
-import no.nav.system.ruledsl.core.trace.Trace
+import no.nav.system.ruledsl.core.trace.RuleContext
 import no.nav.system.ruledsl.core.trace.traced
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -23,7 +23,7 @@ import kotlin.math.roundToInt
  * - ELLERS (else branch)
  * - kommentar() (rule documentation)
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 fun beregnFaktiskTrygdetid(
     fødselsdato: Faktum<LocalDate>,
     virkningstidspunkt: Faktum<LocalDate>,

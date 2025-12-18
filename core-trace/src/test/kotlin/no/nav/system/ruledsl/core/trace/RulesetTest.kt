@@ -13,10 +13,10 @@ class RulesetTest {
 
     @Test
     fun `regel with SÅ executes side effect`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         var sideEffectExecuted = false
 
-        with(trace) {
+        with(ruleContext) {
             traced<Unit> {
                 regel("side effect rule") {
                     HVIS { true }
@@ -32,9 +32,9 @@ class RulesetTest {
 
     @Test
     fun `regel with RETURNER returns Faktum`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<Int>> {
                 regel("return rule") {
                     HVIS { true }
@@ -51,9 +51,9 @@ class RulesetTest {
 
     @Test
     fun `first matching rule wins`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<Int>> {
                 regel("first rule") {
                     HVIS { true }
@@ -77,9 +77,9 @@ class RulesetTest {
 
     @Test
     fun `rule with false predicate does not fire`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<Int>> {
                 regel("false rule") {
                     HVIS { false }
@@ -102,10 +102,10 @@ class RulesetTest {
 
     @Test
     fun `throws when no rule matches`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
         assertThrows<IllegalStateException> {
-            with(trace) {
+            with(ruleContext) {
                 traced<Faktum<Int>> {
                     regel("never matches") {
                         HVIS { false }
@@ -120,10 +120,10 @@ class RulesetTest {
 
     @Test
     fun `technical predicate short-circuits on false`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         var secondPredicateEvaluated = false
 
-        with(trace) {
+        with(ruleContext) {
             traced<Unit> {
                 regel("short circuit rule") {
                     HVIS { false }
@@ -139,10 +139,10 @@ class RulesetTest {
 
     @Test
     fun `domain predicate with erMindreEnn`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         val user = TestUser(age = 25, trygdetid = 14)
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<Int>> {
                 regel("age check") {
                     HVIS { user.age erMindreEnn 30 }
@@ -158,11 +158,11 @@ class RulesetTest {
 
     @Test
     fun `formula is traced in RETURNER`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         val sats = Faktum("sats", 1000)
         val faktor = Faktum("faktor", 2)
 
-        with(trace) {
+        with(ruleContext) {
             traced<Faktum<Int>> {
                 regel("calculation") {
                     HVIS { true }
@@ -173,17 +173,17 @@ class RulesetTest {
             }
         }
 
-        val formulas = trace.root.children.first().formulas
+        val formulas = ruleContext.root.children.first().formulas
         assertEquals(1, formulas.size)
         assertEquals("result", formulas.first().name)
     }
 
     @Test
     fun `SPOR explicitly traces Faktum in SÅ block`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         var tracedFaktum: Faktum<Int>? = null
 
-        with(trace) {
+        with(ruleContext) {
             traced<Unit> {
                 regel("spor test") {
                     HVIS { true }
@@ -195,16 +195,16 @@ class RulesetTest {
         }
 
         assertEquals(123, tracedFaktum?.value)
-        val formulas = trace.root.children.first().formulas
+        val formulas = ruleContext.root.children.first().formulas
         assertEquals(1, formulas.size)
         assertEquals("traced", formulas.first().name)
     }
 
     @Test
     fun `nested traced calls preserve hierarchy`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
-        context(trace: Trace)
+        context(ruleContext: RuleContext)
         fun innerCalculation(): Faktum<Int> = traced<Faktum<Int>> {
             regel("inner rule") {
                 HVIS { true }
@@ -214,7 +214,7 @@ class RulesetTest {
             }
         }
 
-        with(trace) {
+        with(ruleContext) {
             traced<Faktum<Int>> {
                 regel("outer rule") {
                     HVIS { true }
@@ -225,7 +225,7 @@ class RulesetTest {
             }
         }
 
-        val outerRule = trace.root.children.first()
+        val outerRule = ruleContext.root.children.first()
         assertEquals("outer rule", outerRule.name)
 
         val innerRule = outerRule.children.first()
@@ -234,10 +234,10 @@ class RulesetTest {
 
     @Test
     fun `throws when both SÅ and RETURNER used in same rule`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
         assertThrows<IllegalStateException> {
-            with(trace) {
+            with(ruleContext) {
                 traced<Faktum<Int>> {
                     regel("invalid rule") {
                         HVIS { true }
@@ -256,12 +256,12 @@ class RulesetTest {
 
     @Test
     fun `resources can be registered and accessed in SÅ block`() {
-        val trace = Trace("test")
-        trace.putResource(TestRateResource::class, TestRateResource(1000))
+        val ruleContext = RuleContext("test")
+        ruleContext.putResource(TestRateResource::class, TestRateResource(1000))
 
         var accessedRate = 0
 
-        with(trace) {
+        with(ruleContext) {
             traced<Unit> {
                 regel("resource access") {
                     HVIS { true }
@@ -277,10 +277,10 @@ class RulesetTest {
 
     @Test
     fun `resources can be accessed in RETURNER block`() {
-        val trace = Trace("test")
-        trace.putResource(TestRateResource::class, TestRateResource(500))
+        val ruleContext = RuleContext("test")
+        ruleContext.putResource(TestRateResource::class, TestRateResource(500))
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<Int>> {
                 regel("resource calculation") {
                     HVIS { true }
@@ -297,15 +297,15 @@ class RulesetTest {
 
     @Test
     fun `extension functions on ResourceAccessor work in SÅ block`() {
-        val trace = Trace("test")
-        trace.putResource(TestRateResource::class, TestRateResource(750))
+        val ruleContext = RuleContext("test")
+        ruleContext.putResource(TestRateResource::class, TestRateResource(750))
 
         // Extension function on ResourceAccessor
         fun Rule<*>.testRate(): Int = getResource(TestRateResource::class).rate
 
         var accessedRate = 0
 
-        with(trace) {
+        with(ruleContext) {
             traced<Unit> {
                 regel("extension access") {
                     HVIS { true }
@@ -321,11 +321,11 @@ class RulesetTest {
 
     @Test
     fun `regel with pattern creates rule per element`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         val items = listOf("A", "B", "C")
         val processedItems = mutableListOf<String>()
 
-        with(trace) {
+        with(ruleContext) {
             traced<Unit> {
                 regel("process item", items) { item ->
                     HVIS { true }
@@ -338,7 +338,7 @@ class RulesetTest {
 
         assertEquals(listOf("A", "B", "C"), processedItems)
         // Trace should show process item.1, process item.2, process item.3
-        val debugOutput = trace.debugTree()
+        val debugOutput = ruleContext.debugTree()
         assertTrue(debugOutput.contains("process item.1"))
         assertTrue(debugOutput.contains("process item.2"))
         assertTrue(debugOutput.contains("process item.3"))
@@ -346,10 +346,10 @@ class RulesetTest {
 
     @Test
     fun `regel with pattern and RETURNER stops at first match`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         val numbers = listOf(5, 10, 15, 20)
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<Int>> {
                 regel("find first over 10", numbers) { num ->
                     HVIS { num > 10 }
@@ -366,12 +366,12 @@ class RulesetTest {
 
     @Test
     fun `regel with pattern accumulates values`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         data class Period(val months: Int)
         val periods = listOf(Period(12), Period(24), Period(6))
         var totalMonths = 0
 
-        with(trace) {
+        with(ruleContext) {
             traced<Unit> {
                 regel("sum periods", periods) { period ->
                     HVIS { true }
@@ -387,9 +387,9 @@ class RulesetTest {
 
     @Test
     fun `RuleResult can be used for introspection in subsequent rules`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<String>> {
                 val r1 = regel("check condition") {
                     HVIS { true }
@@ -407,15 +407,15 @@ class RulesetTest {
 
         assertEquals("r1 fired", result.value)
         // Check trace contains the introspection info
-        val debugOutput = trace.debugTree()
+        val debugOutput = ruleContext.debugTree()
         assertTrue(debugOutput.contains("regel 'check condition'"))
     }
 
     @Test
     fun `RuleResult shows not fired when rule condition fails`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<String>> {
                 val r1 = regel("check condition") {
                     HVIS { false }  // Will not fire
@@ -443,10 +443,10 @@ class RulesetTest {
 
     @Test
     fun `pattern rules can be introspected with minstEnHarTruffet`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         val items = listOf(1, 2, 3, 10, 20)
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<String>> {
                 val overTen = regel("over ten", items) { item ->
                     HVIS { item > 10 }
@@ -474,10 +474,10 @@ class RulesetTest {
 
     @Test
     fun `pattern rules can be introspected with ingenHarTruffet`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         val items = listOf(1, 2, 3, 5)  // None over 10
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<String>> {
                 val overTen = regel("over ten", items) { item ->
                     HVIS { item > 10 }
@@ -505,10 +505,10 @@ class RulesetTest {
 
     @Test
     fun `forklar produces inverse explanation from result Faktum`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
         val user = TestUser(age = 25, trygdetid = 30)
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<Double>> {
                 val factor = Faktum("factor", user.trygdetid / 40.0)
                 val base = Faktum("base", 1000)
@@ -541,9 +541,9 @@ class RulesetTest {
 
     @Test
     fun `forklar with nested rules shows full decision path`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<String>> {
                 val eligibility = regel("check eligibility") {
                     HVIS { true }
@@ -570,9 +570,9 @@ class RulesetTest {
 
     @Test
     fun `forklar with TraceFilter ALL shows non-fired rules too`() {
-        val trace = Trace("test")
+        val ruleContext = RuleContext("test")
 
-        val result = with(trace) {
+        val result = with(ruleContext) {
             traced<Faktum<String>> {
                 regel("first option") {
                     HVIS { false }  // Won't fire

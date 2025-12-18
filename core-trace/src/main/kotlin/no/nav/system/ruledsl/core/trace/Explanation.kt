@@ -61,7 +61,7 @@ fun Faktum<*>.buildExplanation(filter: TraceFilter = TraceFilter.FUNCTIONAL): Ex
     root.children.add(ExplanationNode(ExplanationKind.FORMEL, "$name = $value"))
     
     // Find the source node (the rule that produced this Faktum)
-    val source = sourceNode as? TraceNode
+    val source = sourceNode
     if (source != null) {
         // HVORFOR - walk up the tree to collect fired rules
         val hvorfor = ExplanationNode(ExplanationKind.HVORFOR, "HVORFOR")
@@ -130,6 +130,17 @@ fun Faktum<*>.buildExplanation(filter: TraceFilter = TraceFilter.FUNCTIONAL): Ex
     
     return root
 }
+
+/**
+ * Filter for trace traversal.
+ */
+enum class TraceFilter {
+    /** Include all rules (fired and not fired) */
+    ALL,
+    /** Include only rules that fired (functional explanation) */
+    FUNCTIONAL
+}
+
 
 /**
  * Generate an explanation for this Faktum using a transformer.

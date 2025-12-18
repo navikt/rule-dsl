@@ -6,7 +6,7 @@ import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
 import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
 import no.nav.system.ruledsl.core.expression.math.div
 import no.nav.system.ruledsl.core.expression.math.times
-import no.nav.system.ruledsl.core.trace.Trace
+import no.nav.system.ruledsl.core.trace.RuleContext
 import no.nav.system.ruledsl.core.trace.traced
 
 /**
@@ -25,21 +25,21 @@ fun main() {
     println("User: ${bob.name}, age: ${bob.age}, trygdetid: ${bob.trygdetid}")
     println()
     
-    val trace = Trace("PensionCalculation")
-    val result = with(trace) {
+    val ruleContext = RuleContext("PensionCalculation")
+    val result = with(ruleContext) {
         calculatePension(bob)
     }
     
     println("Result: ${result.name} = ${result.value}")
     println()
-    println(trace.debugTree())
+    println(ruleContext.debugTree())
 }
 
 /**
  * Top-level pension calculation logic.
  * Determines age limit and routes to appropriate calculation.
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 fun calculatePension(user: User): Faktum<Double> = traced<Faktum<Double>> {
     var ageLimit = 67
 
@@ -79,7 +79,7 @@ fun calculatePension(user: User): Faktum<Double> = traced<Faktum<Double>> {
  * Calculate early retirement pension.
  * Uses higher rate, reduced by trygdetid if less than 40 years.
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 fun earlyRetirementCalculation(user: User): Faktum<Double> = traced<Faktum<Double>> {
     val sats = Faktum("høy sats", 7000)
 
@@ -102,7 +102,7 @@ fun earlyRetirementCalculation(user: User): Faktum<Double> = traced<Faktum<Doubl
  * Calculate normal retirement pension.
  * Uses lower rate, reduced by trygdetid if less than 40 years.
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 fun normalRetirementCalculation(user: User): Faktum<Double> = traced<Faktum<Double>> {
     val sats = Faktum("lav sats", 4000)
 

@@ -65,15 +65,15 @@ fun List<RuleResult>.ingenHarTruffet(): Expression<Boolean> = object : Expressio
  *
  * Implements ResourceAccessor to allow extension functions for resource access.
  */
-class Ruleset<T : Any>(private val trace: Trace) : ResourceAccessor {
+class Ruleset<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
     var result: T? = null
         private set
     var hasResult = false
         private set
 
     // ResourceAccessor delegation to Trace
-    override fun <R : Any> getResource(key: KClass<R>): R = trace.getResource(key)
-    override fun <R : Any> putResource(key: KClass<R>, resource: R) = trace.putResource(key, resource)
+    override fun <R : Any> getResource(key: KClass<R>): R = ruleContext.getResource(key)
+    override fun <R : Any> putResource(key: KClass<R>, resource: R) = ruleContext.putResource(key, resource)
 
     /**
      * Define a rule that supports both side-effects (SÅ) and value-producing (RETURNER).
@@ -89,12 +89,12 @@ class Ruleset<T : Any>(private val trace: Trace) : ResourceAccessor {
     fun regel(name: String, builder: Rule<T>.() -> Unit): RuleResult {
         if (hasResult) return RuleResult(name, false)
 
-        val rule = Rule<T>(trace)
+        val rule = Rule<T>(ruleContext)
         rule.builder()
 
         val ruleFired = rule.evaluate()
-        val execution = trace.recordRule(name, ruleFired, rule.expressions())
-        trace.pushContext(execution)
+        val execution = ruleContext.recordRule(name, ruleFired, rule.expressions(), rule.references())
+        ruleContext.pushContext(execution)
 
         if (ruleFired) {
             when {
@@ -112,7 +112,7 @@ class Ruleset<T : Any>(private val trace: Trace) : ResourceAccessor {
             }
         }
 
-        trace.popContext()
+        ruleContext.popContext()
         return RuleResult(name, ruleFired)
     }
 
@@ -149,9 +149,9 @@ class Ruleset<T : Any>(private val trace: Trace) : ResourceAccessor {
  * @return The result from the first matching rule with RETURNER
  * @throws IllegalStateException if no rule matched (except for Unit)
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 inline fun <reified T : Any> traced(block: Ruleset<T>.() -> Unit): T {
-    val scope = Ruleset<T>(trace)
+    val scope = Ruleset<T>(ruleContext)
     scope.block()
 
     return when {

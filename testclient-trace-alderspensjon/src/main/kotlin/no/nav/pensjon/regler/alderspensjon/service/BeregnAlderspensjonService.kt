@@ -4,13 +4,12 @@ import no.nav.pensjon.regler.alderspensjon.config.GrunnbeløpSatsResource
 import no.nav.pensjon.regler.alderspensjon.config.grunnbeløpByDate
 import no.nav.pensjon.regler.alderspensjon.domain.Request
 import no.nav.pensjon.regler.alderspensjon.domain.Response
-import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
 import no.nav.pensjon.regler.alderspensjon.domain.koder.YtelseEnum
 import no.nav.pensjon.regler.alderspensjon.ruleset.beregnFaktiskTrygdetid
 import no.nav.pensjon.regler.alderspensjon.ruleset.beregnGrunnpensjon
 import no.nav.pensjon.regler.alderspensjon.ruleset.personenErFlyktning
 import no.nav.system.ruledsl.core.expression.Faktum
-import no.nav.system.ruledsl.core.trace.Trace
+import no.nav.system.ruledsl.core.trace.RuleContext
 
 /**
  * Service for calculating alderspensjon.
@@ -22,13 +21,13 @@ import no.nav.system.ruledsl.core.trace.Trace
  * In core-trace, we use function-based rules with Trace as context parameter.
  * Resources must be registered on Trace before calling the calculation functions.
  */
-fun beregnAlderspensjon(request: Request): Pair<Response.Alderspensjon, Trace> {
-    val trace = Trace("BeregnAlderspensjon")
+fun beregnAlderspensjon(request: Request): Pair<Response.Alderspensjon, RuleContext> {
+    val ruleContext = RuleContext("BeregnAlderspensjon")
     
     // Register resources
-    trace.putResource(GrunnbeløpSatsResource::class, GrunnbeløpSatsResource())
+    ruleContext.putResource(GrunnbeløpSatsResource::class, GrunnbeløpSatsResource())
     
-    val response = with(trace) {
+    val response = with(ruleContext) {
         val virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt)
         
         // Check flyktning status
@@ -65,5 +64,5 @@ fun beregnAlderspensjon(request: Request): Pair<Response.Alderspensjon, Trace> {
         )
     }
     
-    return response to trace
+    return response to ruleContext
 }

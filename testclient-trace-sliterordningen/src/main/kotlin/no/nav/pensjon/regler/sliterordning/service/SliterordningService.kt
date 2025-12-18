@@ -15,7 +15,7 @@ import no.nav.system.ruledsl.core.expression.math.div
 import no.nav.system.ruledsl.core.expression.math.minus
 import no.nav.system.ruledsl.core.expression.math.times
 import no.nav.system.ruledsl.core.trace.RuleResult
-import no.nav.system.ruledsl.core.trace.Trace
+import no.nav.system.ruledsl.core.trace.RuleContext
 import no.nav.system.ruledsl.core.trace.traced
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
@@ -27,15 +27,15 @@ import java.time.temporal.ChronoUnit
  */
 class SliterordningService(private val request: SliterordningRequest) {
     
-    fun run(): Pair<SliterordningResponse, Trace> {
-        val trace = Trace("SliterordningService")
-        trace.putResource(GrunnbeløpSatsResource::class, GrunnbeløpSatsResource())
+    fun run(): Pair<SliterordningResponse, RuleContext> {
+        val ruleContext = RuleContext("SliterordningService")
+        ruleContext.putResource(GrunnbeløpSatsResource::class, GrunnbeløpSatsResource())
         
-        val response = with(trace) {
+        val response = with(ruleContext) {
             behandleSliterordning(request.uttakstidspunkt, request.virkningstidspunkt, request.person)
         }
         
-        return Pair(response, trace)
+        return Pair(response, ruleContext)
     }
 }
 
@@ -44,7 +44,7 @@ class SliterordningService(private val request: SliterordningRequest) {
  * 
  * The branching logic is expressed as rules, making the decision visible in the trace.
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 fun behandleSliterordning(
     uttakstidspunkt: YearMonth,
     virkningstidspunkt: YearMonth,
@@ -80,7 +80,7 @@ fun behandleSliterordning(
  * 
  * Returns a RuleResult that can be used directly in HVIS predicates of subsequent rules.
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 fun vilkårsprøvSlitertillegg(): RuleResult {
     var result: RuleResult? = null
     traced<Unit> {
@@ -100,7 +100,7 @@ fun vilkårsprøvSlitertillegg(): RuleResult {
  * - Trygdetid (insurance time factor)
  * - Grunnbeløp (base amount)
  */
-context(trace: Trace)
+context(ruleContext: RuleContext)
 fun beregnSlitertillegg(
     uttakstidspunkt: YearMonth,
     person: Person,
