@@ -27,7 +27,7 @@ class RuleResult internal constructor(
     override fun toString() = "${notation()} ${concrete()}"
     
     fun harTruffet() = fired
-    fun ikkeHarTruffet() = !fired
+    fun harIkkeTruffet() = !fired
 }
 
 /**
@@ -36,7 +36,7 @@ class RuleResult internal constructor(
  */
 fun List<RuleResult>.minstEnHarTruffet(): Expression<Boolean> = object : Expression<Boolean> {
     override val value: Boolean get() = this@minstEnHarTruffet.any { it.harTruffet() }
-    override fun notation() = "minst én av ${size} regler"
+    override fun notation() = "minst én av $size regler"
     override fun concrete() = if (value) "har truffet" else "ingen har truffet"
     override fun faktumSet(): Set<Faktum<*>> = emptySet()
     override fun toString() = "${notation()} ${concrete()}"
@@ -48,7 +48,7 @@ fun List<RuleResult>.minstEnHarTruffet(): Expression<Boolean> = object : Express
  */
 fun List<RuleResult>.ingenHarTruffet(): Expression<Boolean> = object : Expression<Boolean> {
     override val value: Boolean get() = this@ingenHarTruffet.none { it.harTruffet() }
-    override fun notation() = "ingen av ${size} regler"
+    override fun notation() = "ingen av $size regler"
     override fun concrete() = if (value) "har truffet" else "minst én har truffet"
     override fun faktumSet(): Set<Faktum<*>> = emptySet()
     override fun toString() = "${notation()} ${concrete()}"
