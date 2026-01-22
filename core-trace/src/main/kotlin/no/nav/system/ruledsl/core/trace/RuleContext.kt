@@ -16,10 +16,10 @@ class RuleTrace(
     val name: String,
     val fired: Boolean,
     val predicates: List<Expression<Boolean>> = emptyList(),
-    val children: MutableList<RuleTrace> = mutableListOf(),
     val formulas: MutableList<Faktum<*>> = mutableListOf(),
     val references: List<Reference> = emptyList(),
-    var parent: RuleTrace? = null
+    var parent: RuleTrace? = null,
+    val children: MutableList<RuleTrace> = mutableListOf()
 ) {
     /**
      * Walk up the tree to collect the path from root to this node.
@@ -71,13 +71,21 @@ class RuleContext(name: String) : ResourceAccessor {
     override fun <T : Any> putResource(key: KClass<T>, resource: T) = resources.putResource(key, resource)
 
     /**
-     * Record a rule execution and attach it to the current context.
-     * Returns the created TraceNode for stack tracking.
+     * Creates the RuleTrace and attach it to the current context.
+     * Returns the created RuleTrace for stack tracking.
      */
     fun recordRule(name: String, fired: Boolean, predicates: List<Expression<Boolean>>, references: List<Reference> = emptyList()): RuleTrace {
-        val execution = RuleTrace(name, fired, predicates, mutableListOf(), mutableListOf(), references, parent = currentContext)
-        currentContext.children.add(execution)
-        return execution
+        val trace = RuleTrace(
+            name = name,
+            fired = fired,
+            predicates = predicates,
+            formulas = mutableListOf(),
+            references = references,
+            parent = currentContext,
+            children = mutableListOf()
+        )
+        currentContext.children.add(trace)
+        return trace
     }
 
     /**
@@ -120,9 +128,7 @@ class RuleContext(name: String) : ResourceAccessor {
             nodes.forEach { node ->
                 val ruleStatus = node.fired.checkmark()
                 appendLine("${indent}regel: $ruleStatus ${node.name}")
-                node.references.forEach { ref ->
-                    appendLine("$indent  📖 ${ref.id}: ${ref.url}")
-                }
+
                 node.predicates.forEach { predicate ->
                     val predicateStatus = predicate.value.checkmark()
                     appendLine("$indent  $predicateStatus $predicate")
@@ -133,6 +139,10 @@ class RuleContext(name: String) : ResourceAccessor {
                         appendLine("$indent    ${faktum.expression.notation()}")
                     }
                 }
+                node.references.forEach { ref ->
+                    appendLine("$indent  📖 ${ref.id}: ${ref.url}")
+                }
+
                 if (node.children.isNotEmpty()) {
                     walk(node.children, "$indent  ")
                 }

@@ -1,6 +1,7 @@
 package no.nav.system.ruledsl.core.expression
 
 import no.nav.system.ruledsl.core.reference.Reference
+import no.nav.system.ruledsl.core.trace.RuleTrace
 
 /**
  * Named expression - treated as atomic unit for fact tracking.
@@ -38,11 +39,11 @@ data class Faktum<T : Any>(
     internal var traced: Boolean = false
     
     /**
-     * Reference to the TraceNode that produced this Faktum.
+     * Reference to the RuleTrace that produced this Faktum.
      * Set by Trace.recordFaktum() when SPOR or RETURNER is called.
      * Used for inverse explanation traversal (starting from result, walking back).
      */
-    internal var sourceNode: no.nav.system.ruledsl.core.trace.RuleTrace? = null
+    internal var sourceNode: RuleTrace? = null
 
     constructor(
         name: String,
