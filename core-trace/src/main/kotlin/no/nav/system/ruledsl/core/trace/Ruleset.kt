@@ -30,14 +30,14 @@ class Ruleset<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor 
      * Use SÅ for side-effects, RETURNER for returning a value of type T.
      * Cannot use both in the same rule.
      *
-     * Returns a RuleResult that can be used for introspection in subsequent rules.
+     * Returns a RuleExpression that can be used for introspection in subsequent rules.
      *
      * @param name The rule name (used in trace output)
      * @param builder DSL builder for the rule content (HVIS, OG, SÅ, RETURNER)
-     * @return RuleResult indicating whether the rule fired (usable as Expression<Boolean>)
+     * @return RuleExpression indicating whether the rule fired (usable as Expression<Boolean>)
      */
-    fun regel(name: String, builder: Rule<T>.() -> Unit): RuleResult {
-        if (hasResult) return RuleResult(name, false)
+    fun regel(name: String, builder: Rule<T>.() -> Unit): RuleExpression {
+        if (hasResult) return RuleExpression(name, false)
 
         val rule = Rule<T>(ruleContext)
         rule.builder()
@@ -63,21 +63,21 @@ class Ruleset<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor 
         }
 
         ruleContext.popContext()
-        return RuleResult(name, ruleFired)
+        return RuleExpression(name, ruleFired)
     }
 
     /**
      * Define a rule that applies to each element in a list (pattern).
      * Each element creates a separate rule with indexed naming (e.g., "RuleName.1", "RuleName.2").
      *
-     * Returns a list of RuleResults, one per element.
+     * Returns a list of RuleExpressions, one per element.
      * 
      * @param name The base rule name
      * @param pattern List of elements to apply the rule to
      * @param builder DSL builder that receives the current element
-     * @return List of RuleResults for introspection (e.g., minstEnHarTruffet())
+     * @return List of RuleExpressions for introspection (e.g., minstEnHarTruffet())
      */
-    fun <P> regel(name: String, pattern: List<P>, builder: Rule<T>.(P) -> Unit): List<RuleResult> {
+    fun <P> regel(name: String, pattern: List<P>, builder: Rule<T>.(P) -> Unit): List<RuleExpression> {
         return pattern.mapIndexed { index, element ->
             regel("$name.${index + 1}") {
                 builder(element)

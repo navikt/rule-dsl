@@ -388,7 +388,7 @@ class RulesetTest {
     }
 
     @Test
-    fun `RuleResult can be used for introspection in subsequent rules`() {
+    fun `RuleExpression can be used for introspection in subsequent rules`() {
         val ruleContext = RuleContext("test")
 
         val result = with(ruleContext) {
@@ -399,7 +399,7 @@ class RulesetTest {
                 }
 
                 regel("uses r1") {
-                    HVIS { r1 }  // RuleResult as Expression<Boolean>
+                    HVIS { r1 }  // RuleExpression as Expression<Boolean>
                     RETURNER {
                         Faktum("result", "r1 fired")
                     }
@@ -414,7 +414,7 @@ class RulesetTest {
     }
 
     @Test
-    fun `RuleResult shows not fired when rule condition fails`() {
+    fun `RuleExpression shows not fired when rule condition fails`() {
         val ruleContext = RuleContext("test")
 
         val result = with(ruleContext) {

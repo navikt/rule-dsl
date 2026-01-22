@@ -6,7 +6,7 @@ import no.nav.system.ruledsl.core.expression.boolean.ListOperator
 import no.nav.system.ruledsl.core.expression.boolean.ListOperation
 
 /**
- * Result of a rule evaluation, usable as an Expression<Boolean> for introspection.
+ * Expression representing the result of a rule evaluation.
  * 
  * Can be used directly in HVIS/OG predicates of subsequent rules:
  * ```
@@ -16,7 +16,7 @@ import no.nav.system.ruledsl.core.expression.boolean.ListOperation
  * }
  * ```
  */
-class RuleResult internal constructor(
+class RuleExpression internal constructor(
     private val name: String,
     private val fired: Boolean
 ) : Expression<Boolean> {
@@ -31,10 +31,10 @@ class RuleResult internal constructor(
 }
 
 /**
- * Wraps a list of RuleResults as an Expression for use in list operations.
+ * Wraps a list of RuleExpressions as an Expression for use in list operations.
  */
-private class RuleResultList(
-    private val results: List<RuleResult>
+private class RuleExpressionList(
+    private val results: List<RuleExpression>
 ) : Expression<List<Boolean>> {
     override val value: List<Boolean> get() = results.map { it.value }
     override fun notation() = "${results.size} regler"
@@ -46,9 +46,9 @@ private class RuleResultList(
  * Extension for checking if at least one rule in a group fired.
  * Uses ListOperation with MINST_EN_AV operator for consistent notation.
  */
-fun List<RuleResult>.minstEnHarTruffet(): Expression<Boolean> = ListOperation(
+fun List<RuleExpression>.minstEnHarTruffet(): Expression<Boolean> = ListOperation(
     expression = Faktum("truffet", true),
-    list = RuleResultList(this),
+    list = RuleExpressionList(this),
     operator = ListOperator.MINST_EN_AV,
     evaluator = { this.any { it.harTruffet() } }
 )
@@ -57,9 +57,9 @@ fun List<RuleResult>.minstEnHarTruffet(): Expression<Boolean> = ListOperation(
  * Extension for checking if no rules in a group fired.
  * Uses ListOperation with INGEN operator for consistent notation.
  */
-fun List<RuleResult>.ingenHarTruffet(): Expression<Boolean> = ListOperation(
+fun List<RuleExpression>.ingenHarTruffet(): Expression<Boolean> = ListOperation(
     expression = Faktum("truffet", true),
-    list = RuleResultList(this),
+    list = RuleExpressionList(this),
     operator = ListOperator.INGEN,
     evaluator = { this.none { it.harTruffet() } }
 )
@@ -68,9 +68,9 @@ fun List<RuleResult>.ingenHarTruffet(): Expression<Boolean> = ListOperation(
  * Extension for checking if all rules in a group fired.
  * Uses ListOperation with ALLE operator for consistent notation.
  */
-fun List<RuleResult>.alleHarTruffet(): Expression<Boolean> = ListOperation(
+fun List<RuleExpression>.alleHarTruffet(): Expression<Boolean> = ListOperation(
     expression = Faktum("truffet", true),
-    list = RuleResultList(this),
+    list = RuleExpressionList(this),
     operator = ListOperator.ALLE,
     evaluator = { this.all { it.harTruffet() } }
 )
