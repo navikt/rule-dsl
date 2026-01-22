@@ -1,7 +1,9 @@
 package no.nav.system.ruledsl.core.trace
 
 import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.boolean.erLik
 import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
+import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
 import no.nav.system.ruledsl.core.expression.math.times
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -602,5 +604,75 @@ class RulesetTest {
         // ALL should include more detail
         assertTrue(allExplanation.length >= functionalExplanation.length, 
             "ALL filter should produce at least as much output")
+    }
+
+    @Test
+    fun `forklar recursively explains Faktum dependencies in predicates`() {
+        // Simulates:
+        // - First compute "oppfylt" based on score >= threshold
+        // - Then use oppfylt in a predicate to decide which rule to fire
+        // - When explaining answer, we should see WHY oppfylt was true
+        
+        val ruleContext = RuleContext("ServiceLevelRuleset")
+        
+        // First, compute oppfylt in a separate traced context
+        val oppfylt: Faktum<Boolean> = with(ruleContext) {
+            traced<Faktum<Boolean>> {
+                val score = Faktum("score", 75)
+                val threshold = Faktum("threshold", 50)
+                
+                regel("vilkårsvurdering") {
+                    HVIS { score erStørreEllerLik threshold }
+                    RETURNER {
+                        Faktum("oppfylt", true)
+                    }
+                }
+                
+                regel("ikke oppfylt") {
+                    HVIS { score erMindreEnn threshold }
+                    RETURNER {
+                        Faktum("oppfylt", false)
+                    }
+                }
+            }
+        }
+        
+        // Now use oppfylt in predicates for the calculation
+        val answer: Faktum<Int> = with(ruleContext) {
+            traced<Faktum<Int>> {
+                // Use oppfylt in a domain predicate
+                regel("beregn positiv ytelse") {
+                    HVIS { oppfylt erLik true }
+                    RETURNER {
+                        Faktum("svar", 1000)
+                    }
+                }
+                
+                regel("beregn null ytelse") {
+                    HVIS { oppfylt erLik false }
+                    RETURNER {
+                        Faktum("svar", 0)
+                    }
+                }
+            }
+        }
+        
+        val explanation = answer.forklar()
+        println("=== Recursive Faktum Dependency Explanation ===")
+        println(explanation)
+        
+        // Should show HVA (result)
+        assertTrue(explanation.contains("svar = 1000"), "Should show result value")
+        
+        // Should show HVORFOR with the fired rule
+        assertTrue(explanation.contains("beregn positiv ytelse"), "Should show producing rule")
+        
+        // Should show AVHENGER AV section with the bool dependency
+        assertTrue(explanation.contains("AVHENGER AV") || explanation.contains("oppfylt"), 
+            "Should show dependency on 'oppfylt' Faktum that determined rule firing")
+        
+        // Should recursively explain how bool was computed
+        assertTrue(explanation.contains("vilkårsvurdering"), 
+            "Should show the rule that produced the bool dependency")
     }
 }

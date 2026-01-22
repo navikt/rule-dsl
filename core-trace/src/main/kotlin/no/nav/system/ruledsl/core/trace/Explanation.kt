@@ -2,6 +2,7 @@ package no.nav.system.ruledsl.core.trace
 
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.helper.checkmark
+import no.nav.system.ruledsl.core.reference.Reference
 
 /**
  * Node in an explanation tree.
@@ -10,6 +11,7 @@ import no.nav.system.ruledsl.core.helper.checkmark
 data class ExplanationNode(
     val kind: ExplanationKind,
     val text: String,
+    val references: List<Reference> = emptyList(),
     val children: MutableList<ExplanationNode> = mutableListOf()
 )
 
@@ -42,6 +44,11 @@ object DefaultTextTransformer : ExplanationTransformer<String> {
     override fun transform(root: ExplanationNode): String = buildString {
         fun walk(node: ExplanationNode, indent: String = "") {
             appendLine("$indent${node.text}")
+            if (node.references.isNotEmpty()) {
+                node.references.forEach { ref ->
+                    appendLine("$indent  REF: ${ref.id} : ${ref.url}")
+                }
+            }
             node.children.forEach { walk(it, "$indent  ") }
         }
         walk(root)
@@ -51,10 +58,30 @@ object DefaultTextTransformer : ExplanationTransformer<String> {
 /**
  * Build an explanation tree for a Faktum, starting from the result and walking backwards.
  *
+ * Recursively follows two dependency paths:
+ * 1. Predicate dependencies: Faktums used in rule predicates (e.g., `bool erLik true` depends on `bool`)
+ * 2. Formula dependencies: Faktums used in calculations (e.g., `result = a * b` depends on `a` and `b`)
+ *
  * @param filter Whether to include all rules or only fired rules (FUNCTIONAL)
  * @return ExplanationNode tree that can be transformed to any format
  */
 fun Faktum<*>.buildExplanation(filter: TraceFilter = TraceFilter.FUNCTIONAL): ExplanationNode {
+    return buildExplanationInternal(filter, mutableSetOf())
+}
+
+/**
+ * Internal implementation with visited tracking to prevent infinite loops.
+ */
+private fun Faktum<*>.buildExplanationInternal(
+    filter: TraceFilter,
+    visited: MutableSet<Faktum<*>>
+): ExplanationNode {
+    // Prevent infinite loops on circular dependencies
+    if (this in visited) {
+        return ExplanationNode(ExplanationKind.HVA, "$name = $value (see above)")
+    }
+    visited.add(this)
+    
     val root = ExplanationNode(ExplanationKind.HVA, "HVA")
     
     // Add the result value
@@ -67,11 +94,15 @@ fun Faktum<*>.buildExplanation(filter: TraceFilter = TraceFilter.FUNCTIONAL): Ex
         val hvorfor = ExplanationNode(ExplanationKind.HVORFOR, "HVORFOR")
         val path = source.pathFromRoot()
         
+        // Collect Faktums used in predicates for recursive explanation
+        val predicateDependencies = mutableSetOf<Faktum<*>>()
+        
         // Collect rules in the path that fired (skip root which is the Trace itself)
         path.drop(1).filter { it.fired || filter == TraceFilter.ALL }.forEach { node ->
             val ruleNode = ExplanationNode(
                 ExplanationKind.REGEL,
-                "${node.fired.checkmark()} ${node.name}"
+                "${node.fired.checkmark()} ${node.name}",
+                references = node.references
             )
             
             // Add predicates for this rule
@@ -81,6 +112,10 @@ fun Faktum<*>.buildExplanation(filter: TraceFilter = TraceFilter.FUNCTIONAL): Ex
                     ruleNode.children.add(
                         ExplanationNode(ExplanationKind.PREDIKAT, "$status $predicate")
                     )
+                    // Collect Faktums used in this predicate for recursive explanation
+                    predicate.faktumSet()
+                        .filter { it != this && it.sourceNode != null && it !in visited }
+                        .forEach { predicateDependencies.add(it) }
                 }
             }
             
@@ -94,6 +129,18 @@ fun Faktum<*>.buildExplanation(filter: TraceFilter = TraceFilter.FUNCTIONAL): Ex
         
         if (hvorfor.children.isNotEmpty()) {
             root.children.add(hvorfor)
+        }
+        
+        // Recursively explain Faktums that this rule depended on (from predicates)
+        predicateDependencies.forEach { dependency ->
+            val dependencyExplanation = dependency.buildExplanationInternal(filter, visited)
+            // Add as a child section showing the dependency chain
+            val dependencyNode = ExplanationNode(
+                ExplanationKind.HVORFOR,
+                "AVHENGER AV: ${dependency.name}"
+            )
+            dependencyNode.children.addAll(dependencyExplanation.children)
+            root.children.add(dependencyNode)
         }
         
         // HVORDAN - show the calculation if not a constant
@@ -110,13 +157,13 @@ fun Faktum<*>.buildExplanation(filter: TraceFilter = TraceFilter.FUNCTIONAL): Ex
                 ExplanationNode(ExplanationKind.FORMEL, "$name = ${expression.concrete()}")
             )
             
-            // Recursively explain contributing Faktum
+            // Recursively explain contributing Faktum from the calculation
             val contributingFaktum = expression.faktumSet()
             contributingFaktum.forEach { contributing ->
-                if (contributing != this && contributing.sourceNode != null) {
-                    val subExplanation = contributing.buildExplanation(filter)
+                if (contributing != this && contributing.sourceNode != null && contributing !in visited) {
+                    val subExplanation = contributing.buildExplanationInternal(filter, visited)
                     // Flatten: add HVORDAN children directly
-                    subExplanation.children.filterIsInstance<ExplanationNode>()
+                    subExplanation.children
                         .filter { it.kind == ExplanationKind.HVORDAN }
                         .forEach { hvordanChild ->
                             hvordan.children.addAll(hvordanChild.children)

@@ -24,17 +24,13 @@ class BeregnSlitertilleggRS(
     innPerson: Person,
     innGrunnbeløp: Int
 ) : AbstractDemoRuleset<Faktum<Double>>() {
-    /**
-     * Faktum
-     */
+    // Faktum
     private val faktiskTrygdetid = Faktum("faktiskTrygdetid", innPerson.trygdetid.faktiskTrygdetid)
     private val uttakstidspunkt = Faktum("uttakstidspunkt", innUttakstidspunkt)
     private val nedrePensjonsDato = Faktum("nedrePensjonsDato", innPerson.nedrePensjonsDato())
     private val fullTrygdetid = Faktum("fullTrygdetid", 40)
 
-    /**
-     * Formler
-     */
+    // Formler
     private val antallMånederEtterNedrePensjonsDato = Faktum(
         "antallMånederEtterNedrePensjonsDato",
         ChronoUnit.MONTHS.between(nedrePensjonsDato.verdi, uttakstidspunkt.verdi).toInt().coerceAtMost(MND_36)
@@ -47,22 +43,6 @@ class BeregnSlitertilleggRS(
 
     @OptIn(DslDomainPredicate::class)
     override fun create() {
-
-        /**
-         * justeringsFaktor.forklar():
-         * HVA
-         *    justeringsFaktor = 1.0
-         *
-         * HVORFOR
-         *    antallMånederEtterNedrePensjonsDato erMindreEnn 36
-         *    0 erMindreEnn 36
-         *
-         * HVORDAN
-         *    justeringsFaktor = (36 - antallMånederEtterNedrePensjonsDato) / 36
-         *    justeringsFaktor = (36 - 0) / 36
-         *    justeringsFaktor = 1.0
-         */
-
 
         /**
          * Uttaket er innen 36 måneder etter nedre pensjonsdato.
@@ -91,32 +71,7 @@ class BeregnSlitertilleggRS(
         }
 
         /**
-         * Forklaring:
-         *      HVA
-         *          slitertillegg = 954.86
-         *
-         *      REFERANSE
-         *          SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID
-         *
-         *      HVORDAN
-         *          slitertillegg = fulltSlitertillegg * justeringsFaktor * trygdetidFaktor
-         *          slitertillegg = 5 * 5 * 5
-         *
-         *          HVORDAN
-         *              fulltSlitertillegg = 0.25 * G / 12
-         *              fulltSlitertillegg = 0.25 * 110000 / 12
-         *
-         *          HVORDAN
-         *              justeringsFaktor = (36 - antallMånederEtterNedrePensjonsDato) / 36
-         *              justeringsFaktor = (36 - 0) / 36
-         *
-         *              HVORFOR
-         *                  antallMånederEtterNedrePensjonsDato erMindreEnn 36
-         *                  0 erMindreEnn 36
-         *
-         *          HVORDAN
-         *              trygdetidFaktor = faktiskTrygdetid / fullTrygdetid
-         *              trygdetidFaktor = 30 / 40
+         * Beregn Slitertillegget
          */
         regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID") {
             HVIS { true }
