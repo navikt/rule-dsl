@@ -5,6 +5,7 @@ import no.nav.system.ruledsl.core.expression.boolean.erLik
 import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
 import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
 import no.nav.system.ruledsl.core.expression.math.times
+
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -13,9 +14,12 @@ class RulesetTest {
 
     data class TestUser(val age: Int, val trygdetid: Int, val hasOption: Boolean = false)
 
+
     @Test
     fun `regel with SÅ executes side effect`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         var sideEffectExecuted = false
 
         with(ruleContext) {
@@ -34,7 +38,9 @@ class RulesetTest {
 
     @Test
     fun `regel with RETURNER returns Faktum`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         val result = with(ruleContext) {
             traced<Faktum<Int>> {
@@ -53,7 +59,9 @@ class RulesetTest {
 
     @Test
     fun `first matching rule wins`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         val result = with(ruleContext) {
             traced<Faktum<Int>> {
@@ -79,7 +87,9 @@ class RulesetTest {
 
     @Test
     fun `rule with false predicate does not fire`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         val result = with(ruleContext) {
             traced<Faktum<Int>> {
@@ -104,7 +114,9 @@ class RulesetTest {
 
     @Test
     fun `throws when no rule matches`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         assertThrows<IllegalStateException> {
             with(ruleContext) {
@@ -122,7 +134,9 @@ class RulesetTest {
 
     @Test
     fun `technical predicate short-circuits on false`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         var secondPredicateEvaluated = false
 
         with(ruleContext) {
@@ -141,7 +155,9 @@ class RulesetTest {
 
     @Test
     fun `domain predicate with erMindreEnn`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         val user = TestUser(age = 25, trygdetid = 14)
 
         val result = with(ruleContext) {
@@ -160,7 +176,9 @@ class RulesetTest {
 
     @Test
     fun `formula is traced in RETURNER`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         val sats = Faktum("sats", 1000)
         val faktor = Faktum("faktor", 2)
 
@@ -175,14 +193,16 @@ class RulesetTest {
             }
         }
 
-        val formulas = ruleContext.root.children.first().formulas
+        val formulas = ruleContext.root().children.first().formulas
         assertEquals(1, formulas.size)
         assertEquals("result", formulas.first().name)
     }
 
     @Test
     fun `SPOR explicitly traces Faktum in SÅ block`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         var tracedFaktum: Faktum<Int>? = null
 
         with(ruleContext) {
@@ -197,14 +217,16 @@ class RulesetTest {
         }
 
         assertEquals(123, tracedFaktum?.value)
-        val formulas = ruleContext.root.children.first().formulas
+        val formulas = ruleContext.root().children.first().formulas
         assertEquals(1, formulas.size)
         assertEquals("traced", formulas.first().name)
     }
 
     @Test
     fun `nested traced calls preserve hierarchy`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         context(ruleContext: RuleContext)
         fun innerCalculation(): Faktum<Int> = traced<Faktum<Int>> {
@@ -227,7 +249,7 @@ class RulesetTest {
             }
         }
 
-        val outerRule = ruleContext.root.children.first()
+        val outerRule = ruleContext.root().children.first()
         assertEquals("outer rule", outerRule.name)
 
         val innerRule = outerRule.children.first()
@@ -236,7 +258,9 @@ class RulesetTest {
 
     @Test
     fun `throws when both SÅ and RETURNER used in same rule`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         assertThrows<IllegalStateException> {
             with(ruleContext) {
@@ -258,7 +282,9 @@ class RulesetTest {
 
     @Test
     fun `resources can be registered and accessed in SÅ block`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         ruleContext.putResource(TestRateResource::class, TestRateResource(1000))
 
         var accessedRate = 0
@@ -279,7 +305,9 @@ class RulesetTest {
 
     @Test
     fun `resources can be accessed in RETURNER block`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         ruleContext.putResource(TestRateResource::class, TestRateResource(500))
 
         val result = with(ruleContext) {
@@ -299,7 +327,9 @@ class RulesetTest {
 
     @Test
     fun `extension functions on ResourceAccessor work in SÅ block`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         ruleContext.putResource(TestRateResource::class, TestRateResource(750))
 
         // Extension function on ResourceAccessor
@@ -323,7 +353,9 @@ class RulesetTest {
 
     @Test
     fun `regel with pattern creates rule per element`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         val items = listOf("A", "B", "C")
         val processedItems = mutableListOf<String>()
 
@@ -348,7 +380,9 @@ class RulesetTest {
 
     @Test
     fun `regel with pattern and RETURNER stops at first match`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         val numbers = listOf(5, 10, 15, 20)
 
         val result = with(ruleContext) {
@@ -368,8 +402,12 @@ class RulesetTest {
 
     @Test
     fun `regel with pattern accumulates values`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
+
         data class Period(val months: Int)
+
         val periods = listOf(Period(12), Period(24), Period(6))
         var totalMonths = 0
 
@@ -389,7 +427,9 @@ class RulesetTest {
 
     @Test
     fun `RuleExpression can be used for introspection in subsequent rules`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         val result = with(ruleContext) {
             traced<Faktum<String>> {
@@ -415,7 +455,9 @@ class RulesetTest {
 
     @Test
     fun `RuleExpression shows not fired when rule condition fails`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         val result = with(ruleContext) {
             traced<Faktum<String>> {
@@ -445,7 +487,9 @@ class RulesetTest {
 
     @Test
     fun `pattern rules can be introspected with minstEnHarTruffet`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         val items = listOf(1, 2, 3, 10, 20)
 
         val result = with(ruleContext) {
@@ -476,7 +520,9 @@ class RulesetTest {
 
     @Test
     fun `pattern rules can be introspected with ingenHarTruffet`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         val items = listOf(1, 2, 3, 5)  // None over 10
 
         val result = with(ruleContext) {
@@ -507,7 +553,9 @@ class RulesetTest {
 
     @Test
     fun `forklar produces inverse explanation from result Faktum`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
         val user = TestUser(age = 25, trygdetid = 30)
 
         val result = with(ruleContext) {
@@ -543,7 +591,9 @@ class RulesetTest {
 
     @Test
     fun `forklar with nested rules shows full decision path`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         val result = with(ruleContext) {
             traced<Faktum<String>> {
@@ -572,7 +622,9 @@ class RulesetTest {
 
     @Test
     fun `forklar with TraceFilter ALL shows non-fired rules too`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         val result = with(ruleContext) {
             traced<Faktum<String>> {
@@ -602,8 +654,10 @@ class RulesetTest {
 
         // FUNCTIONAL should not show the non-fired rule in HVORFOR
         // ALL should include more detail
-        assertTrue(allExplanation.length >= functionalExplanation.length, 
-            "ALL filter should produce at least as much output")
+        assertTrue(
+            allExplanation.length >= functionalExplanation.length,
+            "ALL filter should produce at least as much output"
+        )
     }
 
     @Test
@@ -612,22 +666,24 @@ class RulesetTest {
         // - First compute "oppfylt" based on score >= threshold
         // - Then use oppfylt in a predicate to decide which rule to fire
         // - When explaining answer, we should see WHY oppfylt was true
-        
-        val ruleContext = RuleContext("ServiceLevelRuleset")
-        
+
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
+
         // First, compute oppfylt in a separate traced context
         val oppfylt: Faktum<Boolean> = with(ruleContext) {
             traced<Faktum<Boolean>> {
                 val score = Faktum("score", 75)
                 val threshold = Faktum("threshold", 50)
-                
+
                 regel("vilkårsvurdering") {
                     HVIS { score erStørreEllerLik threshold }
                     RETURNER {
                         Faktum("oppfylt", true)
                     }
                 }
-                
+
                 regel("ikke oppfylt") {
                     HVIS { score erMindreEnn threshold }
                     RETURNER {
@@ -636,7 +692,7 @@ class RulesetTest {
                 }
             }
         }
-        
+
         // Now use oppfylt in predicates for the calculation
         val answer: Faktum<Int> = with(ruleContext) {
             traced<Faktum<Int>> {
@@ -647,7 +703,7 @@ class RulesetTest {
                         Faktum("svar", 1000)
                     }
                 }
-                
+
                 regel("beregn null ytelse") {
                     HVIS { oppfylt erLik false }
                     RETURNER {
@@ -656,23 +712,27 @@ class RulesetTest {
                 }
             }
         }
-        
+
         val explanation = answer.forklar()
         println("=== Recursive Faktum Dependency Explanation ===")
         println(explanation)
-        
+
         // Should show HVA (result)
         assertTrue(explanation.contains("svar = 1000"), "Should show result value")
-        
+
         // Should show HVORFOR with the fired rule
         assertTrue(explanation.contains("beregn positiv ytelse"), "Should show producing rule")
-        
+
         // Should show AVHENGER AV section with the bool dependency
-        assertTrue(explanation.contains("AVHENGER AV") || explanation.contains("oppfylt"), 
-            "Should show dependency on 'oppfylt' Faktum that determined rule firing")
-        
+        assertTrue(
+            explanation.contains("AVHENGER AV") || explanation.contains("oppfylt"),
+            "Should show dependency on 'oppfylt' Faktum that determined rule firing"
+        )
+
         // Should recursively explain how bool was computed
-        assertTrue(explanation.contains("vilkårsvurdering"), 
-            "Should show the rule that produced the bool dependency")
+        assertTrue(
+            explanation.contains("vilkårsvurdering"),
+            "Should show the rule that produced the bool dependency"
+        )
     }
 }

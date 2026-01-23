@@ -6,7 +6,9 @@ import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
 import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
 import no.nav.system.ruledsl.core.expression.math.div
 import no.nav.system.ruledsl.core.expression.math.times
+import no.nav.system.ruledsl.core.trace.DefaultTracer
 import no.nav.system.ruledsl.core.trace.RuleContext
+import no.nav.system.ruledsl.core.trace.Tracer
 import no.nav.system.ruledsl.core.trace.traced
 
 /**
@@ -20,16 +22,18 @@ data class User(val name: String, val age: Int, val trygdetid: Int, val limitOpt
 
 fun main() {
     val bob = User("Bob", 25, 14, null)
-    
+
     println("=== Pension Calculation Demo ===")
     println("User: ${bob.name}, age: ${bob.age}, trygdetid: ${bob.trygdetid}")
     println()
-    
-    val ruleContext = RuleContext("PensionCalculation")
+
+    val ruleContext = RuleContext(
+        mutableMapOf(Tracer::class to DefaultTracer("PensionDemo"))
+    )
     val result = with(ruleContext) {
         calculatePension(bob)
     }
-    
+
     println("Result: ${result.name} = ${result.value}")
     println()
     println(ruleContext.debugTree())
@@ -54,7 +58,7 @@ fun calculatePension(user: User): Faktum<Double> = traced<Faktum<Double>> {
     regel("set age limit from options") {
         HVIS { user.limitOptions != null }
         OG { user.limitOptions!! >= 0 }
-        OG { user.limitOptions!! erStørreEllerLik  0 }
+        OG { user.limitOptions!! erStørreEllerLik 0 }
         SÅ {
             ageLimit = 67 + user.limitOptions!!
         }

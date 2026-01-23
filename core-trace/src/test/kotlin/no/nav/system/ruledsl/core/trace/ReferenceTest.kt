@@ -8,7 +8,9 @@ class ReferenceTest {
 
     @Test
     fun `references are attached to rule trace and shown in explanation`() {
-        val ruleContext = RuleContext("test")
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("test"))
+        )
 
         val result = with(ruleContext) {
             traced<Faktum<Int>> {
@@ -22,7 +24,7 @@ class ReferenceTest {
         }
 
         // References are recorded in trace
-        val ruleTrace = ruleContext.root.children.first()
+        val ruleTrace = ruleContext.root().children.first()
         assertEquals(2, ruleTrace.references.size)
         assertEquals("FTL-20-18", ruleTrace.references[0].id)
         assertEquals("RS-456", ruleTrace.references[1].id)

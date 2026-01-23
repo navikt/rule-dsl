@@ -14,9 +14,11 @@ import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
 import no.nav.system.ruledsl.core.expression.math.div
 import no.nav.system.ruledsl.core.expression.math.minus
 import no.nav.system.ruledsl.core.expression.math.times
-import no.nav.system.ruledsl.core.trace.RuleResult
+import no.nav.system.ruledsl.core.trace.RuleExpression
 import no.nav.system.ruledsl.core.trace.RuleContext
 import no.nav.system.ruledsl.core.trace.traced
+import no.nav.system.ruledsl.core.trace.DefaultTracer
+import no.nav.system.ruledsl.core.trace.Tracer
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -28,8 +30,12 @@ import java.time.temporal.ChronoUnit
 class SliterordningService(private val request: SliterordningRequest) {
     
     fun run(): Pair<SliterordningResponse, RuleContext> {
-        val ruleContext = RuleContext("SliterordningService")
-        ruleContext.putResource(GrunnbeløpSatsResource::class, GrunnbeløpSatsResource())
+        val ruleContext = RuleContext(
+            mutableMapOf(
+                Tracer::class to DefaultTracer("SliterordningService"),
+                GrunnbeløpSatsResource::class to GrunnbeløpSatsResource()
+            )
+        )
         
         val response = with(ruleContext) {
             behandleSliterordning(request.uttakstidspunkt, request.virkningstidspunkt, request.person)
@@ -78,11 +84,11 @@ fun behandleSliterordning(
  * Vilkårsprøving for slitertillegg.
  * For testing purposes, this simple implementation always grants approval.
  * 
- * Returns a RuleResult that can be used directly in HVIS predicates of subsequent rules.
+ * Returns a RuleExpression that can be used directly in HVIS predicates of subsequent rules.
  */
 context(ruleContext: RuleContext)
-fun vilkårsprøvSlitertillegg(): RuleResult {
-    var result: RuleResult? = null
+fun vilkårsprøvSlitertillegg(): RuleExpression {
+    var result: RuleExpression? = null
     traced<Unit> {
         result = regel("Vilkårsprøving slitertillegg") {
             HVIS { true }

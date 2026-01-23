@@ -1,150 +1,66 @@
 package no.nav.system.ruledsl.core.trace
 
-import no.nav.system.ruledsl.core.expression.Expression
-import no.nav.system.ruledsl.core.expression.Faktum
-import no.nav.system.ruledsl.core.helper.checkmark
-import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
-import no.nav.system.ruledsl.core.resource.ResourceMap
-
-/**
- * Tree-based execution trace - captures rule evaluations with composition hierarchy.
- * Preserves function nesting structure for complete AST.
- */
-class RuleTrace(
-    val name: String,
-    var fired: Boolean = false,
-    val predicates: MutableList<Expression<Boolean>> = mutableListOf(),
-    val formulas: MutableList<Faktum<*>> = mutableListOf(),
-    val references: MutableList<Reference> = mutableListOf(),
-    var parent: RuleTrace? = null,
-    val children: MutableList<RuleTrace> = mutableListOf()
-) {
-    /**
-     * Walk up the tree to collect the path from root to this node.
-     * Returns list from root (first) to this node (last).
-     */
-    fun pathFromRoot(): List<RuleTrace> {
-        val path = mutableListOf<RuleTrace>()
-        var current: RuleTrace? = this
-        while (current != null) {
-            path.add(0, current)
-            current = current.parent
-        }
-        return path
-    }
-
-    /**
-     * Find the rule that produced a given Faktum by searching this node's formulas.
-     */
-    fun findProducingRule(faktum: Faktum<*>): RuleTrace? {
-        if (formulas.contains(faktum)) return this
-        for (child in children) {
-            val found = child.findProducingRule(faktum)
-            if (found != null) return found
-        }
-        return null
-    }
-}
+import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
 /**
  * Execution context for rule evaluation.
  *
- * Combines tracing (WHY/HOW) with resource management (plugin capabilities).
- * Resources registered here are accessible via ResourceAccessor interface
- * on Rule and Regelsett.
+ * Combines resource management with optional tracing (WHY/HOW).
+ * Tracing is itself a resource - stored in the internal resources map.
+ * 
+ * Extension functions on RuleContext provide domain-specific helpers
+ * accessible within Rule and Ruleset blocks.
  *
- * @param name Root trace name (typically the service name)
- * @param resources ResourceMap for plugin resources (database connections, rate lookups, etc.)
+ * @param resources Pre-populated map of resources. Must contain exactly one Tracer (defaults to NoOpTracer).
  */
 class RuleContext(
-    name: String,
-    private val resources: ResourceMap = ResourceMap()
-) : ResourceAccessor by resources {
-    val root = RuleTrace(name, fired = true)
-    private val stack = mutableListOf(root)
+    private val resources: MutableMap<KClass<*>, Any> = mutableMapOf(),
+) : ResourceAccessor {
 
-    /**
-     * Current context in the execution tree.
-     */
-    private val currentContext: RuleTrace
-        get() = stack.last()
-
-    /**
-     * Creates a RuleTrace with given name and attaches it to the current context.
-     * Predicates and fired status are set during evaluation via callbacks.
-     * Returns the created RuleTrace for stack tracking.
-     */
-    fun createRuleTrace(name: String, references: List<Reference> = emptyList()): RuleTrace {
-        val trace = RuleTrace(
-            name = name,
-            references = references.toMutableList(),
-            parent = currentContext,
-        )
-        currentContext.children.add(trace)
-        return trace
+    init {
+        ensureTracer()
     }
 
-    /**
-     * Record a Faktum (formula) to the current context.
-     * Called by SPOR and RETURNER to trace calculations.
-     * Skips if already traced (prevents duplicates in nested calls).
-     * Sets the sourceNode on the Faktum for inverse explanation traversal.
-     */
-    fun recordFaktum(faktum: Faktum<*>) {
-        if (!faktum.traced) {
-            faktum.traced = true
-            faktum.sourceNode = currentContext
-            currentContext.formulas.add(faktum)
+    private fun ensureTracer() {
+        val tracers = resources.values.filterIsInstance<Tracer>()
+        require(tracers.size <= 1) {
+            "RuleContext must contain at most one Tracer implementation, found ${tracers.size}"
+        }
+        if (tracers.isEmpty()) {
+            resources[Tracer::class] = NoOpTracer()
         }
     }
 
-    /**
-     * Push an execution context onto the stack.
-     * Called before executing a rule's action block.
-     */
-    fun pushContext(execution: RuleTrace) {
-        stack.add(execution)
+    override fun <T : Any> getResource(key: KClass<T>): T {
+        val resource = resources[key]
+            ?: throw IllegalStateException("No resource found for $key")
+        return key.cast(resource)
     }
 
-    /**
-     * Pop the current execution context from the stack.
-     * Called after executing a rule's action block.
-     */
-    fun popContext() {
-        require(stack.size > 1) { "Cannot pop root context from stack" }
-        stack.removeLast()
-    }
-
-    /**
-     * Detailed explanation: show all rules with their conditions and formulas (recursive tree).
-     */
-    fun debugTree(): String = buildString {
-        appendLine("TRACE: ${root.name}")
-        fun walk(nodes: List<RuleTrace>, indent: String = "  ") {
-            nodes.forEach { node ->
-                val ruleStatus = node.fired.checkmark()
-                appendLine("${indent}regel: $ruleStatus ${node.name}")
-
-                node.predicates.forEach { predicate ->
-                    val predicateStatus = predicate.value.checkmark()
-                    appendLine("$indent  $predicateStatus $predicate")
-                }
-                node.formulas.forEach { faktum ->
-                    appendLine("$indent  → ${faktum.name} = ${faktum.value}")
-                    if (!faktum.isConstant) {
-                        appendLine("$indent    ${faktum.expression.notation()}")
-                    }
-                }
-                node.references.forEach { ref ->
-                    appendLine("$indent  📖 ${ref.id}: ${ref.url}")
-                }
-
-                if (node.children.isNotEmpty()) {
-                    walk(node.children, "$indent  ")
-                }
+    override fun <T : Any> putResource(key: KClass<T>, resource: T) {
+        resources[key] = resource
+        if (resource is Tracer) {
+            val tracerCount = resources.values.count { it is Tracer }
+            require(tracerCount == 1) {
+                "RuleContext must contain at most one Tracer implementation, found $tracerCount"
             }
         }
-        walk(root.children)
     }
+
+    /**
+     * Get the tracer from resources.
+     */
+    val tracer: Tracer get() = getResource(Tracer::class)
+
+    /**
+     * Convenience method to get the trace root.
+     */
+    fun root(): RuleTrace = tracer.root()
+
+    /**
+     * Convenience method to get the debug tree output.
+     */
+    fun debugTree(): String = tracer.debugTree()
 }

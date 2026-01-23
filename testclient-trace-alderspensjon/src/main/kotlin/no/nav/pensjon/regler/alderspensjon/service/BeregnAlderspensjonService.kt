@@ -9,7 +9,9 @@ import no.nav.pensjon.regler.alderspensjon.ruleset.beregnFaktiskTrygdetid
 import no.nav.pensjon.regler.alderspensjon.ruleset.beregnGrunnpensjon
 import no.nav.pensjon.regler.alderspensjon.ruleset.personenErFlyktning
 import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.trace.DefaultTracer
 import no.nav.system.ruledsl.core.trace.RuleContext
+import no.nav.system.ruledsl.core.trace.Tracer
 
 /**
  * Service for calculating alderspensjon.
@@ -22,14 +24,16 @@ import no.nav.system.ruledsl.core.trace.RuleContext
  * Resources must be registered on Trace before calling the calculation functions.
  */
 fun beregnAlderspensjon(request: Request): Pair<Response.Alderspensjon, RuleContext> {
-    val ruleContext = RuleContext("BeregnAlderspensjon")
-    
-    // Register resources
-    ruleContext.putResource(GrunnbeløpSatsResource::class, GrunnbeløpSatsResource())
-    
+    val ruleContext = RuleContext(
+        mutableMapOf(
+            Tracer::class to DefaultTracer("BeregnAlderspensjon"),
+            GrunnbeløpSatsResource::class to GrunnbeløpSatsResource()
+        )
+    )
+
     val response = with(ruleContext) {
         val virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt)
-        
+
         // Check flyktning status
         val anvendtFlyktning = personenErFlyktning(
             request.person,
@@ -38,7 +42,7 @@ fun beregnAlderspensjon(request: Request): Pair<Response.Alderspensjon, RuleCont
             virkningstidspunkt,
             Faktum("Søknadstidspunkt fom 2021", true)
         )
-        
+
         // Calculate trygdetid
         val trygdetid = beregnFaktiskTrygdetid(
             request.person.fødselsdato,
@@ -46,10 +50,10 @@ fun beregnAlderspensjon(request: Request): Pair<Response.Alderspensjon, RuleCont
             request.person.boperioder,
             anvendtFlyktning
         )
-        
+
         // Determine grunnpensjon sats based on sivilstand
         val grunnpensjonSats = if (request.person.erGift) 0.90 else 1.00
-        
+
         // Calculate grunnpensjon
         val grunnbeløp = grunnbeløpByDate(request.virkningstidspunkt)
         val grunnpensjon = beregnGrunnpensjon(
@@ -57,12 +61,12 @@ fun beregnAlderspensjon(request: Request): Pair<Response.Alderspensjon, RuleCont
             trygdetid.value.år,
             grunnpensjonSats
         )
-        
+
         Response.Alderspensjon(
             anvendtTrygdetid = trygdetid.value,
             grunnpensjon = grunnpensjon.value
         )
     }
-    
-    return response to ruleContext
+
+    return Pair(response, ruleContext)
 }

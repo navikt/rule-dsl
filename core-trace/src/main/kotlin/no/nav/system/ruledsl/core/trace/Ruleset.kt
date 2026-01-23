@@ -1,6 +1,5 @@
 package no.nav.system.ruledsl.core.trace
 
-import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import kotlin.reflect.KClass
 
@@ -43,29 +42,29 @@ class Ruleset<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor 
         rule.builder()
 
         // Create trace first, then evaluate with callback to record predicates directly
-        val trace = ruleContext.createRuleTrace(name, rule.references())
+        val trace = ruleContext.tracer.createRuleTrace(name, rule.references())
         val ruleFired = rule.evaluate { predicate -> trace.predicates.add(predicate) }
         trace.fired = ruleFired
-        
-        ruleContext.pushContext(trace)
+
+        ruleContext.tracer.pushContext(trace)
 
         if (ruleFired) {
             when {
-                rule.hasReturner() && rule.hasAction() -> 
+                rule.hasReturner() && rule.hasAction() ->
                     throw IllegalStateException("regel '$name' cannot have both SÅ and RETURNER")
-                
+
                 rule.hasReturner() -> {
                     result = rule.executeReturner()
                     hasResult = true
                 }
-                
+
                 rule.hasAction() -> {
                     rule.executeAction()
                 }
             }
         }
 
-        ruleContext.popContext()
+        ruleContext.tracer.popContext()
         return RuleExpression(name, ruleFired)
     }
 
