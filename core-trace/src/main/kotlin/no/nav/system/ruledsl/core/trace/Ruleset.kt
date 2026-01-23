@@ -42,9 +42,12 @@ class Ruleset<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor 
         val rule = Rule<T>(ruleContext)
         rule.builder()
 
-        val ruleFired = rule.evaluate()
-        val execution = ruleContext.recordRule(name, ruleFired, rule.expressions(), rule.references())
-        ruleContext.pushContext(execution)
+        // Create trace first, then evaluate with callback to record predicates directly
+        val trace = ruleContext.createRuleTrace(name, rule.references())
+        val ruleFired = rule.evaluate { predicate -> trace.predicates.add(predicate) }
+        trace.fired = ruleFired
+        
+        ruleContext.pushContext(trace)
 
         if (ruleFired) {
             when {

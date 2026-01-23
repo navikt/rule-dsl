@@ -65,7 +65,6 @@ private sealed interface Predicate : Expression<Boolean> {
 @OptIn(ExperimentalTypeInference::class)
 class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
     private val predicates = mutableListOf<Expression<Boolean>>()
-    private val evaluatedPredicates = mutableListOf<Expression<Boolean>>()
     private val references = mutableListOf<Reference>()
     private var action: (Rule<T>.() -> Unit)? = null
     
@@ -162,6 +161,7 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
 
     /**
      * Evaluates all predicates and returns true if all pass.
+     * Records each evaluated domain predicate directly via the callback.
      *
      * Short-circuit behavior:
      * - Technical predicates (null-checks, validations): terminate immediately on false
@@ -169,17 +169,16 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
      * - Functional predicates (domain logic): continue evaluating even if false,
      *   so all functional predicate results are available for explanation/tracing.
      *
-     * Only DomainPredicates that are actually evaluated are recorded to evaluatedPredicates.
-     * GuardPredicates are excluded since they are technical checks without trace value.
+     * @param onDomainPredicate Callback invoked for each domain predicate as it's evaluated
+     * @return true if all predicates pass
      */
-    fun evaluate(): Boolean {
-        evaluatedPredicates.clear()
+    fun evaluate(onDomainPredicate: (Expression<Boolean>) -> Unit): Boolean {
         var result = true
         for (predicate in predicates) {
             result = result && predicate.value
 
             when (predicate) {
-                is Predicate.Domain -> evaluatedPredicates.add(predicate)
+                is Predicate.Domain -> onDomainPredicate(predicate)
                 is Predicate.Guard -> if (!result) return false
             }
         }
@@ -210,9 +209,4 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
         return resultValue
     }
 
-    /**
-     * Returns domain predicates that were actually evaluated.
-     * Predicates after a short-circuiting guard are excluded.
-     */
-    fun expressions(): List<Expression<Boolean>> = evaluatedPredicates
 }

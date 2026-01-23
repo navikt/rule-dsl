@@ -14,10 +14,10 @@ import kotlin.reflect.KClass
  */
 class RuleTrace(
     val name: String,
-    val fired: Boolean,
-    val predicates: List<Expression<Boolean>> = emptyList(),
+    var fired: Boolean = false,
+    val predicates: MutableList<Expression<Boolean>> = mutableListOf(),
     val formulas: MutableList<Faktum<*>> = mutableListOf(),
-    val references: List<Reference> = emptyList(),
+    val references: MutableList<Reference> = mutableListOf(),
     var parent: RuleTrace? = null,
     val children: MutableList<RuleTrace> = mutableListOf()
 ) {
@@ -58,7 +58,6 @@ class RuleTrace(
 class RuleContext(name: String) : ResourceAccessor {
     val root = RuleTrace(name, fired = true)
     private val stack = mutableListOf(root)
-    private val resources = ResourceMap()
 
     /**
      * Current context in the execution tree.
@@ -66,23 +65,24 @@ class RuleContext(name: String) : ResourceAccessor {
     private val currentContext: RuleTrace
         get() = stack.last()
 
+    /**
+     * TODO
+     */
+    private val resources = ResourceMap()
     // ResourceAccessor delegation
     override fun <T : Any> getResource(key: KClass<T>): T = resources.getResource(key)
     override fun <T : Any> putResource(key: KClass<T>, resource: T) = resources.putResource(key, resource)
 
     /**
-     * Creates the RuleTrace and attach it to the current context.
+     * Creates a RuleTrace with given name and attaches it to the current context.
+     * Predicates and fired status are set during evaluation via callbacks.
      * Returns the created RuleTrace for stack tracking.
      */
-    fun recordRule(name: String, fired: Boolean, predicates: List<Expression<Boolean>>, references: List<Reference> = emptyList()): RuleTrace {
+    fun createRuleTrace(name: String, references: List<Reference> = emptyList()): RuleTrace {
         val trace = RuleTrace(
             name = name,
-            fired = fired,
-            predicates = predicates,
-            formulas = mutableListOf(),
-            references = references,
+            references = references.toMutableList(),
             parent = currentContext,
-            children = mutableListOf()
         )
         currentContext.children.add(trace)
         return trace
