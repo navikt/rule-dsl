@@ -6,7 +6,6 @@ import no.nav.system.ruledsl.core.helper.checkmark
 import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import no.nav.system.ruledsl.core.resource.ResourceMap
-import kotlin.reflect.KClass
 
 /**
  * Tree-based execution trace - captures rule evaluations with composition hierarchy.
@@ -54,8 +53,14 @@ class RuleTrace(
  * Combines tracing (WHY/HOW) with resource management (plugin capabilities).
  * Resources registered here are accessible via ResourceAccessor interface
  * on Rule and Regelsett.
+ *
+ * @param name Root trace name (typically the service name)
+ * @param resources ResourceMap for plugin resources (database connections, rate lookups, etc.)
  */
-class RuleContext(name: String) : ResourceAccessor {
+class RuleContext(
+    name: String,
+    private val resources: ResourceMap = ResourceMap()
+) : ResourceAccessor by resources {
     val root = RuleTrace(name, fired = true)
     private val stack = mutableListOf(root)
 
@@ -64,14 +69,6 @@ class RuleContext(name: String) : ResourceAccessor {
      */
     private val currentContext: RuleTrace
         get() = stack.last()
-
-    /**
-     * TODO
-     */
-    private val resources = ResourceMap()
-    // ResourceAccessor delegation
-    override fun <T : Any> getResource(key: KClass<T>): T = resources.getResource(key)
-    override fun <T : Any> putResource(key: KClass<T>, resource: T) = resources.putResource(key, resource)
 
     /**
      * Creates a RuleTrace with given name and attaches it to the current context.
