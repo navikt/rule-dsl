@@ -6,21 +6,34 @@ import kotlin.reflect.KClass
  * Interface for accessing resources during rule evaluation.
  *
  * Resources are plugin components that provide external capabilities
- * (database connections, rate lookups, configuration, etc.) to rules.
+ * (database connections, rate lookups, tracing, logging etc.) to rules.
  *
- * Users can create extension functions on RuleContext to provide
- * domain-specific helpers that are directly callable within SÅ/RETURNER blocks:
+ * This interface exists to provide a common type for extension functions that need
+ * to work in both [Rule] and [Ruleset] contexts. Both classes implement this interface,
+ * so user-defined extension functions on [ResourceAccessor] are directly callable
+ * within HVIS, SÅ, RETURNER blocks and at the Ruleset level.
  *
+ * Example - defining an extension function:
  * ```kotlin
- * fun RuleContext.grunnbeløp(dato: YearMonth): Int =
+ * fun ResourceAccessor.grunnbeløp(dato: YearMonth): Int =
  *     getResource(GrunnbeløpSatsResource::class).lookup(dato)
+ * ```
  *
- * // Usage in rule:
+ * Example - using in a rule (works because Rule implements ResourceAccessor):
+ * ```kotlin
  * regel("calculate") {
  *     HVIS { ... }
  *     SÅ {
- *         val g = grunnbeløp(virkningstidspunkt)
+ *         val g = grunnbeløp(virkningstidspunkt)  // Extension function available here
  *     }
+ * }
+ * ```
+ *
+ * Example - using in a ruleset (works because Ruleset implements ResourceAccessor):
+ * ```kotlin
+ * regelsett {
+ *     val g = grunnbeløp(virkningstidspunkt)  // Extension function available here too
+ *     regel("...") { ... }
  * }
  * ```
  */

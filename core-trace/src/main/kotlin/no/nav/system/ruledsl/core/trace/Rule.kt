@@ -143,7 +143,7 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
      * @return The same Faktum (for chaining)
      */
     fun <R : Any> SPOR(faktum: Faktum<R>): Faktum<R> {
-        ruleContext.tracer.recordFaktum(faktum)
+        tracer().recordFaktum(faktum)
         return faktum
     }
 
@@ -204,7 +204,7 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
         resultBlock?.let { block ->
             resultValue = block()
             // Record to trace if result is a Faktum
-            (resultValue as? Faktum<*>)?.let { ruleContext.tracer.recordFaktum(it) }
+            (resultValue as? Faktum<*>)?.let { tracer().recordFaktum(it) }
         }
         return resultValue
     }

@@ -9,6 +9,7 @@ import no.nav.system.ruledsl.core.expression.math.times
 import no.nav.system.ruledsl.core.trace.DefaultTracer
 import no.nav.system.ruledsl.core.trace.RuleContext
 import no.nav.system.ruledsl.core.trace.Tracer
+import no.nav.system.ruledsl.core.trace.debugTree
 import no.nav.system.ruledsl.core.trace.traced
 
 /**

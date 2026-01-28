@@ -50,18 +50,20 @@ class RuleContext(
         }
     }
 
-    /**
-     * Get the tracer from resources.
-     */
-    val tracer: Tracer get() = getResource(Tracer::class)
-
-    /**
-     * Convenience method to get the trace root.
-     */
-    fun root(): RuleTrace = tracer.root()
-
-    /**
-     * Convenience method to get the debug tree output.
-     */
-    fun debugTree(): String = tracer.debugTree()
 }
+
+/**
+ * Extension function to get the tracer from resources.
+ * This demonstrates the same pattern users should follow for their own resources.
+ */
+fun ResourceAccessor.tracer(): Tracer = getResource(Tracer::class)
+
+/**
+ * Extension function to get the trace root.
+ */
+fun ResourceAccessor.root(): RuleTrace = tracer().root()
+
+/**
+ * Extension function to get the debug tree output.
+ */
+fun ResourceAccessor.debugTree(): String = tracer().debugTree()
