@@ -25,11 +25,12 @@ class RuleContext(
 
     private fun ensureTracer() {
         val tracers = resources.values.filterIsInstance<Tracer>()
-        require(tracers.size <= 1) {
-            "RuleContext must contain at most one Tracer implementation, found ${tracers.size}"
-        }
-        if (tracers.isEmpty()) {
-            resources[Tracer::class] = NoOpTracer()
+        when (tracers.size) {
+            0 -> resources[Tracer::class] = NoOpTracer()
+            1 -> Unit
+            else -> error(
+                "RuleContext must contain at most one Tracer implementation, found ${tracers.size}"
+            )
         }
     }
 
