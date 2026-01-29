@@ -47,7 +47,7 @@ class BeregnSlitertilleggRS(
         /**
          * Uttaket er innen 36 måneder etter nedre pensjonsdato.
          */
-        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG") {
+        regel("TidligUttak") {
             HVIS { antallMånederEtterNedrePensjonsDato erMindreEnn MND_36 }
             SÅ {
                 justeringsFaktor = sporing(
@@ -60,7 +60,7 @@ class BeregnSlitertilleggRS(
         /**
          * Uttaket er fom 36 måneder etter nedre pensjonsdato.
          */
-        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-SENT") {
+        regel("SentUttak") {
             HVIS { antallMånederEtterNedrePensjonsDato erStørreEllerLik MND_36 }
             SÅ {
                 justeringsFaktor = sporing(
@@ -73,7 +73,7 @@ class BeregnSlitertilleggRS(
         /**
          * Beregn Slitertillegget
          */
-        regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID") {
+        regel("Beregn") {
             HVIS { true }
             SÅ {
                 RETURNER(
