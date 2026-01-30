@@ -136,15 +136,13 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
     }
 
     /**
-     * SPOR - explicitly records a Faktum to the trace within a SÅ block.
-     * Returns the Faktum for further use.
-     *
-     * @param faktum The Faktum to trace
-     * @return The same Faktum (for chaining)
+     * SPOR - explicitly records an expression to the trace.
+     * Works for both Faktum (calculations) and other expressions.
+     * Returns the expression for further use.
      */
-    fun <R : Any> SPOR(faktum: Faktum<R>): Faktum<R> {
-        tracer().recordFaktum(faktum)
-        return faktum
+    fun <E : Expression<*>> SPOR(expression: E): E {
+        tracer().recordExpression(expression)
+        return expression
     }
 
     /**
@@ -196,15 +194,15 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
 
     /**
      * Executes the RETURNER block. Must be called after trace context is pushed.
-     * If the result is a Faktum, it is automatically recorded to the trace.
-     * 
+     * If the result is an Expression, it is automatically recorded to the trace.
+     *
      * @return The result of type T
      */
     fun executeReturner(): T? {
         resultBlock?.let { block ->
             resultValue = block()
-            // Record to trace if result is a Faktum
-            (resultValue as? Faktum<*>)?.let { tracer().recordFaktum(it) }
+            // Record to trace if result is an Expression
+            (resultValue as? Expression<*>)?.let { tracer().recordExpression(it) }
         }
         return resultValue
     }

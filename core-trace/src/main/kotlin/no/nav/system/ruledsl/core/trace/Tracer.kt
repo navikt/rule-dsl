@@ -2,18 +2,20 @@ package no.nav.system.ruledsl.core.trace
 
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.debugTreeInternal
 import no.nav.system.ruledsl.core.helper.checkmark
 import no.nav.system.ruledsl.core.reference.Reference
 
 /**
- * Tree node for execution trace - captures rule evaluations with composition hierarchy.
- * Preserves function nesting structure for complete AST.
+ * Tree node for execution trace - captures evaluated expressions.
+ *
+ * Both decisions (Expression<Boolean>) and calculations (Expression<Number>)
+ * are unified as Expression<*> in the trace graph.
  */
 class RuleTrace(
     val name: String,
     var fired: Boolean = false,
-    val predicates: MutableList<Expression<Boolean>> = mutableListOf(),
-    val formulas: MutableList<Faktum<*>> = mutableListOf(),
+    val expressions: MutableList<Expression<*>> = mutableListOf(),
     val references: MutableList<Reference> = mutableListOf(),
     var parent: RuleTrace? = null,
     val children: MutableList<RuleTrace> = mutableListOf()
@@ -33,10 +35,10 @@ class RuleTrace(
     }
 
     /**
-     * Find the rule that produced a given Faktum by searching this node's formulas.
+     * Find the rule that produced a given Faktum by searching expressions.
      */
     fun findProducingRule(faktum: Faktum<*>): RuleTrace? {
-        if (formulas.contains(faktum)) return this
+        if (expressions.contains(faktum)) return this
         for (child in children) {
             val found = child.findProducingRule(faktum)
             if (found != null) return found
@@ -47,32 +49,29 @@ class RuleTrace(
 
 /**
  * Interface for tracing rule evaluation.
- * 
- * Implementations can capture execution details (WHY/HOW) for explanation.
+ *
+ * Implementations capture execution details for explanation.
  * Stored as a resource in RuleContext, making tracing optional and configurable.
  */
 interface Tracer {
     /**
      * Creates a RuleTrace with given name and attaches it to the current context.
-     * Returns the created RuleTrace for stack tracking.
      */
     fun createRuleTrace(name: String, references: List<Reference> = emptyList()): RuleTrace
 
     /**
-     * Record a Faktum (formula) to the current context.
-     * Called by SPOR and RETURNER to trace calculations.
+     * Record an expression to the current context.
+     * Works for both decisions (Boolean) and calculations (Number, etc).
      */
-    fun recordFaktum(faktum: Faktum<*>)
+    fun recordExpression(expression: Expression<*>)
 
     /**
      * Push an execution context onto the stack.
-     * Called before executing a rule's action block.
      */
     fun pushContext(trace: RuleTrace)
 
     /**
      * Pop the current execution context from the stack.
-     * Called after executing a rule's action block.
      */
     fun popContext()
 
@@ -82,20 +81,18 @@ interface Tracer {
     fun root(): RuleTrace
 
     /**
-     * Detailed explanation: show all rules with their conditions and formulas (recursive tree).
+     * Debug output showing the trace tree.
      */
     fun debugTree(): String
 }
 
 /**
  * Default implementation of Tracer.
- * Maintains a tree structure of RuleTrace nodes representing the execution flow.
- *
- * @param name Root trace name (typically the service name)
  */
 class DefaultTracer(name: String) : Tracer {
     private val root = RuleTrace(name, fired = true)
     private val stack = mutableListOf(root)
+    private val recorded = mutableSetOf<Expression<*>>()
 
     private val currentContext: RuleTrace
         get() = stack.last()
@@ -110,11 +107,15 @@ class DefaultTracer(name: String) : Tracer {
         return trace
     }
 
-    override fun recordFaktum(faktum: Faktum<*>) {
-        if (!faktum.traced) {
-            faktum.traced = true
-            faktum.sourceNode = currentContext
-            currentContext.formulas.add(faktum)
+    override fun recordExpression(expression: Expression<*>) {
+        if (expression !in recorded) {
+            recorded.add(expression)
+            currentContext.expressions.add(expression)
+
+            // If it's a Faktum, set the sourceNode for backward traversal
+            if (expression is Faktum<*>) {
+                expression.sourceNode = currentContext
+            }
         }
     }
 
@@ -131,21 +132,16 @@ class DefaultTracer(name: String) : Tracer {
 
     override fun debugTree(): String = buildString {
         appendLine("TRACE: ${root.name}")
+
         fun walk(nodes: List<RuleTrace>, indent: String = "  ") {
             nodes.forEach { node ->
                 val ruleStatus = node.fired.checkmark()
                 appendLine("${indent}regel: $ruleStatus ${node.name}")
 
-                node.predicates.forEach { predicate ->
-                    val predicateStatus = predicate.value.checkmark()
-                    appendLine("$indent  $predicateStatus $predicate")
+                node.expressions.forEach { expr ->
+                    appendLine("$indent  ${formatExpression(expr)}")
                 }
-                node.formulas.forEach { faktum ->
-                    appendLine("$indent  → ${faktum.name} = ${faktum.value}")
-                    if (!faktum.isConstant) {
-                        appendLine("$indent    ${faktum.expression.notation()}")
-                    }
-                }
+
                 node.references.forEach { ref ->
                     appendLine("$indent  📖 ${ref.id}: ${ref.url}")
                 }
@@ -157,35 +153,36 @@ class DefaultTracer(name: String) : Tracer {
         }
         walk(root.children)
     }
+
+    /**
+     * Format an expression for debug output.
+     * Handles both Boolean (decisions) and other types (calculations) uniformly.
+     */
+    private fun formatExpression(expr: Expression<*>): String {
+        return when (expr) {
+            is Faktum<*> -> buildString {
+                // Use Faktum's debugTree for full hierarchy
+                expr.debugTreeInternal(this, "", mutableSetOf())
+            }.trimEnd()
+            else -> {
+                // For Boolean expressions (comparisons, etc.)
+                val status = (expr.value as? Boolean)?.checkmark() ?: ""
+                "$status $expr"
+            }
+        }
+    }
 }
 
 /**
  * No-op tracer for when tracing is not needed.
- * All operations are ignored, minimal overhead.
  */
 class NoOpTracer : Tracer {
     private val emptyRoot = RuleTrace("no-trace", fired = true)
-    private var currentTrace: RuleTrace = emptyRoot
 
-    override fun createRuleTrace(name: String, references: List<Reference>): RuleTrace {
-        // Return a lightweight trace that doesn't build the tree
-        currentTrace = RuleTrace(name)
-        return currentTrace
-    }
-
-    override fun recordFaktum(faktum: Faktum<*>) {
-        // No-op
-    }
-
-    override fun pushContext(trace: RuleTrace) {
-        // No-op
-    }
-
-    override fun popContext() {
-        // No-op
-    }
-
+    override fun createRuleTrace(name: String, references: List<Reference>) = RuleTrace(name)
+    override fun recordExpression(expression: Expression<*>) {}
+    override fun pushContext(trace: RuleTrace) {}
+    override fun popContext() {}
     override fun root(): RuleTrace = emptyRoot
-
     override fun debugTree(): String = "Tracing disabled"
 }

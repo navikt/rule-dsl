@@ -4,6 +4,8 @@ import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.expression.boolean.erLik
 import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
 import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
+import no.nav.system.ruledsl.core.expression.math.div
+import no.nav.system.ruledsl.core.expression.math.plus
 import no.nav.system.ruledsl.core.expression.math.times
 
 import org.junit.jupiter.api.Assertions.*
@@ -193,9 +195,9 @@ class RulesetTest {
             }
         }
 
-        val formulas = ruleContext.root().children.first().formulas
-        assertEquals(1, formulas.size)
-        assertEquals("result", formulas.first().name)
+        val expressions = ruleContext.root().children.first().expressions.filterIsInstance<Faktum<*>>()
+        assertEquals(1, expressions.size)
+        assertEquals("result", expressions.first().name)
     }
 
     @Test
@@ -217,9 +219,9 @@ class RulesetTest {
         }
 
         assertEquals(123, tracedFaktum?.value)
-        val formulas = ruleContext.root().children.first().formulas
-        assertEquals(1, formulas.size)
-        assertEquals("traced", formulas.first().name)
+        val expressions = ruleContext.root().children.first().expressions.filterIsInstance<Faktum<*>>()
+        assertEquals(1, expressions.size)
+        assertEquals("traced", expressions.first().name)
     }
 
     @Test
@@ -734,5 +736,53 @@ class RulesetTest {
             explanation.contains("vilkårsvurdering"),
             "Should show the rule that produced the bool dependency"
         )
+    }
+
+    @Test
+    fun `debugTree shows integrated rules predicates and formula hierarchy`() {
+        val ruleContext = RuleContext(
+            mutableMapOf(Tracer::class to DefaultTracer("pension-calculation"))
+        )
+
+        val result = with(ruleContext) {
+            traced<Faktum<Double>> {
+                // Input facts
+                val grunnbeløp = Faktum("grunnbeløp", 118620)
+                val satsFaktor = Faktum("satsFaktor", 0.66)
+                val trygdetid = Faktum("trygdetid", 35)
+                val fullTrygdetid = Faktum("fullTrygdetid", 40)
+                val alder = Faktum("alder", 67)
+
+                // Intermediate calculations
+                val grunnpensjon = Faktum("grunnpensjon", grunnbeløp * satsFaktor)
+                val trygdetidFaktor = Faktum("trygdetidFaktor", trygdetid / fullTrygdetid)
+
+                regel("calculate pension") {
+                    HVIS { alder erStørreEllerLik 62 }
+                    OG { trygdetid erStørreEllerLik 3 }
+                    RETURNER {
+                        Faktum("pensjon", grunnpensjon * trygdetidFaktor)
+                    }
+                }
+            }
+        }
+
+        println("=== Integrated debugTree ===")
+        println(ruleContext.debugTree())
+
+        val tree = ruleContext.debugTree()
+
+        // Should show the rule
+        assertTrue(tree.contains("calculate pension"))
+
+        // Should show predicates
+        assertTrue(tree.contains("alder"))
+        assertTrue(tree.contains("trygdetid"))
+
+        // Should show formula hierarchy
+        assertTrue(tree.contains("pensjon ="))
+        assertTrue(tree.contains("notation: grunnpensjon * trygdetidFaktor"))
+        assertTrue(tree.contains("grunnpensjon ="))
+        assertTrue(tree.contains("notation: grunnbeløp * satsFaktor"))
     }
 }

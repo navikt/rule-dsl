@@ -105,17 +105,25 @@ private fun Faktum<*>.buildExplanationInternal(
                 references = node.references
             )
             
-            // Add predicates for this rule
-            node.predicates.forEach { predicate ->
-                val status = predicate.value.checkmark()
-                if (predicate.value || filter == TraceFilter.ALL) {
-                    ruleNode.children.add(
-                        ExplanationNode(ExplanationKind.PREDIKAT, "$status $predicate")
-                    )
-                    // Collect Faktums used in this predicate for recursive explanation
-                    predicate.faktumSet()
-                        .filter { it != this && it.sourceNode != null && it !in visited }
-                        .forEach { predicateDependencies.add(it) }
+            // Add expressions for this rule (both predicates and formulas)
+            node.expressions.forEach { expr ->
+                when (val exprValue = expr.value) {
+                    is Boolean -> {
+                        // Boolean expression (predicate)
+                        val status = exprValue.checkmark()
+                        if (exprValue || filter == TraceFilter.ALL) {
+                            ruleNode.children.add(
+                                ExplanationNode(ExplanationKind.PREDIKAT, "$status $expr")
+                            )
+                            // Collect Faktums used in this expression for recursive explanation
+                            expr.faktumSet()
+                                .filter { it != this && it.sourceNode != null && it !in visited }
+                                .forEach { predicateDependencies.add(it) }
+                        }
+                    }
+                    else -> {
+                        // Non-boolean expression (formula) - handled in HVORDAN section
+                    }
                 }
             }
             
