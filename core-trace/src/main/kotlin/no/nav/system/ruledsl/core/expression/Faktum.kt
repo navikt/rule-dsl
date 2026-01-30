@@ -30,7 +30,6 @@ import no.nav.system.ruledsl.core.trace.RuleTrace
 data class Faktum<T : Any>(
     val name: String,
     val expression: Expression<T>,
-    val locked: Boolean = true,
     val references: List<Reference> = emptyList()
 ) : Expression<T> {
 
@@ -44,90 +43,43 @@ data class Faktum<T : Any>(
     constructor(
         name: String,
         value: T,
-        locked: Boolean = true,
         references: List<Reference> = emptyList()
     ) : this(
         name = name,
         expression = Const(value),
-        locked = locked,
         references = references
     )
 
     /**
      * True if this Faktum holds a constant value (not a calculated expression).
-     * Useful for transformers to determine if HVORDAN section should be shown.
+     * Constants act as atomic units (show name), calculations expand.
      */
     val isConstant: Boolean = expression is Const<*>
 
     override val value: T by lazy { expression.value }
 
     /**
-     * Returns name if locked (acts as atomic unit), or delegates to expression if unlocked.
-     * Constants always use their name since there's nothing meaningful to expand.
+     * Always returns name - Faktum acts as a boundary in expressions.
+     * To see the formula, access expression.notation() directly.
      */
-    override fun notation(): String =
-        if (locked || isConstant) name else expression.notation()
+    override fun notation(): String = name
 
     /**
-     * Returns value if locked (acts as atomic unit), or delegates to expression if unlocked.
-     * Constants always use their value since there's nothing meaningful to expand.
+     * Always returns value - Faktum acts as a boundary in expressions.
+     * To see the expanded calculation, access expression.concrete() directly.
      */
-    override fun concrete(): String =
-        if (locked || isConstant) value.toString() else expression.concrete()
+    override fun concrete(): String = value.toString()
 
     /**
-     * Returns this Faktum as the atomic unit when locked.
-     * When unlocked, delegates to the inner expression (transparent).
-     *
-     * Locked behavior: Returns `setOf(this)` - Faktum defines the boundary for named facts.
-     * This stops recursion at the name, enabling layered explanations.
-     *
-     * Unlocked behavior: Returns `expression.faktumSet()` - Faktum is transparent,
-     * dependencies are the inner expression's dependencies.
-     *
-     * Constants always return self since there's nothing to delegate to
-     * (Const.faktumSet() is empty, but the constant Faktum itself is still a named fact).
+     * Constants return self as the atomic unit (boundary for fact tracking).
+     * Calculations delegate to expression (transparent, dependencies flow through).
      */
     override fun faktumSet(): Set<Faktum<*>> =
-        if (locked || isConstant) setOf(this) else expression.faktumSet()
-
-    /**
-     * Creates an unlocked copy of this Faktum.
-     * Unlocked Faktums expand their notation/concrete when used in other expressions.
-     */
-    fun unlock(): Faktum<T> = copy(locked = false)
+        if (isConstant) setOf(this) else expression.faktumSet()
 
     override fun toString(): String = "'$name' ($value)"
 }
 
-/**
- * Creates an unlocked Faktum (formula).
- *
- * Unlocked Faktums expand their notation/concrete when used in other expressions,
- * rather than showing their name. This is useful for intermediate calculations
- * that should be inlined in the final formula display.
- *
- * For constants, the name is still used (nothing meaningful to expand).
- *
- * @param name The name of this formula
- * @param expression The expression to wrap
- * @return An unlocked Faktum
- */
-fun <T : Any> formel(name: String, expression: Expression<T>): Faktum<T> =
-    Faktum(name, expression, locked = false)
-
-/**
- * Creates an unlocked Faktum (formula) from a constant value.
- *
- * Note: For constants, locked vs unlocked behaves the same since
- * there's nothing to expand - the name is always used in notation.
- *
- * @param name The name of this formula
- * @param value The constant value
- * @return An unlocked Faktum wrapping the constant
- */
-fun <T : Any> formel(name: String, value: T): Faktum<T> =
-    Faktum(name, value, locked = false)
 
 /**
  * Generates a debug tree showing the formula hierarchy.

@@ -779,10 +779,11 @@ class RulesetTest {
         assertTrue(tree.contains("alder"))
         assertTrue(tree.contains("trygdetid"))
 
-        // Should show formula hierarchy
+        // Should show formula - Faktum acts as boundary, showing names
         assertTrue(tree.contains("pensjon ="))
-        assertTrue(tree.contains("notation: grunnpensjon * trygdetidFaktor"))
-        assertTrue(tree.contains("grunnpensjon ="))
-        assertTrue(tree.contains("notation: grunnbeløp * satsFaktor"))
+        // Faktum shows named references, not expanded
+        assertTrue(tree.contains("grunnpensjon * trygdetidFaktor"))
+        // Constants show as leaf nodes
+        assertTrue(tree.contains("grunnbeløp = 118620"))
     }
 }
