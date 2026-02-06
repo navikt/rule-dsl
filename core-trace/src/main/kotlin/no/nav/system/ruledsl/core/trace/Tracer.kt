@@ -2,7 +2,6 @@ package no.nav.system.ruledsl.core.trace
 
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
-import no.nav.system.ruledsl.core.expression.debugTreeInternal
 import no.nav.system.ruledsl.core.helper.checkmark
 import no.nav.system.ruledsl.core.reference.Reference
 
@@ -112,7 +111,7 @@ class DefaultTracer(name: String) : Tracer {
             recorded.add(expression)
             currentContext.expressions.add(expression)
 
-            // If it's a Faktum, set the sourceNode for backward traversal
+            // Set sourceNode for backward traversal in explanations
             if (expression is Faktum<*>) {
                 expression.sourceNode = currentContext
             }
@@ -160,10 +159,7 @@ class DefaultTracer(name: String) : Tracer {
      */
     private fun formatExpression(expr: Expression<*>): String {
         return when (expr) {
-            is Faktum<*> -> buildString {
-                // Use Faktum's debugTree for full hierarchy
-                expr.debugTreeInternal(this, "", mutableSetOf())
-            }.trimEnd()
+            is Faktum<*> -> formatFaktum(expr, "", mutableSetOf())
             else -> {
                 // For Boolean expressions (comparisons, etc.)
                 val status = (expr.value as? Boolean)?.checkmark() ?: ""
@@ -171,6 +167,35 @@ class DefaultTracer(name: String) : Tracer {
             }
         }
     }
+
+    /**
+     * Format a Faktum with its formula hierarchy.
+     */
+    private fun formatFaktum(
+        faktum: Faktum<*>,
+        indent: String,
+        visited: MutableSet<Faktum<*>>
+    ): String = buildString {
+        // Prevent infinite recursion on circular references
+        if (faktum in visited) {
+            append("$indent${faktum.name} = ${faktum.value} (see above)")
+            return@buildString
+        }
+        visited.add(faktum)
+
+        appendLine("${faktum.name} = ${faktum.value}")
+        appendLine("$indent  notation: ${faktum.expression.notation()}")
+        appendLine("$indent  concrete: ${faktum.expression.concrete()}")
+
+        // Show sub-Faktum (non-trivial ones)
+        val subFaktum = faktum.faktumSet().filter { it.faktumSet().isNotEmpty() }
+        if (subFaktum.isNotEmpty()) {
+            appendLine("$indent  subformulas:")
+            subFaktum.forEach { sub ->
+                append("$indent    ${formatFaktum(sub, "$indent    ", visited)}")
+            }
+        }
+    }.trimEnd()
 }
 
 /**

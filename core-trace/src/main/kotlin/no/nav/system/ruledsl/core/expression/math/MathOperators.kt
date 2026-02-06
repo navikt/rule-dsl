@@ -1,7 +1,7 @@
 package no.nav.system.ruledsl.core.expression.math
 
 import no.nav.system.ruledsl.core.expression.Expression
-import no.nav.system.ruledsl.core.expression.Const
+import no.nav.system.ruledsl.core.expression.Verdi
 import no.nav.system.ruledsl.core.expression.Operator
 
 /**
@@ -20,14 +20,14 @@ private inline fun <T : Number> numberUttrykk(
     expression: Expression<Number>,
     operator: MathOperator,
     crossinline eval: () -> T
-): Expression<T> = binaryMathOp(Const(num), expression, operator, eval)
+): Expression<T> = binaryMathOp(Verdi(num), expression, operator, eval)
 
 private inline fun <T : Number> uttrykkNumber(
     expression: Expression<Number>,
     num: Number,
     operator: MathOperator,
     crossinline eval: () -> T
-): Expression<T> = binaryMathOp(expression, Const(num), operator, eval)
+): Expression<T> = binaryMathOp(expression, Verdi(num), operator, eval)
 
 enum class MathOperator(override val text: String) : Operator {
     ADD(" + "),

@@ -18,5 +18,10 @@ data class UnaryOperation<T : Number>(
 
     override fun concrete(): String = "$name(${expression.concrete()})"
 
-    override fun faktumSet(): Set<Faktum<*>> = expression.faktumSet()
+    /**
+     * Returns Faktum directly used in this operation.
+     * Stops at Faktum boundaries - if operand is Faktum, include it; otherwise recurse.
+     */
+    override fun faktumSet(): Set<Faktum<*>> =
+        if (expression is Faktum<*>) setOf(expression) else expression.faktumSet()
 }

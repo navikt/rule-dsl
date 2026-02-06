@@ -1,6 +1,7 @@
 package no.nav.system.ruledsl.core.trace.demo
 
 import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.Verdi
 import no.nav.system.ruledsl.core.expression.boolean.erLik
 import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
 import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
@@ -86,19 +87,19 @@ fun calculatePension(user: User): Faktum<Double> = traced<Faktum<Double>> {
  */
 context(ruleContext: RuleContext)
 fun earlyRetirementCalculation(user: User): Faktum<Double> = traced<Faktum<Double>> {
-    val sats = Faktum("høy sats", 7000)
+    val sats = Verdi("høy sats", 7000)
 
     regel("reduced by trygdetid") {
         HVIS { user.trygdetid erMindreEnn 40 }
         RETURNER {
-            Faktum("tidlig pensjon", sats * user.trygdetid / 40)
+            faktum("tidlig pensjon", sats * user.trygdetid / 40)
         }
     }
 
     regel("full trygdetid") {
         HVIS { user.trygdetid erLik 40 }
         RETURNER {
-            Faktum("tidlig pensjon", sats.value.toDouble())
+            faktum("tidlig pensjon", Verdi(sats.value.toDouble()))
         }
     }
 }
@@ -109,19 +110,19 @@ fun earlyRetirementCalculation(user: User): Faktum<Double> = traced<Faktum<Doubl
  */
 context(ruleContext: RuleContext)
 fun normalRetirementCalculation(user: User): Faktum<Double> = traced<Faktum<Double>> {
-    val sats = Faktum("lav sats", 4000)
+    val sats = Verdi("lav sats", 4000)
 
     regel("reduced by trygdetid") {
         HVIS { user.trygdetid erMindreEnn 40 }
         RETURNER {
-            Faktum("normal pensjon", sats * user.trygdetid / 40)
+            faktum("normal pensjon", sats * user.trygdetid / 40)
         }
     }
 
     regel("full trygdetid") {
         HVIS { user.trygdetid erLik 40 }
         RETURNER {
-            Faktum("normal pensjon", sats.value.toDouble())
+            faktum("normal pensjon", Verdi(sats.value.toDouble()))
         }
     }
 }

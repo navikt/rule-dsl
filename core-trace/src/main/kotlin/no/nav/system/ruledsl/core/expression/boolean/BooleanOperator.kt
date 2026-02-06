@@ -2,7 +2,7 @@ package no.nav.system.ruledsl.core.expression.boolean
 
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.expression.Expression
-import no.nav.system.ruledsl.core.expression.Const
+import no.nav.system.ruledsl.core.expression.Verdi
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -21,21 +21,21 @@ private inline fun <T : Any> faktumValue(
     value: T,
     operator: PairOperator,
     crossinline eval: () -> Boolean
-): Expression<Boolean> = comparison(faktum, Const(value), operator, eval)
+): Expression<Boolean> = comparison(faktum, Verdi(value), operator, eval)
 
 private inline fun <T : Any> valueFaktum(
     value: T,
     faktum: Faktum<T>,
     operator: PairOperator,
     crossinline eval: () -> Boolean
-): Expression<Boolean> = comparison(Const(value), faktum, operator, eval)
+): Expression<Boolean> = comparison(Verdi(value), faktum, operator, eval)
 
 private inline fun <T : Any> valueValue(
     left: T,
     right: T,
     operator: PairOperator,
     crossinline eval: () -> Boolean
-): Expression<Boolean> = comparison(Const(left), Const(right), operator, eval)
+): Expression<Boolean> = comparison(Verdi(left), Verdi(right), operator, eval)
 
 @Suppress("UNUSED_FUNCTION")
 
@@ -103,7 +103,7 @@ infix fun Faktum<YearMonth>.erFør(other: Faktum<LocalDate>): Expression<Boolean
 
 @JvmName("faktum_yearmonth_erFør_localdate")
 infix fun Faktum<YearMonth>.erFør(other: LocalDate): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.FØR) { value.atDay(1) < other }
+    Comparison(this, Verdi(other), PairOperator.FØR) { value.atDay(1) < other }
 
 @JvmName("faktum_yearmonth_erEtterEllerLik_faktum_localdate")
 infix fun Faktum<YearMonth>.erEtterEllerLik(other: Faktum<LocalDate>): Expression<Boolean> =
@@ -126,7 +126,7 @@ infix fun Faktum<LocalDate>.erFør(other: Faktum<YearMonth>): Expression<Boolean
 
 @JvmName("faktum_localdate_erFør_yearmonth")
 infix fun Faktum<LocalDate>.erFør(other: YearMonth): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.FØR) { value < other.atDay(1) }
+    Comparison(this, Verdi(other), PairOperator.FØR) { value < other.atDay(1) }
 
 @JvmName("faktum_localdate_erEtterEllerLik_faktum_yearmonth")
 infix fun Faktum<LocalDate>.erEtterEllerLik(other: Faktum<YearMonth>): Expression<Boolean> =
@@ -168,15 +168,15 @@ infix fun Faktum<out Number>.erMindreEllerLik(other: Faktum<out Number>): Expres
 
 @JvmName("faktum_number_erMindreEllerLik_number")
 infix fun Faktum<out Number>.erMindreEllerLik(other: Number): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.MINDRE_ELLER_LIK) { value.toDouble() <= other.toDouble() }
+    Comparison(this, Verdi(other), PairOperator.MINDRE_ELLER_LIK) { value.toDouble() <= other.toDouble() }
 
 @JvmName("number_erMindreEllerLik_faktum_number")
 infix fun Number.erMindreEllerLik(other: Faktum<out Number>): Expression<Boolean> =
-    Comparison(Const(this), other, PairOperator.MINDRE_ELLER_LIK) { toDouble() <= other.value.toDouble() }
+    Comparison(Verdi(this), other, PairOperator.MINDRE_ELLER_LIK) { toDouble() <= other.value.toDouble() }
 
 @JvmName("number_erMindreEllerLik_number")
 infix fun Number.erMindreEllerLik(other: Number): Expression<Boolean> =
-    Comparison(Const(this), Const(other), PairOperator.MINDRE_ELLER_LIK) { toDouble() <= other.toDouble() }
+    Comparison(Verdi(this), Verdi(other), PairOperator.MINDRE_ELLER_LIK) { toDouble() <= other.toDouble() }
 
 @JvmName("faktum_number_erMindreEnn_faktum_number")
 infix fun Faktum<out Number>.erMindreEnn(other: Faktum<out Number>): Expression<Boolean> =
@@ -184,15 +184,15 @@ infix fun Faktum<out Number>.erMindreEnn(other: Faktum<out Number>): Expression<
 
 @JvmName("faktum_number_erMindreEnn_number")
 infix fun Faktum<out Number>.erMindreEnn(other: Number): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.MINDRE) { value.toDouble() < other.toDouble() }
+    Comparison(this, Verdi(other), PairOperator.MINDRE) { value.toDouble() < other.toDouble() }
 
 @JvmName("number_erMindreEnn_faktum_number")
 infix fun Number.erMindreEnn(other: Faktum<out Number>): Expression<Boolean> =
-    Comparison(Const(this), other, PairOperator.MINDRE) { toDouble() < other.value.toDouble() }
+    Comparison(Verdi(this), other, PairOperator.MINDRE) { toDouble() < other.value.toDouble() }
 
 @JvmName("number_erMindreEnn_number")
 infix fun Number.erMindreEnn(other: Number): Expression<Boolean> =
-    Comparison(Const(this), Const(other), PairOperator.MINDRE) { toDouble() < other.toDouble() }
+    Comparison(Verdi(this), Verdi(other), PairOperator.MINDRE) { toDouble() < other.toDouble() }
 
 @JvmName("faktum_number_erStørreEllerLik_faktum_number")
 infix fun Faktum<out Number>.erStørreEllerLik(other: Faktum<out Number>): Expression<Boolean> =
@@ -204,43 +204,43 @@ infix fun Faktum<out Number>.erStørreEnn(other: Faktum<out Number>): Expression
 
 @JvmName("faktum_number_erStørreEllerLik_number")
 infix fun Faktum<out Number>.erStørreEllerLik(other: Number): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.STØRRE_ELLER_LIK) { value.toDouble() >= other.toDouble() }
+    Comparison(this, Verdi(other), PairOperator.STØRRE_ELLER_LIK) { value.toDouble() >= other.toDouble() }
 
 @JvmName("faktum_number_erStørreEnn_number")
 infix fun Faktum<out Number>.erStørreEnn(other: Number): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.STØRRE) { value.toDouble() > other.toDouble() }
+    Comparison(this, Verdi(other), PairOperator.STØRRE) { value.toDouble() > other.toDouble() }
 
 @JvmName("number_erStørreEllerLik_faktum_number")
 infix fun Number.erStørreEllerLik(other: Faktum<out Number>): Expression<Boolean> =
-    Comparison(Const(this), other, PairOperator.STØRRE_ELLER_LIK) { toDouble() >= other.value.toDouble() }
+    Comparison(Verdi(this), other, PairOperator.STØRRE_ELLER_LIK) { toDouble() >= other.value.toDouble() }
 
 @JvmName("number_erStørreEnn_faktum_number")
 infix fun Number.erStørreEnn(other: Faktum<out Number>): Expression<Boolean> =
-    Comparison(Const(this), other, PairOperator.STØRRE) { toDouble() > other.value.toDouble() }
+    Comparison(Verdi(this), other, PairOperator.STØRRE) { toDouble() > other.value.toDouble() }
 
 @JvmName("number_erStørreEllerLik_number")
 infix fun Number.erStørreEllerLik(other: Number): Expression<Boolean> =
-    Comparison(Const(this), Const(other), PairOperator.STØRRE_ELLER_LIK) { toDouble() >= other.toDouble() }
+    Comparison(Verdi(this), Verdi(other), PairOperator.STØRRE_ELLER_LIK) { toDouble() >= other.toDouble() }
 
 @JvmName("number_erStørreEnn_number")
 infix fun Number.erStørreEnn(other: Number): Expression<Boolean> =
-    Comparison(Const(this), Const(other), PairOperator.STØRRE) { toDouble() > other.toDouble() }
+    Comparison(Verdi(this), Verdi(other), PairOperator.STØRRE) { toDouble() > other.toDouble() }
 
 /**
  * LocalDate -> Number comparison operators
  * TODO: These appear imprecise. Consider removing or renaming to erÅrTidligereEllerLik, etc.
  */
 infix fun Faktum<out LocalDate>.erMindreEllerLik(other: Int): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.MINDRE_ELLER_LIK) { value.year <= other }
+    Comparison(this, Verdi(other), PairOperator.MINDRE_ELLER_LIK) { value.year <= other }
 
 infix fun Faktum<out LocalDate>.erMindreEnn(other: Int): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.MINDRE) { value.year < other }
+    Comparison(this, Verdi(other), PairOperator.MINDRE) { value.year < other }
 
 infix fun Faktum<out LocalDate>.erStørreEllerLik(other: Int): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.STØRRE_ELLER_LIK) { value.year >= other }
+    Comparison(this, Verdi(other), PairOperator.STØRRE_ELLER_LIK) { value.year >= other }
 
 infix fun Faktum<out LocalDate>.erStørreEnn(other: Int): Expression<Boolean> =
-    Comparison(this, Const(other), PairOperator.STØRRE) { value.year > other }
+    Comparison(this, Verdi(other), PairOperator.STØRRE) { value.year > other }
 
 /**
  * Generic equality operators (work for any type)
@@ -270,7 +270,7 @@ infix fun Number.erLik(other: Number): Expression<Boolean> =
 
 @JvmName("number_erLik_faktum_number")
 infix fun Number.erLik(other: Faktum<out Number>): Expression<Boolean> =
-    Comparison(Const(this), other, PairOperator.LIK) { this == other.value }
+    Comparison(Verdi(this), other, PairOperator.LIK) { this == other.value }
 
 @JvmName("number_erUlik_number")
 infix fun Number.erUlik(other: Number): Expression<Boolean> =
@@ -278,7 +278,7 @@ infix fun Number.erUlik(other: Number): Expression<Boolean> =
 
 @JvmName("number_erUlik_faktum_number")
 infix fun Number.erUlik(other: Faktum<out Number>): Expression<Boolean> =
-    Comparison(Const(this), other, PairOperator.ULIK) { this != other.value }
+    Comparison(Verdi(this), other, PairOperator.ULIK) { this != other.value }
 
 /**
  * List membership operators
@@ -287,14 +287,14 @@ infix fun Number.erUlik(other: Faktum<out Number>): Expression<Boolean> =
 infix fun <T : Any> Expression<T>.erBlant(others: List<T>): Expression<Boolean> = ListOperation(
     operator = ListOperator.ER_BLANDT,
     expression = this,
-    list = Const(others)
+    list = Verdi(others)
 ) { this.value in others }
 
 @JvmName("uttrykk_erBlant_list_faktum")
 infix fun <T : Any> Expression<T>.erBlant(others: List<Faktum<T>>): Expression<Boolean> = ListOperation(
     operator = ListOperator.ER_BLANDT,
     expression = this,
-    list = Const(others.map { faktum -> faktum.value })
+    list = Verdi(others.map { faktum -> faktum.value })
 ) { this.value in others.map { it.value } }
 
 @JvmName("uttrykk_erBlant_faktum_list")
@@ -308,14 +308,14 @@ infix fun <T : Any> Expression<T>.erBlant(other: Faktum<List<T>>): Expression<Bo
 infix fun <T : Any> Expression<T>.erIkkeBlant(others: List<T>): Expression<Boolean> = ListOperation(
     operator = ListOperator.ER_IKKE_BLANDT,
     expression = this,
-    list = Const(others)
+    list = Verdi(others)
 ) { this.value !in others }
 
 @JvmName("uttrykk_erIkkeBlant_list_faktum")
 infix fun <T : Any> Expression<T>.erIkkeBlant(others: List<Faktum<T>>): Expression<Boolean> = ListOperation(
     operator = ListOperator.ER_IKKE_BLANDT,
     expression = this,
-    list = Const(others.map { faktum -> faktum.value })
+    list = Verdi(others.map { faktum -> faktum.value })
 ) { this.value !in others.map { it.value } }
 
 @JvmName("uttrykk_erIkkeBlant_faktum_list")
@@ -324,3 +324,57 @@ infix fun <T : Any> Expression<T>.erIkkeBlant(other: Faktum<List<T>>): Expressio
     expression = this,
     list = other
 ) { this.value !in other.value }
+
+/**
+ * Verdi number comparison operators
+ */
+@JvmName("verdi_number_erMindreEllerLik_verdi_number")
+infix fun Verdi<out Number>.erMindreEllerLik(other: Verdi<out Number>): Expression<Boolean> =
+    Comparison(this, other, PairOperator.MINDRE_ELLER_LIK) { value.toDouble() <= other.value.toDouble() }
+
+@JvmName("verdi_number_erMindreEllerLik_number")
+infix fun Verdi<out Number>.erMindreEllerLik(other: Number): Expression<Boolean> =
+    Comparison(this, Verdi(other), PairOperator.MINDRE_ELLER_LIK) { value.toDouble() <= other.toDouble() }
+
+@JvmName("verdi_number_erMindreEnn_verdi_number")
+infix fun Verdi<out Number>.erMindreEnn(other: Verdi<out Number>): Expression<Boolean> =
+    Comparison(this, other, PairOperator.MINDRE) { value.toDouble() < other.value.toDouble() }
+
+@JvmName("verdi_number_erMindreEnn_number")
+infix fun Verdi<out Number>.erMindreEnn(other: Number): Expression<Boolean> =
+    Comparison(this, Verdi(other), PairOperator.MINDRE) { value.toDouble() < other.toDouble() }
+
+@JvmName("verdi_number_erStørreEllerLik_verdi_number")
+infix fun Verdi<out Number>.erStørreEllerLik(other: Verdi<out Number>): Expression<Boolean> =
+    Comparison(this, other, PairOperator.STØRRE_ELLER_LIK) { value.toDouble() >= other.value.toDouble() }
+
+@JvmName("verdi_number_erStørreEllerLik_number")
+infix fun Verdi<out Number>.erStørreEllerLik(other: Number): Expression<Boolean> =
+    Comparison(this, Verdi(other), PairOperator.STØRRE_ELLER_LIK) { value.toDouble() >= other.toDouble() }
+
+@JvmName("verdi_number_erStørreEnn_verdi_number")
+infix fun Verdi<out Number>.erStørreEnn(other: Verdi<out Number>): Expression<Boolean> =
+    Comparison(this, other, PairOperator.STØRRE) { value.toDouble() > other.value.toDouble() }
+
+@JvmName("verdi_number_erStørreEnn_number")
+infix fun Verdi<out Number>.erStørreEnn(other: Number): Expression<Boolean> =
+    Comparison(this, Verdi(other), PairOperator.STØRRE) { value.toDouble() > other.toDouble() }
+
+/**
+ * Verdi generic equality operators
+ */
+@JvmName("verdi_erLik_value")
+infix fun <T : Any> Verdi<T>.erLik(other: T): Expression<Boolean> =
+    Comparison(this, Verdi(other), PairOperator.LIK) { this.value == other }
+
+@JvmName("verdi_erLik_verdi")
+infix fun <T : Any> Verdi<T>.erLik(other: Verdi<T>): Expression<Boolean> =
+    Comparison(this, other, PairOperator.LIK) { this.value == other.value }
+
+@JvmName("verdi_erUlik_value")
+infix fun <T : Any> Verdi<T>.erUlik(other: T): Expression<Boolean> =
+    Comparison(this, Verdi(other), PairOperator.ULIK) { this.value != other }
+
+@JvmName("verdi_erUlik_verdi")
+infix fun <T : Any> Verdi<T>.erUlik(other: Verdi<T>): Expression<Boolean> =
+    Comparison(this, other, PairOperator.ULIK) { this.value != other.value }

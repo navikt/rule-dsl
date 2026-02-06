@@ -15,7 +15,8 @@ interface Expression<out T : Any> : Serializable {
     fun concrete(): String
 
     /**
-     * Hvilke navngitte faktum bidrar til dette uttrykket.
+     * Returns the Faktum directly used in this expression.
+     * Stops at Faktum boundaries - does not recurse into their expressions.
      */
     fun faktumSet(): Set<Faktum<*>>
 }

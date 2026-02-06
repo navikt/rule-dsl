@@ -1,5 +1,8 @@
 package no.nav.system.ruledsl.core.trace
 
+import no.nav.system.ruledsl.core.expression.Expression
+import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
@@ -48,6 +51,27 @@ class RuleContext(
                 "RuleContext must contain at most one Tracer implementation, found $tracerCount"
             }
         }
+    }
+
+    /**
+     * Creates a Faktum and automatically records it to the trace.
+     *
+     * This is the ONLY way to create a Faktum - the constructor is internal.
+     * Every Faktum created this way is automatically traced.
+     *
+     * @param name The name of the faktum (appears in explanations)
+     * @param expression The expression to wrap
+     * @param references Optional references to legal sources or documentation
+     * @return The created and recorded Faktum
+     */
+    fun <T : Any> faktum(
+        name: String,
+        expression: Expression<T>,
+        references: List<Reference> = emptyList()
+    ): Faktum<T> {
+        val faktum = Faktum.create(name, expression, references)
+        tracer().recordExpression(faktum)
+        return faktum
     }
 
 }

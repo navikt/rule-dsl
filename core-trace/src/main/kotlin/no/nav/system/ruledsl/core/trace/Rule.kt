@@ -2,6 +2,7 @@ package no.nav.system.ruledsl.core.trace
 
 import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.Verdi
 import no.nav.system.ruledsl.core.reference.Reference
 import no.nav.system.ruledsl.core.resource.ResourceAccessor
 import kotlin.experimental.ExperimentalTypeInference
@@ -54,13 +55,12 @@ private sealed interface Predicate : Expression<Boolean> {
  * DSL keywords:
  * - HVIS / OG: Define predicates (technical or domain)
  * - SÅ: Define side-effect action
- * - RETURNER: Define value-producing action (returns Faktum)
- * - SPOR: Explicitly trace a Faktum within SÅ block
+ * - RETURNER: Define value-producing action
+ * - faktum(): Create and trace a Faktum (the only way to create Faktum)
  *
  * Cannot use both SÅ and RETURNER in the same rule.
  *
  * Type parameter T represents the result type. Can be any type.
- * If T is a Faktum, it will be automatically recorded to the trace.
  */
 @OptIn(ExperimentalTypeInference::class)
 class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
@@ -128,22 +128,36 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
 
     /**
      * SÅ - side-effect action (no return value).
-     * Use SPOR inside to trace Faktum calculations.
+     * Use faktum() inside to create and trace calculations.
      * Extension functions on ResourceAccessor are available in this block.
      */
     fun SÅ(block: Rule<T>.() -> Unit) {
         action = block
     }
 
+    fun <R : Any> faktum(
+        name: String,
+        value: R,
+        references: List<Reference> = emptyList()
+    ) = faktum(name, Verdi(value), references)
+
     /**
-     * SPOR - explicitly records an expression to the trace.
-     * Works for both Faktum (calculations) and other expressions.
-     * Returns the expression for further use.
+     * Creates a Faktum and automatically records it to the trace.
+     * Delegates to RuleContext.faktum().
+     *
+     * This is the ONLY way to create a Faktum - the constructor is internal.
+     * Every Faktum created this way is automatically traced.
+     *
+     * @param name The name of the faktum (appears in explanations)
+     * @param expression The expression to wrap
+     * @param references Optional references to legal sources or documentation
+     * @return The created and recorded Faktum
      */
-    fun <E : Expression<*>> SPOR(expression: E): E {
-        tracer().recordExpression(expression)
-        return expression
-    }
+    fun <R : Any> faktum(
+        name: String,
+        expression: Expression<R>,
+        references: List<Reference> = emptyList()
+    ): Faktum<R> = ruleContext.faktum(name, expression, references)
 
     /**
      * RETURNER - value-producing action. Returns T.
@@ -194,15 +208,15 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
 
     /**
      * Executes the RETURNER block. Must be called after trace context is pushed.
-     * If the result is an Expression, it is automatically recorded to the trace.
+     *
+     * Note: Faktum returned from this block should be created via faktum(),
+     * which automatically records to trace. No special handling needed here.
      *
      * @return The result of type T
      */
     fun executeReturner(): T? {
         resultBlock?.let { block ->
             resultValue = block()
-            // Record to trace if result is an Expression
-            (resultValue as? Expression<*>)?.let { tracer().recordExpression(it) }
         }
         return resultValue
     }

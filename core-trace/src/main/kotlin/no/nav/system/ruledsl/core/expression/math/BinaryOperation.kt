@@ -38,8 +38,16 @@ internal data class BinaryOperation<T : Number>(
         return "$v${operator.text}$h"
     }
 
-    override fun faktumSet(): Set<Faktum<*>> =
-        left.faktumSet() + right.faktumSet()
+    /**
+     * Returns Faktum directly used in this operation.
+     * Stops at Faktum boundaries - if operand is Faktum, include it; otherwise recurse.
+     */
+    override fun faktumSet(): Set<Faktum<*>> {
+        val result = mutableSetOf<Faktum<*>>()
+        if (left is Faktum<*>) result.add(left) else result.addAll(left.faktumSet())
+        if (right is Faktum<*>) result.add(right) else result.addAll(right.faktumSet())
+        return result
+    }
 
     /**
      * Legger til parenteser rundt uttrykk ved behov basert på operator precedence.

@@ -1,6 +1,7 @@
 package no.nav.system.ruledsl.core.trace
 
 import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.Verdi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -16,7 +17,7 @@ class ReferenceTest {
             traced<Faktum<Int>> {
                 regel("pension calculation") {
                     HVIS { true }
-                    RETURNER { Faktum("pension", 1000) }
+                    RETURNER { faktum("pension", Verdi(1000)) }
                     REF("FTL-20-18", "https://lovdata.no/ftl-20-18")
                     REF("RS-456", "https://rundskriv.nav.no/456")
                 }
