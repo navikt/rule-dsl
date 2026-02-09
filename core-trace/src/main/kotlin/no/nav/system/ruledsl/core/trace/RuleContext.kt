@@ -23,18 +23,7 @@ class RuleContext(
 ) : ResourceAccessor {
 
     init {
-        ensureTracer()
-    }
-
-    private fun ensureTracer() {
-        val tracers = resources.values.filterIsInstance<Tracer>()
-        when (tracers.size) {
-            0 -> resources[Tracer::class] = NoOpTracer()
-            1 -> Unit
-            else -> error(
-                "RuleContext must contain at most one Tracer implementation, found ${tracers.size}"
-            )
-        }
+        resources.putIfAbsent(Tracer::class, NoOpTracer())
     }
 
     override fun <T : Any> getResource(key: KClass<T>): T {

@@ -1,7 +1,5 @@
 package no.nav.system.ruledsl.core.reference
 
-import java.io.Serializable
-
 /**
  * Reference to external documentation, legal sources, or other resources.
  * Can be attached to both AbstractRuleComponent (rules, rulesets) and Faktum (formulas).
@@ -12,4 +10,4 @@ import java.io.Serializable
 data class Reference(
     val id: String,
     val url: String
-) : Serializable
+)

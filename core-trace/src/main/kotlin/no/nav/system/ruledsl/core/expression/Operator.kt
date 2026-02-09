@@ -5,8 +5,5 @@ package no.nav.system.ruledsl.core.expression
  */
 interface Operator {
     val text: String
-}
-
-interface NegatableOperator : Operator {
-    fun negated(): String
+    fun negated(): String = text
 }

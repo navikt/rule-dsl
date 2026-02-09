@@ -1,7 +1,5 @@
 package no.nav.system.ruledsl.core.expression
 
-import java.io.Serializable
-
 /**
  * Numeric expression tree.
  *
@@ -9,7 +7,7 @@ import java.io.Serializable
  * Users do not work with Uttrykk directly - they use Faktum operators.
  *
  */
-interface Expression<out T : Any> : Serializable {
+interface Expression<out T : Any> {
     val value: T
     fun notation(): String
     fun concrete(): String

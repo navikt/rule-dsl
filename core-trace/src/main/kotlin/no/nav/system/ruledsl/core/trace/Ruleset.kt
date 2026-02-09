@@ -17,8 +17,6 @@ import kotlin.reflect.KClass
 class Ruleset<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
     var result: T? = null
         private set
-    var hasResult = false
-        private set
 
     // ResourceAccessor delegation to Trace
     override fun <R : Any> getResource(key: KClass<R>): R = ruleContext.getResource(key)
@@ -36,7 +34,7 @@ class Ruleset<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor 
      * @return RuleExpression indicating whether the rule fired (usable as Expression<Boolean>)
      */
     fun regel(name: String, builder: Rule<T>.() -> Unit): RuleExpression {
-        if (hasResult) return RuleExpression(name, false)
+        if (result != null) return RuleExpression(name, false)
 
         val rule = Rule<T>(ruleContext)
         rule.builder()
@@ -56,7 +54,6 @@ class Ruleset<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor 
 
                 rule.hasReturner() -> {
                     result = rule.executeReturner()
-                    hasResult = true
                 }
 
                 rule.hasAction() -> {
@@ -108,7 +105,7 @@ inline fun <reified T : Any> traced(block: Ruleset<T>.() -> Unit): T {
     scope.block()
 
     return when {
-        scope.hasResult -> scope.result!!
+        scope.result != null -> scope.result!!
         T::class == Unit::class -> Unit as T
         else -> throw IllegalStateException("No rule matched")
     }

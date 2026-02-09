@@ -1,8 +1,8 @@
 package no.nav.system.ruledsl.core.expression.boolean
 
-import no.nav.system.ruledsl.core.expression.NegatableOperator
+import no.nav.system.ruledsl.core.expression.Operator
 
-enum class PairOperator(override val text: String) : NegatableOperator {
+enum class PairOperator(override val text: String) : Operator {
     FØR_ELLER_LIK(" er før eller lik "),
     FØR(" er før "),
     ETTER_ELLER_LIK(" er etter eller lik "),

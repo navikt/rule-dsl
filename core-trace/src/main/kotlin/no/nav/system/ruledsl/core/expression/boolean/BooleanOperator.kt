@@ -37,8 +37,6 @@ private inline fun <T : Any> valueValue(
     crossinline eval: () -> Boolean
 ): Expression<Boolean> = comparison(Verdi(left), Verdi(right), operator, eval)
 
-@Suppress("UNUSED_FUNCTION")
-
 /**
  * LocalDate comparison operators
  */

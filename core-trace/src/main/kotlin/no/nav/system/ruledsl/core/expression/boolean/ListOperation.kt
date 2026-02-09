@@ -3,7 +3,7 @@ package no.nav.system.ruledsl.core.expression.boolean
 import no.nav.system.ruledsl.core.helper.jaNei
 import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.expression.Expression
-import no.nav.system.ruledsl.core.expression.NegatableOperator
+import no.nav.system.ruledsl.core.expression.Operator
 
 /**
  * Hvordan et uttrykk, [expression] forholder seg til en mengde av uttrykk (erBlant, erIkkeBlant).
@@ -28,7 +28,7 @@ internal data class ListOperation(
     override fun faktumSet(): Set<Faktum<*>> = expression.faktumSet() + list.faktumSet()
 }
 
-enum class ListOperator(override val text: String) : NegatableOperator {
+enum class ListOperator(override val text: String) : Operator {
     ER_BLANDT(" er blandt "),
     ER_IKKE_BLANDT(" er ikke blandt "),
     ALLE(" gjelder samtlige"),

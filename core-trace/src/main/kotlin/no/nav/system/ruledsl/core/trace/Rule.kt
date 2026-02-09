@@ -68,13 +68,7 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
     private val references = mutableListOf<Reference>()
     private var action: (Rule<T>.() -> Unit)? = null
     
-    /**
-     * Block that produces the rule's result of type T.
-     * Stored for deferred execution after trace context is pushed.
-     * If result is a Faktum, it will be automatically recorded to the trace.
-     */
     private var resultBlock: (Rule<T>.() -> T)? = null
-    private var resultValue: T? = null
 
     // ResourceAccessor delegation to Trace
     override fun <R : Any> getResource(key: KClass<R>): R = ruleContext.getResource(key)
@@ -206,19 +200,6 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
 
     fun hasReturner(): Boolean = resultBlock != null
 
-    /**
-     * Executes the RETURNER block. Must be called after trace context is pushed.
-     *
-     * Note: Faktum returned from this block should be created via faktum(),
-     * which automatically records to trace. No special handling needed here.
-     *
-     * @return The result of type T
-     */
-    fun executeReturner(): T? {
-        resultBlock?.let { block ->
-            resultValue = block()
-        }
-        return resultValue
-    }
+    fun executeReturner(): T? = resultBlock?.invoke(this)
 
 }

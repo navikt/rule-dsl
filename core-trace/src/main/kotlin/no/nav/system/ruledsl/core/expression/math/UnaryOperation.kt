@@ -4,7 +4,7 @@ import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.expression.Expression
 
 /**
- * Unary funksjon for operasjoner på ett enkelt element (avrund, min, max, etc)
+ * Unary funksjon for operasjoner på ett enkelt element (floor, ceil, abs).
  */
 data class UnaryOperation<T : Number>(
     val expression: Expression<Number>,

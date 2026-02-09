@@ -127,12 +127,7 @@ private fun Faktum<*>.buildExplanationInternal(
                 }
             }
             
-            if (ruleNode.children.isNotEmpty() || filter == TraceFilter.ALL) {
-                hvorfor.children.add(ruleNode)
-            } else {
-                // Still add the rule name even if no predicates to show
-                hvorfor.children.add(ruleNode)
-            }
+            hvorfor.children.add(ruleNode)
         }
         
         if (hvorfor.children.isNotEmpty()) {

@@ -48,7 +48,7 @@ private class RuleExpressionList(
  * Uses ListOperation with MINST_EN_AV operator for consistent notation.
  */
 fun List<RuleExpression>.minstEnHarTruffet(): Expression<Boolean> = ListOperation(
-    expression = Faktum.create("truffet", Verdi(true)),
+    expression = Verdi("truffet", true),
     list = RuleExpressionList(this),
     operator = ListOperator.MINST_EN_AV,
     evaluator = { this.any { it.harTruffet() } }
@@ -59,7 +59,7 @@ fun List<RuleExpression>.minstEnHarTruffet(): Expression<Boolean> = ListOperatio
  * Uses ListOperation with INGEN operator for consistent notation.
  */
 fun List<RuleExpression>.ingenHarTruffet(): Expression<Boolean> = ListOperation(
-    expression = Faktum.create("truffet", Verdi(true)),
+    expression = Verdi("truffet", true),
     list = RuleExpressionList(this),
     operator = ListOperator.INGEN,
     evaluator = { this.none { it.harTruffet() } }
@@ -70,7 +70,7 @@ fun List<RuleExpression>.ingenHarTruffet(): Expression<Boolean> = ListOperation(
  * Uses ListOperation with ALLE operator for consistent notation.
  */
 fun List<RuleExpression>.alleHarTruffet(): Expression<Boolean> = ListOperation(
-    expression = Faktum.create("truffet", Verdi(true)),
+    expression = Verdi("truffet", true),
     list = RuleExpressionList(this),
     operator = ListOperator.ALLE,
     evaluator = { this.all { it.harTruffet() } }
