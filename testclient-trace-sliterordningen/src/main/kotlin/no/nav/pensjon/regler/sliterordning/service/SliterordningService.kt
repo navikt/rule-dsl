@@ -8,7 +8,9 @@ import no.nav.pensjon.regler.sliterordning.functions.avrund2desimal
 import no.nav.pensjon.regler.sliterordning.to.SliterordningRequest
 import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse
 import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse.*
+import no.nav.system.ruledsl.core.expression.Expression
 import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.Verdi
 import no.nav.system.ruledsl.core.expression.boolean.erMindreEnn
 import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
 import no.nav.system.ruledsl.core.expression.math.div
@@ -24,11 +26,11 @@ import java.time.temporal.ChronoUnit
 
 /**
  * Sliterordning service using core-trace module.
- * 
+ *
  * This demonstrates the new functional approach with context parameters.
  */
 class SliterordningService(private val request: SliterordningRequest) {
-    
+
     fun run(): Pair<SliterordningResponse, RuleContext> {
         val ruleContext = RuleContext(
             mutableMapOf(
@@ -36,18 +38,18 @@ class SliterordningService(private val request: SliterordningRequest) {
                 GrunnbeløpSatsResource::class to GrunnbeløpSatsResource()
             )
         )
-        
+
         val response = with(ruleContext) {
             behandleSliterordning(request.uttakstidspunkt, request.virkningstidspunkt, request.person)
         }
-        
+
         return Pair(response, ruleContext)
     }
 }
 
 /**
  * Main flow: determines if sliterordning should be granted or denied.
- * 
+ *
  * The branching logic is expressed as rules, making the decision visible in the trace.
  */
 context(ruleContext: RuleContext)
@@ -56,10 +58,10 @@ fun behandleSliterordning(
     virkningstidspunkt: YearMonth,
     person: Person
 ): SliterordningResponse = traced<SliterordningResponse> {
-    
+
     // First, evaluate vilkårsprøving - this produces a RuleResult we can reference
     val vilkårOppfylt = vilkårsprøvSlitertillegg()
-    
+
     // Branch: Innvilget when vilkår is met
     regel("Innvilget slitertillegg") {
         HVIS { vilkårOppfylt }
@@ -70,7 +72,7 @@ fun behandleSliterordning(
             )
         }
     }
-    
+
     // Branch: Avslag when vilkår is not met
     regel("Avslag slitertillegg") {
         HVIS { true }  // Fallback - only reached if above didn't fire
@@ -83,7 +85,7 @@ fun behandleSliterordning(
 /**
  * Vilkårsprøving for slitertillegg.
  * For testing purposes, this simple implementation always grants approval.
- * 
+ *
  * Returns a RuleExpression that can be used directly in HVIS predicates of subsequent rules.
  */
 context(ruleContext: RuleContext)
@@ -100,7 +102,7 @@ fun vilkårsprøvSlitertillegg(): RuleExpression {
 
 /**
  * Beregning av slitertillegg.
- * 
+ *
  * Calculates the pension supplement based on:
  * - Time since lower pension age (justeringsfaktor)
  * - Trygdetid (insurance time factor)
@@ -112,54 +114,51 @@ fun beregnSlitertillegg(
     person: Person,
     grunnbeløp: Int
 ): Faktum<Double> = traced<Faktum<Double>> {
-    
-    // Faktum
-    val faktiskTrygdetid = Faktum("faktiskTrygdetid", person.trygdetid.faktiskTrygdetid)
-    val nedrePensjonsDato = Faktum("nedrePensjonsDato", person.nedrePensjonsDato())
-    val fullTrygdetid = Faktum("fullTrygdetid", 40)
-    
-    val antallMånederEtterNedrePensjonsDato = Faktum(
+
+    // Input values (Verdi - not traced)
+    val faktiskTrygdetid = Verdi("faktiskTrygdetid", person.trygdetid.faktiskTrygdetid)
+    val nedrePensjonsDato = Verdi("nedrePensjonsDato", person.nedrePensjonsDato())
+    val fullTrygdetid = Verdi("fullTrygdetid", 40)
+
+    val antallMånederEtterNedrePensjonsDato = Verdi(
         "antallMånederEtterNedrePensjonsDato",
         ChronoUnit.MONTHS.between(nedrePensjonsDato.value, uttakstidspunkt).toInt().coerceAtMost(MND_36)
     )
-    
-    // Formler
-    val G = Faktum("G", grunnbeløp)
-    val fulltSlitertillegg = Faktum("fulltSlitertillegg", avrund2desimal(G * 0.25 / 12))
-    var justeringsFaktor = Faktum("justeringsFaktor", 0.0)
-    val trygdetidFaktor = Faktum("trygdetidFaktor", faktiskTrygdetid / fullTrygdetid)
-    
+
+    // Formulas (Expression - traced when used in faktum inside rules)
+    val G = Verdi("G", grunnbeløp)
+    val fulltSlitertillegg = avrund2desimal(G * 0.25 / 12)
+    var justeringsFaktor: Expression<Double> = Verdi(0.0)
+    val trygdetidFaktor = faktiskTrygdetid / fullTrygdetid
+
     /**
      * Uttaket er innen 36 måneder etter nedre pensjonsdato.
      */
     regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-TIDLIG") {
         HVIS { antallMånederEtterNedrePensjonsDato erMindreEnn MND_36 }
         SÅ {
-            justeringsFaktor = SPOR(
-                Faktum("justeringsFaktor", (MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36)
-            )
+            justeringsFaktor =
+                faktum("justeringsFaktor", (MND_36 - antallMånederEtterNedrePensjonsDato) / MND_36)
         }
     }
-    
+
     /**
      * Uttaket er fom 36 måneder etter nedre pensjonsdato.
      */
     regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-SENT") {
         HVIS { antallMånederEtterNedrePensjonsDato erStørreEllerLik MND_36 }
         SÅ {
-            justeringsFaktor = SPOR(
-                Faktum("justeringsFaktor", 0.0)
-            )
+            justeringsFaktor = faktum("justeringsFaktor", 0.0)
         }
     }
-    
+
     /**
      * Final calculation with all factors applied.
      */
     regel("SLITERTILLEGG-JUSTERING-UTTAKSTIDSPUNKT-OG-AVKORTING-TRYGDETID") {
         HVIS { true }
         RETURNER {
-            Faktum("slitertillegg", avrund2desimal(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor))
+            faktum("slitertillegg", avrund2desimal(fulltSlitertillegg * justeringsFaktor * trygdetidFaktor))
         }
     }
 }

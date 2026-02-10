@@ -19,28 +19,22 @@ fun beregnGrunnpensjon(
     regel("FullEllerOverTrygdetid") {
         HVIS { trygdetid >= 40 }
         RETURNER {
-            Faktum(
-                "grunnpensjon",
-                Grunnpensjon(
-                    grunnbeløp = grunnbeløp,
-                    prosentsats = sats,
-                    netto = (grunnbeløp * sats).roundToInt()
-                )
-            )
+            faktum("grunnpensjon", Grunnpensjon(
+                grunnbeløp = grunnbeløp,
+                prosentsats = sats,
+                netto = (grunnbeløp * sats).roundToInt()
+            ))
         }
     }
 
     regel("RedusertTrygdetid") {
         HVIS { trygdetid < 40 }
         RETURNER {
-            Faktum(
-                "grunnpensjon",
-                Grunnpensjon(
-                    grunnbeløp = grunnbeløp,
-                    prosentsats = sats,
-                    netto = (grunnbeløp * sats * trygdetid / 40.0).roundToInt()
-                )
-            )
+            faktum("grunnpensjon", Grunnpensjon(
+                grunnbeløp = grunnbeløp,
+                prosentsats = sats,
+                netto = (grunnbeløp * sats * trygdetid / 40.0).roundToInt()
+            ))
         }
     }
 }

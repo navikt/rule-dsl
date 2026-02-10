@@ -8,7 +8,7 @@ import no.nav.pensjon.regler.alderspensjon.domain.koder.YtelseEnum
 import no.nav.pensjon.regler.alderspensjon.ruleset.beregnFaktiskTrygdetid
 import no.nav.pensjon.regler.alderspensjon.ruleset.beregnGrunnpensjon
 import no.nav.pensjon.regler.alderspensjon.ruleset.personenErFlyktning
-import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.Verdi
 import no.nav.system.ruledsl.core.trace.DefaultTracer
 import no.nav.system.ruledsl.core.trace.RuleContext
 import no.nav.system.ruledsl.core.trace.Tracer
@@ -32,15 +32,15 @@ fun beregnAlderspensjon(request: Request): Pair<Response.Alderspensjon, RuleCont
     )
 
     val response = with(ruleContext) {
-        val virkningstidspunkt = Faktum("virkningstidspunkt", request.virkningstidspunkt)
+        val virkningstidspunkt = Verdi("virkningstidspunkt", request.virkningstidspunkt)
 
         // Check flyktning status
         val anvendtFlyktning = personenErFlyktning(
             request.person,
-            Faktum("Ytelsestype", YtelseEnum.AP),
-            Faktum("Kapittel 20", false),
+            Verdi("Ytelsestype", YtelseEnum.AP),
+            Verdi("Kapittel 20", false),
             virkningstidspunkt,
-            Faktum("Søknadstidspunkt fom 2021", true)
+            Verdi("Søknadstidspunkt fom 2021", true)
         )
 
         // Calculate trygdetid

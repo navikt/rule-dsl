@@ -5,6 +5,7 @@ import no.nav.pensjon.regler.sliterordning.domain.Person
 import no.nav.pensjon.regler.sliterordning.domain.Trygdetid
 import no.nav.pensjon.regler.sliterordning.to.SliterordningRequest
 import no.nav.pensjon.regler.sliterordning.to.SliterordningResponse
+import no.nav.system.ruledsl.core.trace.debugTree
 import no.nav.system.ruledsl.core.trace.forklar
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

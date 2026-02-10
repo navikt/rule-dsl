@@ -1,16 +1,16 @@
 package no.nav.pensjon.regler.alderspensjon.domain
 
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UnntakEnum
-import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.Verdi
 
 
 data class InngangOgEksportgrunnlag(
     val unntakFraForutgaendeMedlemskap: Unntak = Unntak(
-        Faktum("UnntakFraForutgaendeMedlemskap", false),
-        Faktum("UnntakFraForutgaendeMedlemskap type", UnntakEnum.FLYKT_ALDER)
+        Verdi("UnntakFraForutgaendeMedlemskap", false),
+        Verdi("UnntakFraForutgaendeMedlemskap type", UnntakEnum.FLYKT_ALDER)
     ),
     val unntakFraForutgaendeTT: Unntak = Unntak(
-        Faktum("unntakFraForutgaendeTT", false),
-        Faktum("unntakFraForutgaendeTT type", UnntakEnum.FLYKT_ALDER)
+        Verdi("unntakFraForutgaendeTT", false),
+        Verdi("unntakFraForutgaendeTT type", UnntakEnum.FLYKT_ALDER)
     )
 )

@@ -4,7 +4,8 @@ import no.nav.pensjon.regler.alderspensjon.domain.Boperiode
 import no.nav.pensjon.regler.alderspensjon.domain.Person
 import no.nav.pensjon.regler.alderspensjon.domain.Request
 import no.nav.pensjon.regler.alderspensjon.domain.koder.LandEnum
-import no.nav.system.ruledsl.core.expression.Faktum
+import no.nav.system.ruledsl.core.expression.Verdi
+import no.nav.system.ruledsl.core.trace.debugTree
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -15,7 +16,7 @@ class BeregnAlderspensjonServiceTest {
     @Test
     fun `beregn alderspensjon for ugift person with full trygdetid`() {
         val person = Person(
-            fødselsdato = Faktum("fødselsdato", LocalDate.of(1960, 1, 1)),
+            fødselsdato = Verdi("fødselsdato", LocalDate.of(1960, 1, 1)),
             erGift = false,
             boperioder = listOf(
                 Boperiode(
@@ -44,7 +45,7 @@ class BeregnAlderspensjonServiceTest {
     @Test
     fun `beregn alderspensjon for gift person with reduced trygdetid`() {
         val person = Person(
-            fødselsdato = Faktum("fødselsdato", LocalDate.of(1960, 1, 1)),
+            fødselsdato = Verdi("fødselsdato", LocalDate.of(1960, 1, 1)),
             erGift = true,
             boperioder = listOf(
                 Boperiode(

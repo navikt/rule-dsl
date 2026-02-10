@@ -6,9 +6,8 @@ import no.nav.pensjon.regler.alderspensjon.domain.koder.UnntakEnum
 import no.nav.pensjon.regler.alderspensjon.domain.koder.UtfallType
 import no.nav.pensjon.regler.alderspensjon.domain.koder.YtelseEnum
 import no.nav.system.ruledsl.core.expression.Faktum
-import no.nav.system.ruledsl.core.expression.boolean.erEtterEllerLik
+import no.nav.system.ruledsl.core.expression.Verdi
 import no.nav.system.ruledsl.core.expression.boolean.erLik
-import no.nav.system.ruledsl.core.expression.boolean.erMindreEllerLik
 import no.nav.system.ruledsl.core.expression.boolean.erStørreEllerLik
 import no.nav.system.ruledsl.core.trace.RuleContext
 import no.nav.system.ruledsl.core.trace.traced
@@ -27,43 +26,43 @@ import java.time.Period
 context(ruleContext: RuleContext)
 fun personenErFlyktning(
     innPersongrunnlag: Person,
-    innYtelseType: Faktum<YtelseEnum>,
-    innKapittel20: Faktum<Boolean>,
-    innVirk: Faktum<LocalDate>,
-    innKravlinjeFremsattDatoFom2021: Faktum<Boolean>,
+    innYtelseType: Verdi<YtelseEnum>,
+    innKapittel20: Verdi<Boolean>,
+    innVirk: Verdi<LocalDate>,
+    innKravlinjeFremsattDatoFom2021: Verdi<Boolean>,
 ): Faktum<UtfallType> = traced {
 
-    val dato67m = Faktum(
+    val dato67m = Verdi(
         "Fødselsdato67m",
         innPersongrunnlag.fødselsdato.value.withDayOfMonth(1) + 67.år + 1.måneder
     )
     val unntakFraForutgaendeMedlemskap =
         innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeMedlemskap
-    val unntakFraForutgaendeTT = 
+    val unntakFraForutgaendeTT =
         innPersongrunnlag.inngangOgEksportgrunnlag?.unntakFraForutgaendeTT
     val aktuelleUnntakstyper = listOf(
         UnntakEnum.FLYKT_ALDER, UnntakEnum.FLYKT_BARNEP, UnntakEnum.FLYKT_GJENLEV, UnntakEnum.FLYKT_UFOREP
     )
     val dato2021 = LocalDate.of(2021, 1, 1)
-    val harUTfør2021 = Faktum(
+    val harUTfør2021 = Verdi(
         "Uføretrygd før 2021",
         innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any {
             it.kravlinjeType == YtelseEnum.UT && it.virkningsdato < dato2021
         }
     )
-    val harGJPfør2021 = Faktum(
+    val harGJPfør2021 = Verdi(
         "Gjenlevendepensjon før 2021",
         innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any {
             it.kravlinjeType == YtelseEnum.UT && it.virkningsdato < dato2021
         }
     )
-    val harUTGJRfør2021 = Faktum(
+    val harUTGJRfør2021 = Verdi(
         "Gjenlevendetillegg før 2021",
         innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any {
             it.kravlinjeType == YtelseEnum.UT_GJR && it.virkningsdato < dato2021
         }
     )
-    val harGJRfør2021 = Faktum(
+    val harGJRfør2021 = Verdi(
         "Gjenlevenderett før 2021",
         innPersongrunnlag.forsteVirkningsdatoGrunnlagListe.any {
             it.kravlinjeType == YtelseEnum.GJR && it.virkningsdato < dato2021
@@ -121,7 +120,7 @@ fun personenErFlyktning(
     // "Overgangsregel" rules - track if any fires
     regel("Overgangsregel_AP") {
         HVIS { innYtelseType.value == YtelseEnum.AP }
-        OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
+        OG { innPersongrunnlag.fødselsdato.value.year <= 1959 }
         OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
         SÅ {
             overgangsregelHarTruffet = true
@@ -130,8 +129,8 @@ fun personenErFlyktning(
 
     regel("Overgangsregel_AP_tidligereUT") {
         HVIS { innYtelseType.value == YtelseEnum.AP }
-        OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-        OG { innVirk erEtterEllerLik dato67m }
+        OG { innPersongrunnlag.fødselsdato.value.year <= 1959 }
+        OG { innVirk.value >= dato67m.value }
         OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
         OG { harUTfør2021 erLik true }
         SÅ {
@@ -141,8 +140,8 @@ fun personenErFlyktning(
 
     regel("Overgangsregel_AP_tidligereGJP") {
         HVIS { innYtelseType.value == YtelseEnum.AP }
-        OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-        OG { innVirk erEtterEllerLik dato67m }
+        OG { innPersongrunnlag.fødselsdato.value.year <= 1959 }
+        OG { innVirk.value >= dato67m.value }
         OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
         OG { harGJPfør2021 erLik true }
         SÅ {
@@ -152,8 +151,8 @@ fun personenErFlyktning(
 
     regel("Overgangsregel_GJR_tidligereUT_GJT") {
         HVIS { innYtelseType.value == YtelseEnum.GJR }
-        OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-        OG { innVirk erEtterEllerLik dato67m }
+        OG { innPersongrunnlag.fødselsdato.value.year <= 1959 }
+        OG { innVirk.value >= dato67m.value }
         OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
         OG { harUTGJRfør2021 erLik true }
         SÅ {
@@ -163,8 +162,8 @@ fun personenErFlyktning(
 
     regel("Overgangsregel_GJR_tidligereGJR") {
         HVIS { innYtelseType.value == YtelseEnum.GJR }
-        OG { innPersongrunnlag.fødselsdato erMindreEllerLik 1959 }
-        OG { innVirk erEtterEllerLik dato67m }
+        OG { innPersongrunnlag.fødselsdato.value.year <= 1959 }
+        OG { innVirk.value >= dato67m.value }
         OG { trygdetid.tt_fa_F2021 erStørreEllerLik 20 }
         OG { harGJRfør2021 erLik true }
         SÅ {
@@ -176,7 +175,7 @@ fun personenErFlyktning(
     regel("AnvendtFlyktning_ikkeRelevant") {
         HVIS { !angittFlyktningHarTruffet }
         RETURNER {
-            Faktum("Anvendt flyktning", UtfallType.IKKE_RELEVANT)
+            faktum("Anvendt flyktning", UtfallType.IKKE_RELEVANT)
         }
     }
 
@@ -184,7 +183,7 @@ fun personenErFlyktning(
         HVIS { angittFlyktningHarTruffet }
         OG { innKravlinjeFremsattDatoFom2021 erLik false }
         RETURNER {
-            Faktum("Anvendt flyktning", UtfallType.OPPFYLT)
+            faktum("Anvendt flyktning", UtfallType.OPPFYLT)
         }
     }
 
@@ -193,7 +192,7 @@ fun personenErFlyktning(
         OG { innKravlinjeFremsattDatoFom2021 erLik true }
         OG { !overgangsregelHarTruffet }
         RETURNER {
-            Faktum("Anvendt flyktning", UtfallType.IKKE_OPPFYLT)
+            faktum("Anvendt flyktning", UtfallType.IKKE_OPPFYLT)
         }
     }
 
@@ -202,7 +201,7 @@ fun personenErFlyktning(
         OG { innKravlinjeFremsattDatoFom2021 erLik true }
         OG { overgangsregelHarTruffet }
         RETURNER {
-            Faktum("Anvendt flyktning", UtfallType.OPPFYLT)
+            faktum("Anvendt flyktning", UtfallType.OPPFYLT)
         }
     }
 }

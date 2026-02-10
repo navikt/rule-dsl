@@ -1,11 +1,12 @@
 package no.nav.system.ruledsl.core.expression
 
 /**
- * Numeric expression tree.
+ * Base interface for all values in the rule DSL.
  *
- * IMPORTANT: This is now INTERNAL to Faktum<Number>.
- * Users do not work with Uttrykk directly - they use Faktum operators.
- *
+ * Implemented by:
+ * - [Verdi] — input values and constants, created freely
+ * - [Faktum] — traced results, created via `faktum()` inside rules
+ * - Internal types from operators (BinaryOperation, Comparison, etc.)
  */
 interface Expression<out T : Any> {
     val value: T
