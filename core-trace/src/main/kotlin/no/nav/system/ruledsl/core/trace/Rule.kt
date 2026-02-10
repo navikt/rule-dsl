@@ -132,26 +132,27 @@ class Rule<T : Any>(private val ruleContext: RuleContext) : ResourceAccessor {
     fun <R : Any> faktum(
         name: String,
         value: R,
-        references: List<Reference> = emptyList()
-    ) = faktum(name, Verdi(value), references)
+    ) = faktum(name, Verdi(value))
 
     /**
      * Creates a Faktum and automatically records it to the trace.
-     * Delegates to RuleContext.faktum().
      *
      * This is the ONLY way to create a Faktum - the constructor is internal.
      * Every Faktum created this way is automatically traced.
+     * References from REF declarations in this rule are automatically attached.
      *
      * @param name The name of the faktum (appears in explanations)
      * @param expression The expression to wrap
-     * @param references Optional references to legal sources or documentation
      * @return The created and recorded Faktum
      */
     fun <R : Any> faktum(
         name: String,
         expression: Expression<R>,
-        references: List<Reference> = emptyList()
-    ): Faktum<R> = ruleContext.faktum(name, expression, references)
+    ): Faktum<R> {
+        val faktum = Faktum.create(name, expression, references)
+        tracer().recordExpression(faktum)
+        return faktum
+    }
 
     /**
      * RETURNER - value-producing action. Returns T.

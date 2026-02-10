@@ -1,5 +1,6 @@
 package no.nav.system.ruledsl.core.trace
 
+import no.nav.system.ruledsl.core.expression.Faktum
 import no.nav.system.ruledsl.core.expression.Verdi
 import no.nav.system.ruledsl.core.expression.debugTree
 import no.nav.system.ruledsl.core.expression.math.div
@@ -20,8 +21,8 @@ class ComplexFormulaTest {
 
     @Test
     fun `complex formula`() {
-        val ctx = createContext()
-        with(ctx) {
+        val ruleContext = createContext()
+        with(ruleContext) {
             // Input facts (Verdi - named constants, not traced)
             val grunnbeløp = Verdi("grunnbeløp", 118620)
             val satsFaktor = Verdi("satsFaktor", 0.66)
@@ -30,14 +31,20 @@ class ComplexFormulaTest {
             val trygdetid = Verdi("trygdetid", 35)
             val fullTrygdetid = Verdi("fullTrygdetid", 40)
 
-            // Intermediate calculations - each named and traced via faktum()
-            val grunnpensjon = faktum("grunnpensjon", grunnbeløp * satsFaktor * trygdetid / fullTrygdetid)
-            val barnetillegg = faktum("barnetillegg", tillegg * barnetilleggFaktor)
-            val pensjon = faktum("pensjon", grunnpensjon + barnetillegg)
+            val pensjon: Faktum<Double> = traced {
+                regel("beregn pensjon") {
+                    HVIS { true }
+                    RETURNER {
+                        val grunnpensjon = faktum("grunnpensjon", grunnbeløp * satsFaktor * trygdetid / fullTrygdetid)
+                        val barnetillegg = faktum("barnetillegg", tillegg * barnetilleggFaktor)
+                        faktum("pensjon", grunnpensjon + barnetillegg)
+                    }
+                }
+            }
 
             // 1. Final result value
             assertEquals(98503.05, pensjon.value, 0.01)
-
+            println(pensjon.forklar())
             println(pensjon.debugTree())
 
             val debugLines = pensjon.debugTree().split("\n").iterator()

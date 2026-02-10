@@ -750,9 +750,9 @@ class RulesetTest {
                 val fullTrygdetid = Verdi("fullTrygdetid", 40)
                 val alder = Verdi("alder", 67)
 
-                // Intermediate calculations (Faktum via faktum() - traced)
-                val grunnpensjon = faktum("grunnpensjon", grunnbeløp * satsFaktor)
-                val trygdetidFaktor = faktum("trygdetidFaktor", trygdetid / fullTrygdetid)
+                // Intermediate formulas (Expression - not yet traced)
+                val grunnpensjon = grunnbeløp * satsFaktor
+                val trygdetidFaktor = trygdetid / fullTrygdetid
 
                 regel("calculate pension") {
                     HVIS { alder erStørreEllerLik 62 }
@@ -779,11 +779,8 @@ class RulesetTest {
         // Should show result Faktum
         assertTrue(tree.contains("pensjon ="))
 
-        // Should show formula notation (Faktum names, not expanded)
-        assertTrue(tree.contains("grunnpensjon * trygdetidFaktor"))
-
-        // Intermediate Faktum are recorded at traced block level
-        // They appear as expressions, showing formula notation/concrete
-        assertTrue(tree.contains("notation:") && tree.contains("concrete:"))
+        // Formula is fully expanded since intermediates are plain expressions (not Faktum)
+        assertTrue(tree.contains("notation:"))
+        assertTrue(tree.contains("concrete:"))
     }
 }
