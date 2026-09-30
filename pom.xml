@@ -31,6 +31,8 @@
         <module>core-trace</module>
         <module>testclient-trace-alderspensjon</module>
         <module>testclient-trace-sliterordningen</module>
+        <module>rdsl2</module>
+        <module>testclient-rdsl2</module>
     </modules>
 
     <dependencyManagement>
