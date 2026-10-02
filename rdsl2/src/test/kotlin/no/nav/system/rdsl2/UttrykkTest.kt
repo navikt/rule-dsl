@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
+import java.time.LocalDate
 
 class UttrykkTest {
 
@@ -84,6 +85,42 @@ class UttrykkTest {
             SÅ { indre = regel("INDRE") { HVIS { a erStørreEllerLik 1 } } }
         }
         assertSame(ytre, indre.regel)
+    }
+
+    @Test
+    fun `likhet, stoerre enn og negasjon`() {
+        val r = regel("R") {
+            HVIS { a erStørreEnn b }
+            OG { Faktum("tekst", "x") erLik "x" }
+            OG { !(a erLik b) }
+        }
+        assertTrue(r.verdi)
+        assertEquals("a > b og tekst = x og ikke(a = b)", r.uttrykk.notasjon())
+        assertEquals("6 > 2 og x = x og ikke(6 = 2)", r.uttrykk.konkret())
+    }
+
+    @Test
+    fun `sammenligning mot ren verdi`() {
+        val r = regel("R") { HVIS { Faktum("dato", LocalDate.of(2020, 3, 1)) erStørreEnn LocalDate.of(2020, 2, 1) } }
+        assertTrue(r.verdi)
+        assertEquals("dato > 2020-02-01", r.uttrykk.notasjon())
+    }
+
+    @Test
+    fun `guard spores ikke og stopper evalueringen`() {
+        val mangler: Faktum<Int>? = null
+        val r = regel("R") {
+            HVIS { mangler != null }
+            OG { mangler!! erStørreEnn 1 }
+        }
+        assertFalse(r.verdi)
+
+        val s = regel("S") {
+            HVIS { true }
+            OG { a erStørreEnn b }
+        }
+        assertTrue(s.verdi)
+        assertEquals("a > b", s.uttrykk.notasjon())
     }
 
     @Test

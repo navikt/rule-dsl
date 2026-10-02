@@ -1,5 +1,7 @@
 package no.nav.system.rdsl2
 
+import kotlin.experimental.ExperimentalTypeInference
+
 @DslMarker
 annotation class RegelDsl
 
@@ -14,30 +16,63 @@ annotation class RegelDsl
  * }
  * ```
  *
- * En regel uten betingelser treffer alltid.
+ * En regel uten betingelser treffer alltid. Tekniske betingelser (`HVIS { x != null }`) styrer
+ * om regelen kan treffe, men vises ikke i forklaringen.
  */
 fun regel(navn: String, definisjon: Regel.() -> Unit): Faktum<Boolean> = utfør(navn, null, definisjon)
 
 @RegelDsl
 class Regel internal constructor() {
-    private val betingelser = mutableListOf<() -> Uttrykk<Boolean>>()
+    private val predikater = mutableListOf<Predikat>()
     private var kropp: (RegelKropp.() -> Unit)? = null
 
+    /** Fagregel som spores. */
+    @OptIn(ExperimentalTypeInference::class)
+    @OverloadResolutionByLambdaReturnType
     fun HVIS(betingelse: () -> Uttrykk<Boolean>) {
-        betingelser += betingelse
+        predikater += Predikat.Sporet(betingelse)
     }
 
+    /**
+     * Teknisk betingelse (guard). Spores ikke. Er den usann, treffer ikke regelen, og
+     * betingelsene etter den evalueres ikke.
+     */
+    @OptIn(ExperimentalTypeInference::class)
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("HVISGuard")
+    fun HVIS(betingelse: () -> Boolean) {
+        predikater += Predikat.Guard(betingelse)
+    }
+
+    @OptIn(ExperimentalTypeInference::class)
+    @OverloadResolutionByLambdaReturnType
     fun OG(betingelse: () -> Uttrykk<Boolean>) = HVIS(betingelse)
+
+    @OptIn(ExperimentalTypeInference::class)
+    @OverloadResolutionByLambdaReturnType
+    @JvmName("OGGuard")
+    fun OG(betingelse: () -> Boolean) = HVIS(betingelse)
 
     fun SÅ(kropp: RegelKropp.() -> Unit) {
         check(this.kropp == null) { "SÅ kan bare brukes én gang per regel" }
         this.kropp = kropp
     }
 
-    internal fun betingelser(): Uttrykk<Boolean> =
-        betingelser.map { it() }.reduceOrNull { a, b -> a og b } ?: Konstant(true)
+    internal fun betingelser(): Uttrykk<Boolean> {
+        val sporet = mutableListOf<Uttrykk<Boolean>>()
+        for (predikat in predikater) when (predikat) {
+            is Predikat.Sporet -> sporet += predikat.uttrykk()
+            is Predikat.Guard -> if (!predikat.oppfylt()) return Konstant(false)
+        }
+        return sporet.reduceOrNull { a, b -> a og b } ?: Konstant(true)
+    }
 
     internal fun kropp(): (RegelKropp.() -> Unit)? = kropp
+
+    private sealed interface Predikat {
+        class Sporet(val uttrykk: () -> Uttrykk<Boolean>) : Predikat
+        class Guard(val oppfylt: () -> Boolean) : Predikat
+    }
 }
 
 /**

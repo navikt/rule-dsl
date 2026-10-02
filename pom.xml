@@ -32,7 +32,8 @@
         <module>testclient-trace-alderspensjon</module>
         <module>testclient-trace-sliterordningen</module>
         <module>rdsl2</module>
-        <module>testclient-rdsl2</module>
+        <module>testclient-rdsl2-slitertillegg</module>
+        <module>testclient-rdsl2-venteperiode</module>
     </modules>
 
     <dependencyManagement>

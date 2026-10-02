@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>no.nav.system.ruledsl</groupId>
-    <artifactId>testclient-rdsl2</artifactId>
+    <artifactId>testclient-rdsl2-venteperiode</artifactId>
 
     <dependencies>
         <dependency>
