@@ -29,23 +29,41 @@ interface Uttrykk<out T : Any> {
 - Sammenligninger tar både `Uttrykk<T>` og ren `T` på høyre eller venstre side.
 - Laget kjenner ikke til regler eller sporing.
 
+### Verdi
+
+En `Verdi` er et navngitt uttrykk, for eksempel inndata, konstanter og satser. Den er en grense
+i uttrykkstreet: i andre uttrykk vises den bare med navn og verdi, og `grunnlag()` stopper ved den.
+
+```kotlin
+open class Verdi<out T : Any>(val navn: String, override val verdi: T) : Uttrykk<T> {
+    override fun notasjon() = navn                 // "G"
+    override fun konkret() = verdi.vis()           // "118620"
+    override fun grunnlag() = listOf(this)
+}
+```
+
+- `Verdi` hører hjemme i lag 1. `grunnlag()` returnerer `Verdi`, og uttrykk kan ikke brukes
+  eller testes uten navngitte verdier. Den kjenner ikke til regler.
+- Lag 2 utvider `Verdi` med `Faktum` og `Regel`.
+- Konstruktøren er offentlig, og brukeren kan i prinsippet arve fra `Verdi`. Det koster lite:
+  en egen subklasse vises og forklares som en vanlig `Verdi`.
+- Likhet er identitet.
+
 ## Lag 2 – Regel
 
-### Verdi, Faktum og Regel
+### Faktum og Regel
 
-Tre typer, med `Uttrykk` på toppen:
+Lag 2 utvider `Verdi` fra lag 1 med to typer:
 
 ```
-Uttrykk<T>
-├── Konstant, Sum, Produkt, Sammenligning, Og, Ikke, …   (lag 1)
-└── Verdi<T>                 navn og verdi
-    ├── Faktum<T>            + uttrykk, regel
-    └── Regel                + betingelser          (Verdi<Boolean>)
+Uttrykk<T>                                                  (lag 1)
+├── Konstant, Infiks, Funksjon, …                           (lag 1)
+└── Verdi<T>                 navn og verdi                  (lag 1)
+    ├── Faktum<T>            + uttrykk, regel               (lag 2)
+    └── Regel                + betingelser                  (lag 2, Verdi<Boolean>)
 ```
 
 ```kotlin
-open class Verdi<out T : Any>(val navn: String, override val verdi: T) : Uttrykk<T>   // inndata
-
 class Faktum<out T : Any> internal constructor(
     navn: String,
     val uttrykk: Uttrykk<T>,         // Beregning
@@ -58,19 +76,14 @@ class Regel internal constructor(
 ) : Verdi<Boolean>(navn, betingelser.verdi)
 ```
 
-- **Verdi** er en navngitt verdi. Inndata lages med `Verdi(navn, verdi)`. Det er den eneste
-  typen brukeren konstruerer selv.
 - **Faktum** er en verdi som en regel har fastsatt. Det lages med `faktum(...)` i en
   `SÅ`-blokk, og har alltid en regel.
 - **Regel** er en beslutning. Den lages med `regel(...)`, og er et `Uttrykk<Boolean>` som kan
   brukes som predikat i andre regler.
-- Grensen går ved `Verdi`. I andre uttrykk vises alle tre bare med navn og verdi, for
-  eksempel «trygdetid (20)» eller «AFP-MELLOM (false)». Forklaringen innover ligger i
-  `Faktum` og `Regel`.
-- Konstruktørene til `Faktum` og `Regel` er internal, så bare rammeverket lager dem.
-  `Verdi` har offentlig konstruktør, og brukeren kan i prinsippet arve fra den. Det koster lite:
-  en egen subklasse vises og forklares som en vanlig `Verdi`.
-- Likhet er identitet.
+- Begge er en `Verdi`. I andre uttrykk vises de derfor bare med navn og verdi, for eksempel
+  «trygdetid (20)» eller «AFP-MELLOM (false)». Forklaringen innover ligger i `uttrykk` og
+  `betingelser`.
+- Konstruktørene er internal, så bare rammeverket lager dem. Brukeren lager bare `Verdi`.
 - Hvordan en regel knyttes til regelen den ble evaluert under (forutsetningen), er ikke
   avklart. Se oppfølgingspunkter.
 
