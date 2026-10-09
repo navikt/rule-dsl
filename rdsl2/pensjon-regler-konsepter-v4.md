@@ -3,7 +3,7 @@
 ## 1. Bakgrunn
 
 Dagens Rule-DSL v1.x er utviklet for å være funksjonelt kompatibel med tidligere Blaze Advisor-løsning.
-Migrering fra Blaze til egenutviklet regelplattform ble gjort mulig av Rule-DSL v1. Koden er nå ren Kotlin,
+Migrering fra Blaze til egenutviklet regelplattform ble gjort mulig av Rule-DSL v1.0. Koden er nå ren Kotlin,
 men inneholder flere legacy-konsepter som er arvet fra Blaze og som legger føringer for hvordan regelkoden
 utformes:
 
@@ -11,20 +11,16 @@ utformes:
 - b) begrenser utviklers uttrykksfrihet når alt må passe inn i DSL-språket
 - c) øker terskelen for nye utviklere som skal forstå regelkoden
 - d) generelt dårlig utnyttelse av Kotlin som programmeringsspråk
-- e) regelkoden er ikke tilrettelagt for sporing. Det er gjort forsøk på å bygge sporing inn i eksisterende
-  plattform uten å oppnå et godt resultat
+- e) regelkoden er ikke tilrettelagt for sporing. Forsøk på å bygge inn sporing har ikke ført frem.
 
 Dette utgjør motivasjonen for å bygge ny regelplattform i Rule-DSL v2.0.
 
 ## 2. Løsning
 
-Regelkode skrives som vanlige Kotlin-funksjoner. Klassehierarkiet (tjeneste, flyt, regelsett) erstattes av
-funksjoner med en usynlig kontekst. DSL-en brukes bare der en faglig beslutning tas, og ellers skrives
-ordinær Kotlin.
+Regelkode skrives som vanlige Kotlin-funksjoner og benytter DSLen kun når faglig beslutning tas.
 
-Sporing bygges inn i selve verdiene. Hver beregnet verdi er et `Faktum` som vet hvordan den ble regnet ut,
-hvilken regel som ga den, og hvilken forutsetning regelen ble evaluert under. Det finnes ingen egen
-sporingslogg. Forklaringen er grafen av fakta.
+Sporing bygges inn i selve svarene. Hver beregnet verdi er et `Faktum` som vet hvordan den ble regnet ut
+og hvilken regel som ga den. Det finnes ingen egen sporingslogg. Forklaringen er grafen av fakta.
 
 Målet er Kotlins fleksibilitet og uttrykkskraft kombinert med en stram DSL for faglige beslutninger.
 
@@ -32,7 +28,7 @@ Målet er Kotlins fleksibilitet og uttrykkskraft kombinert med en stram DSL for 
 |---|---|
 | a) seremoniell struktur | Funksjoner i stedet for klasser. Ingen tjeneste/flyt/regelsett-hierarki. |
 | b) begrenset uttrykksfrihet | Vanlig Kotlin overalt. DSL bare for regler. |
-| c) høy terskel | Få begreper: `Uttrykk`, `Faktum`, `regel`, `kjør`. |
+| c) høy terskel | Få begreper: `Uttrykk`, `Verdi`, `Faktum`, `Regel`, `kjør`. |
 | d) dårlig utnyttelse av Kotlin | Context parameters, infix-operatorer, typede uttrykk. |
 | e) mangelfull sporing | Sporing er en egenskap ved `Faktum`, ikke et eget system. |
 
@@ -53,16 +49,16 @@ Et regelsett er en funksjon med `context(_: RegelKontekst)`:
 
 ```kotlin
 context(_: RegelKontekst)
-fun vilkårsprøvAlderspensjon(alder: Faktum<Int>): Faktum<VilkårEnum> = kjør {
-    regel("VilkårOppfylt") {
-        HVIS { alder erStørreEllerLik 62 }
-        RETURNER { faktum("vilkårAlderspensjon", VilkårEnum.INNVILGET) }
+fun vilkårsprøvAlderspensjon(alder: Verdi<Int>): Faktum<VilkårEnum> = kjør {
+        regel("VilkårOppfylt") {
+            HVIS { alder erStørreEllerLik 62 }
+            RETURNER { faktum("vilkårAlderspensjon", VilkårEnum.INNVILGET) }
+        }
+        regel("VilkårIkkeOppfylt") {
+            HVIS { alder erMindreEnn 62 }
+            RETURNER { faktum("vilkårAlderspensjon", VilkårEnum.AVSLAG) }
+        }
     }
-    regel("VilkårIkkeOppfylt") {
-        HVIS { alder erMindreEnn 62 }
-        RETURNER { faktum("vilkårAlderspensjon", VilkårEnum.AVSLAG) }
-    }
-}
 ```
 
 Overgang fra v1:
@@ -71,20 +67,24 @@ Overgang fra v1:
 class BeregnGrunnpensjonRS : AbstractRuleset   →  fun beregnGrunnpensjon(...)
 ARC.run(parent) / ruleComponent-propagering    →  context(_: RegelKontekst)
 "regelA".harTruffet()                          →  val regelA = regel("regelA") { ... }
-Formel + Faktum                                →  Uttrykk + Faktum
+Formel + Faktum                                →  Uttrykk + Verdi / Faktum
 ```
 
 ## 4. Lag 1 – Uttrykk
 
-Uttrykk er en uforanderlig trestruktur med en verdi. Formel og predikat har samme modell: både beregninger
-og sammenligninger er `Uttrykk`, og begge har `notasjon` og `konkret`.
+Et uttrykk er en utregning som husker hvordan den ble gjort. `G * sats` gir verdien `78289.2`, og kan i
+tillegg vises som `G * sats` og som `118620 * 0.66`. Verdien regnes ut når uttrykket lages, og uttrykket endres
+ikke etterpå. Det som vises, er derfor alltid det som faktisk ble regnet ("single source of truth").
+
+Beregninger (`G * sats`) og sammenligninger (`trygdetid erMindreEnn 40`) er begge uttrykk. Den eneste
+forskjellen er typen på verdien.
 
 ```kotlin
 interface Uttrykk<out T : Any> {
     val verdi: T
     fun notasjon(): String              // "sats * trygdetid / fullTrygdetid"
     fun konkret(): String               // "2.9 * 20 / 40"
-    fun grunnlag(): List<Faktum<*>>     // navngitte ledd brukt direkte
+    fun grunnlag(): List<Verdi<*>>      // navngitte ledd benyttet i dette uttrykk
 }
 ```
 
@@ -95,11 +95,14 @@ interface Uttrykk<out T : Any> {
 
 - Operatorer for matematikk og for logikk og sammenligning bygger nye uttrykk.
 - Sammenligninger tar både `Uttrykk<T>` og ren `T` på høyre eller venstre side.
+- Tilrettelegger for de fleste operatorer (lik, ulik, større, mindre, etc etc) for de mest brukte datatyper (Number og LocalDate)
 - Laget kjenner ikke til regler eller sporing.
 
-### Komparatorer
+### Operatorer
 
-Infix-operatorer som returnerer `Uttrykk<Boolean>`.
+#### Logiske
+
+For å spore operandene i et logisk uttrykk innføres det egne infix-operatorer som returnerer `Uttrykk<Boolean>`.
 
 | Kategori | Operatorer |
 |---|---|
@@ -107,7 +110,6 @@ Infix-operatorer som returnerer `Uttrykk<Boolean>`.
 | Likhet | `erLik`, `erUlik` |
 | Dato | `erFør`, `erFørEllerLik`, `erEtter`, `erEtterEllerLik` |
 | Liste | `erBlant`, `erIkkeBlant` |
-| Logikk | `og`, `eller`, `ikke` |
 
 ```kotlin
 trygdetid erMindreEnn 40
@@ -115,7 +117,9 @@ fødselsdato erFør LocalDate.of(1960, 1, 1)
 ytelseType erBlant listOf(YtelseEnum.AP, YtelseEnum.GJR)
 ```
 
-### Matematiske operatorer og funksjoner
+#### Matematiske
+
+For å spore operandene i et matematisk uttrykk overstyres infix-operatorer som returnerer `Uttrykk<Number>`.
 
 Operatorer: `+`, `-`, `*`, `/`.
 
@@ -123,40 +127,58 @@ Funksjoner: `floor()`, `ceil()`, `abs()`, `min()`, `max()`, samt egne funksjoner
 
 ```kotlin
 val beløp = avrund2desimal(G * sats / 12)
-// notasjon: avrund2desimal(G * sats / 12)
-// konkret:  avrund2desimal(118620 * 0.25 / 12)
+// beløp.notasjon() -> avrund2desimal(G * sats / 12)
+// beløp.konkret() -> avrund2desimal(118620 * 0.25 / 12)
 ```
 
 ## 5. Lag 2 – Regel
 
-### Faktum
+### Verdi, Faktum og Regel
 
-Et `Faktum` er et navngitt uttrykk. Utover er det en grense: andre uttrykk ser bare navnet og verdien.
-Innover bærer det sin egen forklaring.
+Tre typer, med `Uttrykk` på toppen:
 
-```kotlin
-class Faktum<out T : Any>(
-    val navn: String,
-    val uttrykk: Uttrykk<T>,         // utregningen, eller betingelsene for en regel
-    val regel: Faktum<Boolean>?,     // regelen som gjorde at faktumet oppsto
-) : Uttrykk<T>
+```
+Uttrykk<T>
+├── Konstant, Sum, Produkt, Sammenligning, Og, Ikke, …   (lag 1)
+└── Verdi<T>                 navn og verdi
+    ├── Faktum<T>            + uttrykk, regel
+    └── Regel                + betingelser          (Verdi<Boolean>)
 ```
 
-- **Inndata** lages med `Faktum(navn, verdi)` og har ingen regel. Det finnes ikke egne begreper
-  for inndata som `Verdi` eller `Grunnlag`. Se åpne spørsmål.
-- **Utledet faktum** lages med `faktum(...)`. I en `SÅ`- eller `RETURNER`-blokk får det regelen som
-  eier blokken, som `regel`. Utenfor en regel er det lov, men da er `regel = null`, og forklaringen viser
-  bare utregningen. Brukeren må selv vite om forskjellen.
-- **Regel** er et `Faktum<Boolean>` der `uttrykk` er betingelsene. `regel` er forutsetningen, altså
-  regelen som regelen ble evaluert under.
-- Likhet er identitet.
+```kotlin
+open class Verdi<out T : Any>(val navn: String, override val verdi: T) : Uttrykk<T>   // inndata
 
-`Faktum.regel` har dermed én betydning: regelen som gjorde at faktumet oppsto.
+class Faktum<out T : Any> internal constructor(
+    navn: String,
+    val uttrykk: Uttrykk<T>,         // Beregning
+    val regel: Regel,                // regelen som fastsatte faktumet
+) : Verdi<T>(navn, uttrykk.verdi)
+
+class Regel internal constructor(
+    navn: String,
+    val betingelser: Uttrykk<Boolean>,   // Betingelser
+) : Verdi<Boolean>(navn, betingelser.verdi)
+```
+
+- **Verdi** er en navngitt verdi: inndata, konstanter og satser. Den lages med `Verdi(navn, verdi)`,
+  og er den eneste typen brukeren konstruerer selv.
+- **Faktum** er en verdi som en regel har fastsatt. Det lages med `faktum(...)` i en `SÅ`- eller
+  `RETURNER`-blokk, og har alltid en regel.
+- **Regel** er en beslutning. Den lages med `regel(...)`, og er et `Uttrykk<Boolean>` som kan brukes som
+  betingelse i andre regler.
+- Grensen går ved `Verdi`. I andre uttrykk vises alle tre bare med navn og verdi, for eksempel
+  «trygdetid (20)» eller «AFP-MELLOM (false)». Forklaringen innover ligger i `Faktum` og `Regel`.
+- Konstruktørene til `Faktum` og `Regel` er internal, så bare rammeverket lager dem. `Verdi` har
+  offentlig konstruktør, og brukeren kan i prinsippet arve fra den. Det koster lite: en egen subklasse
+  vises og forklares som en vanlig `Verdi`.
+- Likhet er identitet.
+- Hvordan en regel knyttes til regelen den ble evaluert under (forutsetningen), er ikke avklart. Se
+  åpne spørsmål.
 
 ### Regel
 
 En regel er en navngitt blokk med betingelser (`HVIS` / `OG`) og et resultat (`SÅ` eller `RETURNER`).
-`regel(...)` returnerer et `Faktum<Boolean>`.
+`regel(...)` returnerer en `Regel`. DSL-byggeren med `HVIS`/`OG`/`SÅ`/`RETURNER` heter `RegelBuilder`.
 
 ```kotlin
 regel("FastsettTrygdetid") {
@@ -167,23 +189,24 @@ regel("FastsettTrygdetid") {
 ```
 
 - Typen på betingelsen bestemmer hvordan den behandles, ikke om den står i `HVIS` eller `OG`.
-  - `Uttrykk<Boolean>` er en fagbetingelse. Den spores og vises i forklaringen.
-  - `Boolean` er en teknisk guard. Den spores ikke. Er den usann, treffer ikke regelen, og
-    betingelsene etter den evalueres ikke.
+    - `Uttrykk<Boolean>` er en fagbetingelse. Den spores og vises i forklaringen. Det gjelder også
+      `Verdi<Boolean>`, `Faktum<Boolean>` og `Regel`, siden alle er `Uttrykk<Boolean>`.
+    - `Boolean` er en teknisk guard. Den spores ikke. Er den usann, treffer ikke regelen, og
+      betingelsene etter den evalueres ikke.
 - `HVIS` og `OG` er like. `OG` finnes for lesbarhetens skyld.
 - En regel uten betingelser treffer alltid.
 - En regel har enten `SÅ` eller `RETURNER`, ikke begge.
 
 #### Regler som verdier
 
-Fordi en regel er et `Faktum<Boolean>`, kan den brukes som betingelse i andre regler. Dette erstatter
-`"regelA".harTruffet()` fra v1.
+Fordi en `Regel` er et `Uttrykk<Boolean>`, kan den brukes som betingelse i andre regler. Det trengs ingen
+egen `HVIS(regel)`. Dette erstatter `"regelA".harTruffet()` fra v1.
 
 ```kotlin
 val afpMellom = regel("AFP-MELLOM") { ... }
 
 regel("AFP-ORDINÆR") {
-    HVIS { ikke(afpMellom) }
+    HVIS { afpMellom erLik false }
     SÅ { ... }
 }
 ```
@@ -195,16 +218,16 @@ regel("AFP-ORDINÆR") {
 
 ```kotlin
 context(_: RegelKontekst)
-fun beregn(beløp: Faktum<Int>, G: Faktum<Int>): Faktum<Int> = kjør {
-    regel("InntektUnderG") {
-        HVIS { beløp erMindreEnn G }
-        RETURNER { faktum("uavkortet", beløp) }
+fun beregn(beløp: Verdi<Int>, G: Verdi<Int>): Faktum<Int> = kjør {
+        regel("InntektUnderG") {
+            HVIS { beløp erMindreEnn G }
+            RETURNER { faktum("uavkortet", beløp) }
+        }
+        regel("InntektFomG") {
+            HVIS { beløp erStørreEllerLik G }
+            RETURNER { faktum("avkortet", beløp - 50000) }
+        }
     }
-    regel("InntektFomG") {
-        HVIS { beløp erStørreEllerLik G }
-        RETURNER { faktum("avkortet", beløp - 50000) }
-    }
-}
 ```
 
 - Bak kulissene holder `kjør` resultatet i en `lateinit var`. `RETURNER` setter den, og `kjør`
@@ -230,7 +253,7 @@ class RegelKontekst(ressurser: Map<KClass<out Ressurs>, Ressurs>) {  // legger a
     inline fun <reified R : Ressurs> ressurs(): R                     // krasjer hvis ressursen mangler
 }
 
-context(k: RegelKontekst) fun regel(navn: String, definisjon: Regel.() -> Unit): Faktum<Boolean>
+context(k: RegelKontekst) fun regel(navn: String, definisjon: RegelBuilder.() -> Unit): Regel
 context(k: RegelKontekst) fun <T : Any> faktum(navn: String, uttrykk: Uttrykk<T>): Faktum<T>
 context(k: RegelKontekst) fun <T : Any> kjør(blokk: () -> Unit): T
 ```
@@ -263,14 +286,15 @@ context-funksjon.
 
 ```kotlin
 class GrunnbeløpSatser(...) : Ressurs {
-    fun på(dato: LocalDate): Faktum<Int> = ...         // krasjer hvis det ikke finnes en sats for datoen
+    fun på(dato: LocalDate): Verdi<Int> = ...          // krasjer hvis det ikke finnes en sats for datoen
 }
 
 context(k: RegelKontekst)
-fun grunnbeløp(dato: LocalDate): Faktum<Int> = k.ressurs<GrunnbeløpSatser>().på(dato)
+fun grunnbeløp(dato: LocalDate): Verdi<Int> = k.ressurs<GrunnbeløpSatser>().på(dato)
 ```
 
-- Tilgangsfunksjoner returnerer `Faktum`, slik at verdien er navngitt i forklaringen.
+- Tilgangsfunksjoner returnerer `Verdi`, slik at verdien er navngitt i forklaringen. En sats er ikke
+  fastsatt av en regel, så den er ikke et `Faktum`.
 - Ressurser skrives ikke defensivt. Mangler en ressurs eller en verdi i den, krasjer kallet med en
   melding som navngir ressursen.
 - Det finnes ingen `NoOp`-varianter og ingen valgfrie ressurser.
@@ -283,34 +307,36 @@ Sporing er alltid på. Uttrykkstreet bygges uansett, fordi det er selve utregnin
 spare på å slå sporing av, og det ville krevd en egen kodevei. Det finnes ingen `Tracer`, `NoOpTracer`,
 `traced`-blokk eller `debugTree()`.
 
-`Sporing` er en ressurs som holder den aktive forutsetningen. `RegelKontekst` legger den alltid i kartet,
-og brukeren gjør det aldri.
+`Sporing` er en ressurs som holder regelen som eier den aktive `SÅ`- eller `RETURNER`-blokken.
+`RegelKontekst` legger den alltid i kartet, og brukeren gjør det aldri.
 
 ```kotlin
-class Sporing internal constructor(val forutsetning: Faktum<Boolean>?) : Ressurs
+class Sporing internal constructor(val regel: Regel?) : Ressurs
 ```
 
-- `regel(...)` lager et `Faktum<Boolean>` med betingelsene som `uttrykk` og
-  `regel = sporing.forutsetning`.
+- `regel(...)` lager en `Regel` med betingelsene.
 - `SÅ` og `RETURNER` kjører kroppen i en ny `RegelKontekst`. Kartet er det samme, bortsett fra at
-  `Sporing` er byttet ut med `Sporing(forutsetning = denne regelen)`. Den nye konteksten overstyrer den
+  `Sporing` er byttet ut med `Sporing(regel = denne regelen)`. Den nye konteksten overstyrer den
   ytre, også gjennom vanlige funksjonskall. Det finnes ingen push/pop og ingen mutabel tilstand.
-- `faktum(...)` lager et faktum med `uttrykk` og `regel = sporing.forutsetning`. Det er altså den
-  nærmeste regelen som slo til, også om faktumet lages i en funksjon kalt fra `SÅ`.
+- `faktum(...)` lager et faktum med `uttrykk` og `regel = sporing.regel`. Det er altså den nærmeste
+  regelen som slo til, også om faktumet lages i en funksjon kalt fra `SÅ`.
+- Utenfor enhver regel er `sporing.regel` null. Hva `faktum(...)` skal gjøre da, henger sammen med
+  det åpne spørsmålet om forutsetning.
 
 ### Regler som ikke treffer
 
 Regler som ikke treffer, spores ikke. Dette er et grunnleggende valg for å holde kompleksiteten nede.
 
 - Det finnes ingen logg eller graf over evaluerte regler, bare `Faktum`-grafen.
-- En regel som ikke traff, er et `Faktum<Boolean>` med verdi `false`. Den blir bare en del av en
-  forklaring hvis en annen regel bruker den som betingelse, for eksempel `ikke(afpMellom)`.
+- En regel som ikke traff, er en `Regel` med verdi `false`. Den blir bare en del av en
+  forklaring hvis en annen regel bruker den som betingelse, for eksempel `afpMellom erLik false`.
 - En regel som ikke traff, har ingen `SÅ`- eller `RETURNER`-blokk som har kjørt. Den har derfor ingen
   fakta som peker på den.
 
 ### Forklaring
 
-Forklaringen går bakover fra et resultat og nøster i én graf: `uttrykk`, `grunnlag()` og `regel`.
+Forklaringen går bakover fra et resultat og nøster i én graf: `uttrykk`, `grunnlag()`, `regel` og
+`betingelser`.
 
 ```kotlin
 val forklaring = slitertillegg.forklar()
@@ -326,10 +352,11 @@ slitertillegg = 1.45
 | Linje | Kilde |
 |---|---|
 | Beregning | `faktum.uttrykk` |
-| Betingelser | `faktum.regel.uttrykk` |
-| Forutsetning | `faktum.regel.regel` (en kjede som kan nøstes videre) |
+| Betingelser | `faktum.regel.betingelser` |
+| Forutsetning | ikke avklart, se åpne spørsmål |
 
-Hvert `Faktum` i `grunnlag()` kan forklares på samme måte.
+Hvert `Faktum` i `grunnlag()` kan forklares på samme måte. En ren `Verdi` er inndata og har ingen
+forklaring utover navn og verdi.
 
 ## 6. Lag 3 – Orkestrering
 
@@ -339,8 +366,9 @@ praksis gjør kode betinget: beslutninger tas med `regel`, og resten er vanlig K
 Hvis laget innføres, gjelder disse føringene:
 
 - En `Regeltjeneste` konstrueres med en `RegelKontekst`. Det er inngangen til rammeverket.
-- Beslutninger i flyten er regler fra lag 2. Det som kjøres i `SÅ`, får beslutningen som forutsetning
-  automatisk.
+- Beslutninger i flyten er regler fra lag 2. Fakta som lages i `SÅ`, får beslutningen som regel
+  automatisk. Hvordan regler under beslutningen knyttes til den, avhenger av det åpne spørsmålet om
+  forutsetning.
 - Laget inneholder ingen egen graf. Hvorfor noe kjørte, ligger i `Faktum.regel`.
 
 Vurderinger:
@@ -354,33 +382,37 @@ Vurderinger:
 ```kotlin
 context(_: RegelKontekst)
 fun beregnSlitertillegg(
-    antallMnd: Faktum<Int>,     // 18
-    trygdetid: Faktum<Int>,     // 30
-    G: Faktum<Int>,             // 118620
+    antallMnd: Verdi<Int>,      // 18
+    trygdetid: Verdi<Int>,      // 30
+    G: Verdi<Int>,              // 118620
 ): Faktum<Double> = kjør {
-    val fullTrygdetid = Faktum("fullTrygdetid", 40)
-    val fulltSlitertillegg = faktum("fulltSlitertillegg", avrund2(G * 0.25 / 12))
-    lateinit var justeringsFaktor: Faktum<Double>
+        val fullTrygdetid = Verdi("fullTrygdetid", 40)
+        lateinit var fulltSlitertillegg: Faktum<Double>
+        lateinit var justeringsFaktor: Faktum<Double>
 
-    regel("UTTAK-TIDLIG") {
-        HVIS { antallMnd erMindreEnn 36 }
-        SÅ { justeringsFaktor = faktum("justeringsFaktor", (36 - antallMnd) / 36) }
-    }
+        regel("FULLT-SLITERTILLEGG") {
+            SÅ { fulltSlitertillegg = faktum("fulltSlitertillegg", avrund2(G * 0.25 / 12)) }
+        }
 
-    regel("UTTAK-SENT") {
-        HVIS { antallMnd erStørreEllerLik 36 }
-        SÅ { justeringsFaktor = faktum("justeringsFaktor", 0.0) }
-    }
+        regel("UTTAK-TIDLIG") {
+            HVIS { antallMnd erMindreEnn 36 }
+            SÅ { justeringsFaktor = faktum("justeringsFaktor", (36 - antallMnd) / 36) }
+        }
 
-    regel("AVKORTING-TRYGDETID") {
-        RETURNER {
-            faktum(
-                "slitertillegg",
-                avrund2(fulltSlitertillegg * justeringsFaktor * trygdetid / fullTrygdetid)
-            )
+        regel("UTTAK-SENT") {
+            HVIS { antallMnd erStørreEllerLik 36 }
+            SÅ { justeringsFaktor = faktum("justeringsFaktor", 0.0) }
+        }
+
+        regel("AVKORTING-TRYGDETID") {
+            RETURNER {
+                faktum(
+                    "slitertillegg",
+                    avrund2(fulltSlitertillegg * justeringsFaktor * trygdetid / fullTrygdetid)
+                )
+            }
         }
     }
-}
 ```
 
 Forklaring:
@@ -411,9 +443,9 @@ slitertillegg = 926.72
    tilbyr en håndfull formater, eller brukeren sender inn sin egen formateringsfunksjon. Modellen må
    derfor eksponere nok struktur til at en ekstern funksjon kan formatere den, ikke bare ferdige strenger
    fra `notasjon()` og `konkret()`. Eksempler på formater:
-   - kompakt: `antallMåneder (15) er mindre enn 36`
-   - utvidet: én rad med notasjon (`G * 2`) og én med konkrete verdier (`130000 * 2`)
-   - frontend: navngitte fakta rendres som lenker man kan navigere gjennom, eller hele grafen som et tre
+    - kompakt: `antallMåneder (15) er mindre enn 36`
+    - utvidet: én rad med notasjon (`G * 2`) og én med konkrete verdier (`130000 * 2`)
+    - frontend: navngitte fakta rendres som lenker man kan navigere gjennom, eller hele grafen som et tre
 2. **Regler over lister og map.** I v1 brukes `Pattern`. Forslag fra v3: `regel` tar en `List` eller
    `Map` direkte, og `Pattern` blir et internt konsept.
    ```kotlin
@@ -429,8 +461,8 @@ slitertillegg = 926.72
    `R1:I1 → R2:I1 → R1:I2 → R2:I2`.
 
    Eksempel fra issuet, med reglene `odd` og `even` over tallene 1–10:
-   - v1-pattern: `1 odd, 3 odd, 5 odd, 7 odd, 9 odd, 2 even, 4 even, 6 even, 8 even, 10 even`
-   - ønsket: `1 odd, 2 even, 3 odd, 4 even, …`
+    - v1-pattern: `1 odd, 3 odd, 5 odd, 7 odd, 9 odd, 2 even, 4 even, 6 even, 8 even, 10 even`
+    - ønsket: `1 odd, 2 even, 3 odd, 4 even, …`
 
    Dette er nødvendig når en regel for et element bygger på resultatet for forrige element, for
    eksempel venteperiode per beregningsvilkårsperiode (BVP), der en periode kan arve resultatet fra
@@ -443,19 +475,25 @@ slitertillegg = 926.72
    ```
    Det er uavklart om det trengs egen DSL (`forHvert`), og hvordan regler per element navngis.
 3. **Referanse til lovtolkning.** v3 foreslår `REF("BER-TT", "https://confluence.nav/...")` i regelen.
-   Det er uavklart hvordan referansen lagres i modellen (`Faktum<Boolean>`) og vises i forklaringen.
+   Det er uavklart hvordan referansen lagres i modellen (`Regel`) og vises i forklaringen.
 4. **Lag 3 – orkestrering.** Se kapittel 6.
 5. **Mekanismen bak `RETURNER`.** Planen er at `kjør` holder resultatet i en `lateinit var`. Dette må
    undersøkes nærmere:
-   - Hvordan hindres de neste reglene i å evaluere når resultatet er satt? For eksempel ved at `regel`
-     sjekker om `kjør` allerede har et resultat.
-   - Vanlig Kotlin-kode mellom reglene kjører fortsatt etter et treff. Er det akseptabelt, eller må
-     brukeren selv passe på det?
-   - Hva skjer hvis `RETURNER` treffer i en nøstet regel inne i en `SÅ`-blokk?
-6. **Inndata uten regel.** I dag er inndata et `Faktum(navn, verdi)` med `regel = null`. Det betyr at
-   `regel = null` kan bety både «inndata» og «utledet utenfor en regel», og forklaringen kan ikke skille
-   dem. Vurder om dette er uakseptabelt, og om vi eventuelt skal innføre `Verdi` for inndata og
-   konstanter. Da får `Faktum` alltid en regel, mens `Verdi` er navngitt, men ikke begrunnet.
+    - Hvordan hindres de neste reglene i å evaluere når resultatet er satt? For eksempel ved at `regel`
+      sjekker om `kjør` allerede har et resultat.
+    - Vanlig Kotlin-kode mellom reglene kjører fortsatt etter et treff. Er det akseptabelt, eller må
+      brukeren selv passe på det?
+    - Hva skjer hvis `RETURNER` treffer i en nøstet regel inne i en `SÅ`-blokk?
+6. **Forutsetning.** En regel som evalueres i en `SÅ`-blokk, er evaluert under regelen som eier
+   blokken. Det er forutsetningen, og den gir Forutsetning-linjen i forklaringen. Hvordan den skal
+   modelleres, er ikke avklart:
+    - `Regel.forutsetning: Regel?` krever null for regler på øverste nivå.
+    - En standardverdi `ALLTID` kan ikke selv være en `Regel`, fordi den da trenger en forutsetning
+      under konstruksjon (verifisert: `NullPointerException` når klassen lastes).
+    - `forutsetning: Verdi<Boolean> = ALLTID`, med `ALLTID` som en ren `Verdi<Boolean>`, unngår både
+      null og sykel, men gir svakere typing. Nøsting krever `is Regel`.
+
+   Valget avgjør også hva `faktum(...)` utenfor en regel skal gi.
 
 ## Vedlegg: Avklaringer fra v3 og DESIGN.md
 
@@ -465,8 +503,26 @@ slitertillegg = 926.72
 | RETURNER | `RETURNER { }` i regel | Bare `SÅ` + `lateinit var` | `kjør<T> { }` + `RETURNER { T }`, `lateinit var` bak kulissene, runtime-feil uten treff. Mekanismen er åpen. |
 | Regelflyt | Utgår | Lag 3 med `Regeltjeneste`/`Regelflyt` | Åpent spørsmål |
 | Forklaringsformat | HVA / HVORFOR / HVORDAN | Beregning / Betingelser / Forutsetning | DESIGN.md |
-| Inndata | `Verdi`, `Grunnlag` | `Faktum(navn, verdi)` | DESIGN.md, men `Verdi` er et åpent spørsmål |
+| Inndata | `Verdi`, `Grunnlag` | `Verdi(navn, verdi)` | `Verdi`. `Faktum` og `Regel` arver fra `Verdi`. |
 | Kontekst | `RuleContext`, `ResourceAccessor`-extensions | `RegelKontekst`, `Ressurs`, context-funksjoner | DESIGN.md |
 | Utledet faktum | `sporing(navn, uttrykk)` | `faktum(navn, uttrykk)` | DESIGN.md |
 | HVIS / OG | `HVIS` teknisk, `OG` faglig | Typen bestemmer | Typen bestemmer |
-| Regelkjeding | Vurdering | `regel(...)` returnerer `Faktum<Boolean>` | `val regelA = regel(...)` |
+| Regelkjeding | Vurdering | `regel(...)` returnerer `Regel` | `val regelA = regel(...)` |
+| Forutsetning | – | Oppfølgingspunkt | Åpent spørsmål |
+
+## Vedlegg: Mulige forbedringer
+
+1. **Forenkle `erLik true`.** `afpMellom erLik true` vises i dag som «AFP-MELLOM (true) er lik true».
+   En egen overload for `Boolean` kan returnere venstresiden direkte, slik at det vises som
+   «AFP-MELLOM (true)»:
+   ```kotlin
+   infix fun Uttrykk<Boolean>.erLik(høyre: Boolean): Uttrykk<Boolean> =
+       if (høyre) this else Infiks(this, "=", Konstant(høyre), ...)
+   ```
+    - Kotlin velger den mest spesifikke overloaden, så den generiske `erLik` for andre typer påvirkes
+      ikke (verifisert).
+    - Verdien og `grunnlag()` blir de samme. Bare uttrykkstreet blir kortere.
+    - `erLik false` kan ikke forenkles på samme måte uten `ikke`, og vises fortsatt som
+      «AFP-MELLOM (false) er lik false».
+    - Alternativt kan forenklingen gjøres ved formatering i stedet for i modellen. Da beholder treet
+      det brukeren skrev, og forenklingen blir en del av det åpne spørsmålet om formatering.

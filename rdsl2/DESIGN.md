@@ -20,39 +20,59 @@ interface Uttrykk<out T : Any> {
     val verdi: T
     fun notasjon(): String              // "sats * trygdetid / fullTrygdetid"
     fun konkret(): String               // "2.9 * 20 / 40"
-    fun grunnlag(): List<Faktum<*>>     // navngitte ledd brukt direkte
+    fun grunnlag(): List<Verdi<*>>      // navngitte ledd brukt direkte
 }
 ```
 
-- Operatorer for matematikk (`+ - * /`) og for logikk og sammenligning (`og`, `ikke`,
-  `erMindreEnn`, `erLik`, …) bygger nye uttrykk.
+- Operatorer for matematikk (`+ - * /`) og sammenligning (`erMindreEnn`, `erLik`, …) bygger
+  nye uttrykk.
 - Sammenligninger tar både `Uttrykk<T>` og ren `T` på høyre eller venstre side.
 - Laget kjenner ikke til regler eller sporing.
 
 ## Lag 2 – Regel
 
-### Faktum
+### Verdi, Faktum og Regel
 
-Et `Faktum` er et navngitt uttrykk. Utover er det en grense: andre uttrykk ser bare navnet
-og verdien. Innover bærer det sin egen forklaring.
+Tre typer, med `Uttrykk` på toppen:
 
-```kotlin
-class Faktum<out T : Any>(
-    val navn: String,
-    val uttrykk: Uttrykk<T>,         // utregningen, eller betingelsene for en regel
-    val regel: Faktum<Boolean>?,     // regelen som gjorde at faktumet oppsto
-) : Uttrykk<T>
+```
+Uttrykk<T>
+├── Konstant, Sum, Produkt, Sammenligning, Og, Ikke, …   (lag 1)
+└── Verdi<T>                 navn og verdi
+    ├── Faktum<T>            + uttrykk, regel
+    └── Regel                + betingelser          (Verdi<Boolean>)
 ```
 
-- **Inndata** lages med `Faktum(navn, verdi)` og har ingen regel.
-- **Utledet faktum** lages med `faktum(...)`. I en `SÅ`-blokk får det regelen som eier
-  blokken, som `regel`. Utenfor en regel er det lov, men da er `regel = null`, og
-  forklaringen viser bare utregningen. Brukeren må selv vite om forskjellen.
-- **Regel** er et `Faktum<Boolean>` der `uttrykk` er betingelsene. `regel` er forutsetningen,
-  altså regelen som regelen ble evaluert under.
-- Likhet er identitet.
+```kotlin
+open class Verdi<out T : Any>(val navn: String, override val verdi: T) : Uttrykk<T>   // inndata
 
-`Faktum.regel` har dermed én betydning: regelen som gjorde at faktumet oppsto.
+class Faktum<out T : Any> internal constructor(
+    navn: String,
+    val uttrykk: Uttrykk<T>,         // Beregning
+    val regel: Regel,                // regelen som fastsatte faktumet
+) : Verdi<T>(navn, uttrykk.verdi)
+
+class Regel internal constructor(
+    navn: String,
+    val betingelser: Uttrykk<Boolean>,   // Betingelser
+) : Verdi<Boolean>(navn, betingelser.verdi)
+```
+
+- **Verdi** er en navngitt verdi. Inndata lages med `Verdi(navn, verdi)`. Det er den eneste
+  typen brukeren konstruerer selv.
+- **Faktum** er en verdi som en regel har fastsatt. Det lages med `faktum(...)` i en
+  `SÅ`-blokk, og har alltid en regel.
+- **Regel** er en beslutning. Den lages med `regel(...)`, og er et `Uttrykk<Boolean>` som kan
+  brukes som predikat i andre regler.
+- Grensen går ved `Verdi`. I andre uttrykk vises alle tre bare med navn og verdi, for
+  eksempel «trygdetid (20)» eller «AFP-MELLOM (false)». Forklaringen innover ligger i
+  `Faktum` og `Regel`.
+- Konstruktørene til `Faktum` og `Regel` er internal, så bare rammeverket lager dem.
+  `Verdi` har offentlig konstruktør, og brukeren kan i prinsippet arve fra den. Det koster lite:
+  en egen subklasse vises og forklares som en vanlig `Verdi`.
+- Likhet er identitet.
+- Hvordan en regel knyttes til regelen den ble evaluert under (forutsetningen), er ikke
+  avklart. Se oppfølgingspunkter.
 
 ### Regelkontekst (`@Context`)
 
@@ -65,7 +85,7 @@ class RegelKontekst(ressurser: Map<KClass<out Ressurs>, Ressurs>) {  // legger a
     inline fun <reified R : Ressurs> ressurs(): R                     // krasjer hvis ressursen mangler
 }
 
-context(k: RegelKontekst) fun regel(navn: String, definisjon: Regel.() -> Unit): Faktum<Boolean>
+context(k: RegelKontekst) fun regel(navn: String, definisjon: RegelBuilder.() -> Unit): Regel
 context(k: RegelKontekst) fun <T : Any> faktum(navn: String, uttrykk: Uttrykk<T>): Faktum<T>
 ```
 
@@ -77,7 +97,8 @@ context(k: RegelKontekst) fun <T : Any> faktum(navn: String, uttrykk: Uttrykk<T>
   sendes manuelt.
 - Utad tilbyr `RegelKontekst` bare konstruktøren og `ressurs<R>()`. Kartet er internal.
   Ressurser hentes alltid eksplisitt fra konteksten: `k.ressurs<R>()`.
-- `RegelKontekst` erstatter `RegelKropp`.
+- `RegelKontekst` erstatter `RegelKropp`. DSL-byggeren med `HVIS`/`OG`/`SÅ` heter
+  `RegelBuilder`.
 
 ### Ressurser
 
@@ -130,22 +151,23 @@ fun grunnbeløp(dato: LocalDate): Faktum<Int> = k.ressurs<GrunnbeløpSatser>().p
 Sporing er alltid på. Uttrykkstreet bygges uansett, fordi det er selve utregningen. Det er
 derfor lite å spare på å slå sporing av, og det ville krevd en egen kodevei.
 
-`Sporing` er en ressurs som holder den aktive forutsetningen. Alt som har med sporing å
-gjøre, ligger her. `RegelKontekst` legger den alltid i kartet, og brukeren gjør det aldri.
+`Sporing` er en ressurs som holder regelen som eier den aktive `SÅ`-blokken. Alt som har med
+sporing å gjøre, ligger her. `RegelKontekst` legger den alltid i kartet, og brukeren gjør
+det aldri.
 
 ```kotlin
-class Sporing internal constructor(val forutsetning: Faktum<Boolean>?) : Ressurs
+class Sporing internal constructor(val regel: Regel?) : Ressurs
 ```
 
-- `regel(...)` lager et `Faktum<Boolean>` med betingelsene som `uttrykk` og
-  `regel = sporing.forutsetning`.
+- `regel(...)` lager en `Regel` med betingelsene.
 - `SÅ` kjører kroppen i en ny `RegelKontekst`. Kartet er det samme, bortsett fra at
-  `Sporing` er byttet ut med `Sporing(forutsetning = denne regelen)`. Den nye konteksten
+  `Sporing` er byttet ut med `Sporing(regel = denne regelen)`. Den nye konteksten
   overstyrer den ytre, også gjennom vanlige funksjonskall. Det finnes ingen push/pop og
   ingen mutabel tilstand.
-- `faktum(...)` lager et faktum med `uttrykk` og `regel = sporing.forutsetning`. Det er
-  altså den nærmeste regelen som slo til, også om faktumet lages i en funksjon kalt fra
-  `SÅ`. Utenfor enhver regel er `forutsetning` null.
+- `faktum(...)` lager et faktum med `uttrykk` og `regel = sporing.regel`. Det er altså den
+  nærmeste regelen som slo til, også om faktumet lages i en funksjon kalt fra `SÅ`.
+- Utenfor enhver regel er `sporing.regel` null. Hva `faktum(...)` skal gjøre da, henger
+  sammen med oppfølgingspunktet om forutsetning.
 
 ### Regler som ikke treffer
 
@@ -153,9 +175,9 @@ Regler som ikke treffer, spores ikke. Dette er et grunnleggende valg for å hold
 kompleksiteten nede.
 
 - Det finnes ingen logg eller graf over evaluerte regler, bare `Faktum`-grafen.
-- En regel som ikke traff, er et `Faktum<Boolean>` med verdi `false`. Den blir bare en
+- En regel som ikke traff, er en `Regel` med verdi `false`. Den blir bare en
   del av en forklaring hvis en annen regel bruker den som predikat, for eksempel
-  `ikke(AFP-MELLOM)`.
+  `afpMellom erLik false`.
 - En regel som ikke traff, har ingen `SÅ`-blokk som har kjørt. Den har derfor ingen fakta
   som peker på den.
 
@@ -176,7 +198,7 @@ fun beregnSlitertillegg(...): Faktum<Double> {
 
 ### Forklaring
 
-Forklaringen nøster i én graf: `uttrykk`, `grunnlag()` og `regel`.
+Forklaringen nøster i én graf: `uttrykk`, `grunnlag()`, `regel` og `betingelser`.
 
 ```
 slitertillegg = 1.45
@@ -188,8 +210,8 @@ slitertillegg = 1.45
 | Linje | Kilde |
 |---|---|
 | Beregning | `faktum.uttrykk` |
-| Betingelser | `faktum.regel.uttrykk` |
-| Forutsetning | `faktum.regel.regel` (en kjede som kan nøstes videre) |
+| Betingelser | `faktum.regel.betingelser` |
+| Forutsetning | ikke avklart, se oppfølgingspunkter |
 
 ## Lag 3 – Orkestrering
 
@@ -200,8 +222,9 @@ flyten.
 - En `Regeltjeneste` konstrueres med en `RegelKontekst`. Det er inngangen til rammeverket.
 - `Regelflyt` og `Regel` får `RegelKontekst` fra rammeverket. Brukeren sender den aldri
   inn selv.
-- Beslutninger i flyten er regler fra lag 2. Det som kjøres i `SÅ`, får beslutningen som
-  forutsetning automatisk.
+- Beslutninger i flyten er regler fra lag 2. Fakta som lages i `SÅ`, får beslutningen som
+  regel automatisk. Hvordan regler under beslutningen knyttes til den, avhenger av
+  oppfølgingspunktet om forutsetning.
 - Laget inneholder ingen egen graf. Hvorfor noe kjørte, ligger i `Faktum.regel`.
 
 ## Begrensninger
@@ -210,6 +233,19 @@ flyten.
   `SÅ`-blokk er usynlig.
 - Konteksten følger kallet. Bytter koden tråd eller korutine, må konteksten sendes med.
 - First-match i `when` gjenspeiles ikke i forklaringen.
+
+## Oppfølgingspunkter
+
+1. Forutsetning. En regel som evalueres i en `SÅ`-blokk, er evaluert under regelen som eier
+   blokken. Det er forutsetningen, og den gir Forutsetning-linjen i forklaringen. Hvordan
+   den skal modelleres, er ikke avklart:
+   - `Regel.forutsetning: Regel?` krever null for regler på øverste nivå.
+   - En standardverdi `ALLTID` kan ikke selv være en `Regel`, fordi den da trenger en
+     forutsetning under konstruksjon (verifisert: `NullPointerException` når klassen lastes).
+   - `forutsetning: Verdi<Boolean> = ALLTID`, med `ALLTID` som en ren `Verdi<Boolean>`,
+     unngår både null og sykel, men gir svakere typing. Nøsting krever `is Regel`.
+
+   Valget avgjør også hva `faktum(...)` utenfor en regel skal gi.
 
 ## Åpne spørsmål
 
