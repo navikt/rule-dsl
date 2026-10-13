@@ -539,3 +539,20 @@ slitertillegg = 926.72
       «AFP-MELLOM (false) er lik false».
     - Alternativt kan forenklingen gjøres ved formatering i stedet for i modellen. Da beholder treet
       det brukeren skrev, og forenklingen blir en del av det åpne spørsmålet om formatering.
+2. **Valgfri visning av verdier.** `notasjon()` og `konkret()` er standardvisningene, men andre er like
+   gyldige. Forklaringene i dette dokumentet bruker en tredje, «antallMnd (18) er mindre enn 36», som
+   ikke er definert i modellen. Visningene skiller seg bare i hvordan en `Verdi` vises. Operatorer og
+   parenteser er de samme. `Uttrykk` kan derfor ha én funksjon som tar visningen av `Verdi` som
+   parameter, og de faste visningene blir varianter av den:
+   ```kotlin
+   fun vis(verdi: (Verdi<*>) -> String): String                     // i Uttrykk
+
+   fun Uttrykk<*>.notasjon()  = vis { it.navn }                     // antallMnd er mindre enn 36
+   fun Uttrykk<*>.konkret()   = vis { it.verdi.vis() }              // 18 er mindre enn 36
+   fun Uttrykk<*>.kombinert() = vis { "${it.navn} (${it.verdi.vis()})" } // antallMnd (18) er mindre enn 36
+   ```
+    - Mottakeren kan sende inn sin egen visning, for eksempel lenker i frontend. Dette dekker en del av
+      det åpne spørsmålet om formatering.
+    - Skal også operatorene kunne vises annerledes (`<` eller «er mindre enn»), trengs en parameter til,
+      eller offentlige noder.
+    - `toString()` er ikke egnet. Den kan ikke ta parametre og brukes implisitt i strengmaler.
