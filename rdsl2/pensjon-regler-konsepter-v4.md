@@ -79,6 +79,10 @@ ikke etterpå. Det som vises, er derfor alltid det som faktisk ble regnet ("sing
 Beregninger (`G * sats`) og sammenligninger (`trygdetid erMindreEnn 40`) er begge uttrykk. Den eneste
 forskjellen er typen på verdien.
 
+Uttrykk bygges av operatorer og ledd, der hvert ledd selv er et uttrykk. I `G * sats` virker operatoren `*`
+på leddene `G` og `sats`. I `G * sats erMindreEnn 50000` virker `erMindreEnn` på `G * sats` og `50000`.
+Resultatet er et **abstrakt syntakstre** (AST), også kallt "Uttrykkstre".
+
 ```kotlin
 interface Uttrykk<out T : Any> {
     val verdi: T
@@ -100,14 +104,14 @@ interface Uttrykk<out T : Any> {
 
 ### Verdi
 
-En `Verdi` er et navngitt uttrykk, for eksempel inndata, konstanter og satser. Den er en grense i
-uttrykkstreet: i andre uttrykk vises den bare med navn og verdi, og `grunnlag()` stopper ved den.
+En `Verdi` navngir og holder en verdi. Den er den minste
+delen av et uttrykk som kan forklares.
 
 ```kotlin
 open class Verdi<out T : Any>(val navn: String, override val verdi: T) : Uttrykk<T> {
-    override fun notasjon() = navn                 // "G"
-    override fun konkret() = verdi.vis()           // "118620"
-    override fun grunnlag() = listOf(this)
+    override fun notasjon() = navn                 // "G", kun visning
+    override fun konkret() = verdi.formater()      // "118620", kun visning
+    override fun grunnlag() = listOf(this)         // en verdi er sitt eget grunnlag.
 }
 ```
 
@@ -548,8 +552,8 @@ slitertillegg = 926.72
    fun vis(verdi: (Verdi<*>) -> String): String                     // i Uttrykk
 
    fun Uttrykk<*>.notasjon()  = vis { it.navn }                     // antallMnd er mindre enn 36
-   fun Uttrykk<*>.konkret()   = vis { it.verdi.vis() }              // 18 er mindre enn 36
-   fun Uttrykk<*>.kombinert() = vis { "${it.navn} (${it.verdi.vis()})" } // antallMnd (18) er mindre enn 36
+   fun Uttrykk<*>.konkret()   = vis { it.verdi.formater() }         // 18 er mindre enn 36
+   fun Uttrykk<*>.kombinert() = vis { "${it.navn} (${it.verdi.formater()})" } // antallMnd (18) er mindre enn 36
    ```
     - Mottakeren kan sende inn sin egen visning, for eksempel lenker i frontend. Dette dekker en del av
       det åpne spørsmålet om formatering.

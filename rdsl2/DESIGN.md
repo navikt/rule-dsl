@@ -13,7 +13,8 @@ Grunnprinsipp: modellen skal være liten. Kompleksitet hører hjemme i DSL-en, i
 
 ## Lag 1 – Uttrykk
 
-Uttrykk er en uforanderlig trestruktur med en verdi.
+Et uttrykk er et **abstrakt syntakstre** (AST): operatorer i forgreiningene, verdier og konstanter
+ytterst. Verdien regnes ut når uttrykket lages, og treet endres ikke etterpå.
 
 ```kotlin
 interface Uttrykk<out T : Any> {
@@ -31,14 +32,16 @@ interface Uttrykk<out T : Any> {
 
 ### Verdi
 
-En `Verdi` er et navngitt uttrykk, for eksempel inndata, konstanter og satser. Den er en grense
-i uttrykkstreet: i andre uttrykk vises den bare med navn og verdi, og `grunnlag()` stopper ved den.
+En `Verdi` er et navngitt uttrykk, for eksempel inndata, konstanter og satser. Forklaringer viser til
+verdier, og `grunnlag()` returnerer dem som et uttrykk er bygd av, men ikke det de selv er regnet ut fra
+(se `Faktum`). Konstanter uten navn er ikke grunnlag.
 
 ```kotlin
 open class Verdi<out T : Any>(val navn: String, override val verdi: T) : Uttrykk<T> {
     override fun notasjon() = navn                 // "G"
-    override fun konkret() = verdi.vis()           // "118620"
-    override fun grunnlag() = listOf(this)
+    override fun konkret() = verdi.formater()      // "118620"
+    override fun grunnlag() = listOf(this)         // en verdi er sitt eget grunnlag. Operasjoner samler
+                                                   // grunnlag fra leddene sine, og innsamlingen stopper her.
 }
 ```
 
