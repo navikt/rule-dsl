@@ -1,36 +1,32 @@
 # Rule-DSL v2.0
 
 Designdokument for ny regelplattform med innebygd forklaring av resultater.
-Designet er under arbeid; eksemplene viser ønsket løsning, ikke nødvendigvis ferdig implementert kode.
 
 ## Del 1 – Formål, løsning og arkitektur
 
 ### 1. Bakgrunn for ny regelplattform
 
 Dagens Rule-DSL v1.x gjorde det mulig å flytte reglene fra Blaze Advisor til en egenutviklet
-plattform uten å endre den faglige virkemåten. Løsningen videreførte samtidig mye av strukturen fra
-Blaze. Reglene må passe inn i et fast hierarki, også når oppgaven kunne vært løst enklere.
+plattform uten å endre den faglige virkemåten. Løsningen videreførte samtidig mye tung struktur fra
+Blaze. Dette har ført til mange rettningslinjer som må følges selv om oppgaven kunne vært løst enklere.
 
-Dette gir unødvendig arbeid for utviklerne, begrenser bruken av programmeringsspråket Kotlin og gjør
-regelkoden vanskeligere å sette seg inn i. Plattformen ble heller ikke utformet for å forklare
-resultatene. Forsøk på å bygge inn sporing i etterkant har ikke gitt den ønskede løsningen.
+Dette gjør det unødvendig vanskelig å arbeide med koden og samtidig utnytter vi ikke alle fordelene med  programmeringsspråket Kotlin. Plattformen ble heller ikke utformet med tanke på å forklare
+resultatene. Forsøk på å bygge inn forklaring inn i etterkant har ikke gitt den ønskede løsningen.
 
 Rule-DSL v2.0 skal gjøre det enklere å skrive regler og samtidig gjøre resultatene forståelige.
 Forklaringen skal svare på tre spørsmål:
 
-- Hvilke opplysninger og satser ble brukt?
-- Hvilke betingelser gjorde at regelen gjaldt?
+- Hvilke opplysninger ble brukt?
+- Hvilke betingelser gjorde at regelen slår til?
 - Hvordan ble resultatet beregnet?
 
-### 2. Forklaringen følger resultatet
+### 2. Forklaring
+
+Løsningen skal kunne produsere verdier som inneholder en forklaring på hvordan og hvorfor verdien er skapt. Er verdien skapt av en regel, vil verdien inneholde dokumentasjon på regelen. Dette omfatter regelens betingelser og referanser til lovtekst / regelverkspesifikasjon / rundskriv eller annen relevant kilde.
 
 Forslaget bygger på at et resultat skal ta vare på sin egen begrunnelse. Når en regel fastsetter en
 verdi, knyttes verdien til utregningen og regelen som ga den. Denne regelen har igjen en forklaring
-på hvorfor den har kjørt ved å liste opp alle sine betingelser. 
-
-Forklaringen leses bakover fra svaret: først den siste beregningen, deretter grunnlaget for den.
-Hvis en av verdiene selv er beregnet, kan leseren følge den videre til sin begrunnelse. Slik kan
-forklaringen vises ett steg om gangen, uten at alle detaljer må vises samtidig.
+på hvorfor den har kjørt ved å liste opp alle sine betingelser. Betingelsene har igjen sin egen forklaring.
 
 Nye begrep i løsningen:
 
