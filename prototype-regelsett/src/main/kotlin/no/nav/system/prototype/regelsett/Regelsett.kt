@@ -102,7 +102,7 @@ class RegelBygger<R> internal constructor() {
 }
 
 /**
- * Mottakeren i SÅ. Funksjonene under heter `Faktum` med vilje: i SÅ vinner de over konstruktøren,
+ * Mottakeren i SÅ. Funksjonene under heter `Faktum` med vilje: i SÅ vinner de over de vanlige `Faktum`-funksjonene,
  * slik at `Faktum(navn, ...)` automatisk får regelen som eier blokken.
  *
  * `@MustUseReturnValues` gir advarsel når et faktum lages i SÅ uten å bli brukt, typisk en glemt `RETURNER`.

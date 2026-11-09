@@ -19,7 +19,7 @@ Prototype av en sporingsmodell der alle faktum har en regel. Uavhengig av `rdsl2
 - Brukeren lager faktum på én måte: `Faktum(navn, verdi)` eller `Faktum(navn, uttrykk)`.
 - Alle faktum har en regel:
   - I en `SÅ`-blokk får faktumet regelen som eier blokken. Det skjer automatisk: `RegelKropp` har
-    funksjoner som heter `Faktum`, og de vinner over konstruktøren.
+    funksjoner som heter `Faktum`, og de vinner over de vanlige `Faktum`-funksjonene.
   - Utenfor en regel får faktumet `DefaultRegel`. Det gir ingen regel-linje i forklaringen.
 - En regel kjenner ikke de andre reglene i regelsettet. To regler henger bare sammen når den ene
   bruker noe den andre har laget:

@@ -5,8 +5,8 @@ package no.nav.system.prototype.regelsett
  *
  * ```
  * slitertillegg = 1647.5
- *   formel: (fulltSlitertillegg * justeringsFaktor) * trygdetidsbrøk
- *   beregning: (2471.25 * 0.6666666666666666) * 1.0
+ *   formel: fulltSlitertillegg * justeringsFaktor * trygdetidsbrøk
+ *   beregning: 2471.25 * 0.6666666666666666 * 1.0
  *   regel: BEREGN-SLITERTILLEGG
  *   referanse: §3-2 Folketrygdloven https://lovdata.no
  * ```
@@ -17,42 +17,37 @@ package no.nav.system.prototype.regelsett
  * - Hvert faktum vises én gang per nivå, selv om det brukes både i formel og betingelse.
  */
 fun Faktum<*>.forklar(innrykk: String = ""): String = buildString {
-    val erRegel = this@forklar is Regel
-    val regel: Regel? = if (erRegel) this@forklar as Regel else regel.takeIf { it !== DefaultRegel }
-
-    val linjer = buildList {
-        if (!erRegel && uttrykk !is Konstant<*>) {
-            add("formel: ${uttrykk.notasjon()}")
-            add("beregning: ${uttrykk.konkret()}")
-        }
-        if (regel != null) {
-            if (!erRegel) add("regel: ${regel.navn}")
-            if (regel.harFunksjonellInnhold) {
-                add("betingelse: ${regel.uttrykk.notasjon()}")
-                add("vurdering: ${regel.uttrykk.konkret()}")
-            }
-            regel.referanser.forEach { add("referanse: ${it.id} ${it.url}") }
-        }
-    }
-
     append("$innrykk$navn = $verdi")
-    linjer.forEach { append("\n$innrykk  $it") }
-
-    val under = buildList {
-        if (!erRegel) addAll(uttrykk.grunnlag())
-        if (regel != null && regel.harFunksjonellInnhold) addAll(regel.uttrykk.grunnlag())
-    }.filter { it.harNoeÅForklare() }.distinct()
-    for (f in under) append("\n").append(f.forklar("$innrykk    "))
+    for (linje in linjer()) append("\n$innrykk  $linje")
+    for (f in underliggende()) append("\n").append(f.forklar("$innrykk    "))
 }
+
+private fun Faktum<*>.linjer(): List<String> = when (this) {
+    is Regel -> vurderingslinjer()
+    else -> formellinjer() + regel.kildelinjer()
+}
+
+private fun Faktum<*>.formellinjer(): List<String> =
+    if (uttrykk is Konstant<*>) emptyList()
+    else listOf("formel: ${uttrykk.notasjon()}", "beregning: ${uttrykk.konkret()}")
+
+internal fun Regel.vurderingslinjer(): List<String> = buildList {
+    if (harFunksjonellInnhold) {
+        add("betingelse: ${uttrykk.notasjon()}")
+        add("vurdering: ${uttrykk.konkret()}")
+    }
+    referanser.forEach { add("referanse: ${it.id} ${it.url}") }
+}
+
+/** Faktum brukt i formelen eller i regelens betingelser, som har mer å fortelle. */
+private fun Faktum<*>.underliggende(): List<Faktum<*>> =
+    (uttrykk.grunnlag() + regel.uttrykk.grunnlag()).distinct().filter { it.harNoeÅForklare() }
 
 /**
  * Navn og verdi står allerede i `formel:`/`beregning:` til den som bruker faktumet. Det får
- * derfor bare egen linje hvis det har mer å fortelle: en formel, en regel med funksjonelle
- * betingelser, eller en referanse.
+ * derfor bare egen linje hvis det har en formel, funksjonelle betingelser eller en referanse.
  */
-private fun Faktum<*>.harNoeÅForklare(): Boolean {
-    val regel = if (this is Regel) this else regel
-    return (this !is Regel && uttrykk !is Konstant<*>) ||
-        (regel !== DefaultRegel && regel.harFunksjonellInnhold) ||
-        regel.referanser.isNotEmpty()
+private fun Faktum<*>.harNoeÅForklare(): Boolean = when (this) {
+    is Regel -> vurderingslinjer().isNotEmpty()
+    else -> formellinjer().isNotEmpty() || regel.vurderingslinjer().isNotEmpty()
 }

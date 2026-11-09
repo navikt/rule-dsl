@@ -13,14 +13,11 @@ Blaze. Dette har ført til mange rettningslinjer som må følges selv om oppgave
 Dette gjør det unødvendig vanskelig å arbeide med koden og samtidig utnytter vi ikke alle fordelene med  programmeringsspråket Kotlin. Plattformen ble heller ikke utformet med tanke på å forklare
 resultatene. Forsøk på å bygge inn forklaring inn i etterkant har ikke gitt den ønskede løsningen.
 
-Rule-DSL v2.0 skal gjøre det enklere å skrive regler og samtidig gjøre resultatene forståelige.
-Forklaringen skal svare på tre spørsmål:
-
-- Hvilke opplysninger ble brukt?
-- Hvilke betingelser gjorde at regelen slår til?
-- Hvordan ble resultatet beregnet?
+Rule-DSL v2.0 skal gjøre det mulig å skrive ren Kotlin og kun benytte DSL der hvor en faglig beslutning blir tatt eller hvor en beregningsformel er nødvendig. 
 
 ### 2. Forklaring
+
+???? Både beslutninger og formler er representert som _uttrykk_ og kan inneholder sporing hvordan ble resultatet beregnet og hvilke opplysninger som ble brukt. For beslutninger kartlegges også alle betingelsene som var aktuelle. ????
 
 Løsningen skal kunne produsere verdier som inneholder en forklaring på hvordan og hvorfor verdien er skapt. Er verdien skapt av en regel, vil verdien inneholde dokumentasjon på regelen. Dette omfatter regelens betingelser og referanser til lovtekst / regelverkspesifikasjon / rundskriv eller annen relevant kilde.
 
